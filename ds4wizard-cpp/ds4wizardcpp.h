@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <QtWidgets/QMainWindow>
 #include "ui_ds4wizardcpp.h"
 
@@ -12,7 +13,9 @@ public:
 
 private:
 	Ui::ds4wizardcpp ui;
+	bool supports_systray = false;
+	std::unique_ptr<QSystemTrayIcon> tray_icon = nullptr;
 
 protected slots:
-	void on_pushButton_DeviceProperties_clicked();
+	static void on_pushButton_DeviceProperties_clicked();
 };

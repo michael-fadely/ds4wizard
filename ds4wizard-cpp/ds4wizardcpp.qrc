@@ -1,4 +1,5 @@
 <RCC>
-    <qresource prefix="ds4wizardcpp">
+    <qresource prefix="/ds4wizardcpp">
+        <file>Resources/race_q00.ico</file>
     </qresource>
 </RCC>
