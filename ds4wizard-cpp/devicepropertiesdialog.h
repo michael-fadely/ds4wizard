@@ -8,7 +8,7 @@ class DevicePropertiesDialog : public QDialog
 	Q_OBJECT
 
 public:
-	DevicePropertiesDialog(QWidget *parent = Q_NULLPTR);
+	DevicePropertiesDialog(QWidget* parent = Q_NULLPTR);
 	~DevicePropertiesDialog();
 
 private:

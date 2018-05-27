@@ -2,7 +2,7 @@
 #include "ds4wizardcpp.h"
 #include "devicepropertiesdialog.h"
 
-ds4wizardcpp::ds4wizardcpp(QWidget *parent)
+ds4wizardcpp::ds4wizardcpp(QWidget* parent)
 	: QMainWindow(parent)
 {
 	ui.setupUi(this);
@@ -16,8 +16,9 @@ ds4wizardcpp::ds4wizardcpp(QWidget *parent)
 	}
 }
 
-void ds4wizardcpp::on_pushButton_DeviceProperties_clicked()
+void ds4wizardcpp::on_pushButton_DeviceProperties_clicked() const
 {
+	tray_icon->showMessage("hi", "this is a test");
 	auto dialog = new DevicePropertiesDialog();
 	dialog->exec();
 	delete dialog;

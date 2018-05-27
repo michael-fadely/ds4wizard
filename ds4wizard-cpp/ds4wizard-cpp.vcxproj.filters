@@ -61,6 +61,8 @@
     </QtRcc>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="ds4wizard-cpp.rc" />
+    <ResourceCompile Include="ds4wizard-cpp.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

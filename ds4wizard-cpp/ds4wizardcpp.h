@@ -9,7 +9,7 @@ class ds4wizardcpp : public QMainWindow
 	Q_OBJECT
 
 public:
-	ds4wizardcpp(QWidget *parent = Q_NULLPTR);
+	ds4wizardcpp(QWidget* parent = Q_NULLPTR);
 
 private:
 	Ui::ds4wizardcpp ui;
@@ -17,5 +17,5 @@ private:
 	std::unique_ptr<QSystemTrayIcon> tray_icon = nullptr;
 
 protected slots:
-	static void on_pushButton_DeviceProperties_clicked();
+	void on_pushButton_DeviceProperties_clicked() const;
 };
