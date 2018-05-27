@@ -8,6 +8,9 @@
     <ClCompile Include="ds4wizardcpp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="devicepropertiesdialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resource Files">
@@ -40,9 +43,15 @@
     <QtMoc Include="ds4wizardcpp.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="devicepropertiesdialog.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="ds4wizardcpp.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="devicepropertiesdialog.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>

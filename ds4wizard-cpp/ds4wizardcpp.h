@@ -11,5 +11,8 @@ public:
 	ds4wizardcpp(QWidget *parent = Q_NULLPTR);
 
 private:
-	Ui::ds4wizardcppClass ui;
+	Ui::ds4wizardcpp ui;
+
+protected slots:
+	void on_pushButton_DeviceProperties_clicked();
 };
