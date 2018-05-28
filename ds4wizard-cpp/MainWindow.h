@@ -1,20 +1,20 @@
 #pragma once
 
 #include <QtWidgets/QMainWindow>
-#include "ui_ds4wizardcpp.h"
+#include "ui_mainwindow.h"
 
-class ds4wizardcpp : public QMainWindow
+class MainWindow : public QMainWindow
 {
 	Q_OBJECT
 
 public:
-	ds4wizardcpp(QWidget* parent = nullptr);
-	~ds4wizardcpp();
+	MainWindow(QWidget* parent = nullptr);
+	~MainWindow();
 
 	void changeEvent(QEvent* e) override;
 
 private:
-	Ui::ds4wizardcpp ui;
+	Ui::MainWindow ui;
 	bool supportsSystemTray = false;
 	QSystemTrayIcon* trayIcon = nullptr;
 

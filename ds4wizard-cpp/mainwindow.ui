@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ds4wizardcpp</class>
- <widget class="QMainWindow" name="ds4wizardcpp">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -204,7 +204,7 @@
   <connection>
    <sender>pushButton_DeviceProperties</sender>
    <signal>clicked()</signal>
-   <receiver>ds4wizardcpp</receiver>
+   <receiver>MainWindow</receiver>
    <slot>devicePropertiesClicked()</slot>
    <hints>
     <hint type="sourcelabel">

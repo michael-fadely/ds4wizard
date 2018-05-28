@@ -1,15 +1,15 @@
 #include "stdafx.h"
-#include "ds4wizardcpp.h"
+#include "MainWindow.h"
 #include <QtWidgets/QApplication>
 #include "program.h"
 
 int main(int argc, char** argv)
 {
-	QApplication a(argc, argv);
+	QApplication application(argc, argv);
 
 	Program::initialize();
 	Program::loadSettings();
 
-	ds4wizardcpp w;
-	return a.exec();
+	MainWindow window;
+	return application.exec();
 }

@@ -5,9 +5,6 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ds4wizardcpp.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="devicepropertiesdialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -18,6 +15,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="program.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MainWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -61,18 +61,18 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="ds4wizardcpp.h">
+    <QtMoc Include="devicepropertiesdialog.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="devicepropertiesdialog.h">
+    <QtMoc Include="MainWindow.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
-    <QtUic Include="ds4wizardcpp.ui">
+    <QtUic Include="devicepropertiesdialog.ui">
       <Filter>Form Files</Filter>
     </QtUic>
-    <QtUic Include="devicepropertiesdialog.ui">
+    <QtUic Include="mainwindow.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>
