@@ -20,5 +20,5 @@ private:
 
 protected slots:
 	void toggleHide(QSystemTrayIcon::ActivationReason reason);
-	void on_pushButton_DeviceProperties_clicked() const;
+	void devicePropertiesClicked() const;
 };

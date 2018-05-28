@@ -4,8 +4,8 @@
 bool Settings::operator==(const Settings& rhs) const
 {
 	return preferredConnection == rhs.preferredConnection &&
-	       startMinimized == rhs.startMinimized &&
-	       minimizeToTray == rhs.minimizeToTray;
+	       startMinimized      == rhs.startMinimized &&
+	       minimizeToTray      == rhs.minimizeToTray;
 }
 
 bool Settings::operator!=(const Settings& rhs) const

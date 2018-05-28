@@ -11,6 +11,5 @@ int main(int argc, char** argv)
 	Program::loadSettings();
 
 	ds4wizardcpp w;
-	w.show();
 	return a.exec();
 }

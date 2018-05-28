@@ -1,6 +1,10 @@
 #include "stdafx.h"
 #include "ds4wizardcpp.h"
 #include "devicepropertiesdialog.h"
+#include "program.h"
+
+// TODO: rename to MainWindow
+// TODO: update Program::settings on checkbox change
 
 ds4wizardcpp::ds4wizardcpp(QWidget* parent)
 	: QMainWindow(parent)
@@ -13,8 +17,14 @@ ds4wizardcpp::ds4wizardcpp(QWidget* parent)
 		trayIcon = new QSystemTrayIcon(this);
 		trayIcon->setIcon(QIcon(":/ds4wizardcpp/Resources/race_q00.ico"));
 		trayIcon->show();
+
 		connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
-		        this, SLOT(toggle_hide(QSystemTrayIcon::ActivationReason)));
+		        this, SLOT(toggleHide(QSystemTrayIcon::ActivationReason)));
+
+		if (!Program::settings.startMinimized)
+		{
+			show();
+		}
 	}
 }
 
@@ -28,6 +38,11 @@ void ds4wizardcpp::changeEvent(QEvent* e)
 	switch (e->type())
 	{
 		case QEvent::WindowStateChange:
+			if (!Program::settings.minimizeToTray)
+			{
+				break;
+			}
+
 			if (windowState() & Qt::WindowMinimized)
 			{
 				if (supportsSystemTray && ui.checkMinimizeToTray->isChecked())
@@ -65,7 +80,7 @@ void ds4wizardcpp::toggleHide(QSystemTrayIcon::ActivationReason reason)
 	}
 }
 
-void ds4wizardcpp::on_pushButton_DeviceProperties_clicked() const
+void ds4wizardcpp::devicePropertiesClicked() const
 {
 	trayIcon->showMessage("hi", "this is a test");
 	auto dialog = new DevicePropertiesDialog();
