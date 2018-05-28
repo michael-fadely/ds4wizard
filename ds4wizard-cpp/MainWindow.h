@@ -17,6 +17,11 @@ private:
 	Ui::MainWindow ui;
 	bool supportsSystemTray = false;
 	QSystemTrayIcon* trayIcon = nullptr;
+	PVOID notificationHandle = nullptr;
+
+	void registerDeviceNotification();
+	void unregisterDeviceNotification();
+	bool nativeEvent(const QByteArray& eventType, void* message, long* result) override;
 
 protected slots:
 	void closeEvent(QCloseEvent* event) override;

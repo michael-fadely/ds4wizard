@@ -27,6 +27,8 @@ MainWindow::MainWindow(QWidget* parent)
 	ui.checkMinimizeToTray->setChecked(Program::settings.minimizeToTray);
 	ui.checkStartMinimized->setChecked(Program::settings.startMinimized);
 	ui.comboConnectionType->setCurrentIndex(static_cast<int>(Program::settings.preferredConnection));
+
+	registerDeviceNotification();
 }
 
 MainWindow::~MainWindow()
@@ -60,9 +62,77 @@ void MainWindow::changeEvent(QEvent* e)
 	QMainWindow::changeEvent(e);
 }
 
+void MainWindow::registerDeviceNotification()
+{
+	GUID guid {};
+	HidD_GetHidGuid(&guid);
+
+	DEV_BROADCAST_DEVICEINTERFACE filter {};
+
+	filter.dbcc_size       = sizeof(DEV_BROADCAST_DEVICEINTERFACE);
+	filter.dbcc_classguid  = guid;
+	filter.dbcc_devicetype = DBT_DEVTYP_DEVICEINTERFACE;
+
+	auto hwnd = reinterpret_cast<HWND>(this->winId());
+
+	notificationHandle = RegisterDeviceNotification(hwnd, &filter, DEVICE_NOTIFY_WINDOW_HANDLE);
+
+	if (notificationHandle == nullptr || notificationHandle == INVALID_HANDLE_VALUE)
+	{
+		QMessageBox::warning(this, tr("Warning"), tr("Failed to register device notification event."));
+	}
+}
+
+void MainWindow::unregisterDeviceNotification()
+{
+	if (notificationHandle == nullptr || notificationHandle == INVALID_HANDLE_VALUE)
+	{
+		return;
+	}
+
+	UnregisterDeviceNotification(notificationHandle);
+	notificationHandle = nullptr;
+}
+
+bool MainWindow::nativeEvent(const QByteArray& eventType, void* message, long* result)
+{
+	auto msg = static_cast<MSG*>(message);
+
+	if (msg->message == WM_DEVICECHANGE && msg->wParam == DBT_DEVICEARRIVAL)
+	{
+		auto hdr = reinterpret_cast<DEV_BROADCAST_HDR*>(msg->lParam);
+
+		if (!hdr || hdr->dbch_devicetype != DBT_DEVTYP_DEVICEINTERFACE)
+		{
+			return false;
+		}
+
+		auto devinterface = reinterpret_cast<DEV_BROADCAST_DEVICEINTERFACE*>(msg->lParam);
+
+		qDebug() << "DEVICE DETECTED";
+
+		// TODO
+
+		/*try
+		{
+			if (Ds4DeviceManager.IsDs4(devinterface->dbcc_name))
+			{
+				// TODO: pull required metadata (instance id) from device and open directly instead of re-scanning everything
+				Task.Run(() = > deviceManager.FindControllers());
+			}
+		}
+		catch
+		{
+			// HACK: ignored
+		}*/
+	}
+
+	return false;
+}
+
 void MainWindow::closeEvent(QCloseEvent* event)
 {
-	// reasons
+	unregisterDeviceNotification();
 }
 
 void MainWindow::toggleHide(QSystemTrayIcon::ActivationReason reason)
