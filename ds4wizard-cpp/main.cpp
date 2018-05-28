@@ -11,5 +11,10 @@ int main(int argc, char** argv)
 	Program::loadSettings();
 
 	MainWindow window;
-	return application.exec();
+
+	auto result = application.exec();
+
+	Program::saveSettings();
+
+	return result;
 }

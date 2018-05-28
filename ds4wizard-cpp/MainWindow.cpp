@@ -25,6 +25,10 @@ MainWindow::MainWindow(QWidget* parent)
 			show();
 		}
 	}
+
+	ui.checkMinimizeToTray->setChecked(Program::settings.minimizeToTray);
+	ui.checkStartMinimized->setChecked(Program::settings.startMinimized);
+	ui.comboConnectionType->setCurrentIndex(static_cast<int>(Program::settings.preferredConnection));
 }
 
 MainWindow::~MainWindow()
@@ -58,6 +62,10 @@ void MainWindow::changeEvent(QEvent* e)
 	QMainWindow::changeEvent(e);
 }
 
+void MainWindow::closeEvent(QCloseEvent* event)
+{
+	// reasons
+}
 
 void MainWindow::toggleHide(QSystemTrayIcon::ActivationReason reason)
 {

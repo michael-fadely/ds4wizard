@@ -18,6 +18,7 @@ const QString& Program::settingsFile()
 
 void Program::initialize()
 {
+	// HACK: don't do this
 	QDir dir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
 	dir.cdUp();
 
