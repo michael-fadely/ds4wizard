@@ -3,8 +3,6 @@
 #include "devicepropertiesdialog.h"
 #include "program.h"
 
-// TODO: update Program::settings on checkbox change
-
 MainWindow::MainWindow(QWidget* parent)
 	: QMainWindow(parent)
 {
@@ -93,4 +91,19 @@ void MainWindow::devicePropertiesClicked() const
 	auto dialog = new DevicePropertiesDialog();
 	dialog->exec();
 	delete dialog;
+}
+
+void MainWindow::startMinimizedToggled(bool value) const
+{
+	Program::settings.startMinimized = value;
+}
+
+void MainWindow::minimizeToTrayToggled(bool value) const
+{
+	Program::settings.minimizeToTray = value;
+}
+
+void MainWindow::preferredConnectionChanged(int value) const
+{
+	Program::settings.preferredConnection = static_cast<ConnectionType>(value);
 }

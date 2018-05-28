@@ -217,8 +217,59 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>checkMinimizeToTray</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>minimizeToTrayToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>88</x>
+     <y>74</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>309</x>
+     <y>4</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkStartMinimized</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>startMinimizedToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>64</x>
+     <y>53</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>98</x>
+     <y>5</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>comboConnectionType</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>preferredConnectionChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>178</x>
+     <y>121</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>85</x>
+     <y>393</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>devicePropertiesClicked()</slot>
+  <slot>startMinimizedToggled(bool)</slot>
+  <slot>minimizeToTrayToggled(bool)</slot>
+  <slot>preferredConnectionChanged(int)</slot>
  </slots>
 </ui>
