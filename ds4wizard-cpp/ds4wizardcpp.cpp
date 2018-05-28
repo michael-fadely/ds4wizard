@@ -6,21 +6,21 @@ ds4wizardcpp::ds4wizardcpp(QWidget* parent)
 	: QMainWindow(parent)
 {
 	ui.setupUi(this);
-	this->supports_systray = QSystemTrayIcon::isSystemTrayAvailable();
+	this->supportsSystemTray = QSystemTrayIcon::isSystemTrayAvailable();
 
-	if (supports_systray)
+	if (supportsSystemTray)
 	{
-		tray_icon = new QSystemTrayIcon(this);
-		tray_icon->setIcon(QIcon(":/ds4wizardcpp/Resources/race_q00.ico"));
-		tray_icon->show();
-		connect(tray_icon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
+		trayIcon = new QSystemTrayIcon(this);
+		trayIcon->setIcon(QIcon(":/ds4wizardcpp/Resources/race_q00.ico"));
+		trayIcon->show();
+		connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
 		        this, SLOT(toggle_hide(QSystemTrayIcon::ActivationReason)));
 	}
 }
 
 ds4wizardcpp::~ds4wizardcpp()
 {
-	delete tray_icon;
+	delete trayIcon;
 }
 
 void ds4wizardcpp::changeEvent(QEvent* e)
@@ -30,7 +30,7 @@ void ds4wizardcpp::changeEvent(QEvent* e)
 		case QEvent::WindowStateChange:
 			if (windowState() & Qt::WindowMinimized)
 			{
-				if (supports_systray && ui.checkMinimizeToTray->isChecked())
+				if (supportsSystemTray && ui.checkMinimizeToTray->isChecked())
 				{
 					QTimer::singleShot(0, this, SLOT(hide()));
 				}
@@ -45,7 +45,7 @@ void ds4wizardcpp::changeEvent(QEvent* e)
 }
 
 
-void ds4wizardcpp::toggle_hide(QSystemTrayIcon::ActivationReason reason)
+void ds4wizardcpp::toggleHide(QSystemTrayIcon::ActivationReason reason)
 {
 	if (reason != QSystemTrayIcon::DoubleClick)
 	{
@@ -67,7 +67,7 @@ void ds4wizardcpp::toggle_hide(QSystemTrayIcon::ActivationReason reason)
 
 void ds4wizardcpp::on_pushButton_DeviceProperties_clicked() const
 {
-	tray_icon->showMessage("hi", "this is a test");
+	trayIcon->showMessage("hi", "this is a test");
 	auto dialog = new DevicePropertiesDialog();
 	dialog->exec();
 	delete dialog;

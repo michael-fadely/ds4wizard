@@ -15,10 +15,10 @@ public:
 
 private:
 	Ui::ds4wizardcpp ui;
-	bool supports_systray = false;
-	QSystemTrayIcon* tray_icon = nullptr;
+	bool supportsSystemTray = false;
+	QSystemTrayIcon* trayIcon = nullptr;
 
 protected slots:
-	void toggle_hide(QSystemTrayIcon::ActivationReason reason);
+	void toggleHide(QSystemTrayIcon::ActivationReason reason);
 	void on_pushButton_DeviceProperties_clicked() const;
 };
