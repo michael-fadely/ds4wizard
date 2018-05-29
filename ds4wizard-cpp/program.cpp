@@ -3,37 +3,52 @@
 
 Settings Program::settings {};
 Settings Program::lastSettings {};
-QString Program::settingsDir_;
-QString Program::settingsFile_;
+QString Program::settingsPath_;
+QString Program::settingsFilePath_;
+QString Program::profilesPath_;
+QString Program::devicesFilePath_;
 
-const QString& Program::settingsDir()
+const QString& Program::settingsPath()
 {
-	return settingsDir_;
+	return settingsPath_;
 }
 
-const QString& Program::settingsFile()
+const QString& Program::settingsFilePath()
 {
-	return settingsFile_;
+	return settingsFilePath_;
+}
+
+const QString& Program::profilesPath()
+{
+	return profilesPath_;
+}
+
+const QString& Program::devicesFilePath()
+{
+	return devicesFilePath_;
 }
 
 void Program::initialize()
 {
-	// HACK: don't do this
+	// HACK: don't do this?
 	QDir dir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
 	dir.cdUp();
 
 	const QString appDataLocation = dir.path();
-	settingsDir_ = appDataLocation + "/ds4wizard";
-	settingsFile_ = settingsDir_ + "/settings.json";
+
+	settingsPath_     = appDataLocation + "/ds4wizard";
+	settingsFilePath_ = settingsPath_ + "/settings.json";
+	profilesPath_     = settingsPath_ + "/profiles";
+	devicesFilePath_  = settingsPath_ + "/devices.json";
 }
 
 void Program::loadSettings()
 {
-	QFile file(settingsFile());
+	QFile file(settingsFilePath());
 
 	if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
 	{
-		qDebug() << "failed to open " << settingsFile() << "for reading.\n";
+		qDebug() << "failed to open " << settingsFilePath() << "for reading.\n";
 		return;
 	}
 
@@ -52,11 +67,11 @@ void Program::saveSettings()
 		return;
 	}
 
-	QFile file(settingsFile());
+	QFile file(settingsFilePath());
 
 	if (!file.open(QIODevice::WriteOnly))
 	{
-		qDebug() << "failed to open " << settingsFile() << "for writing.\n";
+		qDebug() << "failed to open " << settingsFilePath() << "for writing.\n";
 		return;
 	}
 

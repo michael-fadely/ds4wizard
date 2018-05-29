@@ -4,14 +4,18 @@
 class Program
 {
 	static Settings lastSettings;
-	static QString settingsDir_;
-	static QString settingsFile_;
+	static QString settingsPath_;
+	static QString settingsFilePath_;
+	static QString profilesPath_;
+	static QString devicesFilePath_;
 
 public:
 	static Settings settings;
 
-	static const QString& settingsDir();
-	static const QString& settingsFile();
+	static const QString& settingsPath();
+	static const QString& settingsFilePath();
+	static const QString& profilesPath();
+	static const QString& devicesFilePath();
 
 	static void initialize();
 	static void loadSettings();
