@@ -14,7 +14,7 @@ std::string toString(ConnectionType value)
 	}
 }
 
-ConnectionType fromString(const std::string& value)
+ConnectionType ConnectionType_fromString(const std::string& value)
 {
 	if (value == "usb")
 	{
@@ -29,7 +29,7 @@ ConnectionType fromString(const std::string& value)
 	throw std::out_of_range("invalid value for enum ConnectionType");
 }
 
-ConnectionType fromQString(const QString& value)
+ConnectionType ConnectionType_fromQString(const QString& value)
 {
-	return fromString(value.toStdString());
+	return ConnectionType_fromString(value.toStdString());
 }

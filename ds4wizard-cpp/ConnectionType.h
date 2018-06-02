@@ -7,5 +7,5 @@ enum class ConnectionType
 };
 
 std::string toString(ConnectionType value);
-ConnectionType fromString(const std::string& value);
-ConnectionType fromQString(const QString& value);
+ConnectionType ConnectionType_fromString(const std::string& value);
+ConnectionType ConnectionType_fromQString(const QString& value);

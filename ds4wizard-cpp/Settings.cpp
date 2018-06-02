@@ -17,7 +17,7 @@ void Settings::readJson(const QJsonObject& json)
 {
 	if (json.contains("preferredConnection"))
 	{
-		preferredConnection = fromQString(json["preferredConnection"].toString());
+		preferredConnection = ConnectionType_fromQString(json["preferredConnection"].toString());
 	}
 
 	if (json.contains("startMinimized"))

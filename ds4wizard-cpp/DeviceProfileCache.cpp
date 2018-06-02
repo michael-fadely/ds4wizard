@@ -79,7 +79,7 @@ void DeviceProfileCache::RemoveProfile(const DeviceProfile& profile)
 		return;
 	}
 
-	const std::string path = filesystem::combine_path(Program::profilesPath().toStdString(), profile.FileName);
+	const std::string path = filesystem::combine_path(Program::profilesPath().toStdString(), profile.FileName());
 
 	if (filesystem::file_exists(path))
 	{
@@ -104,7 +104,7 @@ void DeviceProfileCache::UpdateProfile(const DeviceProfile& last, const DevicePr
 			filesystem::create_directory(Program::profilesPath().toStdString());
 		}
 
-		std::string newPath = filesystem::combine_path(Program::profilesPath().toStdString(), current.FileName);
+		std::string newPath = filesystem::combine_path(Program::profilesPath().toStdString(), current.FileName());
 
 		QFile f(QString::fromStdString(newPath));
 
@@ -116,9 +116,9 @@ void DeviceProfileCache::UpdateProfile(const DeviceProfile& last, const DevicePr
 		f.write(QJsonDocument(current.toJson()).toJson(QJsonDocument::Indented));
 
 		// TODO: case insensitive
-		if (last.FileName != current.FileName)
+		if (last.FileName() != current.FileName())
 		{
-			filesystem::remove(filesystem::combine_path(Program::profilesPath().toStdString(), last.FileName));
+			filesystem::remove(filesystem::combine_path(Program::profilesPath().toStdString(), last.FileName()));
 		}
 	}
 }
@@ -131,7 +131,7 @@ bool DeviceProfileCache::FindProfile(const std::string& profileName, DeviceProfi
 	for (auto& profile : Profiles)
 	{
 		// TODO: case insensitive
-		if (profile.FileName == profileName || profile.Name() == profileName)
+		if (profile.FileName() == profileName || profile.Name == profileName)
 		{
 			outProfile = profile;
 			return true;
@@ -147,19 +147,29 @@ void DeviceProfileCache::LoadImpl()
 		std::lock_guard<std::mutex> guard(profile_lock);
 		Profiles.clear();
 
-		if (filesystem::directory_exists(Program::profilesPath().toStdString()))
+		//if (filesystem::directory_exists(Program::profilesPath().toStdString()))
+		//{
+		//	foreach(std::string f in Directory.EnumerateFiles(Program::profilesPath()))
+		//	{
+		//		try
+		//		{
+		//			auto profile = JsonConvert.DeserializeObject<DeviceProfile>(File.ReadAllText(f));
+		//			Profiles.Add(profile);
+		//		}
+		//		catch
+		//		{
+		//			// HACK: ignored
+		//		}
+		//	}
+		//}
+
+		QDir dir(Program::profilesPath());
+		if (dir.exists())
 		{
-			foreach(std::string f in Directory.EnumerateFiles(Program::profilesPath()))
+			for (auto& f : dir.entryList({ "*.json" }, QDir::Files))
 			{
-				try
-				{
-					auto profile = JsonConvert.DeserializeObject<DeviceProfile>(File.ReadAllText(f));
-					Profiles.Add(profile);
-				}
-				catch
-				{
-					// HACK: ignored
-				}
+				// TODO: DeviceProfile
+				qDebug() << "PROFILE " + f;
 			}
 		}
 	}
@@ -168,15 +178,31 @@ void DeviceProfileCache::LoadImpl()
 		std::lock_guard<std::mutex> guard(deviceSettings_lock);
 		deviceSettings.clear();
 
-		if (filesystem::file_exists(Program::devicesFilePath()))
+		QDir devicesPath(Program::devicesFilePath());
+		if (devicesPath.exists())
 		{
-			deviceSettings = JsonConvert.DeserializeObject<Dictionary<std::string, DeviceSettings>>(
-			                                                                                        File.ReadAllText(Program::devicesFilePath())
-			                                                                                       );
+			//deviceSettings = JsonConvert.DeserializeObject<Dictionary<std::string, DeviceSettings>>(
+			//                                                                                        File.ReadAllText(Program::devicesFilePath())
+			//                                                                                       );
 
-			foreach(DeviceSettings device in deviceSettings.Values.Where(device = > FindProfile(device.Profile) is nullptr))
+			//foreach(DeviceSettings device in deviceSettings.Values.Where(device = > FindProfile(device.Profile) is nullptr))
+			//{
+			//	device.Profile = nullptr;
+			//}
+
+			QFile devicesFile(devicesPath.path());
+
+			if (devicesFile.open(QIODevice::ReadOnly | QIODevice::Text))
 			{
-				device.Profile = nullptr;
+				QString str = devicesFile.readAll();
+
+				auto doc = QJsonDocument::fromJson(str.toUtf8());
+				QJsonObject object = doc.object();
+				
+				for (auto& key : object.keys())
+				{
+					deviceSettings[key.toStdString()] = JsonData::fromJson<DeviceSettings>(object[key].toObject());
+				}
 			}
 		}
 	}
