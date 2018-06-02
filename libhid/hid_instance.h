@@ -51,6 +51,9 @@ namespace hid
 		std::wstring serial_string;
 		std::vector<uint8_t> serial;
 
+		std::vector<uint8_t> input_buffer;
+		std::vector<uint8_t> output_buffer;
+
 		HidInstance(const HidInstance&) = delete;
 		HidInstance& operator=(const HidInstance&) = delete;
 
@@ -77,13 +80,10 @@ namespace hid
 		void close();
 
 		bool read(void* buffer, size_t length) const;
-		bool read(std::vector<uint8_t>& buffer) const;
+		bool read(gsl::span<uint8_t> buffer) const;
 
-		template <size_t length>
-		bool read(std::array<uint8_t, length>& buffer) const
-		{
-			return read(buffer.data(), buffer.size());
-		}
+		bool set_output_report(gsl::span<uint8_t> buffer) const;
+		bool set_output_report() const;
 
 	private:
 		void get_caps(HANDLE h);

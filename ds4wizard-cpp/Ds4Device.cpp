@@ -94,7 +94,6 @@ Ds4Device::Ds4Device(hid::HidInstance& device)
 	}
 
 	ApplyProfile();
-	ioThread = std::make_unique<std::thread>(&ControllerThread);
 }
 
 void Ds4Device::SaveSettings()
@@ -391,17 +390,17 @@ void Ds4Device::OpenUsbDevice(std::unique_ptr<hid::HidInstance>& device)
 	}
 }
 
-void Ds4Device::SetupBluetoothOutputBuffer()
+void Ds4Device::SetupBluetoothOutputBuffer() const
 {
-	bluetoothDevice->OutputBuffer[0] = 0x11;
-	bluetoothDevice->OutputBuffer[1] = 0x80; // For HID + CRC, use 0xC0.
-	bluetoothDevice->OutputBuffer[3] = 0x0F;
+	bluetoothDevice->output_buffer[0] = 0x11;
+	bluetoothDevice->output_buffer[1] = 0x80; // For HID + CRC, use 0xC0.
+	bluetoothDevice->output_buffer[3] = 0x0F;
 }
 
-void Ds4Device::SetupUsbOutputBuffer()
+void Ds4Device::SetupUsbOutputBuffer() const
 {
-	usbDevice->OutputBuffer[0] = 0x05;
-	usbDevice->OutputBuffer[1] = 0xFF;
+	usbDevice->output_buffer[0] = 0x05;
+	usbDevice->output_buffer[1] = 0xFF;
 }
 
 void Ds4Device::WriteUsbAsync()
@@ -417,7 +416,7 @@ void Ds4Device::WriteUsbAsync()
 		Output.FromXInput(realXInputIndex, scpDevice);
 	}
 
-	if (!Output.Update(usbDevice->OutputBuffer, 4))
+	if (!Output.Update(usbDevice->output_buffer, 4))
 	{
 		return;
 	}
@@ -433,12 +432,12 @@ void Ds4Device::WriteBluetooth()
 		Output.FromXInput(realXInputIndex, scpDevice);
 	}
 
-	if (!Output.Update(bluetoothDevice->OutputBuffer, 6))
+	if (!Output.Update(bluetoothDevice->output_buffer, 6))
 	{
 		return;
 	}
 
-	if (!bluetoothDevice->SetOutputReport())
+	if (!bluetoothDevice->set_output_report())
 	{
 		CloseBluetoothDevice();
 	}
@@ -460,13 +459,13 @@ void Ds4Device::Run()
 	if (activeLight.IdleFade)
 	{
 		Ds4LightOptions l = Settings.UseProfileLight ? Profile.Light : Settings.Light;
-		double m          = IsIdle ? 1.0 : (idleTime.Elapsed.TotalMilliseconds / IdleTimeout.TotalMilliseconds).Clamp(0f, 1f);
+		double m = IsIdle ? 1.0 : clamp(duration_cast<milliseconds>(idleTime.elapsed()).count() / static_cast<double>(duration_cast<milliseconds>(IdleTimeout()).count()), 0.0, 1.0);
 
-		Ds4Color::Lerp(l.Color, fadeColor, Output.LightColor, (float)m);
+		Output.LightColor = Ds4Color::Lerp(l.Color, fadeColor, static_cast<float>(m));
 	}
 
 	bool charging = Charging;
-	uint8_t battery  = Battery();
+	uint8_t battery = Battery();
 
 	// cache
 	bool usb       = UsbConnected;
@@ -483,7 +482,7 @@ void Ds4Device::Run()
 		if (usbDevice->ReadAsync())
 		{
 			DataReceived = true;
-			Input.Update(usbDevice->InputBuffer, 1);
+			Input.Update(usbDevice->input_buffer, 1);
 		}
 
 		// If the controller gets disconnected from USB while idle,
@@ -498,10 +497,10 @@ void Ds4Device::Run()
 	{
 		WriteBluetooth();
 
-		if (bluetoothDevice->ReadAsync() && bluetoothDevice->InputBuffer[0] == 0x11)
+		if (bluetoothDevice->ReadAsync() && bluetoothDevice->input_buffer[0] == 0x11)
 		{
 			DataReceived = true;
-			Input.Update(bluetoothDevice->InputBuffer, 3);
+			Input.Update(bluetoothDevice->input_buffer, 3);
 		}
 	}
 
@@ -535,7 +534,7 @@ void Ds4Device::Run()
 			//Debug.WriteLine($"{Latency.Elapsed.TotalMilliseconds} ms"); // TODO
 		}
 
-		Latency.Restart();
+		Latency.start();
 
 		if (Profile.UseXInput)
 		{
@@ -608,9 +607,9 @@ void Ds4Device::OnDeviceClosed()
 
 void Ds4Device::Start()
 {
-	if (!ioThread.IsAlive)
+	if (ioThread == nullptr)
 	{
-		ioThread.Start();
+		ioThread = std::make_unique<std::thread>(&ControllerThread);
 	}
 }
 

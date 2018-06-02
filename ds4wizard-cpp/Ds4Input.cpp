@@ -151,7 +151,7 @@ void Ds4Input::ToXInput(int index, ScpDevice device)
 	lastGamepad = Gamepad;
 }
 
-float Ds4Input::GetAxis(Ds4Axis axis, AxisPolarity polarity)
+float Ds4Input::GetAxis(Ds4Axis axis, AxisPolarity* polarity)
 {
 	float result;
 
@@ -206,15 +206,15 @@ float Ds4Input::GetAxis(Ds4Axis axis, AxisPolarity polarity)
 			throw /*new ArgumentOutOfRangeException(nameof(axis), axis, null) // TODO */;
 	}
 
-	if (!polarity.HasValue)
+	if (!polarity)
 	{
 		return result;
 	}
 
-	if (polarity == AxisPolarity::Negative)
+	if (*polarity == AxisPolarity::Negative)
 	{
 		result = -result;
 	}
 
-	return Math.Max(0.0f, result);
+	return std::max(0.0f, result);
 }

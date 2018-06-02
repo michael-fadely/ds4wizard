@@ -102,6 +102,9 @@ void HidInstance::read_metadata()
 void HidInstance::get_caps()
 {
 	get_caps(handle);
+
+	input_buffer.resize(caps().input_report_size);
+	output_buffer.resize(caps().output_report_size);
 }
 
 bool HidInstance::get_serial()
@@ -183,9 +186,24 @@ bool HidInstance::read(void* buffer, size_t length) const
 	return ReadFile(handle, buffer, static_cast<DWORD>(length), &read, nullptr) != 0;
 }
 
-bool HidInstance::read(std::vector<uint8_t>& buffer) const
+bool HidInstance::read(gsl::span<uint8_t> buffer) const
 {
 	return read(buffer.data(), buffer.size());
+}
+
+bool HidInstance::set_output_report(gsl::span<uint8_t> buffer) const
+{
+	if (!is_open())
+	{
+		return false;
+	}
+
+	return HidD_SetOutputReport(handle, buffer.data(), buffer.size_bytes());
+}
+
+bool HidInstance::set_output_report() const
+{
+	return set_output_report(output_buffer);
 }
 
 void HidInstance::get_caps(HANDLE h)

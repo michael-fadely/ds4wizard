@@ -111,8 +111,8 @@ public:
 	void OpenUsbDevice(std::unique_ptr<hid::HidInstance>& device);
 
 private:
-	void SetupBluetoothOutputBuffer();
-	void SetupUsbOutputBuffer();
+	void SetupBluetoothOutputBuffer() const;
+	void SetupUsbOutputBuffer() const;
 	void WriteUsbAsync();
 	void WriteBluetooth();
 	void Run();

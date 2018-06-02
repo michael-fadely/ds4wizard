@@ -33,5 +33,5 @@ public:
 	void Update(gsl::span<uint8_t> buffer, int i);
 	void UpdateChangedState();
 	void ToXInput(int index, ScpDevice device);
-	float GetAxis(Ds4Axis axis, AxisPolarity/*?*/ polarity); // TODO
+	float GetAxis(Ds4Axis axis, AxisPolarity* polarity);
 };
