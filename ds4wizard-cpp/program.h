@@ -10,6 +10,7 @@ class Program
 	static QString settingsFilePath_;
 	static QString profilesPath_;
 	static QString devicesFilePath_;
+	inline static bool isElevated_ = false;
 
 public:
 	static DeviceProfileCache ProfileCache;
@@ -19,6 +20,7 @@ public:
 	static const QString& settingsFilePath();
 	static const QString& profilesPath();
 	static const QString& devicesFilePath();
+	static bool isElevated() { return isElevated_; }
 
 	static void initialize();
 	static void loadSettings();

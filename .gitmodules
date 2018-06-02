@@ -1,3 +1,6 @@
 [submodule "better-enums"]
 	path = better-enums
 	url = https://github.com/aantron/better-enums.git
+[submodule "GSL"]
+	path = GSL
+	url = https://github.com/Microsoft/GSL.git

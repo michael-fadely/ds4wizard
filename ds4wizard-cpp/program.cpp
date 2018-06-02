@@ -2,6 +2,30 @@
 #include "program.h"
 #include "DeviceProfileCache.h"
 
+BOOL IsElevated()
+{
+	BOOL fRet     = FALSE;
+	HANDLE hToken = nullptr;
+
+	if (OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &hToken))
+	{
+		TOKEN_ELEVATION elevation;
+		DWORD cbSize = sizeof(TOKEN_ELEVATION);
+
+		if (GetTokenInformation(hToken, TokenElevation, &elevation, sizeof(elevation), &cbSize))
+		{
+			fRet = elevation.TokenIsElevated;
+		}
+	}
+
+	if (hToken)
+	{
+		CloseHandle(hToken);
+	}
+
+	return fRet;
+}
+
 DeviceProfileCache Program::ProfileCache {};
 Settings Program::settings {};
 Settings Program::lastSettings {};
@@ -42,6 +66,8 @@ void Program::initialize()
 	settingsFilePath_ = settingsPath_ + "/settings.json";
 	profilesPath_     = settingsPath_ + "/profiles";
 	devicesFilePath_  = settingsPath_ + "/devices.json";
+
+	isElevated_ = !!IsElevated();
 }
 
 void Program::loadSettings()
