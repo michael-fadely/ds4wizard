@@ -1,11 +1,5 @@
 #pragma once
 
-enum class ConnectionType
-{
-	usb,
-	bluetooth
-};
+#include <enum.h>
 
-std::string toString(ConnectionType value);
-ConnectionType ConnectionType_fromString(const std::string& value);
-ConnectionType ConnectionType_fromQString(const QString& value);
+BETTER_ENUM(ConnectionType, int, usb, bluetooth)

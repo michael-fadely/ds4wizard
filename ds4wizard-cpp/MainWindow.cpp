@@ -178,5 +178,5 @@ void MainWindow::minimizeToTrayToggled(bool value) const
 
 void MainWindow::preferredConnectionChanged(int value) const
 {
-	Program::settings.preferredConnection = static_cast<ConnectionType>(value);
+	Program::settings.preferredConnection = ConnectionType::_from_integral(value);
 }

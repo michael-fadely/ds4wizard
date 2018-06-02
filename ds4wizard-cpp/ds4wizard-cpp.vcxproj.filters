@@ -11,9 +11,6 @@
     <ClCompile Include="Settings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ConnectionType.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="program.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -141,9 +138,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="filesystem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="enum_string.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

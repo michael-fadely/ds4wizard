@@ -17,7 +17,7 @@ void Settings::readJson(const QJsonObject& json)
 {
 	if (json.contains("preferredConnection"))
 	{
-		preferredConnection = ConnectionType_fromQString(json["preferredConnection"].toString());
+		preferredConnection = ConnectionType::_from_string(json["preferredConnection"].toString().toStdString().c_str());
 	}
 
 	if (json.contains("startMinimized"))
@@ -33,7 +33,7 @@ void Settings::readJson(const QJsonObject& json)
 
 void Settings::writeJson(QJsonObject& json) const
 {
-	json["preferredConnection"] = QString::fromStdString(toString(preferredConnection));
+	json["preferredConnection"] = preferredConnection._to_string();
 	json["startMinimized"]      = startMinimized;
 	json["minimizeToTray"]      = minimizeToTray;
 }
