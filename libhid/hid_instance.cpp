@@ -147,7 +147,6 @@ bool HidInstance::open(bool exclusive)
 		close();
 	}
 
-#ifdef _MSC_VER
 	const uint32_t share_flags = exclusive ? 0 : FILE_SHARE_READ | FILE_SHARE_WRITE;
 
 	handle = CreateFile(path.c_str(), GENERIC_READ | GENERIC_WRITE, share_flags, nullptr,
@@ -157,7 +156,6 @@ bool HidInstance::open(bool exclusive)
 	{
 		return false;
 	}
-#endif
 
 	is_exclusive_ = exclusive;
 	return true;
@@ -167,10 +165,8 @@ void HidInstance::close()
 {
 	if (is_open())
 	{
-#ifdef _MSC_VER
 		CloseHandle(handle);
 		handle = nullptr;
-#endif
 	}
 
 	is_exclusive_ = false;
@@ -183,10 +179,8 @@ bool HidInstance::read(void* buffer, size_t length) const
 		return false;
 	}
 
-#ifdef _MSC_VER
 	DWORD read = 0;
 	return ReadFile(handle, buffer, static_cast<DWORD>(length), &read, nullptr) != 0;
-#endif
 }
 
 bool HidInstance::read(std::vector<uint8_t>& buffer) const

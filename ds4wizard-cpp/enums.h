@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 struct InputType
 {
 	enum T
@@ -110,4 +112,31 @@ enum class PressedState
 	/// The button was on (held), but has now been released.
 	/// </summary>
 	Released
+};
+
+enum class Ds4Axis : uint32_t
+{
+	LeftStickX   = 1 << 0,
+	LeftStickY   = 1 << 1,
+	RightStickX  = 1 << 2,
+	RightStickY  = 1 << 3,
+	LeftTrigger  = 1 << 4,
+	RightTrigger = 1 << 5,
+	AccelX       = 1 << 6,
+	AccelY       = 1 << 7,
+	AccelZ       = 1 << 8,
+	GyroX        = 1 << 9,
+	GyroY        = 1 << 10,
+	GyroZ        = 1 << 11
+};
+
+struct Ds4Extensions
+{
+	enum T : uint8_t
+	{
+		Cable      = 1 << 0,
+		Headphones = 1 << 1,
+		Microphone = 1 << 2,
+		Unknown    = 1 << 3
+	};
 };

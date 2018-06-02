@@ -60,7 +60,7 @@ std::wstring hid::get_instance_id(const HDEVINFO dev_info_set, SP_DEVINFO_DATA* 
 	return result;
 }
 
-bool hid::enum_guid(const std::function<bool(std::wstring&, std::wstring&)>& fn, const GUID& guid) noexcept
+bool hid::enum_guid(const std::function<bool(const std::wstring& path, const std::wstring& instanceId)>& fn, const GUID& guid) noexcept
 {
 	const HDEVINFO dev_info = SetupDiGetClassDevs(&guid, nullptr, nullptr, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
 
@@ -98,12 +98,12 @@ bool hid::enum_guid(const std::function<bool(std::wstring&, std::wstring&)>& fn,
 	return false;
 }
 
-void hid::enum_hid(const std::function<bool(HidInstance&)>& fn) noexcept
+void hid::enum_hid(const std::function<bool(HidInstance& instance)>& fn) noexcept
 {
 	GUID guid = {};
 	HidD_GetHidGuid(&guid);
 
-	auto callback = [fn](std::wstring& path, std::wstring& instanceId) -> bool
+	auto callback = [fn](const std::wstring& path, const std::wstring& instanceId) -> bool
 	{
 		try
 		{
@@ -121,7 +121,7 @@ void hid::enum_hid(const std::function<bool(HidInstance&)>& fn) noexcept
 	enum_guid(callback, guid);
 }
 
-void hid::enum_usb(const std::function<bool(std::wstring&, std::wstring&)>& fn) noexcept
+void hid::enum_usb(const std::function<bool(const std::wstring& path, const std::wstring& instanceId)>& fn) noexcept
 {
 	enum_guid(fn, GUID_DEVINTERFACE_USB_HUB);
 }

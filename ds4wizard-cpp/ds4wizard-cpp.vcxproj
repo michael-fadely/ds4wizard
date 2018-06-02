@@ -124,6 +124,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AxisOptions.cpp" />
+    <ClCompile Include="Bluetooth.cpp" />
     <ClCompile Include="DeviceIdleOptions.cpp" />
     <ClCompile Include="DeviceProfile.cpp" />
     <ClCompile Include="DeviceProfileCache.cpp" />
@@ -131,23 +132,30 @@
     <ClCompile Include="DeviceSettings.cpp" />
     <ClCompile Include="DeviceSettingsCommon.cpp" />
     <ClCompile Include="Ds4Color.cpp" />
+    <ClCompile Include="Ds4Device.cpp" />
     <ClCompile Include="Ds4DeviceManager.cpp" />
+    <ClCompile Include="Ds4Input.cpp" />
     <ClCompile Include="Ds4InputData.cpp" />
     <ClCompile Include="Ds4LightOptions.cpp" />
+    <ClCompile Include="Ds4Output.cpp" />
     <ClCompile Include="Ds4TouchRegion.cpp" />
     <ClCompile Include="filesystem.cpp" />
     <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Pressable.cpp" />
     <ClCompile Include="program.cpp" />
+    <ClCompile Include="ScpDevice.cpp" />
     <ClCompile Include="Settings.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Stopwatch.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AxisOptions.h" />
+    <ClInclude Include="Bluetooth.h" />
+    <ClInclude Include="busenum.h" />
     <ClInclude Include="clamp.h" />
     <ClInclude Include="DeviceIdleOptions.h" />
     <ClInclude Include="DeviceProfile.h" />
@@ -156,13 +164,19 @@
     <ClInclude Include="DeviceSettingsCommon.h" />
     <ClInclude Include="Ds4Buttons.h" />
     <ClInclude Include="Ds4Color.h" />
+    <ClInclude Include="Ds4Device.h" />
     <ClInclude Include="Ds4DeviceManager.h" />
+    <ClInclude Include="Ds4Input.h" />
     <ClInclude Include="Ds4InputData.h" />
     <ClInclude Include="Ds4LightOptions.h" />
+    <ClInclude Include="Ds4Output.h" />
     <ClInclude Include="Ds4TouchRegion.h" />
     <ClInclude Include="enums.h" />
     <ClInclude Include="filesystem.h" />
     <ClInclude Include="JsonData.h" />
+    <ClInclude Include="ScpDevice.h" />
+    <ClInclude Include="Stopwatch.h" />
+    <ClInclude Include="XInputGamepad.h" />
     <QtMoc Include="MainWindow.h">
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtUiTools</IncludePath>
       <Define Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;QT_UITOOLS_LIB</Define>
@@ -177,6 +191,7 @@
     </QtMoc>
     <ClInclude Include="ConnectionType.h" />
     <ClInclude Include="lerp.h" />
+    <ClInclude Include="lock.h" />
     <ClInclude Include="Pressable.h" />
     <ClInclude Include="program.h" />
     <ClInclude Include="Settings.h" />

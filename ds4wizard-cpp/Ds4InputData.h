@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstdint>
-#include <cmath>
 
 #include "enums.h"
 
@@ -21,26 +20,14 @@ struct Ds4Stick
 	/// Note that the center of the axis rests at 127, not 0.
 	/// </summary>
 	uint8_t Y;
-	
-	bool operator==(const Ds4Stick& other) const
-	{
-		return X == other.X && Y == other.Y;
-	}
 
-	bool operator!=(const Ds4Stick& right) const
-	{
-		return !(*this == right);
-	}
+	bool operator==(const Ds4Stick& other) const;
 
-	double LengthSquared() const
-	{
-		return X * X + Y * Y;
-	}
+	bool operator!=(const Ds4Stick& right) const;
 
-	double Length() const
-	{
-		return std::sqrt(LengthSquared());
-	}
+	double LengthSquared() const;
+
+	double Length() const;
 };
 
 /// <summary>
@@ -61,20 +48,11 @@ struct Ds4Vector2
 	/// </summary>
 	short Y;
 
-	bool operator==(Ds4Vector2 other) const
-	{
-		return X == other.X && Y == other.Y;
-	}
+	bool operator==(Ds4Vector2 other) const;
 
-	double LengthSquared() const
-	{
-		return X * X + Y * Y;
-	}
+	double LengthSquared() const;
 
-	double Length() const
-	{
-		return std::sqrt(LengthSquared());
-	}
+	double Length() const;
 };
 
 /// <summary>
@@ -85,20 +63,11 @@ struct Ds4Vector3
 {
 	short X, Y, Z;
 
-	bool operator==(Ds4Vector3 other) const
-	{
-		return X == other.X && Y == other.Y && Z == other.Z;
-	}
+	bool operator==(Ds4Vector3 other) const;
 
-	double LengthSquared() const
-	{
-		return X * X + Y * Y + Z * Z;
-	}
+	double LengthSquared() const;
 
-	double Length() const
-	{
-		return std::sqrt(LengthSquared());
-	}
+	double Length() const;
 };
 
 struct Ds4InputData
