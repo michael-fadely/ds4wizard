@@ -13,7 +13,7 @@ bool Settings::operator!=(const Settings& rhs) const
 	return !(*this == rhs);
 }
 
-void Settings::read(const QJsonObject& json)
+void Settings::readJson(const QJsonObject& json)
 {
 	if (json.contains("preferredConnection"))
 	{
@@ -31,7 +31,7 @@ void Settings::read(const QJsonObject& json)
 	}
 }
 
-void Settings::write(QJsonObject& json)
+void Settings::writeJson(QJsonObject& json) const
 {
 	json["preferredConnection"] = QString::fromStdString(toString(preferredConnection));
 	json["startMinimized"]      = startMinimized;

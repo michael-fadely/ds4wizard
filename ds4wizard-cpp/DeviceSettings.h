@@ -2,35 +2,22 @@
 
 #include <string>
 #include "DeviceSettingsCommon.h"
+#include "JsonData.h"
 
-class DeviceSettings : DeviceSettingsCommon
+class DeviceSettings : public DeviceSettingsCommon, public JsonData
 {
 public:
-	std::string Name;
-	std::string Profile;
-	bool   UseProfileLight;
-	bool   UseProfileIdle;
+	std::string       Name;
+	std::string       Profile;
+	bool              UseProfileLight;
+	bool              UseProfileIdle;
+	DeviceIdleOptions Idle;
 
-	DeviceSettings()
-	{
-		UseProfileLight = false;
-		UseProfileIdle = false;
-		// TODO
-		//Idle = DeviceIdleOptions::Default;
-	}
+	DeviceSettings();
 
-	DeviceSettings(const DeviceSettings& s) : DeviceSettingsCommon(s)
-	{
-		Name = s.Name;
-		Profile = s.Profile;
-		UseProfileLight = s.UseProfileLight;
-		UseProfileIdle = s.UseProfileIdle;
-	}
+	DeviceSettings(const DeviceSettings& s);
 
-	bool operator==(const DeviceSettings& other)
-	{
-		return Name == other.Name && Profile == other.Profile
-			&& UseProfileLight == other.UseProfileLight
-			&& UseProfileIdle == other.UseProfileIdle;
-	}
+	bool operator==(const DeviceSettings& other) const;
+	void readJson(const QJsonObject& json) override;
+	void writeJson(QJsonObject& json) const override;
 };

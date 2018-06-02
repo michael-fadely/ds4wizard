@@ -74,7 +74,7 @@ private:
 
 	void LoadImpl();
 
-	void OnLoaded();
+	void OnLoaded() const;
 
-	void OnProfileChanged(const std::string& oldName, const std::string& newName);
+	void OnProfileChanged(const std::string& oldName, const std::string& newName) const;
 };

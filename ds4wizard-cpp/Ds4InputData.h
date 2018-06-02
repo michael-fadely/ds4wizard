@@ -32,12 +32,12 @@ struct Ds4Stick
 		return !(*this == right);
 	}
 
-	double LengthSquared()
+	double LengthSquared() const
 	{
 		return X * X + Y * Y;
 	}
 
-	double Length()
+	double Length() const
 	{
 		return std::sqrt(LengthSquared());
 	}

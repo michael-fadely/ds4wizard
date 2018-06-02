@@ -133,6 +133,7 @@
     <ClCompile Include="Ds4InputData.cpp" />
     <ClCompile Include="Ds4LightOptions.cpp" />
     <ClCompile Include="Ds4TouchRegion.cpp" />
+    <ClCompile Include="filesystem.cpp" />
     <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Pressable.cpp" />
@@ -157,6 +158,8 @@
     <ClInclude Include="Ds4LightOptions.h" />
     <ClInclude Include="Ds4TouchRegion.h" />
     <ClInclude Include="enums.h" />
+    <ClInclude Include="enum_string.h" />
+    <ClInclude Include="filesystem.h" />
     <ClInclude Include="JsonData.h" />
     <QtMoc Include="MainWindow.h">
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtUiTools</IncludePath>

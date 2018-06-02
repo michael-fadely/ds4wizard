@@ -54,7 +54,7 @@ void Program::loadSettings()
 
 	QString val = file.readAll();
 	QJsonDocument configJson = QJsonDocument::fromJson(val.toUtf8());
-	settings = JsonData::read<Settings>(configJson.object());
+	settings = JsonData::fromJson<Settings>(configJson.object());
 	lastSettings = settings;
 
 	file.close();
@@ -76,7 +76,7 @@ void Program::saveSettings()
 	}
 
 	QJsonObject obj;
-	settings.write(obj);
+	settings.writeJson(obj);
 
 	QJsonDocument doc;
 	doc.setObject(obj);

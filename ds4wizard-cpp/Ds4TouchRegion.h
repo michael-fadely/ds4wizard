@@ -68,12 +68,12 @@ public:
 		TouchAxisOptions = other.TouchAxisOptions;
 	}
 
-	bool IsInRegion(Ds4Buttons::T sender, const Ds4Vector2& point)
+	bool IsInRegion(Ds4Buttons::T sender, const Ds4Vector2& point) const
 	{
 		return IsInRegion(sender, point.X, point.Y);
 	}
 
-	bool IsInRegion(Ds4Buttons::T sender, short x, short y)
+	bool IsInRegion(Ds4Buttons::T sender, short x, short y) const
 	{
 		if (x >= Left && x <= Right && y >= Top && y <= Bottom)
 		{
@@ -83,7 +83,7 @@ public:
 		return !AllowCrossOver && IsActive(sender);
 	}
 
-	Ds4Vector2 GetStartPoint(Ds4Buttons::T sender)
+	Ds4Vector2 GetStartPoint(Ds4Buttons::T sender) const
 	{
 		if ((sender & Ds4Buttons::Touch1) != 0)
 		{
@@ -98,7 +98,7 @@ public:
 		return {};
 	}
 
-	bool IsActive(Ds4Buttons::T sender)
+	bool IsActive(Ds4Buttons::T sender) const
 	{
 		return (Active & sender) != 0;
 	}
@@ -147,7 +147,7 @@ public:
 		}
 	}
 
-	float GetTouchDelta(Ds4Buttons::T sender, Direction::T direction, const Ds4Vector2& point)
+	float GetTouchDelta(Ds4Buttons::T sender, Direction::T direction, const Ds4Vector2& point) const
 	{
 		short x = clamp(point.X, Left, Right);
 		short y = clamp(point.Y, Top, Bottom);

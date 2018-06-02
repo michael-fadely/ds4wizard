@@ -23,7 +23,7 @@ struct InputModifier
 	bool operator!=(const InputModifier& o) const { return false; }
 };
 
-class DeviceProfile : public DeviceSettingsCommon
+class DeviceProfile : public DeviceSettingsCommon, public JsonData
 {
 private:
 	/*[JsonIgnore]*/ std::string name_;

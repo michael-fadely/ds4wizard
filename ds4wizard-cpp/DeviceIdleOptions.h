@@ -1,42 +1,33 @@
 #pragma once
 
 #include <chrono>
+#include "JsonData.h"
 
 enum class TimeUnit
 {
-	Seconds,
-	Minutes,
-	Hours
+	seconds,
+	minutes,
+	hours
 };
 
-struct DeviceIdleOptions
+std::string toString(TimeUnit value);
+TimeUnit fromString(const std::string& value);
+TimeUnit fromQString(const QString& value);
+
+struct DeviceIdleOptions : JsonData
 {
 	using clock = std::chrono::high_resolution_clock;
-	/*[JsonIgnore]*/ clock::duration Timeout;
+	static const DeviceIdleOptions Default;
 
+	clock::duration Timeout;
 	bool Disconnect;
-
 	TimeUnit Unit;
 
 	DeviceIdleOptions() = default;
+	DeviceIdleOptions(clock::duration timeout, bool disconnect, TimeUnit unit);
+	DeviceIdleOptions(const DeviceIdleOptions& other);
 
-	DeviceIdleOptions(const DeviceIdleOptions& other)
-	{
-		Disconnect = other.Disconnect;
-		Unit       = other.Unit;
-		Timeout    = other.Timeout;
-	}
-
-	// TODO
-	/*static const DeviceIdleOptions Default = DeviceIdleOptions()
-	{
-		Disconnect = true,
-		Unit       = TimeUnit.Minutes,
-		Timeout    = TimeSpan.FromMinutes(5.0)
-	};*/
-
-	bool operator==(const DeviceIdleOptions& other) const
-	{
-		return Disconnect == other.Disconnect && Timeout == other.Timeout;
-	}
+	bool operator==(const DeviceIdleOptions& other) const;
+	void readJson(const QJsonObject& json) override;
+	void writeJson(QJsonObject& json) const override;
 };

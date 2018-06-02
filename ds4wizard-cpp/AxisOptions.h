@@ -55,7 +55,7 @@ public:
 			&& DeadZone == other.DeadZone;
 	}
 
-	void ApplyDeadZone(float& analog)
+	void ApplyDeadZone(float& analog) const
 	{
 		switch (DeadZoneMode::Scale)
 		{

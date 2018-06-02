@@ -22,7 +22,7 @@ bool DeviceProfileCache::GetProfile(const std::string& profileName, DeviceProfil
 bool DeviceProfileCache::GetSettings(const std::string& id, DeviceSettings& outSettings)
 {
 	std::lock_guard<std::mutex> guard(deviceSettings_lock);
-	auto it = deviceSettings.find(id);
+	const auto it = deviceSettings.find(id);
 
 	if (it == deviceSettings.end())
 	{
@@ -37,15 +37,32 @@ void DeviceProfileCache::SaveSettings(const std::string& id, const DeviceSetting
 {
 	std::lock_guard<std::mutex> guard(deviceSettings_lock);
 
-	auto it = deviceSettings.find(id);
+	const auto it = deviceSettings.find(id);
 
 	if (it != deviceSettings.end() && it->second == settings)
 	{
 		return;
 	}
 
+	QFile f(Program::devicesFilePath());
+
+	if (!f.open(QIODevice::WriteOnly | QIODevice::Text))
+	{
+		throw std::runtime_error("failed to open devices.json for writing");
+	}
+
+	QJsonObject obj;
+
+	for (auto& pair : deviceSettings)
+	{
+		obj[pair.first.c_str()] = pair.second.toJson();
+	}
+
+	auto doc = QJsonDocument(obj);
+
+	f.write(doc.toJson(QJsonDocument::Indented));
+	f.close();
 	deviceSettings[id] = settings;
-	File.WriteAllText(Program::devicesFilePath(), JsonConvert.SerializeObject(deviceSettings));
 }
 
 void DeviceProfileCache::RemoveProfile(const DeviceProfile& profile)
@@ -57,16 +74,16 @@ void DeviceProfileCache::RemoveProfile(const DeviceProfile& profile)
 
 	OnProfileChanged(profile.Name, nullptr);
 
-	if (!Directory.Exists(Program::profilesPath()))
+	if (filesystem::directory_exists(Program::profilesPath().toStdString()))
 	{
 		return;
 	}
 
-	std::string path = Path.Combine(Program::profilesPath(), profile.FileName);
+	const std::string path = filesystem::combine_path(Program::profilesPath().toStdString(), profile.FileName);
 
-	if (File.Exists(path))
+	if (filesystem::file_exists(path))
 	{
-		File.Delete(path);
+		filesystem::remove(path);
 	}
 }
 
@@ -82,24 +99,33 @@ void DeviceProfileCache::UpdateProfile(const DeviceProfile& last, const DevicePr
 
 	{
 		std::lock_guard<std::mutex> guard(profile_lock);
-		if (!Directory.Exists(Program::profilesPath()))
+		if (!filesystem::directory_exists(Program::profilesPath().toStdString()))
 		{
-			Directory.CreateDirectory(Program::profilesPath());
+			filesystem::create_directory(Program::profilesPath().toStdString());
 		}
 
-		std::string newPath = Path.Combine(Program::profilesPath(), current.FileName);
-		File.WriteAllText(newPath, JsonConvert.SerializeObject(current));
+		std::string newPath = filesystem::combine_path(Program::profilesPath().toStdString(), current.FileName);
 
-		if (!last.FileName.Equals(current.FileName, StringComparison.InvariantCultureIgnoreCase))
+		QFile f(QString::fromStdString(newPath));
+
+		if (!f.open(QIODevice::WriteOnly | QIODevice::Text))
 		{
-			File.Delete(Path.Combine(Program::profilesPath(), last.FileName));
+			throw std::runtime_error(std::string("failed to open \"") + newPath + "\" for writing");
+		}
+
+		f.write(QJsonDocument(current.toJson()).toJson(QJsonDocument::Indented));
+
+		// TODO: case insensitive
+		if (last.FileName != current.FileName)
+		{
+			filesystem::remove(filesystem::combine_path(Program::profilesPath().toStdString(), last.FileName));
 		}
 	}
 }
 
 bool DeviceProfileCache::FindProfile(const std::string& profileName, DeviceProfile& outProfile)
 {
-	/*return Profiles.FirstOrDefault(x =  > x.FileName.Equals(profileName, StringComparison.InvariantCultureIgnoreCase)
+	/*return Profiles.FirstOrDefault(x => x.FileName.Equals(profileName, StringComparison.InvariantCultureIgnoreCase)
 	                                   || x.Name.Equals(profileName, StringComparison.InvariantCultureIgnoreCase));*/
 
 	for (auto& profile : Profiles)
@@ -121,7 +147,7 @@ void DeviceProfileCache::LoadImpl()
 		std::lock_guard<std::mutex> guard(profile_lock);
 		Profiles.clear();
 
-		if (Directory.Exists(Program::profilesPath()))
+		if (filesystem::directory_exists(Program::profilesPath().toStdString()))
 		{
 			foreach(std::string f in Directory.EnumerateFiles(Program::profilesPath()))
 			{
@@ -142,7 +168,7 @@ void DeviceProfileCache::LoadImpl()
 		std::lock_guard<std::mutex> guard(deviceSettings_lock);
 		deviceSettings.clear();
 
-		if (File.Exists(Program::devicesFilePath()))
+		if (filesystem::file_exists(Program::devicesFilePath()))
 		{
 			deviceSettings = JsonConvert.DeserializeObject<Dictionary<std::string, DeviceSettings>>(
 			                                                                                        File.ReadAllText(Program::devicesFilePath())
@@ -156,13 +182,13 @@ void DeviceProfileCache::LoadImpl()
 	}
 }
 
-void DeviceProfileCache::OnLoaded()
+void DeviceProfileCache::OnLoaded() const
 {
 	// TODO
 	//Loaded?.Invoke(this, EventArgs.Empty);
 }
 
-void DeviceProfileCache::OnProfileChanged(const std::string& oldName, const std::string& newName)
+void DeviceProfileCache::OnProfileChanged(const std::string& oldName, const std::string& newName) const
 {
 	// TODO
 #if 0
