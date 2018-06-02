@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "program.h"
+#include "DeviceProfileCache.h"
 
+DeviceProfileCache Program::ProfileCache {};
 Settings Program::settings {};
 Settings Program::lastSettings {};
 QString Program::settingsPath_;

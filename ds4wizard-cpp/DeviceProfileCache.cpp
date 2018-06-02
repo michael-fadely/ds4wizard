@@ -178,8 +178,8 @@ void DeviceProfileCache::LoadImpl()
 		std::lock_guard<std::mutex> guard(deviceSettings_lock);
 		deviceSettings.clear();
 
-		QDir devicesPath(Program::devicesFilePath());
-		if (devicesPath.exists())
+		QFile devicesFile(Program::devicesFilePath());
+		if (devicesFile.exists())
 		{
 			//deviceSettings = JsonConvert.DeserializeObject<Dictionary<std::string, DeviceSettings>>(
 			//                                                                                        File.ReadAllText(Program::devicesFilePath())
@@ -189,8 +189,6 @@ void DeviceProfileCache::LoadImpl()
 			//{
 			//	device.Profile = nullptr;
 			//}
-
-			QFile devicesFile(devicesPath.path());
 
 			if (devicesFile.open(QIODevice::ReadOnly | QIODevice::Text))
 			{

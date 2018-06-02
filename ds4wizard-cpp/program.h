@@ -1,6 +1,8 @@
 #pragma once
 #include "Settings.h"
 
+class DeviceProfileCache;
+
 class Program
 {
 	static Settings lastSettings;
@@ -10,6 +12,7 @@ class Program
 	static QString devicesFilePath_;
 
 public:
+	static DeviceProfileCache ProfileCache;
 	static Settings settings;
 
 	static const QString& settingsPath();

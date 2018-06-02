@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "MainWindow.h"
 #include "devicepropertiesdialog.h"
+#include "DeviceProfileCache.h"
 #include "program.h"
 
 MainWindow::MainWindow(QWidget* parent)
@@ -29,6 +30,8 @@ MainWindow::MainWindow(QWidget* parent)
 	ui.comboConnectionType->setCurrentIndex(static_cast<int>(Program::settings.preferredConnection));
 
 	registerDeviceNotification();
+
+	Program::ProfileCache.Load();
 }
 
 MainWindow::~MainWindow()
