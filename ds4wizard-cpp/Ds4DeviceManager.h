@@ -4,7 +4,6 @@
 #include <map>
 #include <mutex>
 #include <string>
-#include <iomanip>
 
 #include <hid_instance.h>
 #include "Ds4Device.h"
@@ -47,7 +46,7 @@ public class DeviceClosedEventArgs
 
 class Ds4DeviceManager
 {
-	std::mutex sync_lock, devices_lock;
+	std::recursive_mutex sync_lock, devices_lock;
 	std::map<std::wstring, std::shared_ptr<Ds4Device>> devices;
 
 public:

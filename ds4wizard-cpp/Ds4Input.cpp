@@ -9,9 +9,9 @@ void Ds4Input::_addButton(uint8_t pressed, Ds4Buttons_t buttons)
 	}
 }
 
-void Ds4Input::Update(gsl::span<uint8_t> buffer, int i)
+void Ds4Input::Update(const gsl::span<uint8_t>& buffer, int i)
 {
-	Ds4Buttons_t lastDpad = HeldButtons & (Ds4Buttons::Up | Ds4Buttons::Down | Ds4Buttons::Left | Ds4Buttons::Right);
+	const Ds4Buttons_t lastDpad = HeldButtons & (Ds4Buttons::Up | Ds4Buttons::Down | Ds4Buttons::Left | Ds4Buttons::Right);
 	HeldButtons = 0;
 
 	Data.LeftStick.X       = buffer[i + 0];

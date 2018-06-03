@@ -35,13 +35,13 @@ bool Ds4Device::IsIdle() const
 bool Ds4Device::BluetoothConnected()
 {
 	lock(sync);
-	return bluetoothDevice->is_open();
+	return bluetoothDevice != nullptr && bluetoothDevice->is_open();
 }
 
 bool Ds4Device::UsbConnected()
 {
 	lock(sync);
-	return usbDevice->is_open();
+	return usbDevice != nullptr && usbDevice->is_open();
 }
 
 bool Ds4Device::Connected()
@@ -246,6 +246,8 @@ bool Ds4Device::ScpDeviceOpen()
 
 void Ds4Device::ScpDeviceClose()
 {
+	lock(sync);
+
 	if (scpDevice == nullptr)
 	{
 		return;
@@ -262,6 +264,7 @@ void Ds4Device::ScpDeviceClose()
 
 void Ds4Device::ReleaseAutoColor()
 {
+	lock(sync);
 	Ds4AutoLightColor::ReleaseColor(colorIndex);
 	colorIndex = -1;
 }
@@ -274,20 +277,44 @@ void Ds4Device::OnProfileChanged(const std::string& newName)
 	ApplyProfile();
 }
 
+Ds4Device::~Ds4Device()
+{
+	Close();
+}
+
 void Ds4Device::Close()
 {
-	lock(sync);
-	CloseUsbDevice();
-	CloseBluetoothDevice();
-	scpDevice->Disconnect(realXInputIndex);
-	scpDevice->Close();
-	ReleaseAutoColor();
+	if (!Connected())
+	{
+		return;
+	}
+
+	{
+		lock(sync);
+
+		CloseUsbDevice();
+		CloseBluetoothDevice();
+		ScpDeviceClose();
+		ReleaseAutoColor();
+	}
+
+	if (deviceThread)
+	{
+		deviceThread->join();
+	}
+
+	OnDeviceClosed();
 }
 
 void Ds4Device::CloseBluetoothDevice()
 {
 	lock(sync);
-	bluetoothDevice->close();
+
+	if (bluetoothDevice != nullptr && bluetoothDevice->is_open())
+	{
+		bluetoothDevice->close();
+	}
+
 	idleTime.start();
 }
 
@@ -309,7 +336,12 @@ void Ds4Device::DisconnectBluetooth()
 void Ds4Device::CloseUsbDevice()
 {
 	lock(sync);
-	usbDevice->close();
+
+	if (usbDevice != nullptr && usbDevice->is_open())
+	{
+		usbDevice->close();
+	}
+
 	idleTime.start();
 }
 
@@ -455,24 +487,24 @@ void Ds4Device::Run()
 	Output.LightColor = activeLight.Color;
 
 	// HACK: see above
-	if (activeLight.IdleFade)
+	/*if (activeLight.IdleFade)
 	{
 		Ds4LightOptions l = Settings.UseProfileLight ? Profile.Light : Settings.Light;
 		double m = IsIdle() ? 1.0 : std::clamp(duration_cast<milliseconds>(idleTime.elapsed()).count() / static_cast<double>(duration_cast<milliseconds>(IdleTimeout()).count()), 0.0, 1.0);
 
 		Output.LightColor = Ds4Color::Lerp(l.Color, fadeColor, static_cast<float>(m));
-	}
+	}*/
 
-	bool charging = Charging();
-	uint8_t battery = Battery();
+	const bool charging = Charging();
+	const uint8_t battery = Battery();
 
 	// cache
-	bool usb = UsbConnected();
-	bool bluetooth = BluetoothConnected();
+	const bool usb = UsbConnected();
+	const bool bluetooth = BluetoothConnected();
 
-	ConnectionType preferredConnection = Program::settings.preferredConnection;
-	bool useUsb = usb && (preferredConnection == ConnectionType(ConnectionType::usb) || !bluetooth);
-	bool useBluetooth = bluetooth && (preferredConnection == ConnectionType(ConnectionType::bluetooth)|| !usb);
+	const ConnectionType preferredConnection = Program::settings.preferredConnection;
+	const bool useUsb = usb && (preferredConnection == ConnectionType(ConnectionType::usb) || !bluetooth);
+	const bool useBluetooth = bluetooth && (preferredConnection == ConnectionType(ConnectionType::bluetooth)|| !usb);
 
 	DataReceived = false;
 
@@ -505,13 +537,13 @@ void Ds4Device::Run()
 		}
 	}
 
-	float lx = Input.GetAxis(Ds4Axis::LeftStickX, nullptr);
-	float ly = Input.GetAxis(Ds4Axis::LeftStickY, nullptr);
-	auto ls   = static_cast<float>(std::sqrt(lx * lx + ly * ly));
+	const float lx = Input.GetAxis(Ds4Axis::LeftStickX, nullptr);
+	const float ly = Input.GetAxis(Ds4Axis::LeftStickY, nullptr);
+	const auto  ls = static_cast<float>(std::sqrt(lx * lx + ly * ly));
 
-	float rx = Input.GetAxis(Ds4Axis::RightStickX, nullptr);
-	float ry = Input.GetAxis(Ds4Axis::RightStickY, nullptr);
-	auto rs   = static_cast<float>(std::sqrt(rx * rx + ry * ry));
+	const float rx = Input.GetAxis(Ds4Axis::RightStickX, nullptr);
+	const float ry = Input.GetAxis(Ds4Axis::RightStickY, nullptr);
+	const auto  rs = static_cast<float>(std::sqrt(rx * rx + ry * ry));
 
 	// TODO: gyro/accel
 	if (Input.ButtonsChanged || Input.HeldButtons != 0
@@ -593,12 +625,8 @@ void Ds4Device::ControllerThread()
 
 	while (Connected())
 	{
-		lock(sync);
 		Run();
 	}
-
-	Close();
-	OnDeviceClosed();
 }
 
 void Ds4Device::OnDeviceClosed()
@@ -608,9 +636,9 @@ void Ds4Device::OnDeviceClosed()
 
 void Ds4Device::Start()
 {
-	if (ioThread == nullptr)
+	if (deviceThread == nullptr)
 	{
-		ioThread = std::make_unique<std::thread>(&Ds4Device::ControllerThread, this);
+		deviceThread = std::make_unique<std::thread>(&Ds4Device::ControllerThread, this);
 	}
 }
 

@@ -6,6 +6,7 @@
 #include "program.h"
 #include <shellapi.h>
 #include "Ds4Device.h"
+#include <iomanip>
 
 bool Ds4DeviceManager::IsDs4(const hid::HidInstance& hid)
 {
@@ -146,11 +147,12 @@ void Ds4DeviceManager::Close()
 {
 	lock(devices);
 
-	for (auto& pair : devices)
+	/*for (auto& pair : devices)
 	{
 		pair.second->Close();
-	}
+	}*/
 
+	// shared_ptr will run the destructors and cause all the devices to close
 	devices.clear();
 }
 

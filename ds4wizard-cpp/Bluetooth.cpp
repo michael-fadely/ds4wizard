@@ -4,7 +4,7 @@
 #include <BluetoothAPIs.h>
 #include <Bthioctl.h>
 
-bool Bluetooth::DisconnectDevice(gsl::span<uint8_t> macAddress)
+bool Bluetooth::DisconnectDevice(const gsl::span<uint8_t>& macAddress)
 {
 	bool result = false;
 

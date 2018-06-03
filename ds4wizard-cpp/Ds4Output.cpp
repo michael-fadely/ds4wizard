@@ -2,7 +2,7 @@
 #include "ScpDevice.h"
 #include "Ds4Output.h"
 
-bool Ds4Output::Update(gsl::span<uint8_t> buffer, int n) const
+bool Ds4Output::Update(const gsl::span<uint8_t>& buffer, int n) const
 {
 	int i = n;
 

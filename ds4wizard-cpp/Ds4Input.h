@@ -31,7 +31,7 @@ private:
 	void _addButton(uint8_t pressed, Ds4Buttons_t buttons);
 
 public:
-	void Update(gsl::span<uint8_t> buffer, int i);
+	void Update(const gsl::span<uint8_t>& buffer, int i);
 	void UpdateChangedState();
 	void ToXInput(int index, std::unique_ptr<ScpDevice>& device);
 	float GetAxis(Ds4Axis_t axis, AxisPolarity* polarity) const;

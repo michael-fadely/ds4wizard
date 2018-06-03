@@ -17,9 +17,9 @@ class DeviceProfileCache
 
 
 public:
-	std::mutex profile_lock;
-	std::mutex deviceSettings_lock;
-	std::mutex devices_lock;
+	std::recursive_mutex profile_lock;
+	std::recursive_mutex deviceSettings_lock;
+	std::recursive_mutex devices_lock;
 	std::list<DeviceProfile> Profiles;
 
 	// TODO

@@ -26,7 +26,7 @@ struct ScpVibration
 
 class ScpDevice
 {
-	inline static std::mutex portLock_lock;
+	inline static std::recursive_mutex portLock_lock;
 
 	// HACK: This is prone to failure. Probably better to use integers.
 	/// <summary>

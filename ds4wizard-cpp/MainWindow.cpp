@@ -38,6 +38,7 @@ MainWindow::MainWindow(QWidget* parent)
 
 MainWindow::~MainWindow()
 {
+	deviceManager.Close();
 	delete trayIcon;
 }
 

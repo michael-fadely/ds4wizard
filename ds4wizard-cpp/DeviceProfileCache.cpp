@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "DeviceProfileCache.h"
+#include "lock.h"
 
 void DeviceProfileCache::Load()
 {
@@ -14,14 +15,14 @@ std::unique_ptr<DeviceProfile> DeviceProfileCache::GetProfile(const std::string&
 		return {};
 	}
 
-	std::lock_guard<std::mutex> guard(profile_lock);
+	lock(profile);
 
 	return FindProfile(profileName);
 }
 
 std::unique_ptr<DeviceSettings> DeviceProfileCache::GetSettings(const std::string& id)
 {
-	std::lock_guard<std::mutex> guard(deviceSettings_lock);
+	lock(deviceSettings);
 	const auto it = deviceSettings.find(id);
 
 	if (it == deviceSettings.end())
@@ -34,7 +35,7 @@ std::unique_ptr<DeviceSettings> DeviceProfileCache::GetSettings(const std::strin
 
 void DeviceProfileCache::SaveSettings(const std::string& id, const DeviceSettings& settings)
 {
-	std::lock_guard<std::mutex> guard(deviceSettings_lock);
+	lock(deviceSettings);
 
 	const auto it = deviceSettings.find(id);
 
@@ -67,7 +68,7 @@ void DeviceProfileCache::SaveSettings(const std::string& id, const DeviceSetting
 void DeviceProfileCache::RemoveProfile(const DeviceProfile& profile)
 {
 	{
-		std::lock_guard<std::mutex> guard(profile_lock);
+		lock(profile);
 		Profiles.remove(profile);
 	}
 
@@ -89,7 +90,7 @@ void DeviceProfileCache::RemoveProfile(const DeviceProfile& profile)
 void DeviceProfileCache::UpdateProfile(const DeviceProfile& last, const DeviceProfile& current)
 {
 	{
-		std::lock_guard<std::mutex> guard(profile_lock);
+		lock(profile);
 		Profiles.remove(last);
 		Profiles.push_back(current);
 	}
@@ -97,7 +98,7 @@ void DeviceProfileCache::UpdateProfile(const DeviceProfile& last, const DevicePr
 	OnProfileChanged(last.Name, current.Name);
 
 	{
-		std::lock_guard<std::mutex> guard(profile_lock);
+		lock(profile);
 		if (!filesystem::directory_exists(Program::profilesPath().toStdString()))
 		{
 			filesystem::create_directory(Program::profilesPath().toStdString());
@@ -142,7 +143,7 @@ std::unique_ptr<DeviceProfile> DeviceProfileCache::FindProfile(const std::string
 void DeviceProfileCache::LoadImpl()
 {
 	{
-		std::lock_guard<std::mutex> guard(profile_lock);
+		lock(profile);
 		Profiles.clear();
 
 		QDir dir(Program::profilesPath());
@@ -157,7 +158,7 @@ void DeviceProfileCache::LoadImpl()
 	}
 
 	{
-		std::lock_guard<std::mutex> guard(deviceSettings_lock);
+		lock(deviceSettings);
 		deviceSettings.clear();
 
 		QFile devicesFile(Program::devicesFilePath());
@@ -190,7 +191,7 @@ void DeviceProfileCache::OnProfileChanged(const std::string& oldName, const std:
 	// TODO
 #if 0
 	{
-		std::lock_guard<std::mutex> guard(devices_lock);
+		lock(devices);
 
 		foreach(Ds4Device device in devices.Enumerate().Where(device = > device.Settings.Profile == oldName))
 		{

@@ -14,7 +14,7 @@
 
 /*partial TODO*/ class Ds4Device
 {
-	std::mutex sync_lock;
+	std::recursive_mutex sync_lock;
 
 	// Read-Only
 	Stopwatch idleTime {};
@@ -37,7 +37,7 @@ public:
 	bool      DataReceived = false;
 
 private:
-	std::unique_ptr<std::thread> ioThread = nullptr;
+	std::unique_ptr<std::thread> deviceThread = nullptr;
 
 	// Devices
 	std::unique_ptr<ScpDevice> scpDevice = nullptr;
@@ -83,6 +83,7 @@ public:
 	const std::string& Name() const;
 
 	explicit Ds4Device(hid::HidInstance& device);
+	~Ds4Device();
 
 	void SaveSettings();
 
