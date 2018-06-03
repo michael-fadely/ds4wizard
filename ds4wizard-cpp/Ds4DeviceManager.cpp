@@ -61,7 +61,7 @@ void Ds4DeviceManager::FindControllers()
 
 				std::wstringstream serialString;
 
-				serialString << std::setw(2) << std::setfill('0') << std::hex
+				serialString << std::setw(2) << std::setfill(L'0') << std::hex
 					<< buffer[6] << buffer[5] << buffer[4] << buffer[3] << buffer[2] << buffer[1];
 
 				hid.serial_string = serialString.str();
@@ -84,36 +84,37 @@ void Ds4DeviceManager::FindControllers()
 		{
 			lock(devices);
 
-			const auto it                     = devices.find(hid.serial_string);
+			const auto it = devices.find(hid.serial_string);
 			std::shared_ptr<Ds4Device> device = nullptr;
 
 			if (it != devices.end())
 			{
 				QueueDeviceToggle(hid.instance_id);
 				device = std::make_shared<Ds4Device>(hid);
-				//device.DeviceClosed += OnDs4DeviceClosed; // TODO
+				//device->DeviceClosed += OnDs4DeviceClosed; // TODO
 
 				//OnDeviceOpened(new DeviceOpenedEventArgs(device, true)); // TODO
-				device.Start();
+				device->Start();
 
-				devices[device.SafeMacAddress] = device;
+				auto& safe = device->SafeMacAddress;
+				devices[std::wstring(safe.begin(), safe.end())] = device;
 			}
 			else
 			{
 				if (isBluetooth)
 				{
-					if (!device.BluetoothConnected)
+					if (!device->BluetoothConnected())
 					{
 						QueueDeviceToggle(hid.instance_id);
-						device.OpenBluetoothDevice(hid);
+						device->OpenBluetoothDevice(hid);
 					}
 				}
 				else
 				{
-					if (!device.UsbConnected)
+					if (!device->UsbConnected())
 					{
 						QueueDeviceToggle(hid.instance_id);
-						device.OpenUsbDevice(hid);
+						device->OpenUsbDevice(hid);
 					}
 				}
 
@@ -224,7 +225,7 @@ void Ds4DeviceManager::ToggleDevice(const std::wstring& instanceId)
 		throw std::runtime_error(message.str());
 	}
 
-	// Apply the changes, disabling the device.
+	// Apply the changes, disabling the device->
 	success = SetupDiCallClassInstaller(DIF_PROPERTYCHANGE, devInfoSet, &devInfoData);
 
 	if (!success)
@@ -256,7 +257,7 @@ void Ds4DeviceManager::ToggleDevice(const std::wstring& instanceId)
 		throw std::runtime_error(message.str());
 	}
 
-	// Apply the changes, enabling the device.
+	// Apply the changes, enabling the device->
 	success = SetupDiCallClassInstaller(DIF_PROPERTYCHANGE, devInfoSet, &devInfoData);
 
 	if (!success)

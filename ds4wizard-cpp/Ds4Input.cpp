@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "Ds4Input.h"
 
-void Ds4Input::_addButton(uint8_t pressed, Ds4Buttons::T buttons)
+void Ds4Input::_addButton(uint8_t pressed, Ds4Buttons_t buttons)
 {
 	if (pressed != 0)
 	{
@@ -11,7 +11,7 @@ void Ds4Input::_addButton(uint8_t pressed, Ds4Buttons::T buttons)
 
 void Ds4Input::Update(gsl::span<uint8_t> buffer, int i)
 {
-	Ds4Buttons::T lastDpad = HeldButtons & (Ds4Buttons::Up | Ds4Buttons::Down | Ds4Buttons::Left | Ds4Buttons::Right);
+	Ds4Buttons_t lastDpad = HeldButtons & (Ds4Buttons::Up | Ds4Buttons::Down | Ds4Buttons::Left | Ds4Buttons::Right);
 	HeldButtons = 0;
 
 	Data.LeftStick.X       = buffer[i + 0];
@@ -131,7 +131,7 @@ void Ds4Input::UpdateChangedState()
 	LastHeldButtons = HeldButtons;
 	ButtonsChanged  = ReleasedButtons != 0 || PressedButtons != 0;
 
-	const Ds4Buttons::T touchMask = Ds4Buttons::Touch1 | Ds4Buttons::Touch2 | Ds4Buttons::TouchButton;
+	const Ds4Buttons_t touchMask = Ds4Buttons::Touch1 | Ds4Buttons::Touch2 | Ds4Buttons::TouchButton;
 
 	TouchChanged = lastTouchFrame != Data.TouchFrame
 	               || (PressedButtons & touchMask) != 0
@@ -151,28 +151,28 @@ void Ds4Input::ToXInput(int index, std::unique_ptr<ScpDevice>& device)
 	lastGamepad = Gamepad;
 }
 
-float Ds4Input::GetAxis(Ds4Axis axis, AxisPolarity* polarity)
+float Ds4Input::GetAxis(Ds4Axis_t axis, AxisPolarity* polarity) const
 {
 	float result;
 
 	switch (axis)
 	{
 		case Ds4Axis::LeftStickX:
-			result = Math.Min(1.0f, (Data.LeftStick.X - 128).Clamp(-127, 127) / 127.0f);
-			result = result.Clamp(-1.0f, 1.0f);
+			result = std::min(1.0f, std::clamp(Data.LeftStick.X - 128, -127, 127) / 127.0f);
+			result = std::clamp(result, -1.0f, 1.0f);
 			break;
 		case Ds4Axis::LeftStickY:
-			result = -Math.Min(1.0f, (Data.LeftStick.Y - 128).Clamp(-127, 127) / 127.0f);
-			result = result.Clamp(-1.0f, 1.0f);
+			result = -std::min(1.0f, std::clamp(Data.LeftStick.Y - 128, -127, 127) / 127.0f);
+			result = std::clamp(result, -1.0f, 1.0f);
 			break;
 
 		case Ds4Axis::RightStickX:
-			result = Math.Min(1.0f, (Data.RightStick.X - 128).Clamp(-127, 127) / 127.0f);
-			result = result.Clamp(-1.0f, 1.0f);
+			result = std::min(1.0f, std::clamp(Data.RightStick.X - 128, -127, 127) / 127.0f);
+			result = std::clamp(result, -1.0f, 1.0f);
 			break;
 		case Ds4Axis::RightStickY:
-			result = -Math.Min(1.0f, (Data.RightStick.Y - 128).Clamp(-127, 127) / 127.0f);
-			result = result.Clamp(-1.0f, 1.0f);
+			result = -std::min(1.0f, std::clamp(Data.RightStick.Y - 128, -127, 127) / 127.0f);
+			result = std::clamp(result, -1.0f, 1.0f);
 			break;
 
 		case Ds4Axis::LeftTrigger:
@@ -183,23 +183,23 @@ float Ds4Input::GetAxis(Ds4Axis axis, AxisPolarity* polarity)
 			break;
 
 		case Ds4Axis::AccelX:
-			result = (Data.Accel.X / (short.MaxValue + 1.0f)).Clamp(0.0f, 1.0f);
+			result = std::clamp(Data.Accel.X / (std::numeric_limits<short>::max() + 1.0f), 0.0f, 1.0f);
 			break;
 		case Ds4Axis::AccelY:
-			result = (Data.Accel.Y / (short.MaxValue + 1.0f)).Clamp(0.0f, 1.0f);
+			result = std::clamp(Data.Accel.Y / (std::numeric_limits<short>::max() + 1.0f), 0.0f, 1.0f);
 			break;
 		case Ds4Axis::AccelZ:
-			result = (Data.Accel.Z / (short.MaxValue + 1.0f)).Clamp(0.0f, 1.0f);
+			result = std::clamp(Data.Accel.Z / (std::numeric_limits<short>::max() + 1.0f), 0.0f, 1.0f);
 			break;
 
 		case Ds4Axis::GyroX:
-			result = (Data.Gyro.X / (short.MaxValue + 1.0f)).Clamp(0.0f, 1.0f);
+			result = std::clamp(Data.Gyro.X / (std::numeric_limits<short>::max() + 1.0f), 0.0f, 1.0f);
 			break;
 		case Ds4Axis::GyroY:
-			result = (Data.Gyro.Y / (short.MaxValue + 1.0f)).Clamp(0.0f, 1.0f);
+			result = std::clamp(Data.Gyro.Y / (std::numeric_limits<short>::max() + 1.0f), 0.0f, 1.0f);
 			break;
 		case Ds4Axis::GyroZ:
-			result = (Data.Gyro.Z / (short.MaxValue + 1.0f)).Clamp(0.0f, 1.0f);
+			result = std::clamp(Data.Gyro.Z / (std::numeric_limits<short>::max() + 1.0f), 0.0f, 1.0f);
 			break;
 
 		default:

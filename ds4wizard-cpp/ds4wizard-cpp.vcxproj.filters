@@ -152,9 +152,6 @@
     <ClInclude Include="lerp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="clamp.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="AxisOptions.h">
       <Filter>Header Files</Filter>
     </ClInclude>

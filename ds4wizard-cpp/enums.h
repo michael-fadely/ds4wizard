@@ -7,11 +7,13 @@ struct InputType
 	enum T
 	{
 		None,
-		Button = 1 << 0,
-		Axis = 1 << 1,
+		Button      = 1 << 0,
+		Axis        = 1 << 1,
 		TouchRegion = 1 << 2
 	};
 };
+
+using InputType_t = uint32_t;
 
 enum class AxisPolarity
 {
@@ -39,11 +41,13 @@ struct OutputType // TODO: vjoy output support
 	enum T
 	{
 		None,
-		XInput = 1 << 0,
+		XInput   = 1 << 0,
 		Keyboard = 1 << 1,
-		Mouse = 1 << 2
+		Mouse    = 1 << 2
 	};
 };
+
+using OutputType_t = uint32_t;
 
 enum class DeadZoneMode
 {
@@ -54,29 +58,33 @@ enum class DeadZoneMode
 
 struct XInputAxis
 {
-	enum T
+	enum T : uint32_t
 	{
 		None,
-		LeftStickX = 1 << 0,
-		LeftStickY = 1 << 1,
-		RightStickX = 1 << 2,
-		RightStickY = 1 << 3,
-		LeftTrigger = 1 << 4,
+		LeftStickX   = 1 << 0,
+		LeftStickY   = 1 << 1,
+		RightStickX  = 1 << 2,
+		RightStickY  = 1 << 3,
+		LeftTrigger  = 1 << 4,
 		RightTrigger = 1 << 5
 	};
 };
 
+using XInputAxis_t = uint32_t;
+
 struct Direction
 {
-	enum T
+	enum T : uint32_t
 	{
 		None,
-		Up = 1 << 0,
-		Down = 1 << 1,
-		Left = 1 << 2,
+		Up    = 1 << 0,
+		Down  = 1 << 1,
+		Left  = 1 << 2,
 		Right = 1 << 3
 	};
 };
+
+using Direction_t = uint32_t;
 
 enum class Hat
 {
@@ -114,21 +122,26 @@ enum class PressedState
 	Released
 };
 
-enum class Ds4Axis : uint32_t
+struct Ds4Axis
 {
-	LeftStickX   = 1 << 0,
-	LeftStickY   = 1 << 1,
-	RightStickX  = 1 << 2,
-	RightStickY  = 1 << 3,
-	LeftTrigger  = 1 << 4,
-	RightTrigger = 1 << 5,
-	AccelX       = 1 << 6,
-	AccelY       = 1 << 7,
-	AccelZ       = 1 << 8,
-	GyroX        = 1 << 9,
-	GyroY        = 1 << 10,
-	GyroZ        = 1 << 11
+	enum T : uint32_t
+	{
+		LeftStickX   = 1 << 0,
+		LeftStickY   = 1 << 1,
+		RightStickX  = 1 << 2,
+		RightStickY  = 1 << 3,
+		LeftTrigger  = 1 << 4,
+		RightTrigger = 1 << 5,
+		AccelX       = 1 << 6,
+		AccelY       = 1 << 7,
+		AccelZ       = 1 << 8,
+		GyroX        = 1 << 9,
+		GyroY        = 1 << 10,
+		GyroZ        = 1 << 11
+	};
 };
+
+using Ds4Axis_t = uint32_t;
 
 struct Ds4Extensions
 {
@@ -140,3 +153,5 @@ struct Ds4Extensions
 		Unknown    = 1 << 3
 	};
 };
+
+using Ds4Extensions_t = uint8_t;

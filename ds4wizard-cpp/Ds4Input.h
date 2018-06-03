@@ -10,12 +10,12 @@
 class Ds4Input
 {
 public:
-	Ds4Buttons::T HeldButtons; // TODO: private set
-	Ds4Buttons::T PressedButtons; // TODO: private set
-	Ds4Buttons::T ReleasedButtons; // TODO: private set
+	Ds4Buttons_t HeldButtons = 0; // TODO: private set
+	Ds4Buttons_t PressedButtons = 0; // TODO: private set
+	Ds4Buttons_t ReleasedButtons = 0; // TODO: private set
 
 private:
-	Ds4Buttons::T LastHeldButtons;
+	Ds4Buttons_t LastHeldButtons = 0;
 
 public:
 	bool ButtonsChanged = false; // TODO: private set
@@ -28,11 +28,11 @@ private:
 	XInputGamepad lastGamepad {};
 	uint8_t lastTouchFrame {};
 
-	void _addButton(uint8_t pressed, Ds4Buttons::T buttons);
+	void _addButton(uint8_t pressed, Ds4Buttons_t buttons);
 
 public:
 	void Update(gsl::span<uint8_t> buffer, int i);
 	void UpdateChangedState();
 	void ToXInput(int index, std::unique_ptr<ScpDevice>& device);
-	float GetAxis(Ds4Axis axis, AxisPolarity* polarity);
+	float GetAxis(Ds4Axis_t axis, AxisPolarity* polarity) const;
 };

@@ -156,7 +156,6 @@
     <ClInclude Include="AxisOptions.h" />
     <ClInclude Include="Bluetooth.h" />
     <ClInclude Include="busenum.h" />
-    <ClInclude Include="clamp.h" />
     <ClInclude Include="DeviceIdleOptions.h" />
     <ClInclude Include="DeviceProfile.h" />
     <ClInclude Include="DeviceProfileCache.h" />

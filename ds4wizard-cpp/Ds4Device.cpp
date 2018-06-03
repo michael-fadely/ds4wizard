@@ -142,13 +142,15 @@ void Ds4Device::ApplyProfile()
 	if (usbDevice != nullptr && (!UsbConnected() || usbDevice->is_exclusive() != Profile.ExclusiveMode))
 	{
 		CloseUsbDevice();
-		OpenUsbDevice(usbDevice);
+		hid::HidInstance inst = std::move(*usbDevice);
+		OpenUsbDevice(inst);
 	}
 
 	if (bluetoothDevice != nullptr && (!BluetoothConnected() || bluetoothDevice->is_exclusive() != Profile.ExclusiveMode))
 	{
 		CloseBluetoothDevice();
-		OpenBluetoothDevice(bluetoothDevice);
+		hid::HidInstance inst = std::move(*bluetoothDevice);
+		OpenBluetoothDevice(inst);
 	}
 
 	idleTime.start();
@@ -300,23 +302,18 @@ void Ds4Device::CloseUsbDevice()
 	idleTime.start();
 }
 
-bool Ds4Device::OpenDevice(std::unique_ptr<hid::HidInstance>& device, bool exclusive)
+bool Ds4Device::OpenDevice(hid::HidInstance& device, bool exclusive)
 {
-	if (device->open((exclusive ? hid::HidOpenFlags::exclusive : 0) | hid::HidOpenFlags::async))
+	if (device.open((exclusive ? hid::HidOpenFlags::exclusive : 0) | hid::HidOpenFlags::async))
 	{
 		return true;
 	}
 
-	return exclusive && device->open(hid::HidOpenFlags::async);
+	return exclusive && device.open(hid::HidOpenFlags::async);
 }
 
-void Ds4Device::OpenBluetoothDevice(std::unique_ptr<hid::HidInstance>& device)
+void Ds4Device::OpenBluetoothDevice(hid::HidInstance& device)
 {
-	if (device == nullptr)
-	{
-		return;
-	}
-
 	lock(sync);
 	{
 		if (BluetoothConnected())
@@ -330,7 +327,7 @@ void Ds4Device::OpenBluetoothDevice(std::unique_ptr<hid::HidInstance>& device)
 			return;
 		}
 
-		if (Profile.ExclusiveMode && !device->is_exclusive())
+		if (Profile.ExclusiveMode && !device.is_exclusive())
 		{
 			//Logger.WriteLine(LogLevel.Warning, Name, Resources.BluetoothExclusiveOpenFailed); // TODO
 		}
@@ -339,7 +336,7 @@ void Ds4Device::OpenBluetoothDevice(std::unique_ptr<hid::HidInstance>& device)
 			//Logger.WriteLine(LogLevel.Info, Name, Resources.BluetoothConnected); // TODO
 		}
 
-		bluetoothDevice = std::move(device);
+		bluetoothDevice = std::make_unique<hid::HidInstance>(std::move(device));
 
 		// Enables Bluetooth operational mode which makes
 		// the controller send report id 17 (0x11)
@@ -356,13 +353,8 @@ void Ds4Device::OpenBluetoothDevice(std::unique_ptr<hid::HidInstance>& device)
 	}
 }
 
-void Ds4Device::OpenUsbDevice(std::unique_ptr<hid::HidInstance>& device)
+void Ds4Device::OpenUsbDevice(hid::HidInstance& device)
 {
-	if (device == nullptr)
-	{
-		return;
-	}
-
 	lock(sync);
 	{
 		if (UsbConnected())
@@ -376,7 +368,7 @@ void Ds4Device::OpenUsbDevice(std::unique_ptr<hid::HidInstance>& device)
 			return;
 		}
 
-		if (Profile.ExclusiveMode && !device->is_exclusive())
+		if (Profile.ExclusiveMode && !device.is_exclusive())
 		{
 			//Logger.WriteLine(LogLevel.Warning, Name, Resources.UsbExclusiveOpenFailed); // TODO
 		}
@@ -385,7 +377,7 @@ void Ds4Device::OpenUsbDevice(std::unique_ptr<hid::HidInstance>& device)
 			//Logger.WriteLine(LogLevel.Info, Name, Resources.UsbConnected); // TODO
 		}
 
-		usbDevice = std::move(device);
+		usbDevice = std::make_unique<hid::HidInstance>(std::move(device));
 		SetupUsbOutputBuffer();
 	}
 }
@@ -459,7 +451,7 @@ void Ds4Device::Run()
 	if (activeLight.IdleFade)
 	{
 		Ds4LightOptions l = Settings.UseProfileLight ? Profile.Light : Settings.Light;
-		double m = IsIdle ? 1.0 : clamp(duration_cast<milliseconds>(idleTime.elapsed()).count() / static_cast<double>(duration_cast<milliseconds>(IdleTimeout()).count()), 0.0, 1.0);
+		double m = IsIdle ? 1.0 : std::clamp(duration_cast<milliseconds>(idleTime.elapsed()).count() / static_cast<double>(duration_cast<milliseconds>(IdleTimeout()).count()), 0.0, 1.0);
 
 		Output.LightColor = Ds4Color::Lerp(l.Color, fadeColor, static_cast<float>(m));
 	}

@@ -1,8 +1,10 @@
 #pragma once
 
+#include <cstdint>
+
 struct Ds4Buttons
 {
-	enum T
+	enum T : uint32_t
 	{
 		Square      = 1 << 0,
 		Cross       = 1 << 1,
@@ -26,3 +28,5 @@ struct Ds4Buttons
 		Right       = 1 << 19
 	};
 };
+
+using Ds4Buttons_t = uint32_t;

@@ -7,6 +7,7 @@
 #include <iomanip>
 
 #include <hid_instance.h>
+#include "Ds4Device.h"
 
 /* TODO
 class DeviceOpenedEventArgs

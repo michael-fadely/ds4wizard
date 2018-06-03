@@ -104,11 +104,11 @@ private:
 	void CloseBluetoothDevice();
 	void DisconnectBluetooth();
 	void CloseUsbDevice();
-	static bool OpenDevice(std::unique_ptr<hid::HidInstance>& device, bool exclusive);
+	static bool OpenDevice(hid::HidInstance& device, bool exclusive);
 
 public:
-	void OpenBluetoothDevice(std::unique_ptr<hid::HidInstance>& device);
-	void OpenUsbDevice(std::unique_ptr<hid::HidInstance>& device);
+	void OpenBluetoothDevice(hid::HidInstance& device);
+	void OpenUsbDevice(hid::HidInstance& device);
 
 private:
 	void SetupBluetoothOutputBuffer() const;
