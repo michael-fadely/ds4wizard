@@ -69,7 +69,7 @@ void DeviceProfileCache::RemoveProfile(const DeviceProfile& profile)
 {
 	{
 		lock(profile);
-		Profiles.remove(profile);
+		profiles.remove(profile);
 	}
 
 	OnProfileChanged(profile.Name, nullptr);
@@ -91,8 +91,8 @@ void DeviceProfileCache::UpdateProfile(const DeviceProfile& last, const DevicePr
 {
 	{
 		lock(profile);
-		Profiles.remove(last);
-		Profiles.push_back(current);
+		profiles.remove(last);
+		profiles.push_back(current);
 	}
 
 	OnProfileChanged(last.Name, current.Name);
@@ -128,7 +128,7 @@ std::unique_ptr<DeviceProfile> DeviceProfileCache::FindProfile(const std::string
 	/*return Profiles.FirstOrDefault(x => x.FileName.Equals(profileName, StringComparison.InvariantCultureIgnoreCase)
 	                                   || x.Name.Equals(profileName, StringComparison.InvariantCultureIgnoreCase));*/
 
-	for (auto& profile : Profiles)
+	for (auto& profile : profiles)
 	{
 		// TODO: case insensitive
 		if (profile.FileName() == profileName || profile.Name == profileName)
@@ -144,7 +144,7 @@ void DeviceProfileCache::LoadImpl()
 {
 	{
 		lock(profile);
-		Profiles.clear();
+		profiles.clear();
 
 		QDir dir(Program::profilesPath());
 		if (dir.exists())

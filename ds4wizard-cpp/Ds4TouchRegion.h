@@ -20,6 +20,7 @@ enum class Ds4TouchRegionType
 	StickAutoCenter
 };
 
+// TODO: JsonData
 class Ds4TouchRegion
 {
 	/*[JsonIgnore]*/ Ds4Vector2 PointStart1 {};

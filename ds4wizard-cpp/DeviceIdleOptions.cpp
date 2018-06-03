@@ -22,6 +22,11 @@ bool DeviceIdleOptions::operator==(const DeviceIdleOptions& other) const
 	return Disconnect == other.Disconnect && Timeout == other.Timeout;
 }
 
+bool DeviceIdleOptions::operator!=(const DeviceIdleOptions& other) const
+{
+	return !(*this == other);
+}
+
 void DeviceIdleOptions::readJson(const QJsonObject& json)
 {
 	this->Timeout    = std::chrono::milliseconds(json["timeout"].toInt());

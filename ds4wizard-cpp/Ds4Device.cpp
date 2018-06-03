@@ -192,7 +192,7 @@ bool Ds4Device::ScpDeviceOpen()
 
 	if (info == nullptr)
 	{
-		//Logger.WriteLine(LogLevel.Warning, Resources.ScpVBusMissing); // TODO
+		// TODO: Logger.WriteLine(LogLevel.Warning, Resources.ScpVBusMissing);
 		return false;
 	}
 
@@ -201,7 +201,7 @@ bool Ds4Device::ScpDeviceOpen()
 
 	if (handle == INVALID_HANDLE_VALUE || handle == nullptr)
 	{
-		//Logger.WriteLine(LogLevel.Warning, Resources.ScpVBusOpenFailed); // TODO
+		// TODO: Logger.WriteLine(LogLevel.Warning, Resources.ScpVBusOpenFailed);
 		return false;
 	}
 
@@ -236,7 +236,7 @@ bool Ds4Device::ScpDeviceOpen()
 
 	if (!ok)
 	{
-		//Logger.WriteLine(LogLevel.Warning, Resources.XInputCreateFailed); // TODO
+		// TODO: Logger.WriteLine(LogLevel.Warning, Resources.XInputCreateFailed);
 		return false;
 	}
 
@@ -380,11 +380,11 @@ void Ds4Device::OpenBluetoothDevice(hid::HidInstance& device)
 
 		if (Profile.ExclusiveMode && !device.is_exclusive())
 		{
-			//Logger.WriteLine(LogLevel.Warning, Name, Resources.BluetoothExclusiveOpenFailed); // TODO
+			// TODO: Logger.WriteLine(LogLevel.Warning, Name, Resources.BluetoothExclusiveOpenFailed);
 		}
 		else
 		{
-			//Logger.WriteLine(LogLevel.Info, Name, Resources.BluetoothConnected); // TODO
+			// TODO: Logger.WriteLine(LogLevel.Info, Name, Resources.BluetoothConnected);
 		}
 
 		bluetoothDevice = std::make_unique<hid::HidInstance>(std::move(device));
@@ -421,11 +421,11 @@ void Ds4Device::OpenUsbDevice(hid::HidInstance& device)
 
 		if (Profile.ExclusiveMode && !device.is_exclusive())
 		{
-			//Logger.WriteLine(LogLevel.Warning, Name, Resources.UsbExclusiveOpenFailed); // TODO
+			// TODO: Logger.WriteLine(LogLevel.Warning, Name, Resources.UsbExclusiveOpenFailed);
 		}
 		else
 		{
-			//Logger.WriteLine(LogLevel.Info, Name, Resources.UsbConnected); // TODO
+			// TODO: Logger.WriteLine(LogLevel.Info, Name, Resources.UsbConnected);
 		}
 
 		usbDevice = std::make_unique<hid::HidInstance>(std::move(device));
@@ -562,17 +562,17 @@ void Ds4Device::Run()
 	else if (DisconnectOnIdle() && useBluetooth && IsIdle())
 	{
 		DisconnectBluetooth();
-		//Logger.WriteLine(LogLevel.Info, Name, std::string.Format(Resources.IdleDisconnect, IdleTimeout)); // TODO
+		// TODO: Logger.WriteLine(LogLevel.Info, Name, std::string.Format(Resources.IdleDisconnect, IdleTimeout));
 	}
 
 	if (DataReceived)
 	{
-		//RunMaps(); // TODO
+		// TODO: RunMaps();
 
 		if (Latency.elapsed() >= 5ms)
 		{
 			// TODO: configurable latency target & light flash (although that increases latency on send)
-			//Debug.WriteLine($"{Latency.Elapsed.TotalMilliseconds} ms"); // TODO
+			// TODO: Debug.WriteLine($"{Latency.Elapsed.TotalMilliseconds} ms");
 		}
 
 		Latency.start();
@@ -620,7 +620,7 @@ void Ds4Device::Run()
 	else
 	{
 		Input.UpdateChangedState();
-		//RunPersistent(); // TODO
+		// TODO: RunPersistent();
 		std::this_thread::sleep_for(1ms);
 	}
 }
@@ -642,7 +642,7 @@ void Ds4Device::ControllerThread()
 
 void Ds4Device::OnDeviceClosed()
 {
-	//DeviceClosed.Invoke(this, EventArgs.Empty); // TODO
+	// TODO: DeviceClosed.Invoke(this, EventArgs.Empty);
 }
 
 void Ds4Device::Start()
@@ -656,5 +656,5 @@ void Ds4Device::Start()
 
 void Ds4Device::OnBatteryLevelChanged()
 {
-	//BatteryLevelChanged.Invoke(this, EventArgs.Empty); // TODO
+	// TODO: BatteryLevelChanged.Invoke(this, EventArgs.Empty);
 }

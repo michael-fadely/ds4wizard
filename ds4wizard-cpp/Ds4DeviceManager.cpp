@@ -61,7 +61,7 @@ void Ds4DeviceManager::FindControllers()
 
 				if (!hid.get_feature(buffer))
 				{
-					throw /*std::runtime_error(std::wstring.Format(Resources.DeviceReadMACFailed, hid.path)) // TODO */;
+					throw /* TODO std::runtime_error(std::wstring.Format(Resources.DeviceReadMACFailed, hid.path)) */;
 				}
 
 				hid.serial =
@@ -80,13 +80,13 @@ void Ds4DeviceManager::FindControllers()
 
 			if (hid.serial_string.empty())
 			{
-				throw /*std::runtime_error(std::wstring.Format(Resources.DeviceReturnedEmptyMAC, hid.Path)) // TODO */;
+				throw /* TODO std::runtime_error(std::wstring.Format(Resources.DeviceReturnedEmptyMAC, hid.Path)) */;
 			}
 		}
 		catch (const std::exception&)
 		{
 			// TODO: proper HID exceptions
-			//Logger.WriteLine(LogLevel.Warning, $"Failed to read device metadata: {ex.Message}"); // TODO
+			// TODO: Logger.WriteLine(LogLevel.Warning, $"Failed to read device metadata: {ex.Message}");
 			hid.close();
 			return false;
 		}
@@ -102,9 +102,9 @@ void Ds4DeviceManager::FindControllers()
 			{
 				QueueDeviceToggle(hid.instance_id);
 				device = std::make_shared<Ds4Device>(hid);
-				//device->DeviceClosed += OnDs4DeviceClosed; // TODO
+				// TODO: device->DeviceClosed += OnDs4DeviceClosed
 
-				//OnDeviceOpened(new DeviceOpenedEventArgs(device, true)); // TODO
+				// TODO: OnDeviceOpened(new DeviceOpenedEventArgs(device, true));
 				device->Start();
 
 				auto& safe = device->SafeMacAddress;
@@ -129,14 +129,14 @@ void Ds4DeviceManager::FindControllers()
 					}
 				}
 
-				//OnDeviceOpened(new DeviceOpenedEventArgs(device, false)); // TODO
+				// TODO: OnDeviceOpened(new DeviceOpenedEventArgs(device, false));
 			}
 		}
 		catch (const std::exception& ex)
 		{
 			qDebug() << ex.what();
 			// TODO: proper HID exceptions
-			//Logger.WriteLine(LogLevel.Error, $"Error while opening device: {ex.Message}"); // TODO
+			// TODO: Logger.WriteLine(LogLevel.Error, $"Error while opening device: {ex.Message}");
 		}
 
 		return false;

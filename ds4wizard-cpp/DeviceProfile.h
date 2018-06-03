@@ -6,22 +6,7 @@
 
 #include "DeviceSettingsCommon.h"
 #include "Ds4TouchRegion.h"
-
-// TODO
-struct InputMap
-{
-	int hi;
-	bool operator==(const InputMap& o) const { return false; }
-	bool operator!=(const InputMap& o) const { return false; }
-};
-
-// TODO
-struct InputModifier
-{
-	int hi;
-	bool operator==(const InputModifier& o) const { return false; }
-	bool operator!=(const InputModifier& o) const { return false; }
-};
+#include "InputMap.h"
 
 class DeviceProfile : public DeviceSettingsCommon, public JsonData
 {

@@ -20,7 +20,7 @@ public:
 	std::recursive_mutex profile_lock;
 	std::recursive_mutex deviceSettings_lock;
 	std::recursive_mutex devices_lock;
-	std::list<DeviceProfile> Profiles;
+	std::list<DeviceProfile> profiles;
 
 	// TODO
 	//event EventHandler Loaded;
@@ -71,10 +71,7 @@ public:
 
 private:
 	std::unique_ptr<DeviceProfile> FindProfile(const std::string& profileName);
-
 	void LoadImpl();
-
 	void OnLoaded() const;
-
 	void OnProfileChanged(const std::string& oldName, const std::string& newName) const;
 };

@@ -188,7 +188,7 @@ VBusStatus ScpDevice::SyncState(int userIndex)
 
 	writeBuffer[9] = 0x14;
 
-	gamepads[userIndex].ToBytes(writeBuffer.data(), 10);
+	gamepads[userIndex].toBytes(writeBuffer.data(), 10);
 
 	int flags = Version[0] < 17 ? 0x2A400C : 0x2AE010;
 	DWORD bytesReturned = 0;

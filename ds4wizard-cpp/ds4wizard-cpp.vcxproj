@@ -141,6 +141,7 @@
     <ClCompile Include="Ds4Output.cpp" />
     <ClCompile Include="Ds4TouchRegion.cpp" />
     <ClCompile Include="filesystem.cpp" />
+    <ClCompile Include="InputMap.cpp" />
     <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Pressable.cpp" />
@@ -152,6 +153,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Stopwatch.cpp" />
+    <ClCompile Include="XInputGamepad.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AxisOptions.h" />
@@ -174,6 +176,7 @@
     <ClInclude Include="Ds4TouchRegion.h" />
     <ClInclude Include="enums.h" />
     <ClInclude Include="filesystem.h" />
+    <ClInclude Include="InputMap.h" />
     <ClInclude Include="JsonData.h" />
     <ClInclude Include="ScpDevice.h" />
     <ClInclude Include="Stopwatch.h" />

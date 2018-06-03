@@ -5,77 +5,61 @@
 class AxisOptions
 {
 public:
-	float/* ? */ Multiplier = 1.0f;
-	AxisPolarity/* ?*/ Polarity = AxisPolarity::Positive;
+	float Multiplier      = 1.0f;
+	AxisPolarity Polarity = AxisPolarity::Positive;
 
 	AxisOptions() = default;
 
-	AxisOptions(AxisPolarity polarity)
-	{
-		Polarity = polarity;
-	}
+	explicit AxisOptions(AxisPolarity polarity);
+	AxisOptions(const AxisOptions& other);
 
-	AxisOptions(const AxisOptions& other)
-	{
-		Multiplier = other.Multiplier;
-		Polarity = other.Polarity;
-	}
-
-	bool operator==(const AxisOptions& other) const
-	{
-		return Multiplier == other.Multiplier && Polarity == other.Polarity;
-	}
+	bool operator==(const AxisOptions& other) const;
+	bool operator!=(const AxisOptions& other) const;
 };
 
 class InputAxisOptions : public AxisOptions
 {
 public:
-	bool Invert;
+	bool         Invert       = false;
 	DeadZoneMode DeadZoneMode = DeadZoneMode::Scale;
-	float DeadZone = 0.0f;
+	float        DeadZone     = 0.0f;
 
 	InputAxisOptions() = default;
+	explicit InputAxisOptions(AxisPolarity polarity);
+	InputAxisOptions(const InputAxisOptions& other);
 
-	InputAxisOptions(AxisPolarity polarity) : AxisOptions(polarity)
-	{
-	}
+	void ApplyDeadZone(float& analog) const;
 
-	InputAxisOptions(const InputAxisOptions& other) : AxisOptions(other)
-	{
-		Invert       = other.Invert;
-		DeadZoneMode = other.DeadZoneMode;
-		DeadZone     = other.DeadZone;
-	}
+	bool operator==(const InputAxisOptions& other) const;
+	bool operator!=(const InputAxisOptions& other) const;
 
-	bool operator==(const InputAxisOptions& other) const
-	{
-		return AxisOptions::operator==(other)
-			&& Invert == other.Invert
-			&& DeadZoneMode == other.DeadZoneMode
-			&& DeadZone == other.DeadZone;
-	}
+};
 
-	void ApplyDeadZone(float& analog) const
-	{
-		switch (DeadZoneMode::Scale)
-		{
-			case DeadZoneMode::HardLimit:
-				analog = analog >= DeadZone ? analog : 0.0f;
-				break;
+class XInputAxes
+{
+public:
+	XInputAxis_t Axes;
+	std::unordered_map<XInputAxis_t, AxisOptions> Options;
 
-			case DeadZoneMode::Scale:
-				analog = std::max(0.0f, (analog - DeadZone) / (1.0f - DeadZone));
-				break;
+	XInputAxes() = default;
+	XInputAxes(const XInputAxes& other);
 
-			default:
-				throw /*new ArgumentOutOfRangeException(nameof(DeadZoneMode), DeadZoneMode, "Invalid deadzone mode.")*/;
-		}
+	AxisOptions GetAxisOptions(XInputAxis::T axis);
 
-		if (Invert == true)
-		{
-			analog = 1.0f - analog;
-		}
+	bool operator==(const XInputAxes& other) const;
+	bool operator!=(const XInputAxes& other) const;
+};
 
-		analog *= Multiplier;
-	}
+class MouseAxes
+{
+public:
+	Direction_t Directions = 0;
+	std::unordered_map<Direction_t, AxisOptions> Options;
+
+	MouseAxes() = default;
+	MouseAxes(const MouseAxes& other);
+
+	AxisOptions GetAxisOptions(Direction_t axis);
+
+	bool operator==(const MouseAxes& other) const;
 };

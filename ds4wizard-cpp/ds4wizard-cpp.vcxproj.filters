@@ -77,6 +77,12 @@
     <ClCompile Include="Ds4AutoLightColor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="XInputGamepad.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="InputMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resource Files">
@@ -192,6 +198,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Ds4AutoLightColor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="InputMap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

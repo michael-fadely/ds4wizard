@@ -61,3 +61,8 @@ bool DeviceSettingsCommon::operator==(const DeviceSettingsCommon& other) const
 	       && NotifyFullyCharged == other.NotifyFullyCharged
 	       && NotifyBatteryLow == other.NotifyBatteryLow;
 }
+
+bool DeviceSettingsCommon::operator!=(const DeviceSettingsCommon& other) const
+{
+	return !(*this == other);
+}

@@ -20,6 +20,7 @@ struct DeviceIdleOptions : JsonData
 	DeviceIdleOptions(const DeviceIdleOptions& other);
 
 	bool operator==(const DeviceIdleOptions& other) const;
+	bool operator!=(const DeviceIdleOptions& other) const;
 	void readJson(const QJsonObject& json) override;
 	void writeJson(QJsonObject& json) const override;
 };

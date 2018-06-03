@@ -2,42 +2,35 @@
 #include <Xinput.h>
 #include <cstdint>
 
+struct XInputButtons
+{
+	enum T : uint16_t
+	{
+		DPadUp        = 0x0001,
+		DPadDown      = 0x0002,
+		DPadLeft      = 0x0004,
+		DPadRight     = 0x0008,
+		Start         = 0x0010,
+		Back          = 0x0020,
+		LeftThumb     = 0x0040,
+		RightThumb    = 0x0080,
+		LeftShoulder  = 0x0100,
+		RightShoulder = 0x0200,
+		Guide         = 0x0400,
+		Dummy         = 0x0800,
+		A             = 0x1000,
+		B             = 0x2000,
+		X             = 0x4000,
+		Y             = 0x8000,
+	};
+};
+
+using XInputButtons_t = uint16_t;
+
 struct XInputGamepad : XINPUT_GAMEPAD
 {
-	bool operator ==(const XInputGamepad& r) const
-	{
-		return wButtons == r.wButtons
-			&& bLeftTrigger == r.bLeftTrigger
-			&& bRightTrigger == r.bRightTrigger
-			&& sThumbLX == r.sThumbLX
-			&& sThumbLY == r.sThumbLY
-			&& sThumbRX == r.sThumbRX
-			&& sThumbRY == r.sThumbRY;
-	}
+	bool operator==(const XInputGamepad& r) const;
+	bool operator!=(const XInputGamepad& r) const;
 
-	bool operator !=(const XInputGamepad& r) const
-	{
-		return !(*this == r);
-	}
-
-	// TODO
-	void ToBytes(uint8_t* buffer, int offset)
-	{
-		buffer[offset + 0] = (uint8_t)((int)wButtons & 0xFF);
-		buffer[offset + 1] = (uint8_t)(((int)wButtons >> 8) & 0xFF);
-		buffer[offset + 2] = bLeftTrigger;
-		buffer[offset + 3] = bRightTrigger;
-
-		buffer[offset + 4] = (uint8_t)(sThumbLX & 0xFF);
-		buffer[offset + 5] = (uint8_t)((sThumbLX >> 8) & 0xFF);
-
-		buffer[offset + 6] = (uint8_t)(sThumbLY & 0xFF);
-		buffer[offset + 7] = (uint8_t)((sThumbLY >> 8) & 0xFF);
-
-		buffer[offset + 8] = (uint8_t)(sThumbRX & 0xFF);
-		buffer[offset + 9] = (uint8_t)((sThumbRX >> 8) & 0xFF);
-
-		buffer[offset + 10] = (uint8_t)(sThumbRY & 0xFF);
-		buffer[offset + 11] = (uint8_t)((sThumbRY >> 8) & 0xFF);
-	}
+	void toBytes(uint8_t* buffer, int offset) const;
 };
