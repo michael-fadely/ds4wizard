@@ -48,12 +48,35 @@ namespace hid
 		uint16_t version_number;
 	};
 
+	class Handle
+	{
+	public:
+		bool owner = false;
+		HANDLE nativeHandle = nullptr;
+
+		Handle() = default;
+		Handle(const Handle&) = default;
+
+		Handle(Handle&& rhs) noexcept;
+		Handle(HANDLE h, bool owner = false);
+		~Handle();
+
+		void close();
+
+		bool operator==(const Handle& rhs) const;
+		bool operator!=(const Handle& rhs) const;
+
+		Handle& operator=(const Handle&) = default;
+		Handle& operator=(Handle&& rhs) noexcept;
+
+		bool isValid() const;
+	};
+
 	class HidInstance
 	{
 		HidOpenFlags_t flags = 0;
 
-		// TODO: de-windowsify HANDLE
-		HANDLE handle = nullptr;
+		Handle handle = Handle(nullptr, true);
 
 		HidCaps caps_ {};
 		HidAttributes attributes_ {};

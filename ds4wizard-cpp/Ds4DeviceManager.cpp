@@ -35,6 +35,16 @@ void Ds4DeviceManager::FindControllers()
 
 	hid::enum_hid([&](hid::HidInstance& hid) -> bool
 	{
+		if (hid.attributes().vendor_id != Ds4VendorID)
+		{
+			return false;
+		}
+
+		if (std::find(Ds4ProductIDs.begin(), Ds4ProductIDs.end(), hid.attributes().product_id) == Ds4ProductIDs.end())
+		{
+			return false;
+		}
+
 		bool isBluetooth;
 
 		try
@@ -87,7 +97,7 @@ void Ds4DeviceManager::FindControllers()
 			const auto it = devices.find(hid.serial_string);
 			std::shared_ptr<Ds4Device> device = nullptr;
 
-			if (it != devices.end())
+			if (it == devices.end())
 			{
 				QueueDeviceToggle(hid.instance_id);
 				device = std::make_shared<Ds4Device>(hid);
@@ -121,8 +131,9 @@ void Ds4DeviceManager::FindControllers()
 				//OnDeviceOpened(new DeviceOpenedEventArgs(device, false)); // TODO
 			}
 		}
-		catch (const std::exception&)
+		catch (const std::exception& ex)
 		{
+			qDebug() << ex.what();
 			// TODO: proper HID exceptions
 			//Logger.WriteLine(LogLevel.Error, $"Error while opening device: {ex.Message}"); // TODO
 		}
@@ -171,8 +182,10 @@ void Ds4DeviceManager::ToggleDeviceElevated(const std::wstring& instanceId)
 	}*/
 
 	std::wstring currentProcess = QCoreApplication::applicationFilePath().toStdWString();
-	std::wstring params         = L"--toggle-device ";
+
+	std::wstring params = L"--toggle-device \"";
 	params.append(instanceId);
+	params.append(L"\"");
 
 	HINSTANCE hinst = ShellExecuteW(nullptr, L"runas",
 	                                currentProcess.c_str(), params.c_str(), nullptr, SW_SHOWDEFAULT);

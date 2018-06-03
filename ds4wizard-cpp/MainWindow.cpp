@@ -3,6 +3,7 @@
 #include "devicepropertiesdialog.h"
 #include "DeviceProfileCache.h"
 #include "program.h"
+#include "Ds4DeviceManager.h"
 
 MainWindow::MainWindow(QWidget* parent)
 	: QMainWindow(parent)
@@ -32,6 +33,7 @@ MainWindow::MainWindow(QWidget* parent)
 	registerDeviceNotification();
 
 	Program::ProfileCache.Load();
+	deviceManager.FindControllers();
 }
 
 MainWindow::~MainWindow()
@@ -116,18 +118,18 @@ bool MainWindow::nativeEvent(const QByteArray& eventType, void* message, long* r
 
 		// TODO
 
-		/*try
+		try
 		{
-			if (Ds4DeviceManager.IsDs4(devinterface->dbcc_name))
+			if (Ds4DeviceManager::IsDs4(devinterface->dbcc_name))
 			{
 				// TODO: pull required metadata (instance id) from device and open directly instead of re-scanning everything
-				Task.Run(() = > deviceManager.FindControllers());
+				deviceManager.FindControllers();
 			}
 		}
-		catch
+		catch (const std::exception&)
 		{
 			// HACK: ignored
-		}*/
+		}
 	}
 
 	return false;

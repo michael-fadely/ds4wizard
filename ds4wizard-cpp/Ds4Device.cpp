@@ -13,6 +13,7 @@
 #include "Bluetooth.h"
 #include "Ds4AutoLightColor.h"
 #include "ScpDevice.h"
+#include <locale>
 
 using namespace std::chrono;
 
@@ -67,17 +68,20 @@ Ds4Device::Ds4Device(hid::HidInstance& device)
 {
 	std::stringstream macAddress;
 
-	macAddress << std::hex << std::setw(2) << std::setfill('0') << device.serial[0];
+	macAddress << std::hex << std::uppercase << std::setw(2) << std::setfill('0')
+		<< static_cast<int>(device.serial[0]);
 
 	for (size_t i = 1; i < device.serial.size(); ++i)
 	{
-		macAddress << ':' << std::hex << std::setw(2) << std::setfill('0') << device.serial[i];
+		macAddress << ':' << std::hex << std::uppercase << std::setw(2) << std::setfill('0')
+			<< static_cast<int>(device.serial[i]);
 	}
 
 	MacAddress = macAddress.str();
 	SafeMacAddress = MacAddress;
 
 	SafeMacAddress.erase(std::remove(SafeMacAddress.begin(), SafeMacAddress.end(), ':'), SafeMacAddress.end());
+	std::transform(SafeMacAddress.begin(), SafeMacAddress.end(), SafeMacAddress.begin(), tolower);
 
 	if (device.caps().input_report_size != 64)
 	{

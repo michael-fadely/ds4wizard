@@ -2,6 +2,7 @@
 
 #include <QtWidgets/QMainWindow>
 #include "ui_mainwindow.h"
+#include "Ds4DeviceManager.h"
 
 class MainWindow : public QMainWindow
 {
@@ -14,6 +15,8 @@ public:
 	void changeEvent(QEvent* e) override;
 
 private:
+	Ds4DeviceManager deviceManager;
+
 	Ui::MainWindow ui;
 	bool supportsSystemTray = false;
 	QSystemTrayIcon* trayIcon = nullptr;

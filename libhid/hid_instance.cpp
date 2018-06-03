@@ -5,6 +5,57 @@
 
 using namespace hid;
 
+Handle::Handle(Handle&& rhs) noexcept
+{
+	*this = rhs;
+}
+
+Handle::Handle(HANDLE h, bool owner)
+{
+	nativeHandle = h;
+	this->owner = owner;
+}
+
+Handle::~Handle()
+{
+	close();
+}
+
+void Handle::close()
+{
+	if (owner && isValid())
+	{
+		CloseHandle(nativeHandle);
+		nativeHandle = nullptr;
+	}
+}
+
+bool Handle::operator==(const Handle& rhs) const
+{
+	return nativeHandle == rhs.nativeHandle;
+}
+
+bool Handle::operator!=(const Handle& rhs) const
+{
+	return !(*this == rhs);
+}
+
+Handle& Handle::operator=(Handle&& rhs) noexcept
+{
+	nativeHandle = rhs.nativeHandle;
+	owner = rhs.owner;
+
+	rhs.nativeHandle = nullptr;
+	rhs.owner = false;
+
+	return *this;
+}
+
+bool Handle::isValid() const
+{
+	return nativeHandle && nativeHandle != INVALID_HANDLE_VALUE;
+}
+
 HidInstance::HidInstance(const std::wstring& path, const std::wstring& instance_id, bool read_info)
 	: HidInstance(path, read_info)
 {
@@ -33,7 +84,7 @@ HidInstance::~HidInstance()
 
 HidInstance& HidInstance::operator=(HidInstance&& other) noexcept
 {
-	handle        = other.handle;
+	handle        = std::move(other.handle);
 	flags         = other.flags;
 	caps_         = other.caps_;
 	attributes_   = other.attributes_;
@@ -42,15 +93,21 @@ HidInstance& HidInstance::operator=(HidInstance&& other) noexcept
 	path          = std::move(other.path);
 	instance_id   = std::move(other.instance_id);
 
-	other.handle = nullptr;
+	input_buffer   = std::move(other.input_buffer);
+	output_buffer  = std::move(other.output_buffer);
+	overlap_in     = other.overlap_in;
+	overlap_out    = other.overlap_out;
+	pending_read_  = other.pending_read_;
+	pending_write_ = other.pending_write_;
+
+	other.flags = 0;
 
 	return *this;
 }
 
 bool HidInstance::is_open() const
 {
-	return handle != nullptr &&
-		   handle != reinterpret_cast<HANDLE>(-1);
+	return handle.isValid();
 }
 
 bool HidInstance::is_exclusive() const
@@ -94,10 +151,12 @@ void HidInstance::read_metadata()
 	}
 
 #ifdef _MSC_VER
-	auto h = CreateFile(path.c_str(), GENERIC_READ,
+	Handle h = CreateFile(path.c_str(), GENERIC_READ,
 		FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, 0, nullptr);
 
-	if (h == nullptr || h == reinterpret_cast<HANDLE>(-1))
+	h.owner = true;
+
+	if (!h.isValid())
 	{
 		const std::string path_a(path.begin(), path.end());
 		const std::string message = "Failed to open handle to device: " + path_a;
@@ -107,29 +166,24 @@ void HidInstance::read_metadata()
 	#error __FUNCTION__ not implemented on this platform.
 #endif
 
-	get_caps(h);
-	get_attributes(h);
-	//get_serial(h);
-
-	CloseHandle(h);
+	get_caps(h.nativeHandle);
+	get_attributes(h.nativeHandle);
+	//get_serial(h.handle);
 }
 
 void HidInstance::get_caps()
 {
-	get_caps(handle);
-
-	input_buffer.resize(caps().input_report_size);
-	output_buffer.resize(caps().output_report_size);
+	get_caps(handle.nativeHandle);
 }
 
 bool HidInstance::get_serial()
 {
-	return get_serial(handle);
+	return get_serial(handle.nativeHandle);
 }
 
 bool HidInstance::get_attributes()
 {
-	return get_attributes(handle);
+	return get_attributes(handle.nativeHandle);
 }
 
 bool HidInstance::get_feature(const gsl::span<uint8_t>& buffer) const
@@ -138,18 +192,18 @@ bool HidInstance::get_feature(const gsl::span<uint8_t>& buffer) const
 	{
 		if (is_open())
 		{
-			return HidD_GetFeature(handle, buffer.data(), static_cast<ULONG>(buffer.size_bytes()));
+			return HidD_GetFeature(handle.nativeHandle, buffer.data(), static_cast<ULONG>(buffer.size_bytes()));
 		}
 
-		auto ptr = CreateFile(path.c_str(), GENERIC_READ | GENERIC_WRITE,
+		Handle h = CreateFile(path.c_str(), GENERIC_READ | GENERIC_WRITE,
 		                      FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, 0, nullptr);
 
-		if (!ptr || ptr == INVALID_HANDLE_VALUE)
+		if (!h.isValid())
 		{
 			return false;
 		}
 
-		return HidD_GetFeature(ptr, buffer.data(), static_cast<ULONG>(buffer.size_bytes()));
+		return HidD_GetFeature(h.nativeHandle, buffer.data(), static_cast<ULONG>(buffer.size_bytes()));
 	}
 	catch (const std::exception&)
 	{
@@ -172,11 +226,12 @@ bool HidInstance::open(HidOpenFlags_t flags)
 	handle = CreateFile(path.c_str(), GENERIC_READ | GENERIC_WRITE, share_flags, nullptr,
 	                    OPEN_EXISTING, async_flags, nullptr);
 
-	if (handle == nullptr || handle == reinterpret_cast<HANDLE>(-1))
+	if (!handle.isValid())
 	{
 		return false;
 	}
 
+	handle.owner = true;
 	this->flags = flags;
 
 	if (is_async())
@@ -192,8 +247,7 @@ void HidInstance::close()
 {
 	if (is_open())
 	{
-		CloseHandle(handle);
-		handle = nullptr;
+		handle.close();
 	}
 
 	if (is_async())
@@ -214,7 +268,7 @@ bool HidInstance::read(void* buffer, size_t size) const
 		return false;
 	}
 
-	return ReadFile(handle, buffer, static_cast<DWORD>(size), nullptr, nullptr) != 0;
+	return ReadFile(handle.nativeHandle, buffer, static_cast<DWORD>(size), nullptr, nullptr) != 0;
 }
 
 bool HidInstance::read(const gsl::span<uint8_t>& buffer) const
@@ -229,7 +283,7 @@ bool HidInstance::read()
 
 bool HidInstance::readAsync(void* buffer, size_t size)
 {
-	if (pending_read_ || !ReadFile(handle, buffer, static_cast<DWORD>(size), nullptr, &overlap_in))
+	if (pending_read_ || !ReadFile(handle.nativeHandle, buffer, static_cast<DWORD>(size), nullptr, &overlap_in))
 	{
 		const DWORD error = GetLastError();
 
@@ -243,7 +297,7 @@ bool HidInstance::readAsync(void* buffer, size_t size)
 			case ERROR_IO_PENDING:
 			{
 				DWORD bytes_read;
-				pending_read_ = !GetOverlappedResult(handle, &overlap_in, &bytes_read, FALSE);
+				pending_read_ = !GetOverlappedResult(handle.nativeHandle, &overlap_in, &bytes_read, FALSE);
 				break;
 			}
 
@@ -268,7 +322,7 @@ bool HidInstance::readAsync()
 
 bool HidInstance::write(const void* buffer, size_t size) const
 {
-	return WriteFile(handle, buffer, static_cast<DWORD>(size), nullptr, nullptr);
+	return WriteFile(handle.nativeHandle, buffer, static_cast<DWORD>(size), nullptr, nullptr);
 }
 
 bool HidInstance::write(const gsl::span<const uint8_t>& buffer) const
@@ -283,7 +337,7 @@ bool HidInstance::write() const
 
 bool HidInstance::writeAsync(const void* buffer, size_t size)
 {
-	if (!pending_write_ && WriteFile(handle, buffer, static_cast<DWORD>(size), nullptr, &overlap_out))
+	if (!pending_write_ && WriteFile(handle.nativeHandle, buffer, static_cast<DWORD>(size), nullptr, &overlap_out))
 	{
 		return false;
 	}
@@ -300,7 +354,7 @@ bool HidInstance::writeAsync(const void* buffer, size_t size)
 		case ERROR_IO_PENDING:
 		{
 			DWORD bytes_written;
-			pending_write_ = !GetOverlappedResult(handle, &overlap_out, &bytes_written, FALSE);
+			pending_write_ = !GetOverlappedResult(handle.nativeHandle, &overlap_out, &bytes_written, FALSE);
 			break;
 		}
 
@@ -329,7 +383,7 @@ bool HidInstance::set_output_report(const gsl::span<uint8_t>& buffer) const
 		return false;
 	}
 
-	return HidD_SetOutputReport(handle, reinterpret_cast<PVOID>(buffer.data()), static_cast<ULONG>(buffer.size_bytes()));
+	return HidD_SetOutputReport(handle.nativeHandle, reinterpret_cast<PVOID>(buffer.data()), static_cast<ULONG>(buffer.size_bytes()));
 }
 
 bool HidInstance::set_output_report()
@@ -369,6 +423,9 @@ void HidInstance::get_caps(HANDLE h)
 #else
 	#error __FUNCTION__ not implemented on this platform.
 #endif
+
+	input_buffer.resize(caps().input_report_size);
+	output_buffer.resize(caps().output_report_size);
 }
 
 bool HidInstance::get_serial(HANDLE h)
