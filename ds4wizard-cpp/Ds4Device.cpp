@@ -282,7 +282,7 @@ Ds4Device::~Ds4Device()
 	Close();
 }
 
-void Ds4Device::Close()
+void Ds4Device::closeImpl()
 {
 	if (!Connected())
 	{
@@ -298,12 +298,20 @@ void Ds4Device::Close()
 		ReleaseAutoColor();
 	}
 
-	if (deviceThread)
+	OnDeviceClosed();
+}
+
+void Ds4Device::Close()
+{
+	if (!deviceThread)
 	{
-		deviceThread->join();
+		closeImpl();
+		return;
 	}
 
-	OnDeviceClosed();
+	running = false;
+	deviceThread->join();
+	deviceThread = nullptr;
 }
 
 void Ds4Device::CloseBluetoothDevice()
@@ -623,10 +631,13 @@ void Ds4Device::ControllerThread()
 	idleTime.start();
 	deltaStopwatch.start();
 
-	while (Connected())
+	while (Connected() && running)
 	{
+		lock(sync);
 		Run();
 	}
+
+	closeImpl();
 }
 
 void Ds4Device::OnDeviceClosed()
@@ -638,6 +649,7 @@ void Ds4Device::Start()
 {
 	if (deviceThread == nullptr)
 	{
+		running = true;
 		deviceThread = std::make_unique<std::thread>(&Ds4Device::ControllerThread, this);
 	}
 }

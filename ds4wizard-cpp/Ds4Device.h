@@ -14,6 +14,10 @@
 
 /*partial TODO*/ class Ds4Device
 {
+	// HACK: work around for what may or may not be a bug with recursive_mutex;
+	// the main thread fails to acquire a lock when the mutex is UNLOCKED,
+	// and I suspect it might be due to async file IO that is used with hid.
+	bool running = false;
 	std::recursive_mutex sync_lock;
 
 	// Read-Only
@@ -85,6 +89,10 @@ public:
 	explicit Ds4Device(hid::HidInstance& device);
 	~Ds4Device();
 
+private:
+	void closeImpl();
+
+public:
 	void SaveSettings();
 
 	/// <summary>
