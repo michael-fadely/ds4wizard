@@ -2,7 +2,7 @@
 
 #include <Windows.h>
 
-#include <array>
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -10,6 +10,17 @@
 
 namespace hid
 {
+	struct HidOpenFlags
+	{
+		enum T : uint32_t
+		{
+			none,
+			exclusive = 1u << 0,
+			async     = 1u << 1
+		};
+	};
+
+	using HidOpenFlags_t = uint32_t;
 
 	struct HidCaps
 	{
@@ -39,11 +50,19 @@ namespace hid
 
 	class HidInstance
 	{
+		HidOpenFlags_t flags = 0;
+
 		// TODO: de-windowsify HANDLE
 		HANDLE handle = nullptr;
-		bool is_exclusive_ = false;
+
 		HidCaps caps_ {};
 		HidAttributes attributes_ {};
+
+		OVERLAPPED overlap_in = {};
+		OVERLAPPED overlap_out = {};
+
+		bool pending_read_ = false;
+		bool pending_write_ = false;
 
 	public:
 		std::wstring path;
@@ -67,6 +86,9 @@ namespace hid
 
 		bool is_open() const;
 		bool is_exclusive() const;
+		bool is_async() const;
+		bool pending_read() const;
+		bool pending_write() const;
 		const HidCaps& caps() const;
 		const HidAttributes& attributes() const;
 
@@ -74,16 +96,29 @@ namespace hid
 		void get_caps();
 		bool get_serial();
 		bool get_attributes();
-		bool get_feature(gsl::span<uint8_t> buffer) const;
+		bool get_feature(const gsl::span<uint8_t>& buffer) const;
 
-		bool open(bool exclusive);
+		bool open(HidOpenFlags_t flags);
 		void close();
 
-		bool read(void* buffer, size_t length) const;
-		bool read(gsl::span<uint8_t> buffer) const;
+		bool read(void* buffer, size_t size) const;
+		bool read(const gsl::span<uint8_t>& buffer) const;
+		bool read();
 
-		bool set_output_report(gsl::span<uint8_t> buffer) const;
-		bool set_output_report() const;
+		bool readAsync(void* buffer, size_t size);
+		bool readAsync(const gsl::span<uint8_t>& buffer);
+		bool readAsync();
+
+		bool write(const void* buffer, size_t size) const;
+		bool write(const gsl::span<const uint8_t>& buffer) const;
+		bool write() const;
+
+		bool writeAsync(const void* buffer, size_t size);
+		bool writeAsync(const gsl::span<const uint8_t>& buffer);
+		bool writeAsync();
+
+		bool set_output_report(const gsl::span<uint8_t>& buffer) const;
+		bool set_output_report();
 
 	private:
 		void get_caps(HANDLE h);

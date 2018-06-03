@@ -1,8 +1,9 @@
 #pragma once
 
+#include <memory>
+#include <gsl/span>
 #include "Ds4Buttons.h"
 #include "Ds4InputData.h"
-#include <gsl/span>
 #include "ScpDevice.h"
 #include "XInputGamepad.h"
 
@@ -32,6 +33,6 @@ private:
 public:
 	void Update(gsl::span<uint8_t> buffer, int i);
 	void UpdateChangedState();
-	void ToXInput(int index, ScpDevice device);
+	void ToXInput(int index, std::unique_ptr<ScpDevice>& device);
 	float GetAxis(Ds4Axis axis, AxisPolarity* polarity);
 };

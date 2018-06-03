@@ -21,15 +21,17 @@ DeviceSettings::DeviceSettings(const DeviceSettings& s)
 
 bool DeviceSettings::operator==(const DeviceSettings& other) const
 {
-	return Name            == other.Name &&
-	       Profile         == other.Profile &&
+	return DeviceSettingsCommon::operator==(other) &&
+	       Name == other.Name &&
+	       Profile == other.Profile &&
 	       UseProfileLight == other.UseProfileLight &&
-	       UseProfileIdle  == other.UseProfileIdle &&
-	       Idle            == other.Idle;
+	       UseProfileIdle == other.UseProfileIdle &&
+	       Idle == other.Idle;
 }
 
 void DeviceSettings::readJson(const QJsonObject& json)
 {
+	// TODO DeviceSettingsCommon
 	Name            = json["name"].toString().toStdString();
 	Profile         = json["profile"].toString().toStdString();
 	UseProfileLight = json["useProfileLight"].toBool();
@@ -39,6 +41,7 @@ void DeviceSettings::readJson(const QJsonObject& json)
 
 void DeviceSettings::writeJson(QJsonObject& json) const
 {
+	// TODO DeviceSettingsCommon
 	json["name"]            = QString::fromStdString(Name);
 	json["profile"]         = QString::fromStdString(Profile);
 	json["useProfileLight"] = UseProfileLight;

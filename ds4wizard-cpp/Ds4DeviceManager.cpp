@@ -5,6 +5,7 @@
 #include <sstream>
 #include "program.h"
 #include <shellapi.h>
+#include "Ds4Device.h"
 
 bool Ds4DeviceManager::IsDs4(const hid::HidInstance& hid)
 {
@@ -32,7 +33,7 @@ void Ds4DeviceManager::FindControllers()
 {
 	lock(sync);
 
-	hid::enum_hid([&](hid::HidInstance& hid) -> void
+	hid::enum_hid([&](hid::HidInstance& hid) -> bool
 	{
 		bool isBluetooth = false;
 
@@ -76,7 +77,7 @@ void Ds4DeviceManager::FindControllers()
 			// TODO: proper HID exceptions
 			//Logger.WriteLine(LogLevel.Warning, $"Failed to read device metadata: {ex.Message}"); // TODO
 			hid.close();
-			return;
+			return false;
 		}
 
 		try
@@ -124,6 +125,8 @@ void Ds4DeviceManager::FindControllers()
 			// TODO: proper HID exceptions
 			//Logger.WriteLine(LogLevel.Error, $"Error while opening device: {ex.Message}"); // TODO
 		}
+
+		return false;
 	});
 }
 

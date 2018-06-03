@@ -139,13 +139,13 @@ void Ds4Device::ApplyProfile()
 
 	activeLight = new Ds4LightOptions(l);
 
-	if (usbDevice != nullptr && (!UsbConnected || usbDevice->is_exclusive() != Profile.ExclusiveMode))
+	if (usbDevice != nullptr && (!UsbConnected() || usbDevice->is_exclusive() != Profile.ExclusiveMode))
 	{
 		CloseUsbDevice();
 		OpenUsbDevice(usbDevice);
 	}
 
-	if (bluetoothDevice != nullptr && (!BluetoothConnected || bluetoothDevice->is_exclusive() != Profile.ExclusiveMode))
+	if (bluetoothDevice != nullptr && (!BluetoothConnected() || bluetoothDevice->is_exclusive() != Profile.ExclusiveMode))
 	{
 		CloseBluetoothDevice();
 		OpenBluetoothDevice(bluetoothDevice);
@@ -280,7 +280,7 @@ void Ds4Device::CloseBluetoothDevice()
 
 void Ds4Device::DisconnectBluetooth()
 {
-	if (!BluetoothConnected)
+	if (!BluetoothConnected())
 	{
 		return;
 	}
@@ -302,12 +302,12 @@ void Ds4Device::CloseUsbDevice()
 
 bool Ds4Device::OpenDevice(std::unique_ptr<hid::HidInstance>& device, bool exclusive)
 {
-	if (device->open(exclusive))
+	if (device->open((exclusive ? hid::HidOpenFlags::exclusive : 0) | hid::HidOpenFlags::async))
 	{
 		return true;
 	}
 
-	return exclusive && device->open(false);
+	return exclusive && device->open(hid::HidOpenFlags::async);
 }
 
 void Ds4Device::OpenBluetoothDevice(std::unique_ptr<hid::HidInstance>& device)
@@ -319,7 +319,7 @@ void Ds4Device::OpenBluetoothDevice(std::unique_ptr<hid::HidInstance>& device)
 
 	lock(sync);
 	{
-		if (BluetoothConnected)
+		if (BluetoothConnected())
 		{
 			return;
 		}
@@ -365,7 +365,7 @@ void Ds4Device::OpenUsbDevice(std::unique_ptr<hid::HidInstance>& device)
 
 	lock(sync);
 	{
-		if (UsbConnected)
+		if (UsbConnected())
 		{
 			return;
 		}
@@ -405,7 +405,7 @@ void Ds4Device::SetupUsbOutputBuffer() const
 
 void Ds4Device::WriteUsbAsync()
 {
-	if (usbDevice->WritePending)
+	if (usbDevice->pending_write())
 	{
 		return;
 	}
@@ -421,7 +421,7 @@ void Ds4Device::WriteUsbAsync()
 		return;
 	}
 
-	usbDevice->WriteAsync();
+	usbDevice->writeAsync();
 }
 
 void Ds4Device::WriteBluetooth()
@@ -468,8 +468,8 @@ void Ds4Device::Run()
 	uint8_t battery = Battery();
 
 	// cache
-	bool usb       = UsbConnected;
-	bool bluetooth = BluetoothConnected;
+	bool usb       = UsbConnected();
+	bool bluetooth = BluetoothConnected();
 
 	bool useUsb       = usb && (preferredConnection == ConnectionType::usb || !bluetooth);
 	bool useBluetooth = bluetooth && (preferredConnection == ConnectionType::bluetooth|| !usb);
@@ -479,7 +479,7 @@ void Ds4Device::Run()
 	{
 		WriteUsbAsync();
 
-		if (usbDevice->ReadAsync())
+		if (usbDevice->readAsync())
 		{
 			DataReceived = true;
 			Input.Update(usbDevice->input_buffer, 1);
@@ -488,7 +488,7 @@ void Ds4Device::Run()
 		// If the controller gets disconnected from USB while idle,
 		// reset the idle timer so that it doesn't get immediately
 		// disconnected from bluetooth (if connected).
-		if (!UsbConnected)
+		if (!UsbConnected())
 		{
 			idleTime.start();
 		}
@@ -497,7 +497,7 @@ void Ds4Device::Run()
 	{
 		WriteBluetooth();
 
-		if (bluetoothDevice->ReadAsync() && bluetoothDevice->input_buffer[0] == 0x11)
+		if (bluetoothDevice->readAsync() && bluetoothDevice->input_buffer[0] == 0x11)
 		{
 			DataReceived = true;
 			Input.Update(bluetoothDevice->input_buffer, 3);
@@ -518,7 +518,7 @@ void Ds4Device::Run()
 	{
 		idleTime.start();
 	}
-	else if (DisconnectOnIdle && useBluetooth && IsIdle)
+	else if (DisconnectOnIdle() && useBluetooth && IsIdle())
 	{
 		DisconnectBluetooth();
 		//Logger.WriteLine(LogLevel.Info, Name, std::string.Format(Resources.IdleDisconnect, IdleTimeout)); // TODO

@@ -140,14 +140,14 @@ void Ds4Input::UpdateChangedState()
 	lastTouchFrame = Data.TouchFrame;
 }
 
-void Ds4Input::ToXInput(int index, ScpDevice device)
+void Ds4Input::ToXInput(int index, std::unique_ptr<ScpDevice>& device)
 {
 	if (Gamepad == lastGamepad)
 	{
 		return;
 	}
 
-	device.SyncState(index, Gamepad);
+	device->SyncState(index, Gamepad);
 	lastGamepad = Gamepad;
 }
 

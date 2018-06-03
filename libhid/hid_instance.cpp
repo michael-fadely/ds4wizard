@@ -34,7 +34,7 @@ HidInstance::~HidInstance()
 HidInstance& HidInstance::operator=(HidInstance&& other) noexcept
 {
 	handle        = other.handle;
-	is_exclusive_ = other.is_exclusive_;
+	flags         = other.flags;
 	caps_         = other.caps_;
 	attributes_   = other.attributes_;
 	serial_string = std::move(other.serial_string);
@@ -55,7 +55,22 @@ bool HidInstance::is_open() const
 
 bool HidInstance::is_exclusive() const
 {
-	return is_exclusive_;
+	return !!(flags & HidOpenFlags::exclusive);
+}
+
+bool HidInstance::is_async() const
+{
+	return !!(flags & HidOpenFlags::async);
+}
+
+bool HidInstance::pending_read() const
+{
+	return pending_read_;
+}
+
+bool HidInstance::pending_write() const
+{
+	return pending_write_;
 }
 
 const HidCaps& HidInstance::caps() const
@@ -117,7 +132,7 @@ bool HidInstance::get_attributes()
 	return get_attributes(handle);
 }
 
-bool HidInstance::get_feature(gsl::span<uint8_t> buffer) const
+bool HidInstance::get_feature(const gsl::span<uint8_t>& buffer) const
 {
 	try
 	{
@@ -127,7 +142,7 @@ bool HidInstance::get_feature(gsl::span<uint8_t> buffer) const
 		}
 
 		auto ptr = CreateFile(path.c_str(), GENERIC_READ | GENERIC_WRITE,
-			FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, 0, nullptr);
+		                      FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, 0, nullptr);
 
 		if (!ptr || ptr == INVALID_HANDLE_VALUE)
 		{
@@ -143,24 +158,33 @@ bool HidInstance::get_feature(gsl::span<uint8_t> buffer) const
 	}
 }
 
-bool HidInstance::open(bool exclusive)
+bool HidInstance::open(HidOpenFlags_t flags)
 {
+	bool exclusive = !!(flags & HidOpenFlags::exclusive);
 	if (exclusive != is_exclusive())
 	{
 		close();
 	}
 
 	const uint32_t share_flags = exclusive ? 0 : FILE_SHARE_READ | FILE_SHARE_WRITE;
+	const uint32_t async_flags = !!(flags & HidOpenFlags::async) ? FILE_FLAG_OVERLAPPED : 0;
 
 	handle = CreateFile(path.c_str(), GENERIC_READ | GENERIC_WRITE, share_flags, nullptr,
-		OPEN_EXISTING, /*FILE_FLAG_OVERLAPPED*/ 0, nullptr);
+	                    OPEN_EXISTING, async_flags, nullptr);
 
 	if (handle == nullptr || handle == reinterpret_cast<HANDLE>(-1))
 	{
 		return false;
 	}
 
-	is_exclusive_ = exclusive;
+	this->flags = flags;
+
+	if (is_async())
+	{
+		overlap_in.hEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+		overlap_out.hEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+	}
+
 	return true;
 }
 
@@ -172,36 +196,143 @@ void HidInstance::close()
 		handle = nullptr;
 	}
 
-	is_exclusive_ = false;
+	if (is_async())
+	{
+		CloseHandle(overlap_in.hEvent);
+		CloseHandle(overlap_out.hEvent);
+		pending_read_ = false;
+		pending_write_ = false;
+	}
+
+	flags = 0;
 }
 
-bool HidInstance::read(void* buffer, size_t length) const
+bool HidInstance::read(void* buffer, size_t size) const
 {
 	if (!is_open())
 	{
 		return false;
 	}
 
-	DWORD read = 0;
-	return ReadFile(handle, buffer, static_cast<DWORD>(length), &read, nullptr) != 0;
+	return ReadFile(handle, buffer, static_cast<DWORD>(size), nullptr, nullptr) != 0;
 }
 
-bool HidInstance::read(gsl::span<uint8_t> buffer) const
+bool HidInstance::read(const gsl::span<uint8_t>& buffer) const
 {
 	return read(buffer.data(), buffer.size());
 }
 
-bool HidInstance::set_output_report(gsl::span<uint8_t> buffer) const
+bool HidInstance::read()
+{
+	return read(input_buffer);
+}
+
+bool HidInstance::readAsync(void* buffer, size_t size)
+{
+	if (pending_read_ || !ReadFile(handle, buffer, static_cast<DWORD>(size), nullptr, &overlap_in))
+	{
+		const DWORD error = GetLastError();
+
+		switch (error)
+		{
+			case ERROR_SUCCESS:
+				pending_read_ = false;
+				break;
+
+			case ERROR_IO_INCOMPLETE:
+			case ERROR_IO_PENDING:
+			{
+				DWORD bytes_read;
+				pending_read_ = !GetOverlappedResult(handle, &overlap_in, &bytes_read, FALSE);
+				break;
+			}
+
+			default:
+				close();
+				return false;
+		}
+	}
+
+	return !pending_read_;
+}
+
+bool HidInstance::readAsync(const gsl::span<uint8_t>& buffer)
+{
+	return readAsync(buffer.data(), buffer.size_bytes());
+}
+
+bool HidInstance::readAsync()
+{
+	return readAsync(input_buffer);
+}
+
+bool HidInstance::write(const void* buffer, size_t size) const
+{
+	return WriteFile(handle, buffer, static_cast<DWORD>(size), nullptr, nullptr);
+}
+
+bool HidInstance::write(const gsl::span<const uint8_t>& buffer) const
+{
+	return write(buffer.data(), buffer.size_bytes());
+}
+
+bool HidInstance::write() const
+{
+	return write(output_buffer);
+}
+
+bool HidInstance::writeAsync(const void* buffer, size_t size)
+{
+	if (!pending_write_ && WriteFile(handle, buffer, static_cast<DWORD>(size), nullptr, &overlap_out))
+	{
+		return false;
+	}
+
+	const DWORD error = GetLastError();
+
+	switch (error)
+	{
+		case ERROR_SUCCESS:
+			pending_write_ = false;
+			break;
+
+		case ERROR_IO_INCOMPLETE:
+		case ERROR_IO_PENDING:
+		{
+			DWORD bytes_written;
+			pending_write_ = !GetOverlappedResult(handle, &overlap_out, &bytes_written, FALSE);
+			break;
+		}
+
+		default:
+			close();
+			return false;
+	}
+
+	return !pending_write_;
+}
+
+bool HidInstance::writeAsync(const gsl::span<const uint8_t>& buffer)
+{
+	return writeAsync(buffer.data(), buffer.size_bytes());
+}
+
+bool HidInstance::writeAsync()
+{
+	return writeAsync(output_buffer);
+}
+
+bool HidInstance::set_output_report(const gsl::span<uint8_t>& buffer) const
 {
 	if (!is_open())
 	{
 		return false;
 	}
 
-	return HidD_SetOutputReport(handle, buffer.data(), buffer.size_bytes());
+	return HidD_SetOutputReport(handle, reinterpret_cast<PVOID>(buffer.data()), static_cast<ULONG>(buffer.size_bytes()));
 }
 
-bool HidInstance::set_output_report() const
+bool HidInstance::set_output_report()
 {
 	return set_output_report(output_buffer);
 }

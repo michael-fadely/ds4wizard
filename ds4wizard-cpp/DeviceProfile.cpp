@@ -50,8 +50,8 @@ DeviceProfile::DeviceProfile(const DeviceProfile& other)
 
 bool DeviceProfile::operator==(const DeviceProfile& other) const
 {
-	// TODO
-	return Name == other.Name // TODO: case insensitive
+	return DeviceSettingsCommon::operator==(other) &&
+	       Name == other.Name // TODO: case insensitive
 	       && ExclusiveMode == other.ExclusiveMode
 	       && UseXInput == other.UseXInput
 	       && AutoXInputIndex == other.AutoXInputIndex
@@ -63,10 +63,14 @@ bool DeviceProfile::operator==(const DeviceProfile& other) const
 
 void DeviceProfile::readJson(const QJsonObject& json)
 {
+	// TODO DeviceSettingsCommon
+	// TODO
 }
 
 void DeviceProfile::writeJson(QJsonObject& json) const
 {
+	// TODO DeviceSettingsCommon
+	// TODO
 }
 
 DeviceProfile DeviceProfile::Default()

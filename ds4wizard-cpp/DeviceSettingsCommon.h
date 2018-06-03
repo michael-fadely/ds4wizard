@@ -7,10 +7,10 @@
 
 class DeviceSettingsCommon
 {
-public:
 	bool notifiedLow;
 	bool notifiedCharged;
 
+public:
 	Ds4LightOptions   Light;
 	DeviceIdleOptions Idle;
 
