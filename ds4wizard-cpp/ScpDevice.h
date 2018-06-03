@@ -6,6 +6,9 @@
 
 #include "XInputGamepad.h"
 
+// {F679F562-3164-42CE-A4DB-E7DDBE723909}
+const GUID GUID_DEVINTERFACE_SCPVBUS = { 0xf679f562, 0x3164, 0x42ce, 0xa4, 0xdb, 0xe7, 0xdd, 0xbe, 0x72, 0x39, 0x9 };
+
 enum class VBusStatus
 {
 	Success            = 0,
@@ -21,12 +24,9 @@ struct ScpVibration
 	uint8_t LeftMotor, RightMotor;
 };
 
-// {F679F562-3164-42CE-A4DB-E7DDBE723909}
-DEFINE_GUID(GUID_DEVINTERFACE_SCPVBUS, 0xf679f562, 0x3164, 0x42ce, 0xa4, 0xdb, 0xe7, 0xdd, 0xbe, 0x72, 0x39, 0x9);
-
 class ScpDevice
 {
-	static std::mutex portLock_lock;
+	inline static std::mutex portLock_lock;
 
 	// HACK: This is prone to failure. Probably better to use integers.
 	/// <summary>

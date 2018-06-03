@@ -11,6 +11,8 @@
 #include "DeviceProfileCache.h"
 #include "util.h"
 #include "Bluetooth.h"
+#include "Ds4AutoLightColor.h"
+#include "ScpDevice.h"
 
 using namespace std::chrono;
 
@@ -88,9 +90,14 @@ Ds4Device::Ds4Device(hid::HidInstance& device)
 		SetupUsbOutputBuffer();
 	}
 
-	if (!Program::ProfileCache.GetSettings(MacAddress, Settings))
+	auto settings = Program::ProfileCache.GetSettings(MacAddress);
+	if (settings == nullptr)
 	{
 		Settings = {};
+	}
+	else
+	{
+		Settings = *settings;
 	}
 
 	ApplyProfile();
@@ -107,15 +114,15 @@ void Ds4Device::ApplyProfile()
 	lock(sync);
 	ReleaseAutoColor();
 
-	DeviceProfile profile = Program::ProfileCache.GetProfile(Settings.Profile);
+	auto profile = Program::ProfileCache.GetProfile(Settings.Profile);
 	if (profile == nullptr)
 	{
-		Settings.Profile = nullptr;
-		Profile = new DeviceProfile(DeviceProfile.Default);
+		Settings.Profile = {};
+		Profile = DeviceProfile::Default();
 	}
 	else
 	{
-		Profile = profile;
+		Profile = *profile;
 	}
 
 	if (Profile.UseXInput)
@@ -134,10 +141,10 @@ void Ds4Device::ApplyProfile()
 
 	if (l.AutomaticColor)
 	{
-		l.Color = Ds4AutoLightColor.GetColor(out colorIndex);
+		l.Color = Ds4AutoLightColor::GetColor(colorIndex);
 	}
 
-	activeLight = new Ds4LightOptions(l);
+	activeLight = Ds4LightOptions(l);
 
 	if (usbDevice != nullptr && (!UsbConnected() || usbDevice->is_exclusive() != Profile.ExclusiveMode))
 	{
@@ -251,11 +258,11 @@ void Ds4Device::ScpDeviceClose()
 
 void Ds4Device::ReleaseAutoColor()
 {
-	Ds4AutoLightColor.ReleaseColor(colorIndex);
+	Ds4AutoLightColor::ReleaseColor(colorIndex);
 	colorIndex = -1;
 }
 
-void Ds4Device::OnProfileChanged(std::string newName)
+void Ds4Device::OnProfileChanged(const std::string& newName)
 {
 	lock(sync);
 	Settings.Profile = newName.empty() ? std::string() : newName;
@@ -440,10 +447,6 @@ void Ds4Device::Run()
 	deltaTime = static_cast<float>(duration_cast<milliseconds>(deltaStopwatch.elapsed()).count());
 	deltaStopwatch.start();
 
-	ConnectionType preferredConnection = ConnectionType::usb;
-
-	preferredConnection = Program::settings.preferredConnection;
-
 	// HACK: make this class manage the light state
 	Output.LightColor = activeLight.Color;
 
@@ -451,21 +454,23 @@ void Ds4Device::Run()
 	if (activeLight.IdleFade)
 	{
 		Ds4LightOptions l = Settings.UseProfileLight ? Profile.Light : Settings.Light;
-		double m = IsIdle ? 1.0 : std::clamp(duration_cast<milliseconds>(idleTime.elapsed()).count() / static_cast<double>(duration_cast<milliseconds>(IdleTimeout()).count()), 0.0, 1.0);
+		double m = IsIdle() ? 1.0 : std::clamp(duration_cast<milliseconds>(idleTime.elapsed()).count() / static_cast<double>(duration_cast<milliseconds>(IdleTimeout()).count()), 0.0, 1.0);
 
 		Output.LightColor = Ds4Color::Lerp(l.Color, fadeColor, static_cast<float>(m));
 	}
 
-	bool charging = Charging;
+	bool charging = Charging();
 	uint8_t battery = Battery();
 
 	// cache
-	bool usb       = UsbConnected();
+	bool usb = UsbConnected();
 	bool bluetooth = BluetoothConnected();
 
-	bool useUsb       = usb && (preferredConnection == ConnectionType::usb || !bluetooth);
-	bool useBluetooth = bluetooth && (preferredConnection == ConnectionType::bluetooth|| !usb);
-	DataReceived      = false;
+	ConnectionType preferredConnection = Program::settings.preferredConnection;
+	bool useUsb = usb && (preferredConnection == ConnectionType(ConnectionType::usb) || !bluetooth);
+	bool useBluetooth = bluetooth && (preferredConnection == ConnectionType(ConnectionType::bluetooth)|| !usb);
+
+	DataReceived = false;
 
 	if (useUsb)
 	{
@@ -518,7 +523,7 @@ void Ds4Device::Run()
 
 	if (DataReceived)
 	{
-		RunMaps();
+		//RunMaps(); // TODO
 
 		if (Latency.elapsed() >= 5ms)
 		{
@@ -571,7 +576,7 @@ void Ds4Device::Run()
 	else
 	{
 		Input.UpdateChangedState();
-		RunPersistent();
+		//RunPersistent(); // TODO
 		std::this_thread::sleep_for(1ms);
 	}
 }
@@ -582,7 +587,7 @@ void Ds4Device::ControllerThread()
 	idleTime.start();
 	deltaStopwatch.start();
 
-	while (Connected)
+	while (Connected())
 	{
 		lock(sync);
 		Run();
@@ -601,7 +606,7 @@ void Ds4Device::Start()
 {
 	if (ioThread == nullptr)
 	{
-		ioThread = std::make_unique<std::thread>(&ControllerThread);
+		ioThread = std::make_unique<std::thread>(&Ds4Device::ControllerThread, this);
 	}
 }
 

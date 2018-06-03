@@ -35,7 +35,7 @@ void Ds4DeviceManager::FindControllers()
 
 	hid::enum_hid([&](hid::HidInstance& hid) -> bool
 	{
-		bool isBluetooth = false;
+		bool isBluetooth;
 
 		try
 		{
@@ -72,7 +72,7 @@ void Ds4DeviceManager::FindControllers()
 				throw /*std::runtime_error(std::wstring.Format(Resources.DeviceReturnedEmptyMAC, hid.Path)) // TODO */;
 			}
 		}
-		catch (const std::runtime_error& ex)
+		catch (const std::exception&)
 		{
 			// TODO: proper HID exceptions
 			//Logger.WriteLine(LogLevel.Warning, $"Failed to read device metadata: {ex.Message}"); // TODO
@@ -121,7 +121,7 @@ void Ds4DeviceManager::FindControllers()
 				//OnDeviceOpened(new DeviceOpenedEventArgs(device, false)); // TODO
 			}
 		}
-		catch (const std::runtime_error& ex)
+		catch (const std::exception&)
 		{
 			// TODO: proper HID exceptions
 			//Logger.WriteLine(LogLevel.Error, $"Error while opening device: {ex.Message}"); // TODO

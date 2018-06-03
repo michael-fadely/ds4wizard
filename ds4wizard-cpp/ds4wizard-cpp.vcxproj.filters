@@ -74,6 +74,9 @@
     <ClCompile Include="Bluetooth.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Ds4AutoLightColor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resource Files">
@@ -186,6 +189,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Bluetooth.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Ds4AutoLightColor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

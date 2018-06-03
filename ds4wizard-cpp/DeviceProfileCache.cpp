@@ -7,7 +7,7 @@ void DeviceProfileCache::Load()
 	OnLoaded();
 }
 
-bool DeviceProfileCache::GetProfile(const std::string& profileName, DeviceProfile& outProfile)
+std::unique_ptr<DeviceProfile> DeviceProfileCache::GetProfile(const std::string& profileName)
 {
 	if (profileName.empty())
 	{
@@ -16,21 +16,20 @@ bool DeviceProfileCache::GetProfile(const std::string& profileName, DeviceProfil
 
 	std::lock_guard<std::mutex> guard(profile_lock);
 
-	return FindProfile(profileName, outProfile);
+	return FindProfile(profileName);
 }
 
-bool DeviceProfileCache::GetSettings(const std::string& id, DeviceSettings& outSettings)
+std::unique_ptr<DeviceSettings> DeviceProfileCache::GetSettings(const std::string& id)
 {
 	std::lock_guard<std::mutex> guard(deviceSettings_lock);
 	const auto it = deviceSettings.find(id);
 
 	if (it == deviceSettings.end())
 	{
-		return false;
+		return nullptr;
 	}
 
-	outSettings = it->second;
-	return true;
+	return std::make_unique<DeviceSettings>(it->second);
 }
 
 void DeviceProfileCache::SaveSettings(const std::string& id, const DeviceSettings& settings)
@@ -123,7 +122,7 @@ void DeviceProfileCache::UpdateProfile(const DeviceProfile& last, const DevicePr
 	}
 }
 
-bool DeviceProfileCache::FindProfile(const std::string& profileName, DeviceProfile& outProfile)
+std::unique_ptr<DeviceProfile> DeviceProfileCache::FindProfile(const std::string& profileName)
 {
 	/*return Profiles.FirstOrDefault(x => x.FileName.Equals(profileName, StringComparison.InvariantCultureIgnoreCase)
 	                                   || x.Name.Equals(profileName, StringComparison.InvariantCultureIgnoreCase));*/
@@ -133,12 +132,11 @@ bool DeviceProfileCache::FindProfile(const std::string& profileName, DeviceProfi
 		// TODO: case insensitive
 		if (profile.FileName() == profileName || profile.Name == profileName)
 		{
-			outProfile = profile;
-			return true;
+			return std::make_unique<DeviceProfile>(profile);
 		}
 	}
 
-	return false;
+	return nullptr;
 }
 
 void DeviceProfileCache::LoadImpl()
@@ -146,22 +144,6 @@ void DeviceProfileCache::LoadImpl()
 	{
 		std::lock_guard<std::mutex> guard(profile_lock);
 		Profiles.clear();
-
-		//if (filesystem::directory_exists(Program::profilesPath().toStdString()))
-		//{
-		//	foreach(std::string f in Directory.EnumerateFiles(Program::profilesPath()))
-		//	{
-		//		try
-		//		{
-		//			auto profile = JsonConvert.DeserializeObject<DeviceProfile>(File.ReadAllText(f));
-		//			Profiles.Add(profile);
-		//		}
-		//		catch
-		//		{
-		//			// HACK: ignored
-		//		}
-		//	}
-		//}
 
 		QDir dir(Program::profilesPath());
 		if (dir.exists())
@@ -181,15 +163,6 @@ void DeviceProfileCache::LoadImpl()
 		QFile devicesFile(Program::devicesFilePath());
 		if (devicesFile.exists())
 		{
-			//deviceSettings = JsonConvert.DeserializeObject<Dictionary<std::string, DeviceSettings>>(
-			//                                                                                        File.ReadAllText(Program::devicesFilePath())
-			//                                                                                       );
-
-			//foreach(DeviceSettings device in deviceSettings.Values.Where(device = > FindProfile(device.Profile) is nullptr))
-			//{
-			//	device.Profile = nullptr;
-			//}
-
 			if (devicesFile.open(QIODevice::ReadOnly | QIODevice::Text))
 			{
 				QString str = devicesFile.readAll();

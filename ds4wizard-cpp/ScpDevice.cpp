@@ -5,6 +5,9 @@
 #include "busenum.h"
 #include "lock.h"
 
+// {F679F562-3164-42CE-A4DB-E7DDBE723909}
+extern const GUID GUID_DEVINTERFACE_SCPVBUS;
+
 int ScpDevice::GetFreePort()
 {
 	lock(portLock);

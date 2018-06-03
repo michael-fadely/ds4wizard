@@ -40,14 +40,14 @@ public:
 	/// </summary>
 	/// <param name="profileName">The name of the profile to get.</param>
 	/// <returns>A copy of the profile if found, else nullptr.</returns>
-	bool GetProfile(const std::string& profileName, DeviceProfile& outProfile);
+	std::unique_ptr<DeviceProfile> GetProfile(const std::string& profileName);
 
 	/// <summary>
 	/// Returns a copy of the cached settings for the specified MAC address.
 	/// </summary>
 	/// <param name="id">The MAC address of the device whose settings are to be copied.</param>
 	/// <returns>The settings associated with the MAC address, or nullptr if none.</returns>
-	bool GetSettings(const std::string& id, DeviceSettings& outSettings);
+	std::unique_ptr<DeviceSettings> GetSettings(const std::string& id);
 
 	/// <summary>
 	/// Adds (or replaces) settings for the specified MAC address, then saves changes to disk.
@@ -70,7 +70,7 @@ public:
 	void UpdateProfile(const DeviceProfile& last, const DeviceProfile& current);
 
 private:
-	bool FindProfile(const std::string& profileName, DeviceProfile& outProfile);
+	std::unique_ptr<DeviceProfile> FindProfile(const std::string& profileName);
 
 	void LoadImpl();
 

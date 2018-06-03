@@ -97,7 +97,7 @@ private:
 	void ReleaseAutoColor();
 
 public:
-	void OnProfileChanged(std::string newName);
+	void OnProfileChanged(const std::string& newName);
 	void Close();
 
 private:

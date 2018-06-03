@@ -68,7 +68,7 @@
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
       <AdditionalLibraryDirectories>$(QTDIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>qtmaind.lib;Qt5Cored.lib;Qt5Guid.lib;Qt5Widgetsd.lib;Qt5UiToolsd.lib;Hid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>qtmaind.lib;Qt5Cored.lib;Qt5Guid.lib;Qt5Widgetsd.lib;Qt5UiToolsd.lib;Hid.lib;Bthprops.lib;SetupAPI.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <QtMoc>
       <OutputFile>.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</OutputFile>
@@ -104,7 +104,7 @@
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
       <AdditionalLibraryDirectories>$(QTDIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalDependencies>qtmain.lib;Qt5Core.lib;Qt5Gui.lib;Qt5Widgets.lib;Qt5UiTools.lib;Hid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>qtmain.lib;Qt5Core.lib;Qt5Gui.lib;Qt5Widgets.lib;Qt5UiTools.lib;SetupAPI.lib;Bthprops.lib;Hid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <QtMoc>
       <OutputFile>.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</OutputFile>
@@ -131,6 +131,7 @@
     <ClCompile Include="devicepropertiesdialog.cpp" />
     <ClCompile Include="DeviceSettings.cpp" />
     <ClCompile Include="DeviceSettingsCommon.cpp" />
+    <ClCompile Include="Ds4AutoLightColor.cpp" />
     <ClCompile Include="Ds4Color.cpp" />
     <ClCompile Include="Ds4Device.cpp" />
     <ClCompile Include="Ds4DeviceManager.cpp" />
@@ -161,6 +162,7 @@
     <ClInclude Include="DeviceProfileCache.h" />
     <ClInclude Include="DeviceSettings.h" />
     <ClInclude Include="DeviceSettingsCommon.h" />
+    <ClInclude Include="Ds4AutoLightColor.h" />
     <ClInclude Include="Ds4Buttons.h" />
     <ClInclude Include="Ds4Color.h" />
     <ClInclude Include="Ds4Device.h" />
