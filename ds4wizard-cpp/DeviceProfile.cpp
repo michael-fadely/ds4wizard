@@ -63,14 +63,25 @@ bool DeviceProfile::operator==(const DeviceProfile& other) const
 
 void DeviceProfile::readJson(const QJsonObject& json)
 {
-	// TODO DeviceSettingsCommon
-	// TODO
+	DeviceSettingsCommon::readJson(json);
+
+	Name            = json["name"].toString().toStdString();
+	ExclusiveMode   = json["exclusiveMode"].toBool();
+	UseXInput       = json["useXInput"].toBool();
+	AutoXInputIndex = json["autoXInput"].toBool();
+	XInputIndex     = json["xInputIndex"].toInt();
+
 }
 
 void DeviceProfile::writeJson(QJsonObject& json) const
 {
-	// TODO DeviceSettingsCommon
-	// TODO
+	DeviceSettingsCommon::writeJson(json);
+
+	json["name"]          = Name.c_str();
+	json["exclusiveMode"] = ExclusiveMode;
+	json["useXInput"]     = UseXInput;
+	json["autoXInput"]    = AutoXInputIndex;
+	json["xInputIndex"]   = XInputIndex;
 }
 
 DeviceProfile DeviceProfile::Default()

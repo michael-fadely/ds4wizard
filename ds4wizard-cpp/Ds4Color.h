@@ -1,8 +1,9 @@
 #pragma once
 
 #include <cstdint>
+#include "JsonData.h"
 
-struct Ds4Color
+struct Ds4Color : JsonData
 {
 	uint8_t Red;
 	uint8_t Green;
@@ -16,4 +17,6 @@ struct Ds4Color
 	bool operator!=(const Ds4Color& other) const;
 
 	static Ds4Color lerp(const Ds4Color& a, const Ds4Color& b, float f);
+	void readJson(const QJsonObject& json) override;
+	void writeJson(QJsonObject& json) const override;
 };

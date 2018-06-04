@@ -5,8 +5,7 @@ DeviceSettings::DeviceSettings()
 {
 	UseProfileLight = false;
 	UseProfileIdle  = false;
-	// TODO
-	//Idle = DeviceIdleOptions::Default;
+	Idle            = DeviceIdleOptions::Default;
 }
 
 DeviceSettings::DeviceSettings(const DeviceSettings& s)
@@ -29,9 +28,15 @@ bool DeviceSettings::operator==(const DeviceSettings& other) const
 	       Idle == other.Idle;
 }
 
+bool DeviceSettings::operator!=(const DeviceSettings& other) const
+{
+	return !(*this == other);
+}
+
 void DeviceSettings::readJson(const QJsonObject& json)
 {
-	// TODO DeviceSettingsCommon
+	DeviceSettingsCommon::readJson(json);
+
 	Name            = json["name"].toString().toStdString();
 	Profile         = json["profile"].toString().toStdString();
 	UseProfileLight = json["useProfileLight"].toBool();
@@ -41,7 +46,8 @@ void DeviceSettings::readJson(const QJsonObject& json)
 
 void DeviceSettings::writeJson(QJsonObject& json) const
 {
-	// TODO DeviceSettingsCommon
+	DeviceSettingsCommon::writeJson(json);
+
 	json["name"]            = QString::fromStdString(Name);
 	json["profile"]         = QString::fromStdString(Profile);
 	json["useProfileLight"] = UseProfileLight;

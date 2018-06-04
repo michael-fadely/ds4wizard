@@ -66,3 +66,15 @@ bool DeviceSettingsCommon::operator!=(const DeviceSettingsCommon& other) const
 {
 	return !(*this == other);
 }
+
+void DeviceSettingsCommon::readJson(const QJsonObject& json)
+{
+}
+
+void DeviceSettingsCommon::writeJson(QJsonObject& json) const
+{
+	json["light"] = Light.toJson();
+	json["idle"] = Idle.toJson();
+	json["notifyFullyCharged"] = NotifyFullyCharged;
+	json["notifyBatteryLow"] = NotifyFullyCharged;
+}

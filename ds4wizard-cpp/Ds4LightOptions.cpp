@@ -31,3 +31,19 @@ bool Ds4LightOptions::operator!=(const Ds4LightOptions& other) const
 {
 	return !(*this == other);
 }
+
+void Ds4LightOptions::readJson(const QJsonObject& json)
+{
+	AutomaticColor  = json["automaticColor"].toBool();
+	Color           = fromJson<Ds4Color>(json["color"].toObject());
+	IdleFade        = json["idleFade"].toBool();
+	LowBatteryColor = fromJson<Ds4Color>(json["lowBatteryColor"].toObject());
+}
+
+void Ds4LightOptions::writeJson(QJsonObject& json) const
+{
+	json["automaticColor"]  = AutomaticColor;
+	json["color"]           = Color.toJson();
+	json["idleFade"]        = IdleFade;
+	json["lowBatteryColor"] = LowBatteryColor.toJson();
+}

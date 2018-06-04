@@ -8,7 +8,7 @@
 #include "Ds4TouchRegion.h"
 #include "InputMap.h"
 
-class DeviceProfile : public DeviceSettingsCommon, public JsonData
+class DeviceProfile : public DeviceSettingsCommon
 {
 public:
 	std::string FileName() const;
