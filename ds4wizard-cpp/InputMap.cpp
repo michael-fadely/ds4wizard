@@ -391,5 +391,5 @@ void InputMap::writeJson(QJsonObject& json) const
 	json["simulatorType"]  = simulatorType._to_string();
 	json["action"]         = action._to_string();
 	json["mouseAxes"]      = mouseAxes.toJson();
-	json["xinputAxes"]     = xinputAxes.toJson()
+	json["xinputAxes"]     = xinputAxes.toJson();
 }
