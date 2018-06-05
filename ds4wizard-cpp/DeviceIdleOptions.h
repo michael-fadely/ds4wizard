@@ -11,12 +11,12 @@ struct DeviceIdleOptions : JsonData
 	using clock = std::chrono::high_resolution_clock;
 	static const DeviceIdleOptions Default;
 
-	clock::duration Timeout    = std::chrono::minutes(5);
-	bool            Disconnect = true;
-	TimeUnit        Unit       = TimeUnit::minutes;
+	std::chrono::nanoseconds Timeout = std::chrono::minutes(5);
+	bool Disconnect = true;
+	TimeUnit Unit = TimeUnit::minutes;
 
 	DeviceIdleOptions() = default;
-	DeviceIdleOptions(clock::duration timeout, bool disconnect, TimeUnit unit);
+	DeviceIdleOptions(std::chrono::nanoseconds timeout, bool disconnect, TimeUnit unit);
 	DeviceIdleOptions(const DeviceIdleOptions& other);
 
 	bool operator==(const DeviceIdleOptions& other) const;

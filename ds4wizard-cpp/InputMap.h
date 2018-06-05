@@ -1,21 +1,20 @@
 #pragma once
 #include "Pressable.h"
 #include "Stopwatch.h"
-#include "Ds4Buttons.h"
 #include "AxisOptions.h"
 #include "XInputGamepad.h"
 
-class InputMapBase : public Pressable
+class InputMapBase : public Pressable, public JsonData
 {
 public:
 	/*[JsonIgnore]*/ bool IsToggled = false;
 
 	/*[JsonIgnore]*/
-	bool PerformRapidFire() const { return rapidStopwatch.elapsed() >= RapidFireInterval; }
+	bool PerformRapidFire() const;
 
 private:
 	/*[JsonIgnore]*/ bool rapidFiring = false;
-	/*[JsonIgnore]*/ PressedState rapidState = PressedState::Off;
+	/*[JsonIgnore]*/ PressedState rapidState = PressedState::off;
 	/*[JsonIgnore]*/ Stopwatch rapidStopwatch;
 
 public:
@@ -31,7 +30,7 @@ public:
 	/*[JsonIgnore]*/
 	bool IsPersistent() const;
 
-	InputType_t InputType = 0;
+	InputType_t inputType = 0;
 
 	Ds4Buttons_t InputButtons = 0;
 	Ds4Axis_t    InputAxis = 0;
@@ -41,7 +40,7 @@ public:
 	bool RapidFire = false;
 
 	// TODO: /!\ fix TimeSpan.ToString rounding
-	std::chrono::high_resolution_clock::duration RapidFireInterval {};
+	std::chrono::nanoseconds RapidFireInterval {};
 
 	std::unordered_map<Ds4Axis_t, InputAxisOptions> InputAxisOptions;
 
@@ -65,6 +64,9 @@ public:
 	bool operator==(const InputMapBase& other) const;
 	bool operator!=(const InputMapBase& other) const;
 
+	virtual void readJson(const QJsonObject& json) override;
+	virtual void writeJson(QJsonObject& json) const override;
+
 	// TODO
 #if 0
 	public override string ToString()
@@ -78,7 +80,7 @@ public:
 			return builder.ToString();
 		}
 
-		if ((InputType & InputType.Button) != 0)
+		if ((InputType & InputType.button) != 0)
 		{
 			if (InputButtons != null)
 			{
@@ -86,7 +88,7 @@ public:
 			}
 		}
 
-		if ((InputType & InputType.Axis) != 0 && InputAxis.HasValue)
+		if ((InputType & InputType.axis) != 0 && InputAxis.HasValue)
 		{
 			foreach (Ds4Axis bit in Enum.GetValues(typeof(Ds4Axis)))
 			{
@@ -114,7 +116,7 @@ public:
 			}
 		}
 
-		if ((InputType & InputType.TouchRegion) != 0)
+		if ((InputType & InputType.touchRegion) != 0)
 		{
 			builder.Append(InputRegion);
 		}
@@ -145,19 +147,21 @@ public:
 
 	bool operator==(const InputModifier& other) const;
 	bool operator!=(const InputModifier& other) const;
+	void readJson(const QJsonObject& json) override;
+	void writeJson(QJsonObject& json) const override;
 };
 
 class InputMap : public InputMapBase
 {
 public:
-	SimulatorType SimulatorType;
-	OutputType_t  OutputType;
+	SimulatorType simulatorType = SimulatorType::none;
+	OutputType_t  outputType = 0;
 
-	ActionType Action = ActionType::None;
+	ActionType action = ActionType::none;
 
 	#pragma region Touch
 
-	Direction_t TouchDirection;
+	Direction_t touchDirection = 0;
 
 	#pragma endregion
 
@@ -170,7 +174,7 @@ public:
 
 	#pragma region Mouse
 
-	MouseAxes MouseAxes;
+	MouseAxes mouseAxes;
 	// TODO: use internal mouse button bitfield
 	// TODO: MouseButton? MouseButton;
 
@@ -178,8 +182,8 @@ public:
 
 	#pragma region XInput
 
-	XInputButtons_t XInputButtons;
-	XInputAxes      XInputAxes;
+	XInputButtons_t xinputButtons = 0;
+	XInputAxes      xinputAxes;
 
 	#pragma endregion
 
@@ -197,6 +201,9 @@ public:
 
 	bool operator==(const InputMap& other) const;
 	bool operator!=(const InputMap& other) const;
+
+	void readJson(const QJsonObject& json) override;
+	void writeJson(QJsonObject& json) const override;
 
 	// TODO
 #if 0
@@ -237,7 +244,7 @@ public:
 					builder.Append(", ");
 				}
 
-				builder.AppendFormat("Axis: {0}", XInputAxes);
+				builder.AppendFormat("axis: {0}", XInputAxes);
 				appended = true;
 			}
 		}
@@ -285,7 +292,7 @@ public:
 			if (MouseButton != null)
 			{
 				hasButtons = true;
-				builder.AppendFormat("Button: {0}", MouseButton.Value);
+				builder.AppendFormat("button: {0}", MouseButton.Value);
 			}
 
 			if (MouseAxes != null)

@@ -106,7 +106,7 @@ float Ds4TouchRegion::GetTouchDelta(Ds4Buttons_t sender, Direction_t direction, 
 	short x = std::clamp(point.X, Left, Right);
 	short y = std::clamp(point.Y, Top, Bottom);
 
-	if (Type == Ds4TouchRegionType::StickAutoCenter)
+	if (Type == +Ds4TouchRegionType::StickAutoCenter)
 	{
 		Ds4Vector2 start = GetStartPoint(sender);
 
@@ -120,16 +120,16 @@ float Ds4TouchRegion::GetTouchDelta(Ds4Buttons_t sender, Direction_t direction, 
 
 		switch (direction)
 		{
-			case Direction::Up:
+			case Direction::up:
 				result = std::abs(std::clamp(std::clamp(y - sy, -height, height) / static_cast<float>(height), -1.0f, 0.0f));
 				break;
-			case Direction::Down:
+			case Direction::down:
 				result = std::clamp(std::clamp(y - sy, -height, height) / static_cast<float>(height), 0.0f, 1.0f);
 				break;
-			case Direction::Left:
+			case Direction::left:
 				result = std::abs(std::clamp(std::clamp(x - sx, -width, width) / static_cast<float>(width), -1.0f, 0.0f));
 				break;
-			case Direction::Right:
+			case Direction::right:
 				result = std::clamp(std::clamp(x - sx, -width, width) / static_cast<float>(width), 0.0f, 1.0f);
 				break;
 			default:
@@ -153,19 +153,19 @@ float Ds4TouchRegion::GetTouchDelta(Ds4Buttons_t sender, Direction_t direction, 
 
 		switch (direction)
 		{
-			case Direction::Up:
+			case Direction::up:
 				//result = std::abs(((y - cy).Clamp(-height, height) / (float)cy).Clamp(-1.0f, 0.0f));
 				result = std::abs(std::clamp(std::clamp(y - cy, -height, height) / static_cast<float>(cy), -1.0f, 0.f));
 				break;
-			case Direction::Down:
+			case Direction::down:
 				//result = ((y - cy).Clamp(-height, height) / (float)cy).Clamp(0.0f, 1.0f);
 				result = std::clamp(std::clamp(y - cy, -height, height) / static_cast<float>(cy), 0.f, 1.f);
 				break;
-			case Direction::Left:
+			case Direction::left:
 				//result = std::abs(((x - cx).Clamp(-width, width) / (float)cx).Clamp(-1.0f, 0.0f));
 				result = std::abs(std::clamp(std::clamp(x - cx, -width, width) / static_cast<float>(cx), -1.0f, 0.f));
 				break;
-			case Direction::Right:
+			case Direction::right:
 				//result = ((x - cx).Clamp(-width, width) / (float)cx).Clamp(0.0f, 1.0f);
 				result = std::clamp(std::clamp(x - cx, -width, width) / static_cast<float>(cx), 0.f, 1.f);
 				break;
@@ -179,7 +179,7 @@ float Ds4TouchRegion::GetTouchDelta(Ds4Buttons_t sender, Direction_t direction, 
 
 float Ds4TouchRegion::GetDeadZone(Direction_t direction)
 {
-	return TouchAxisOptions[direction].DeadZone;
+	return TouchAxisOptions[direction].deadZone;
 }
 
 void Ds4TouchRegion::ApplyDeadZone(Direction_t direction, float& analog)
@@ -201,4 +201,27 @@ bool Ds4TouchRegion::operator==(const Ds4TouchRegion& other) const
 bool Ds4TouchRegion::operator!=(const Ds4TouchRegion& other) const
 {
 	return !(*this == other);
+}
+
+void Ds4TouchRegion::readJson(const QJsonObject& json)
+{
+}
+
+void Ds4TouchRegion::writeJson(QJsonObject& json) const
+{
+	json["type"]           = Type._to_string();
+	json["allowCrossOver"] = AllowCrossOver;
+	json["left"]           = Left;
+	json["top"]            = Top;
+	json["right"]          = Right;
+	json["bottom"]         = Bottom;
+
+	QJsonArray array;
+
+	for (const auto& option : TouchAxisOptions)
+	{
+		// TODO
+	}
+
+	json["touchAxisOptions"] = array;
 }

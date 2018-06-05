@@ -1,27 +1,23 @@
 #pragma once
 
 #include <unordered_map>
+
+#include <enum.h>
+
 #include "enums.h"
-#include "Ds4Buttons.h"
 #include "Ds4InputData.h"
 #include "Pressable.h"
 #include "AxisOptions.h"
+#include "JsonData.h"
 
-enum class Ds4TouchRegionType
-{
-	// TODO: TrackPad
-	// TODO: TrackBall (surface friction, constant friction, "haptic" feedback)
-	// TODO: Slider
-	// TODO: Make auto-center an option instead of type?
+// TODO: TrackPad
+// TODO: TrackBall (surface friction, constant friction, "haptic" feedback)
+// TODO: Slider
+// TODO: Make auto-center an option instead of type?
 
-	None,
-	Button,
-	Stick,
-	StickAutoCenter
-};
+BETTER_ENUM(Ds4TouchRegionType, int, None, Button, Stick, StickAutoCenter)
 
-// TODO: JsonData
-class Ds4TouchRegion
+class Ds4TouchRegion : public JsonData
 {
 	/*[JsonIgnore]*/ Ds4Vector2 PointStart1 {};
 	/*[JsonIgnore]*/ Ds4Vector2 PointStart2 {};
@@ -60,4 +56,6 @@ public:
 	void ApplyDeadZone(Direction_t direction, float& analog);
 	bool operator==(const Ds4TouchRegion& other) const;
 	bool operator!=(const Ds4TouchRegion& other) const;
+	void readJson(const QJsonObject& json) override;
+	void  writeJson(QJsonObject& json) const override;
 };

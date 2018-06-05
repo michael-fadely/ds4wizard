@@ -90,31 +90,31 @@ void Ds4Input::Update(const gsl::span<uint8_t>& buffer, int i)
 
 	switch (Data.DPad)
 	{
-		case Hat::North:
+		case Hat::north:
 			_addButton(1, Ds4Buttons::Up);
 			break;
-		case Hat::NorthEast:
+		case Hat::northEast:
 			_addButton(1, Ds4Buttons::Up | Ds4Buttons::Right);
 			break;
-		case Hat::East:
+		case Hat::east:
 			_addButton(1, Ds4Buttons::Right);
 			break;
-		case Hat::SouthEast:
+		case Hat::southEast:
 			_addButton(1, Ds4Buttons::Right | Ds4Buttons::Down);
 			break;
-		case Hat::South:
+		case Hat::south:
 			_addButton(1, Ds4Buttons::Down);
 			break;
-		case Hat::SouthWest:
+		case Hat::southWest:
 			_addButton(1, Ds4Buttons::Down | Ds4Buttons::Left);
 			break;
-		case Hat::West:
+		case Hat::west:
 			_addButton(1, Ds4Buttons::Left);
 			break;
-		case Hat::NorthWest:
+		case Hat::northWest:
 			_addButton(1, Ds4Buttons::Left | Ds4Buttons::Up);
 			break;
-		case Hat::None:
+		case Hat::none:
 			break;
 		default:
 			_addButton(1, lastDpad);
@@ -211,7 +211,7 @@ float Ds4Input::GetAxis(Ds4Axis_t axis, AxisPolarity* polarity) const
 		return result;
 	}
 
-	if (*polarity == AxisPolarity::Negative)
+	if (*polarity == +AxisPolarity::negative)
 	{
 		result = -result;
 	}

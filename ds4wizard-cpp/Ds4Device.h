@@ -55,7 +55,7 @@ private:
 	Ds4LightOptions activeLight;
 
 	bool DisconnectOnIdle() const;
-	DeviceIdleOptions::clock::duration IdleTimeout() const;
+	std::chrono::nanoseconds IdleTimeout() const;
 	bool IsIdle() const;
 
 public:

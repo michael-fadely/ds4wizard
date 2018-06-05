@@ -31,6 +31,5 @@ public:
 
 	void readJson(const QJsonObject& json) override;
 	void writeJson(QJsonObject& json) const override;
-	// TODO
 	static DeviceProfile Default();
 };

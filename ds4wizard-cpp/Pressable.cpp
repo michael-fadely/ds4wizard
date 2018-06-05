@@ -10,13 +10,13 @@ void Pressable::Press(PressedState& state)
 {
 	switch (state)
 	{
-		case PressedState::Off:
-		case PressedState::Released:
-			state = PressedState::Pressed;
+		case PressedState::off:
+		case PressedState::released:
+			state = PressedState::pressed;
 			break;
 
 		default:
-			state = PressedState::On;
+			state = PressedState::on;
 			break;
 	}
 }
@@ -25,20 +25,20 @@ void Pressable::Release(PressedState& state)
 {
 	switch (state)
 	{
-		case PressedState::On:
-		case PressedState::Pressed:
-			state = PressedState::Released;
+		case PressedState::on:
+		case PressedState::pressed:
+			state = PressedState::released;
 			break;
 
 		default:
-			state = PressedState::Off;
+			state = PressedState::off;
 			break;
 	}
 }
 
 bool Pressable::IsActiveState(PressedState state)
 {
-	return state == PressedState::On || state == PressedState::Pressed;
+	return state == PressedState::on || state == PressedState::pressed;
 }
 
 void Pressable::Press()

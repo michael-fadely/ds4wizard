@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "AxisOptions.h"
+#include <sstream>
 
 AxisOptions::AxisOptions(AxisPolarity polarity)
 {
@@ -22,6 +23,18 @@ bool AxisOptions::operator!=(const AxisOptions& other) const
 	return !(*this == other);
 }
 
+void AxisOptions::readJson(const QJsonObject& json)
+{
+	Multiplier = static_cast<float>(json["multiplier"].toDouble());
+	Polarity   = AxisPolarity::_from_string(json["polarity"].toString().toStdString().c_str()); // oh god
+}
+
+void AxisOptions::writeJson(QJsonObject& json) const
+{
+	json["multiplier"] = Multiplier;
+	json["polarity"] = Polarity._to_string();
+}
+
 InputAxisOptions::InputAxisOptions(AxisPolarity polarity)
 	: AxisOptions(polarity)
 {
@@ -30,28 +43,28 @@ InputAxisOptions::InputAxisOptions(AxisPolarity polarity)
 InputAxisOptions::InputAxisOptions(const InputAxisOptions& other)
 	: AxisOptions(other)
 {
-	Invert       = other.Invert;
-	DeadZoneMode = other.DeadZoneMode;
-	DeadZone     = other.DeadZone;
+	invert       = other.invert;
+	deadZoneMode = other.deadZoneMode;
+	deadZone     = other.deadZone;
 }
 
 void InputAxisOptions::ApplyDeadZone(float& analog) const
 {
-	switch (DeadZoneMode::Scale)
+	switch (deadZoneMode)
 	{
-		case DeadZoneMode::HardLimit:
-			analog = analog >= DeadZone ? analog : 0.0f;
+		case DeadZoneMode::hardLimit:
+			analog = analog >= deadZone ? analog : 0.0f;
 			break;
 
-		case DeadZoneMode::Scale:
-			analog = std::max(0.0f, (analog - DeadZone) / (1.0f - DeadZone));
+		case DeadZoneMode::scale:
+			analog = std::max(0.0f, (analog - deadZone) / (1.0f - deadZone));
 			break;
 
 		default:
 			throw /*new ArgumentOutOfRangeException(nameof(DeadZoneMode), DeadZoneMode, "Invalid deadzone mode.")*/;
 	}
 
-	if (Invert == true)
+	if (invert == true)
 	{
 		analog = 1.0f - analog;
 	}
@@ -62,14 +75,32 @@ void InputAxisOptions::ApplyDeadZone(float& analog) const
 bool InputAxisOptions::operator==(const InputAxisOptions& other) const
 {
 	return AxisOptions::operator==(other)
-	       && Invert == other.Invert
-	       && DeadZoneMode == other.DeadZoneMode
-	       && DeadZone == other.DeadZone;
+	       && invert == other.invert
+	       && deadZoneMode == other.deadZoneMode
+	       && deadZone == other.deadZone;
 }
 
 bool InputAxisOptions::operator!=(const InputAxisOptions& other) const
 {
 	return !(*this == other);
+}
+
+void InputAxisOptions::readJson(const QJsonObject& json)
+{
+	AxisOptions::readJson(json);
+
+	invert       = json["invert"].toBool();
+	deadZoneMode = DeadZoneMode::_from_string(json["deadZoneMode"].toString("scale").toStdString().c_str()); // I feel dirty
+	deadZone     = static_cast<float>(json["deadZone"].toDouble());
+}
+
+void InputAxisOptions::writeJson(QJsonObject& json) const
+{
+	AxisOptions::writeJson(json);
+
+	json["invert"]       = invert;
+	json["deadZoneMode"] = deadZoneMode._to_string();
+	json["deadZone"]     = deadZone;
 }
 
 XInputAxes::XInputAxes(const XInputAxes& other)
@@ -115,6 +146,38 @@ bool XInputAxes::operator!=(const XInputAxes& other) const
 	return !(*this == other);
 }
 
+void XInputAxes::readJson(const QJsonObject& json)
+{
+	auto axes_ = json["axes"].toString().toStdString();
+
+	deserializeFlags(XInputAxis)(axes_, Axes);
+
+	auto options_ = json["options"].toObject();
+
+	for (auto& key : options_.keys())
+	{
+		auto stdstr = key.toStdString();
+		XInputAxis_t value;
+		deserializeFlags(XInputAxis)(stdstr, value);
+		Options[value] = fromJson<AxisOptions>(options_[key].toObject());
+	}
+}
+
+void XInputAxes::writeJson(QJsonObject& json) const
+{
+	json["axes"] = serializeFlags(XInputAxis)(Axes).c_str();
+
+	QJsonObject options_;
+
+	for (const auto& pair : Options)
+	{
+		auto key = serializeFlags(XInputAxis)(pair.first);
+		options_[key.c_str()] = pair.second.toJson();
+	}
+
+	json["options"] = options_;
+}
+
 MouseAxes::MouseAxes(const MouseAxes& other)
 {
 	Directions = other.Directions;
@@ -152,4 +215,14 @@ bool MouseAxes::operator==(const MouseAxes& other) const
 {
 	return Directions == other.Directions
 	       && Options == other.Options;
+}
+
+void MouseAxes::readJson(const QJsonObject& json)
+{
+	throw; // TODO
+}
+
+void MouseAxes::writeJson(QJsonObject& json) const
+{
+	throw; // TODO
 }

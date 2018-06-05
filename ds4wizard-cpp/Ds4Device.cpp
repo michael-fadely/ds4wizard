@@ -22,7 +22,7 @@ bool Ds4Device::DisconnectOnIdle() const
 	return Settings.UseProfileIdle ? Profile.Idle.Disconnect : Settings.Idle.Disconnect;
 }
 
-DeviceIdleOptions::clock::duration Ds4Device::IdleTimeout() const
+nanoseconds Ds4Device::IdleTimeout() const
 {
 	return Settings.UseProfileIdle ? Profile.Idle.Timeout : Settings.Idle.Timeout;
 }
@@ -511,8 +511,8 @@ void Ds4Device::Run()
 	const bool bluetooth = BluetoothConnected();
 
 	const ConnectionType preferredConnection = Program::settings.preferredConnection;
-	const bool useUsb = usb && (preferredConnection == ConnectionType(ConnectionType::usb) || !bluetooth);
-	const bool useBluetooth = bluetooth && (preferredConnection == ConnectionType(ConnectionType::bluetooth)|| !usb);
+	const bool useUsb = usb && (preferredConnection == +ConnectionType::usb || !bluetooth);
+	const bool useBluetooth = bluetooth && (preferredConnection == +ConnectionType::bluetooth|| !usb);
 
 	DataReceived = false;
 

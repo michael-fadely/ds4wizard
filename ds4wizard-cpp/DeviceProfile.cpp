@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "DeviceProfile.h"
 
+using namespace std::chrono;
+
 std::string DeviceProfile::FileName() const
 {
 	// TODO
@@ -69,8 +71,23 @@ void DeviceProfile::readJson(const QJsonObject& json)
 	ExclusiveMode   = json["exclusiveMode"].toBool();
 	UseXInput       = json["useXInput"].toBool();
 	AutoXInputIndex = json["autoXInput"].toBool();
-	XInputIndex     = json["xInputIndex"].toInt();
+	XInputIndex     = json["xinputIndex"].toInt();
 
+	// TouchRegions
+
+	auto bindings_ = json["bindings"].toArray();
+
+	for (auto& value : bindings_)
+	{
+		Bindings.push_back(fromJson<InputMap>(value.toObject()));
+	}
+
+	auto modifiers_ = json["modifiers"].toArray();
+
+	for (auto& value : modifiers_)
+	{
+		Modifiers.push_back(fromJson<InputModifier>(value.toObject()));
+	}
 }
 
 void DeviceProfile::writeJson(QJsonObject& json) const
@@ -81,393 +98,858 @@ void DeviceProfile::writeJson(QJsonObject& json) const
 	json["exclusiveMode"] = ExclusiveMode;
 	json["useXInput"]     = UseXInput;
 	json["autoXInput"]    = AutoXInputIndex;
-	json["xInputIndex"]   = XInputIndex;
+	json["xinputIndex"]   = XInputIndex;
+
+	// TouchRegions
+	// Bindings
+	// Modifiers
 }
+
+#pragma region trash
+const char* a = "{" \
+"  \"exclusiveMode\": true," \
+"  \"usexinput\": true," \
+"  \"autoxinputIndex\": true," \
+"  \"xinputIndex\": 0," \
+"  \"touchRegions\": {" \
+"    \"Left Half\": {" \
+"      \"type\": \"button\"," \
+"      \"allowCrossOver\": false," \
+"      \"left\": 0," \
+"      \"top\": 0," \
+"      \"right\": 959," \
+"      \"bottom\": 941" \
+"    }," \
+"    \"Right Half\": {" \
+"      \"type\": \"stickAutoCenter\"," \
+"      \"allowCrossOver\": false," \
+"      \"left\": 960," \
+"      \"top\": 0," \
+"      \"right\": 1919," \
+"      \"bottom\": 941," \
+"      \"touchAxisoptions\": {" \
+"        \"up\": {" \
+"          \"deadZone\": 0.25" \
+"        }," \
+"        \"down\": {" \
+"          \"deadZone\": 0.25" \
+"        }," \
+"        \"left\": {" \
+"          \"deadZone\": 0.25" \
+"        }," \
+"        \"right\": {" \
+"          \"deadZone\": 0.25" \
+"        }" \
+"      }" \
+"    }" \
+"  }," \
+"  \"bindings\": [" \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"touchDirection\": \"up\"," \
+"      \"xinputButtons\": \"dPadUp\"," \
+"      \"inputType\": \"touchRegion\"," \
+"      \"inputRegion\": \"Right Half\"" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"touchDirection\": \"down\"," \
+"      \"xinputButtons\": \"dPadDown\"," \
+"      \"inputType\": \"touchRegion\"," \
+"      \"inputRegion\": \"Right Half\"" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"touchDirection\": \"left\"," \
+"      \"xinputButtons\": \"dPadLeft\"," \
+"      \"inputType\": \"touchRegion\"," \
+"      \"inputRegion\": \"Right Half\"" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"touchDirection\": \"right\"," \
+"      \"xinputButtons\": \"dPadRight\"," \
+"      \"inputType\": \"touchRegion\"," \
+"      \"inputRegion\": \"Right Half\"" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputButtons\": \"a\"," \
+"      \"inputType\": \"button\"," \
+"      \"inputButtons\": \"cross\"" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputButtons\": \"b\"," \
+"      \"inputType\": \"button\"," \
+"      \"inputButtons\": \"circle\"" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputButtons\": \"x\"," \
+"      \"inputType\": \"button\"," \
+"      \"inputButtons\": \"square\"" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputButtons\": \"y\"," \
+"      \"inputType\": \"button\"," \
+"      \"inputButtons\": \"triangle\"" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputButtons\": \"leftShoulder\"," \
+"      \"inputType\": \"button\"," \
+"      \"inputButtons\": \"l1\"" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputButtons\": \"rightShoulder\"," \
+"      \"inputType\": \"button\"," \
+"      \"inputButtons\": \"r1\"" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputButtons\": \"leftThumb\"," \
+"      \"inputType\": \"button\"," \
+"      \"inputButtons\": \"l3\"" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputButtons\": \"rightThumb\"," \
+"      \"inputType\": \"button\"," \
+"      \"inputButtons\": \"r3\"" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputButtons\": \"start\"," \
+"      \"inputType\": \"button\"," \
+"      \"inputButtons\": \"options\"" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputButtons\": \"back\"," \
+"      \"inputType\": \"button\"," \
+"      \"inputButtons\": \"share\"" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputButtons\": \"dPadUp\"," \
+"      \"inputType\": \"button\"," \
+"      \"inputButtons\": \"up\"" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputButtons\": \"dPadDown\"," \
+"      \"inputType\": \"button\"," \
+"      \"inputButtons\": \"down\"" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputButtons\": \"dPadLeft\"," \
+"      \"inputType\": \"button\"," \
+"      \"inputButtons\": \"left\"" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputButtons\": \"dPadRight\"," \
+"      \"inputType\": \"button\"," \
+"      \"inputButtons\": \"right\"" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputButtons\": \"guide\"," \
+"      \"inputType\": \"button\"," \
+"      \"inputButtons\": \"ps\"" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputAxes\": {" \
+"        \"axes\": \"leftStickY\"," \
+"        \"options\": {" \
+"          \"leftStickY\": {" \
+"            \"polarity\": \"positive\"" \
+"          }" \
+"        }" \
+"      }," \
+"      \"inputType\": \"axis\"," \
+"      \"inputAxis\": \"leftStickY\"," \
+"      \"inputAxisOptions\": {" \
+"        \"leftStickY\": {" \
+"          \"polarity\": \"positive\"" \
+"        }" \
+"      }" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputAxes\": {" \
+"        \"axes\": \"leftStickY\"," \
+"        \"options\": {" \
+"          \"leftStickY\": {" \
+"            \"polarity\": \"negative\"" \
+"          }" \
+"        }" \
+"      }," \
+"      \"inputType\": \"axis\"," \
+"      \"inputAxis\": \"leftStickY\"," \
+"      \"inputAxisOptions\": {" \
+"        \"leftStickY\": {" \
+"          \"polarity\": \"negative\"" \
+"        }" \
+"      }" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputAxes\": {" \
+"        \"axes\": \"leftStickX\"," \
+"        \"options\": {" \
+"          \"leftStickX\": {" \
+"            \"polarity\": \"positive\"" \
+"          }" \
+"        }" \
+"      }," \
+"      \"inputType\": \"axis\"," \
+"      \"inputAxis\": \"leftStickX\"," \
+"      \"inputAxisOptions\": {" \
+"        \"leftStickX\": {" \
+"          \"polarity\": \"positive\"" \
+"        }" \
+"      }" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputAxes\": {" \
+"        \"axes\": \"leftStickX\"," \
+"        \"options\": {" \
+"          \"leftStickX\": {" \
+"            \"polarity\": \"negative\"" \
+"          }" \
+"        }" \
+"      }," \
+"      \"inputType\": \"axis\"," \
+"      \"inputAxis\": \"leftStickX\"," \
+"      \"inputAxisOptions\": {" \
+"        \"leftStickX\": {" \
+"          \"polarity\": \"negative\"" \
+"        }" \
+"      }" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputAxes\": {" \
+"        \"axes\": \"rightStickY\"," \
+"        \"options\": {" \
+"          \"rightStickY\": {" \
+"            \"polarity\": \"positive\"" \
+"          }" \
+"        }" \
+"      }," \
+"      \"inputType\": \"axis\"," \
+"      \"inputAxis\": \"rightStickY\"," \
+"      \"inputAxisOptions\": {" \
+"        \"rightStickY\": {" \
+"          \"polarity\": \"positive\"" \
+"        }" \
+"      }" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputAxes\": {" \
+"        \"axes\": \"rightStickY\"," \
+"        \"options\": {" \
+"          \"rightStickY\": {" \
+"            \"polarity\": \"negative\"" \
+"          }" \
+"        }" \
+"      }," \
+"      \"inputType\": \"axis\"," \
+"      \"inputAxis\": \"rightStickY\"," \
+"      \"inputAxisOptions\": {" \
+"        \"rightStickY\": {" \
+"          \"polarity\": \"negative\"" \
+"        }" \
+"      }" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputAxes\": {" \
+"        \"axes\": \"rightStickX\"," \
+"        \"options\": {" \
+"          \"rightStickX\": {" \
+"            \"polarity\": \"positive\"" \
+"          }" \
+"        }" \
+"      }," \
+"      \"inputType\": \"axis\"," \
+"      \"inputAxis\": \"rightStickX\"," \
+"      \"inputAxisOptions\": {" \
+"        \"rightStickX\": {" \
+"          \"polarity\": \"positive\"" \
+"        }" \
+"      }" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputAxes\": {" \
+"        \"axes\": \"rightStickX\"," \
+"        \"options\": {" \
+"          \"rightStickX\": {" \
+"            \"polarity\": \"negative\"" \
+"          }" \
+"        }" \
+"      }," \
+"      \"inputType\": \"axis\"," \
+"      \"inputAxis\": \"rightStickX\"," \
+"      \"inputAxisOptions\": {" \
+"        \"rightStickX\": {" \
+"          \"polarity\": \"negative\"" \
+"        }" \
+"      }" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputAxes\": {" \
+"        \"axes\": \"leftTrigger\"" \
+"      }," \
+"      \"inputType\": \"axis\"," \
+"      \"inputAxis\": \"leftTrigger\"" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputAxes\": {" \
+"        \"axes\": \"rightTrigger\"" \
+"      }," \
+"      \"inputType\": \"axis\"," \
+"      \"inputAxis\": \"rightTrigger\"" \
+"    }" \
+"  ]," \
+"  \"modifiers\": [" \
+"    {" \
+"      \"bindings\": [" \
+"        {" \
+"          \"simulatorType\": \"input\"," \
+"          \"outputType\": \"xinput\"," \
+"          \"xinputButtons\": \"a\"," \
+"          \"inputType\": \"button\"," \
+"          \"inputButtons\": \"cross\"," \
+"          \"rapidFire\": true," \
+"          \"rapidFireInterval\": \"00:00:00.0170000\"" \
+"        }," \
+"        {" \
+"          \"simulatorType\": \"input\"," \
+"          \"outputType\": \"xinput\"," \
+"          \"xinputButtons\": \"b\"," \
+"          \"inputType\": \"button\"," \
+"          \"inputButtons\": \"circle\"," \
+"          \"rapidFire\": true," \
+"          \"rapidFireInterval\": \"00:00:00.0170000\"" \
+"        }," \
+"        {" \
+"          \"simulatorType\": \"input\"," \
+"          \"outputType\": \"xinput\"," \
+"          \"xinputButtons\": \"x\"," \
+"          \"inputType\": \"button\"," \
+"          \"inputButtons\": \"square\"," \
+"          \"rapidFire\": true," \
+"          \"rapidFireInterval\": \"00:00:00.0170000\"" \
+"        }," \
+"        {" \
+"          \"simulatorType\": \"input\"," \
+"          \"outputType\": \"xinput\"," \
+"          \"xinputButtons\": \"y\"," \
+"          \"inputType\": \"button\"," \
+"          \"inputButtons\": \"triangle\"," \
+"          \"rapidFire\": true," \
+"          \"rapidFireInterval\": \"00:00:00.0170000\"" \
+"        }," \
+"        {" \
+"          \"simulatorType\": \"input\"," \
+"          \"outputType\": \"xinput\"," \
+"          \"xinputButtons\": \"start\"," \
+"          \"inputType\": \"button\"," \
+"          \"inputButtons\": \"options\"," \
+"          \"rapidFire\": true," \
+"          \"rapidFireInterval\": \"00:00:00.0170000\"" \
+"        }," \
+"        {" \
+"          \"simulatorType\": \"input\"," \
+"          \"outputType\": \"xinput\"," \
+"          \"xinputButtons\": \"back\"," \
+"          \"inputType\": \"button\"," \
+"          \"inputButtons\": \"share\"," \
+"          \"rapidFire\": true," \
+"          \"rapidFireInterval\": \"00:00:00.0170000\"" \
+"        }" \
+"      ]," \
+"      \"inputType\": \"touchRegion\"," \
+"      \"inputRegion\": \"Left Half\"" \
+"    }," \
+"    {" \
+"      \"bindings\": [" \
+"        {" \
+"          \"simulatorType\": \"input\"," \
+"          \"outputType\": \"xinput\"," \
+"          \"xinputButtons\": \"leftThumb\"," \
+"          \"inputType\": \"button\"," \
+"          \"inputButtons\": \"touchButton\"" \
+"        }" \
+"      ]," \
+"      \"inputType\": \"touchRegion\"," \
+"      \"inputRegion\": \"Right Half\"" \
+"    }," \
+"    {" \
+"      \"bindings\": [" \
+"        {" \
+"          \"simulatorType\": \"action\"," \
+"          \"outputType\": \"none\"," \
+"          \"action\": \"bluetoothDisconnect\"," \
+"          \"inputType\": \"button\"," \
+"          \"inputButtons\": \"options\"" \
+"        }" \
+"      ]," \
+"      \"inputType\": \"button\"," \
+"      \"inputButtons\": \"ps\"" \
+"    }" \
+"  ]," \
+"  \"light\": {" \
+"    \"automaticColor\": true," \
+"    \"color\": {" \
+"      \"r\": 0," \
+"      \"g\": 0," \
+"      \"b\": 255" \
+"    }," \
+"    \"idleFade\": true" \
+"  }," \
+"  \"idle\": {" \
+"    \"disconnect\": true," \
+"    \"unit\": \"minutes\"," \
+"    \"timeSpan\": 300000" \
+"  }," \
+"  \"notifyFullyCharged\": true," \
+"  \"notifyBatteryLow\": 2," \
+"  \"name\": \"wangis\"" \
+"}";
+#pragma endregion
 
 DeviceProfile DeviceProfile::Default()
 {
-	DeviceProfile result;
-	/*
-	result.Light = Ds4LightOptions(new Ds4Color(Color.Blue));
-	result.Idle = DeviceIdleOptions(DeviceIdleOptions::Default);
+	auto obj = QJsonDocument::fromJson(QString(a).toUtf8());
+	DeviceProfile result = fromJson<DeviceProfile>(obj.object());
 
-	result.TouchRegions = new std::unordered_map<std::string, Ds4TouchRegion>
+/*
+	result.Light = Ds4LightOptions(Ds4Color(0, 0, 255));
+	result.Idle  = DeviceIdleOptions(DeviceIdleOptions::Default);
+
+	Ds4TouchRegion leftHalf(Ds4TouchRegionType::button, 0, 0, 959, 941);
+	result.TouchRegions["Left Half"] = leftHalf;
+
+	Ds4TouchRegion rightHalf(Ds4TouchRegionType::StickAutoCenter, 960, 0, 1919, 941);
+
+	InputAxisOptions touchAxes[4] = {};
+
+	for (auto& a : touchAxes)
 	{
-		{ "Left Half", new Ds4TouchRegion(Ds4TouchRegionType.Button, 0, 0, 959, 941) };
+		a.DeadZone = 0.25f;
+	}
+
+	rightHalf.TouchAxisOptions[Direction::Up]    = touchAxes[0];
+	rightHalf.TouchAxisOptions[Direction::Down]  = touchAxes[1];
+	rightHalf.TouchAxisOptions[Direction::Left]  = touchAxes[2];
+	rightHalf.TouchAxisOptions[Direction::Right] = touchAxes[3];
+
+	result.TouchRegions["Right Half"] = rightHalf;
+
+	InputModifier leftHalfModifier(InputType::touchRegion, "Left Half");
+
+	const auto rapidFireInterval = duration_cast<high_resolution_clock::duration>(duration<double, std::milli>(1000.0 / 60.0));
+	InputMap map;
+
+	map                   = InputMap(SimulatorType::Input, InputType::button, OutputType::XInput);
+	map.InputButtons      = Ds4Buttons::Cross;
+	map.RapidFire         = true;
+	map.RapidFireInterval = duration_cast<high_resolution_clock::duration>(duration<double, std::milli>(1000.0 / 60.0));
+	map.XInputButtons     = XInputButtons::A;
+
+	Modifiers.push_back(map);
+
+	map                   = InputMap(SimulatorType::Input, InputType::button, OutputType::XInput);
+	map.InputButtons      = Ds4Buttons::Circle;
+	map.RapidFire         = true;
+	map.RapidFireInterval = rapidFireInterval;
+	map.XInputButtons     = XInputButtons::B;
+
+	map                   = InputMap(SimulatorType::Input, InputType::button, OutputType::XInput);
+	map.InputButtons      = Ds4Buttons::Square;
+	map.RapidFire         = true;
+	map.RapidFireInterval = rapidFireInterval;
+	map.XInputButtons     = XInputButtons::X;
+
+	InputMap(SimulatorType::Input, InputType::button, OutputType::XInput)
 	{
-		"Right Half";
-		new Ds4TouchRegion(Ds4TouchRegionType.StickAutoCenter, 960, 0, 1919, 941)
+		InputButtons = Ds4Buttons::Triangle;
+		RapidFire = true;
+		RapidFireInterval = TimeSpan.FromMilliseconds(1000.0 / 60.0);
+		XInputButtons = XInputButtons::Y;
+	};
+	InputMap(SimulatorType::Input, InputType::button, OutputType::XInput)
+	{
+		InputButtons = Ds4Buttons::Options;
+		RapidFire = true;
+		RapidFireInterval = TimeSpan.FromMilliseconds(1000.0 / 60.0);
+		XInputButtons = XInputButtons::Start;
+	};
+	InputMap(SimulatorType::Input, InputType::button, OutputType::XInput)
+	{
+		InputButtons = Ds4Buttons::Share;
+		RapidFire = true;
+		RapidFireInterval = TimeSpan.FromMilliseconds(1000.0 / 60.0);
+		XInputButtons = XInputButtons::Back;
+	}
+
+	Modifiers = 
+	{
+		InputModifier()
 		{
-			TouchAxisOptions = new std::unordered_map<Direction, InputAxisOptions>
+			Bindings =
+			{
+				
+			}
+		};
+		InputModifier(InputType::touchRegion, "Right Half")
 		{
-			{ Direction.Up, new InputAxisOptions { DeadZone = 0.25f } };
-		{ Direction.Down, new InputAxisOptions { DeadZone = 0.25f } };
-		{ Direction.Left, new InputAxisOptions { DeadZone = 0.25f } };
-		{ Direction.Right, new InputAxisOptions { DeadZone = 0.25f } }
+			Bindings = std::list<InputMap>
+			{
+				InputMap(SimulatorType::Input, InputType::button, OutputType::XInput)
+				{
+					InputButtons  = Ds4Buttons::TouchButton;
+					XInputButtons = XInputButtons::LeftThumb
+				}
+			}
+		};
+		InputModifier(InputType::button, Ds4Buttons::PS)
+		{
+			Bindings = std::list<InputMap>
+			{
+				InputMap(SimulatorType::Action, InputType::button, OutputType::None)
+				{
+					InputButtons = Ds4Buttons::Options;
+					Action       = ActionType::BluetoothDisconnect
+				}
+			}
 		}
+	};
+
+	Bindings = 
+	{
+		#pragma region Touch Binds
+
+		InputMap(SimulatorType::Input, InputType::touchRegion, OutputType::XInput)
+		{
+			InputRegion    = "Right Half";
+			TouchDirection = Direction::Up;
+			XInputButtons  = XInputButtons::DPadUp
+		};
+		InputMap(SimulatorType::Input, InputType::touchRegion, OutputType::XInput)
+		{
+			InputRegion    = "Right Half";
+			TouchDirection = Direction::Down;
+			XInputButtons  = XInputButtons::DPadDown
+		};
+		InputMap(SimulatorType::Input, InputType::touchRegion, OutputType::XInput)
+		{
+			InputRegion    = "Right Half";
+			TouchDirection = Direction::Left;
+			XInputButtons  = XInputButtons::DPadLeft
+		};
+		InputMap(SimulatorType::Input, InputType::touchRegion, OutputType::XInput)
+		{
+			InputRegion    = "Right Half";
+			TouchDirection = Direction::Right;
+			XInputButtons  = XInputButtons::DPadRight
+		};
+
+	#pragma endregion
+
+		#pragma region Buttons
+
+		InputMap(SimulatorType::Input, InputType::button, OutputType::XInput)
+		{
+			InputButtons  = Ds4Buttons::Cross;
+			XInputButtons = XInputButtons::A
+		};
+		InputMap(SimulatorType::Input, InputType::button, OutputType::XInput)
+		{
+			InputButtons  = Ds4Buttons::Circle;
+			XInputButtons = XInputButtons::B
+		};
+		InputMap(SimulatorType::Input, InputType::button, OutputType::XInput)
+		{
+			InputButtons  = Ds4Buttons::Square;
+			XInputButtons = XInputButtons::X
+		};
+		InputMap(SimulatorType::Input, InputType::button, OutputType::XInput)
+		{
+			InputButtons  = Ds4Buttons::Triangle;
+			XInputButtons = XInputButtons::Y
+		};
+
+		InputMap(SimulatorType::Input, InputType::button, OutputType::XInput)
+		{
+			InputButtons  = Ds4Buttons::L1;
+			XInputButtons = XInputButtons::LeftShoulder
+		};
+		InputMap(SimulatorType::Input, InputType::button, OutputType::XInput)
+		{
+			InputButtons  = Ds4Buttons::R1;
+			XInputButtons = XInputButtons::RightShoulder
+		};
+		InputMap(SimulatorType::Input, InputType::button, OutputType::XInput)
+		{
+			InputButtons  = Ds4Buttons::L3;
+			XInputButtons = XInputButtons::LeftThumb
+		};
+		InputMap(SimulatorType::Input, InputType::button, OutputType::XInput)
+		{
+			InputButtons  = Ds4Buttons::R3;
+			XInputButtons = XInputButtons::RightThumb
+		};
+
+		InputMap(SimulatorType::Input, InputType::button, OutputType::XInput)
+		{
+			InputButtons  = Ds4Buttons::Options;
+			XInputButtons = XInputButtons::Start
+		};
+		InputMap(SimulatorType::Input, InputType::button, OutputType::XInput)
+		{
+			InputButtons  = Ds4Buttons::Share;
+			XInputButtons = XInputButtons::Back
+		};
+
+		InputMap(SimulatorType::Input, InputType::button, OutputType::XInput)
+		{
+			InputButtons  = Ds4Buttons::Up;
+			XInputButtons = XInputButtons::DPadUp
+		};
+		InputMap(SimulatorType::Input, InputType::button, OutputType::XInput)
+		{
+			InputButtons  = Ds4Buttons::Down;
+			XInputButtons = XInputButtons::DPadDown
+		};
+		InputMap(SimulatorType::Input, InputType::button, OutputType::XInput)
+		{
+			InputButtons  = Ds4Buttons::Left;
+			XInputButtons = XInputButtons::DPadLeft
+		};
+		InputMap(SimulatorType::Input, InputType::button, OutputType::XInput)
+		{
+			InputButtons  = Ds4Buttons::Right;
+			XInputButtons = XInputButtons::DPadRight
+		};
+
+		InputMap(SimulatorType::Input, InputType::button, OutputType::XInput)
+		{
+			InputButtons  = Ds4Buttons::PS;
+			XInputButtons = XInputButtons::Guide
+		};
+
+	#pragma endregion
+
+		#pragma region Axes
+
+		InputMap(SimulatorType::Input, InputType::axis, OutputType::XInput)
+		{
+			InputAxis = Ds4Axis::leftStickY;
+
+			InputAxisOptions = std::unordered_map<Ds4Axis, InputAxisOptions>
+			{
+				{ Ds4Axis::leftStickY, InputAxisOptions(AxisPolarity::positive) }
+			};
+
+			XInputAxes = XInputAxes
+			{
+				Axes    = XInputAxis::leftStickY;
+				Options = std::unordered_map<XInputAxis, AxisOptions>
+				{
+					{ XInputAxis::leftStickY, AxisOptions(AxisPolarity::positive) }
+				}
+			}
+		};
+		InputMap(SimulatorType::Input, InputType::axis, OutputType::XInput)
+		{
+			InputAxis = Ds4Axis::leftStickY;
+
+			InputAxisOptions = std::unordered_map<Ds4Axis, InputAxisOptions>
+			{
+				{ Ds4Axis::leftStickY, InputAxisOptions(AxisPolarity::negative) }
+			};
+
+			XInputAxes = XInputAxes
+			{
+				Axes    = XInputAxis::leftStickY;
+				Options = std::unordered_map<XInputAxis, AxisOptions>
+				{
+					{ XInputAxis::leftStickY, AxisOptions(AxisPolarity::negative) }
+				}
+			}
+		};
+		InputMap(SimulatorType::Input, InputType::axis, OutputType::XInput)
+		{
+			InputAxis = Ds4Axis::leftStickX;
+
+			InputAxisOptions = std::unordered_map<Ds4Axis, InputAxisOptions>
+			{
+				{ Ds4Axis::leftStickX, InputAxisOptions(AxisPolarity::positive) }
+			};
+
+			XInputAxes = XInputAxes
+			{
+				Axes    = XInputAxis::leftStickX;
+				Options = std::unordered_map<XInputAxis, AxisOptions>
+				{
+					{ XInputAxis::leftStickX, AxisOptions(AxisPolarity::positive) }
+				}
+			}
+		};
+		InputMap(SimulatorType::Input, InputType::axis, OutputType::XInput)
+		{
+			InputAxis = Ds4Axis::leftStickX;
+
+			InputAxisOptions = std::unordered_map<Ds4Axis, InputAxisOptions>
+			{
+				{ Ds4Axis::leftStickX, InputAxisOptions(AxisPolarity::negative) }
+			};
+
+			XInputAxes = XInputAxes
+			{
+				Axes    = XInputAxis::leftStickX;
+				Options = std::unordered_map<XInputAxis, AxisOptions>
+				{
+					{ XInputAxis::leftStickX, AxisOptions(AxisPolarity::negative) }
+				}
+			}
+		};
+
+		InputMap(SimulatorType::Input, InputType::axis, OutputType::XInput)
+		{
+			InputAxis = Ds4Axis::rightStickY;
+
+			InputAxisOptions = std::unordered_map<Ds4Axis, InputAxisOptions>
+			{
+				{ Ds4Axis::rightStickY, InputAxisOptions(AxisPolarity::positive) }
+			};
+
+			XInputAxes = XInputAxes
+			{
+				Axes    = XInputAxis::rightStickY;
+				Options = std::unordered_map<XInputAxis, AxisOptions>
+				{
+					{ XInputAxis::rightStickY, AxisOptions(AxisPolarity::positive) }
+				}
+			}
+		};
+		InputMap(SimulatorType::Input, InputType::axis, OutputType::XInput)
+		{
+			InputAxis = Ds4Axis::rightStickY;
+
+			InputAxisOptions = std::unordered_map<Ds4Axis, InputAxisOptions>
+			{
+				{ Ds4Axis::rightStickY, InputAxisOptions(AxisPolarity::negative) }
+			};
+
+			XInputAxes = XInputAxes
+			{
+				Axes    = XInputAxis::rightStickY;
+				Options = std::unordered_map<XInputAxis, AxisOptions>
+				{
+					{ XInputAxis::rightStickY, AxisOptions(AxisPolarity::negative) }
+				}
+			}
+		};
+		InputMap(SimulatorType::Input, InputType::axis, OutputType::XInput)
+		{
+			InputAxis = Ds4Axis::rightStickX;
+
+			InputAxisOptions = std::unordered_map<Ds4Axis, InputAxisOptions>
+			{
+				{ Ds4Axis::rightStickX, InputAxisOptions(AxisPolarity::positive) }
+			};
+
+			XInputAxes = XInputAxes
+			{
+				Axes    = XInputAxis::rightStickX;
+				Options = std::unordered_map<XInputAxis, AxisOptions>
+				{
+					{ XInputAxis::rightStickX, AxisOptions(AxisPolarity::positive) }
+				}
+			}
+		};
+		InputMap(SimulatorType::Input, InputType::axis, OutputType::XInput)
+		{
+			InputAxis = Ds4Axis::rightStickX;
+
+			InputAxisOptions = std::unordered_map<Ds4Axis, InputAxisOptions>
+			{
+				{ Ds4Axis::rightStickX, InputAxisOptions(AxisPolarity::negative) }
+			};
+
+			XInputAxes = XInputAxes
+			{
+				Axes    = XInputAxis::rightStickX;
+				Options = std::unordered_map<XInputAxis, AxisOptions>
+				{
+					{ XInputAxis::rightStickX, AxisOptions(AxisPolarity::negative) }
+				}
+			}
+		};
+
+		InputMap(SimulatorType::Input, InputType::axis, OutputType::XInput)
+		{
+			InputAxis  = Ds4Axis::leftTrigger;
+			XInputAxes = XInputAxes
+			{
+				Axes = XInputAxis::leftTrigger
+			}
+		};
+		InputMap(SimulatorType::Input, InputType::axis, OutputType::XInput)
+		{
+			InputAxis  = Ds4Axis::rightTrigger;
+			XInputAxes = XInputAxes
+			{
+				Axes = XInputAxis::rightTrigger
+			}
 		}
-	}
-	};
 
-	Modifiers = new std::list<InputModifier>
-	{
-		new InputModifier(InputType.TouchRegion, "Left Half")
-	{
-		Bindings = new std::list<InputMap>
-	{
-		new InputMap(SimulatorType.Input, InputType.Button, OutputType.XInput)
-	{
-		InputButtons = Ds4Buttons.Cross;
-	RapidFire = true;
-	RapidFireInterval = TimeSpan.FromMilliseconds(1000.0 / 60.0);
-	XInputButtons = XInputButtons.A
-	};
-	new InputMap(SimulatorType.Input, InputType.Button, OutputType.XInput)
-	{
-		InputButtons = Ds4Buttons.Circle;
-	RapidFire = true;
-	RapidFireInterval = TimeSpan.FromMilliseconds(1000.0 / 60.0);
-	XInputButtons = XInputButtons.B
-	};
-	new InputMap(SimulatorType.Input, InputType.Button, OutputType.XInput)
-	{
-		InputButtons = Ds4Buttons.Square;
-	RapidFire = true;
-	RapidFireInterval = TimeSpan.FromMilliseconds(1000.0 / 60.0);
-	XInputButtons = XInputButtons.X
-	};
-	new InputMap(SimulatorType.Input, InputType.Button, OutputType.XInput)
-	{
-		InputButtons = Ds4Buttons.Triangle;
-	RapidFire = true;
-	RapidFireInterval = TimeSpan.FromMilliseconds(1000.0 / 60.0);
-	XInputButtons = XInputButtons.Y
-	};
-	new InputMap(SimulatorType.Input, InputType.Button, OutputType.XInput)
-	{
-		InputButtons = Ds4Buttons.Options;
-	RapidFire = true;
-	RapidFireInterval = TimeSpan.FromMilliseconds(1000.0 / 60.0);
-	XInputButtons = XInputButtons.Start
-	};
-	new InputMap(SimulatorType.Input, InputType.Button, OutputType.XInput)
-	{
-		InputButtons = Ds4Buttons.Share;
-	RapidFire = true;
-	RapidFireInterval = TimeSpan.FromMilliseconds(1000.0 / 60.0);
-	XInputButtons = XInputButtons.Back
-	}
-	}
-	};
-	new InputModifier(InputType.TouchRegion, "Right Half")
-	{
-		Bindings = new std::list<InputMap>
-	{
-		new InputMap(SimulatorType.Input, InputType.Button, OutputType.XInput)
-	{
-		InputButtons = Ds4Buttons.TouchButton;
-	XInputButtons = XInputButtons.LeftThumb
-	}
-	}
-	};
-	new InputModifier(InputType.Button, Ds4Buttons.PS)
-	{
-		Bindings = new std::list<InputMap>
-	{
-		new InputMap(SimulatorType.Action, InputType.Button, OutputType.None)
-	{
-		InputButtons = Ds4Buttons.Options;
-	Action = ActionType.BluetoothDisconnect
-	}
-	}
-	}
-	};
-
-	Bindings = new std::list<InputMap>
-	{
-		#region Touch Binds
-
-		new InputMap(SimulatorType.Input, InputType.TouchRegion, OutputType.XInput)
-	{
-		InputRegion = "Right Half";
-	TouchDirection = Direction.Up;
-	XInputButtons = XInputButtons.DPadUp
-	};
-	new InputMap(SimulatorType.Input, InputType.TouchRegion, OutputType.XInput)
-	{
-		InputRegion = "Right Half";
-	TouchDirection = Direction.Down;
-	XInputButtons = XInputButtons.DPadDown
-	};
-	new InputMap(SimulatorType.Input, InputType.TouchRegion, OutputType.XInput)
-	{
-		InputRegion = "Right Half";
-	TouchDirection = Direction.Left;
-	XInputButtons = XInputButtons.DPadLeft
-	};
-	new InputMap(SimulatorType.Input, InputType.TouchRegion, OutputType.XInput)
-	{
-		InputRegion = "Right Half";
-	TouchDirection = Direction.Right;
-	XInputButtons = XInputButtons.DPadRight
-	};
-
-	#endregion
-
-		#region Buttons
-
-		new InputMap(SimulatorType.Input, InputType.Button, OutputType.XInput)
-	{
-		InputButtons = Ds4Buttons.Cross;
-	XInputButtons = XInputButtons.A
-	};
-	new InputMap(SimulatorType.Input, InputType.Button, OutputType.XInput)
-	{
-		InputButtons = Ds4Buttons.Circle;
-	XInputButtons = XInputButtons.B
-	};
-	new InputMap(SimulatorType.Input, InputType.Button, OutputType.XInput)
-	{
-		InputButtons = Ds4Buttons.Square;
-	XInputButtons = XInputButtons.X
-	};
-	new InputMap(SimulatorType.Input, InputType.Button, OutputType.XInput)
-	{
-		InputButtons = Ds4Buttons.Triangle;
-	XInputButtons = XInputButtons.Y
-	};
-
-	new InputMap(SimulatorType.Input, InputType.Button, OutputType.XInput)
-	{
-		InputButtons = Ds4Buttons.L1;
-	XInputButtons = XInputButtons.LeftShoulder
-	};
-	new InputMap(SimulatorType.Input, InputType.Button, OutputType.XInput)
-	{
-		InputButtons = Ds4Buttons.R1;
-	XInputButtons = XInputButtons.RightShoulder
-	};
-	new InputMap(SimulatorType.Input, InputType.Button, OutputType.XInput)
-	{
-		InputButtons = Ds4Buttons.L3;
-	XInputButtons = XInputButtons.LeftThumb
-	};
-	new InputMap(SimulatorType.Input, InputType.Button, OutputType.XInput)
-	{
-		InputButtons = Ds4Buttons.R3;
-	XInputButtons = XInputButtons.RightThumb
-	};
-
-	new InputMap(SimulatorType.Input, InputType.Button, OutputType.XInput)
-	{
-		InputButtons = Ds4Buttons.Options;
-	XInputButtons = XInputButtons.Start
-	};
-	new InputMap(SimulatorType.Input, InputType.Button, OutputType.XInput)
-	{
-		InputButtons = Ds4Buttons.Share;
-	XInputButtons = XInputButtons.Back
-	};
-
-	new InputMap(SimulatorType.Input, InputType.Button, OutputType.XInput)
-	{
-		InputButtons = Ds4Buttons.Up;
-	XInputButtons = XInputButtons.DPadUp
-	};
-	new InputMap(SimulatorType.Input, InputType.Button, OutputType.XInput)
-	{
-		InputButtons = Ds4Buttons.Down;
-	XInputButtons = XInputButtons.DPadDown
-	};
-	new InputMap(SimulatorType.Input, InputType.Button, OutputType.XInput)
-	{
-		InputButtons = Ds4Buttons.Left;
-	XInputButtons = XInputButtons.DPadLeft
-	};
-	new InputMap(SimulatorType.Input, InputType.Button, OutputType.XInput)
-	{
-		InputButtons = Ds4Buttons.Right;
-	XInputButtons = XInputButtons.DPadRight
-	};
-
-	new InputMap(SimulatorType.Input, InputType.Button, OutputType.XInput)
-	{
-		InputButtons = Ds4Buttons.PS;
-	XInputButtons = XInputButtons.Guide
-	};
-
-	#endregion
-
-		#region Axes
-
-		new InputMap(SimulatorType.Input, InputType.Axis, OutputType.XInput)
-	{
-		InputAxis = Ds4Axis.LeftStickY;
-
-	InputAxisOptions = new std::unordered_map<Ds4Axis, InputAxisOptions>
-	{
-		{ Ds4Axis.LeftStickY, new InputAxisOptions(AxisPolarity.Positive) }
-	};
-
-	XInputAxes = new XInputAxes
-	{
-		Axes = XInputAxis.LeftStickY;
-	Options = new std::unordered_map<XInputAxis, AxisOptions>
-	{
-		{ XInputAxis.LeftStickY, new AxisOptions(AxisPolarity.Positive) }
-	}
-	}
-	};
-	new InputMap(SimulatorType.Input, InputType.Axis, OutputType.XInput)
-	{
-		InputAxis = Ds4Axis.LeftStickY;
-
-	InputAxisOptions = new std::unordered_map<Ds4Axis, InputAxisOptions>
-	{
-		{ Ds4Axis.LeftStickY, new InputAxisOptions(AxisPolarity.Negative) }
-	};
-
-	XInputAxes = new XInputAxes
-	{
-		Axes = XInputAxis.LeftStickY;
-	Options = new std::unordered_map<XInputAxis, AxisOptions>
-	{
-		{ XInputAxis.LeftStickY, new AxisOptions(AxisPolarity.Negative) }
-	}
-	}
-	};
-	new InputMap(SimulatorType.Input, InputType.Axis, OutputType.XInput)
-	{
-		InputAxis = Ds4Axis.LeftStickX;
-
-	InputAxisOptions = new std::unordered_map<Ds4Axis, InputAxisOptions>
-	{
-		{ Ds4Axis.LeftStickX, new InputAxisOptions(AxisPolarity.Positive) }
-	};
-
-	XInputAxes = new XInputAxes
-	{
-		Axes = XInputAxis.LeftStickX;
-	Options = new std::unordered_map<XInputAxis, AxisOptions>
-	{
-		{ XInputAxis.LeftStickX, new AxisOptions(AxisPolarity.Positive) }
-	}
-	}
-	};
-	new InputMap(SimulatorType.Input, InputType.Axis, OutputType.XInput)
-	{
-		InputAxis = Ds4Axis.LeftStickX;
-
-	InputAxisOptions = new std::unordered_map<Ds4Axis, InputAxisOptions>
-	{
-		{ Ds4Axis.LeftStickX, new InputAxisOptions(AxisPolarity.Negative) }
-	};
-
-	XInputAxes = new XInputAxes
-	{
-		Axes = XInputAxis.LeftStickX;
-	Options = new std::unordered_map<XInputAxis, AxisOptions>
-	{
-		{ XInputAxis.LeftStickX, new AxisOptions(AxisPolarity.Negative) }
-	}
-	}
-	};
-
-	new InputMap(SimulatorType.Input, InputType.Axis, OutputType.XInput)
-	{
-		InputAxis = Ds4Axis.RightStickY;
-
-	InputAxisOptions = new std::unordered_map<Ds4Axis, InputAxisOptions>
-	{
-		{ Ds4Axis.RightStickY, new InputAxisOptions(AxisPolarity.Positive) }
-	};
-
-	XInputAxes = new XInputAxes
-	{
-		Axes = XInputAxis.RightStickY;
-	Options = new std::unordered_map<XInputAxis, AxisOptions>
-	{
-		{ XInputAxis.RightStickY, new AxisOptions(AxisPolarity.Positive) }
-	}
-	}
-	};
-	new InputMap(SimulatorType.Input, InputType.Axis, OutputType.XInput)
-	{
-		InputAxis = Ds4Axis.RightStickY;
-
-	InputAxisOptions = new std::unordered_map<Ds4Axis, InputAxisOptions>
-	{
-		{ Ds4Axis.RightStickY, new InputAxisOptions(AxisPolarity.Negative) }
-	};
-
-	XInputAxes = new XInputAxes
-	{
-		Axes = XInputAxis.RightStickY;
-	Options = new std::unordered_map<XInputAxis, AxisOptions>
-	{
-		{ XInputAxis.RightStickY, new AxisOptions(AxisPolarity.Negative) }
-	}
-	}
-	};
-	new InputMap(SimulatorType.Input, InputType.Axis, OutputType.XInput)
-	{
-		InputAxis = Ds4Axis.RightStickX;
-
-	InputAxisOptions = new std::unordered_map<Ds4Axis, InputAxisOptions>
-	{
-		{ Ds4Axis.RightStickX, new InputAxisOptions(AxisPolarity.Positive) }
-	};
-
-	XInputAxes = new XInputAxes
-	{
-		Axes = XInputAxis.RightStickX;
-	Options = new std::unordered_map<XInputAxis, AxisOptions>
-	{
-		{ XInputAxis.RightStickX, new AxisOptions(AxisPolarity.Positive) }
-	}
-	}
-	};
-	new InputMap(SimulatorType.Input, InputType.Axis, OutputType.XInput)
-	{
-		InputAxis = Ds4Axis.RightStickX;
-
-	InputAxisOptions = new std::unordered_map<Ds4Axis, InputAxisOptions>
-	{
-		{ Ds4Axis.RightStickX, new InputAxisOptions(AxisPolarity.Negative) }
-	};
-
-	XInputAxes = new XInputAxes
-	{
-		Axes = XInputAxis.RightStickX;
-	Options = new std::unordered_map<XInputAxis, AxisOptions>
-	{
-		{ XInputAxis.RightStickX, new AxisOptions(AxisPolarity.Negative) }
-	}
-	}
-	};
-
-	new InputMap(SimulatorType.Input, InputType.Axis, OutputType.XInput)
-	{
-		InputAxis = Ds4Axis.LeftTrigger;
-	XInputAxes = new XInputAxes
-	{
-		Axes = XInputAxis.LeftTrigger
-	}
-	};
-	new InputMap(SimulatorType.Input, InputType.Axis, OutputType.XInput)
-	{
-		InputAxis = Ds4Axis.RightTrigger;
-	XInputAxes = new XInputAxes
-	{
-		Axes = XInputAxis.RightTrigger
-	}
-	}
-
-		#endregion
-	}
-	*/
-
-	// TODO
+		#pragma endregion
+	}*/
 
 	return result;
 }

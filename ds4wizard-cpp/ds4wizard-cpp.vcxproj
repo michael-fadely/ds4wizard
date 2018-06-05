@@ -140,6 +140,7 @@
     <ClCompile Include="Ds4LightOptions.cpp" />
     <ClCompile Include="Ds4Output.cpp" />
     <ClCompile Include="Ds4TouchRegion.cpp" />
+    <ClCompile Include="enums.cpp" />
     <ClCompile Include="filesystem.cpp" />
     <ClCompile Include="InputMap.cpp" />
     <ClCompile Include="MainWindow.cpp" />
@@ -165,7 +166,6 @@
     <ClInclude Include="DeviceSettings.h" />
     <ClInclude Include="DeviceSettingsCommon.h" />
     <ClInclude Include="Ds4AutoLightColor.h" />
-    <ClInclude Include="Ds4Buttons.h" />
     <ClInclude Include="Ds4Color.h" />
     <ClInclude Include="Ds4Device.h" />
     <ClInclude Include="Ds4DeviceManager.h" />

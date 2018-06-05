@@ -3,7 +3,7 @@
 
 const DeviceIdleOptions DeviceIdleOptions::Default(std::chrono::seconds(5), true, TimeUnit::minutes);
 
-DeviceIdleOptions::DeviceIdleOptions(clock::duration timeout, bool disconnect, TimeUnit unit)
+DeviceIdleOptions::DeviceIdleOptions(std::chrono::nanoseconds timeout, bool disconnect, TimeUnit unit)
 {
 	this->Timeout    = timeout;
 	this->Disconnect = disconnect;

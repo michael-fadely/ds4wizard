@@ -5,7 +5,7 @@
 class Pressable
 {
 public:
-	PressedState State = PressedState::Off;
+	PressedState State = PressedState::off;
 
 	virtual bool IsActive() const;
 	static void Press(PressedState& state);

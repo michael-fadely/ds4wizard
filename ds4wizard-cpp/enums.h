@@ -1,40 +1,37 @@
 #pragma once
 
 #include <cstdint>
+#include <enum.h>
+
+#define serializableFlags(TYPE) \
+	std::string serializeFlags_ ## TYPE ## (TYPE ## _t value); \
+	void deserializeFlags_ ## TYPE ## (const std::string& input, TYPE ## _t& value)
+
+#define serializeFlags(TYPE) serializeFlags_ ## TYPE
+#define deserializeFlags(TYPE) deserializeFlags_ ## TYPE
+
+BETTER_ENUM(AxisPolarity, int, none, positive, negative);
+BETTER_ENUM(DeadZoneMode, int, none, hardLimit, scale);
+
+// TODO: better name
+BETTER_ENUM(SimulatorType, int, none, input, action);
+
+BETTER_ENUM(ActionType, int, none, bluetoothDisconnect);
 
 struct InputType
 {
 	enum T
 	{
 		None,
-		Button      = 1 << 0,
-		Axis        = 1 << 1,
-		TouchRegion = 1 << 2
+		button      = 1 << 0,
+		axis        = 1 << 1,
+		touchRegion = 1 << 2
 	};
 };
 
 using InputType_t = uint32_t;
 
-enum class AxisPolarity
-{
-	None,
-	Positive,
-	Negative
-};
-
-// TODO: better name
-enum class SimulatorType
-{
-	None,
-	Input,
-	Action
-};
-
-enum class ActionType
-{
-	None,
-	BluetoothDisconnect
-};
+serializableFlags(InputType);
 
 struct OutputType // TODO: vjoy output support
 {
@@ -49,54 +46,77 @@ struct OutputType // TODO: vjoy output support
 
 using OutputType_t = uint32_t;
 
-enum class DeadZoneMode
+serializableFlags(OutputType);
+
+struct XInputButtons
 {
-	None,
-	HardLimit,
-	Scale
+	enum T : uint16_t
+	{
+		DPadUp        = 0x0001,
+		DPadDown      = 0x0002,
+		DPadLeft      = 0x0004,
+		DPadRight     = 0x0008,
+		Start         = 0x0010,
+		Back          = 0x0020,
+		LeftThumb     = 0x0040,
+		RightThumb    = 0x0080,
+		LeftShoulder  = 0x0100,
+		RightShoulder = 0x0200,
+		Guide         = 0x0400,
+		Dummy         = 0x0800,
+		A             = 0x1000,
+		B             = 0x2000,
+		X             = 0x4000,
+		Y             = 0x8000,
+	};
 };
+
+using XInputButtons_t = uint16_t;
+serializableFlags(XInputButtons);
 
 struct XInputAxis
 {
 	enum T : uint32_t
 	{
-		None,
-		LeftStickX   = 1 << 0,
-		LeftStickY   = 1 << 1,
-		RightStickX  = 1 << 2,
-		RightStickY  = 1 << 3,
-		LeftTrigger  = 1 << 4,
-		RightTrigger = 1 << 5
+		none,
+		leftStickX   = 1 << 0,
+		leftStickY   = 1 << 1,
+		rightStickX  = 1 << 2,
+		rightStickY  = 1 << 3,
+		leftTrigger  = 1 << 4,
+		rightTrigger = 1 << 5
 	};
 };
 
 using XInputAxis_t = uint32_t;
+serializableFlags(XInputAxis);
 
 struct Direction
 {
 	enum T : uint32_t
 	{
-		None,
-		Up    = 1 << 0,
-		Down  = 1 << 1,
-		Left  = 1 << 2,
-		Right = 1 << 3
+		none,
+		up    = 1 << 0,
+		down  = 1 << 1,
+		left  = 1 << 2,
+		right = 1 << 3
 	};
 };
 
 using Direction_t = uint32_t;
+serializableFlags(Direction);
 
 enum class Hat
 {
-	North,
-	NorthEast,
-	East,
-	SouthEast,
-	South,
-	SouthWest,
-	West,
-	NorthWest,
-	None
+	north,
+	northEast,
+	east,
+	southEast,
+	south,
+	southWest,
+	west,
+	northWest,
+	none
 };
 
 /// <summary>
@@ -107,20 +127,51 @@ enum class PressedState
 	/// <summary>
 	/// The button has been off for more than one poll.
 	/// </summary>
-	Off,
+	off,
 	/// <summary>
 	/// The button was off last poll, but has now been pressed.
 	/// </summary>
-	Pressed,
+	pressed,
 	/// <summary>
 	/// The button has been on (held) for more than one poll.
 	/// </summary>
-	On,
+	on,
 	/// <summary>
 	/// The button was on (held), but has now been released.
 	/// </summary>
-	Released
+	released
 };
+
+struct Ds4Buttons
+{
+	enum T : uint32_t
+	{
+		Square      = 1 << 0,
+		Cross       = 1 << 1,
+		Circle      = 1 << 2,
+		Triangle    = 1 << 3,
+		L1          = 1 << 4,
+		R1          = 1 << 5,
+		L2          = 1 << 6,
+		R2          = 1 << 7,
+		Share       = 1 << 8,
+		Options     = 1 << 9,
+		L3          = 1 << 10,
+		R3          = 1 << 11,
+		PS          = 1 << 12,
+		TouchButton = 1 << 13,
+		Touch1      = 1 << 14,
+		Touch2      = 1 << 15,
+		Up          = 1 << 16,
+		Down        = 1 << 17,
+		Left        = 1 << 18,
+		Right       = 1 << 19
+	};
+};
+
+using Ds4Buttons_t = uint32_t;
+
+serializableFlags(Ds4Buttons);
 
 struct Ds4Axis
 {
@@ -142,6 +193,7 @@ struct Ds4Axis
 };
 
 using Ds4Axis_t = uint32_t;
+serializableFlags(Ds4Axis);
 
 struct Ds4Extensions
 {
@@ -155,3 +207,4 @@ struct Ds4Extensions
 };
 
 using Ds4Extensions_t = uint8_t;
+serializableFlags(Ds4Extensions);

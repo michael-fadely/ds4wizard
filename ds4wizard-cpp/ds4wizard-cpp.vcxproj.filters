@@ -83,6 +83,9 @@
     <ClCompile Include="InputMap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="enums.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resource Files">
@@ -147,9 +150,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="enums.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Ds4Buttons.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Ds4InputData.h">

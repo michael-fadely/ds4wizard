@@ -1,12 +1,13 @@
 #pragma once
 
 #include "enums.h"
+#include "JsonData.h"
 
-class AxisOptions
+class AxisOptions : public JsonData
 {
 public:
 	float Multiplier      = 1.0f;
-	AxisPolarity Polarity = AxisPolarity::Positive;
+	AxisPolarity Polarity = AxisPolarity::positive;
 
 	AxisOptions() = default;
 
@@ -15,14 +16,16 @@ public:
 
 	bool operator==(const AxisOptions& other) const;
 	bool operator!=(const AxisOptions& other) const;
+	virtual void readJson(const QJsonObject& json) override;
+	virtual void writeJson(QJsonObject& json) const override;
 };
 
 class InputAxisOptions : public AxisOptions
 {
 public:
-	bool         Invert       = false;
-	DeadZoneMode DeadZoneMode = DeadZoneMode::Scale;
-	float        DeadZone     = 0.0f;
+	bool         invert       = false;
+	DeadZoneMode deadZoneMode = DeadZoneMode::scale;
+	float        deadZone     = 0.0f;
 
 	InputAxisOptions() = default;
 	explicit InputAxisOptions(AxisPolarity polarity);
@@ -33,12 +36,14 @@ public:
 	bool operator==(const InputAxisOptions& other) const;
 	bool operator!=(const InputAxisOptions& other) const;
 
+	void readJson(const QJsonObject& json) override;
+	void writeJson(QJsonObject& json) const override;
 };
 
-class XInputAxes
+class XInputAxes : public JsonData
 {
 public:
-	XInputAxis_t Axes;
+	XInputAxis_t Axes = 0;
 	std::unordered_map<XInputAxis_t, AxisOptions> Options;
 
 	XInputAxes() = default;
@@ -48,9 +53,11 @@ public:
 
 	bool operator==(const XInputAxes& other) const;
 	bool operator!=(const XInputAxes& other) const;
+	void readJson(const QJsonObject& json) override;
+	void writeJson(QJsonObject& json) const override;
 };
 
-class MouseAxes
+class MouseAxes : public JsonData
 {
 public:
 	Direction_t Directions = 0;
@@ -62,4 +69,6 @@ public:
 	AxisOptions GetAxisOptions(Direction_t axis);
 
 	bool operator==(const MouseAxes& other) const;
+	void readJson(const QJsonObject& json) override;
+	void writeJson(QJsonObject& json) const override;
 };

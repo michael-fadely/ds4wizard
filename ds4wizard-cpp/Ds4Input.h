@@ -2,7 +2,6 @@
 
 #include <memory>
 #include <gsl/span>
-#include "Ds4Buttons.h"
 #include "Ds4InputData.h"
 #include "ScpDevice.h"
 #include "XInputGamepad.h"

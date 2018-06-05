@@ -1,6 +1,11 @@
 #include "stdafx.h"
 #include "InputMap.h"
 
+bool InputMapBase::PerformRapidFire() const
+{
+	return rapidStopwatch.elapsed() >= RapidFireInterval;
+}
+
 PressedState InputMapBase::SimulatedState() const
 {
 	if (RapidFire == true)
@@ -18,7 +23,7 @@ PressedState InputMapBase::SimulatedState() const
 		return State;
 	}
 
-	return IsActive() ? PressedState::On : State;
+	return IsActive() ? PressedState::on : State;
 }
 
 bool InputMapBase::IsActive() const
@@ -39,8 +44,9 @@ bool InputMapBase::IsPersistent() const
 }
 
 InputMapBase::InputMapBase(const InputMapBase& other)
+	: Pressable(other)
 {
-	InputType         = other.InputType;
+	inputType         = other.inputType;
 	InputButtons      = other.InputButtons;
 	InputAxis         = other.InputAxis;
 	InputRegion       = other.InputRegion;
@@ -57,32 +63,32 @@ InputMapBase::InputMapBase(const InputMapBase& other)
 	}
 }
 
-InputMapBase::InputMapBase(::InputType_t inputType)
+InputMapBase::InputMapBase(InputType_t inputType)
 {
-	InputType = inputType;
+	this->inputType = inputType;
 }
 
-InputMapBase::InputMapBase(::InputType_t inputType, Ds4Buttons::T input)
+InputMapBase::InputMapBase(InputType_t inputType, Ds4Buttons::T input)
 {
-	InputType    = inputType;
+	this->inputType    = inputType;
 	InputButtons = input;
 }
 
-InputMapBase::InputMapBase(::InputType_t inputType, Ds4Axis::T input)
+InputMapBase::InputMapBase(InputType_t inputType, Ds4Axis::T input)
 {
-	InputType = inputType;
+	this->inputType = inputType;
 	InputAxis = input;
 }
 
-InputMapBase::InputMapBase(::InputType_t inputType, const std::string& input)
+InputMapBase::InputMapBase(InputType_t inputType, const std::string& input)
 {
-	InputType   = inputType;
+	this->inputType   = inputType;
 	InputRegion = input;
 }
 
 void InputMapBase::Press()
 {
-	if (Toggle == true && State == PressedState::Pressed)
+	if (Toggle == true && State == PressedState::pressed)
 	{
 		IsToggled = !IsToggled;
 	}
@@ -154,7 +160,7 @@ void InputMapBase::Release()
 	}
 }
 
-::InputAxisOptions InputMapBase::GetAxisOptions(Ds4Axis_t axis)
+InputAxisOptions InputMapBase::GetAxisOptions(Ds4Axis_t axis)
 {
 	if (InputAxisOptions.empty())
 	{
@@ -175,7 +181,7 @@ void InputMapBase::Release()
 
 bool InputMapBase::operator==(const InputMapBase& other) const
 {
-	return InputType == other.InputType
+	return inputType == other.inputType
 	       && InputButtons == other.InputButtons
 	       && InputAxis == other.InputAxis
 	       && InputRegion == other.InputRegion
@@ -190,17 +196,57 @@ bool InputMapBase::operator!=(const InputMapBase& other) const
 	return !(*this == other);
 }
 
-InputModifier::InputModifier(::InputType_t type, Ds4Buttons::T buttons)
+void InputMapBase::readJson(const QJsonObject& json)
+{
+	deserializeFlags(InputType)(json["inputType"].toString().toStdString(), inputType);
+	deserializeFlags(Ds4Buttons)(json["inputButtons"].toString().toStdString(), InputButtons);
+
+	InputRegion       = json["inputRegion"].toString().toStdString();
+	Toggle            = json["toggle"].toBool();
+	RapidFire         = json["rapidFire"].toBool();
+	RapidFireInterval = std::chrono::nanoseconds(json["rapidFireInterval"].toInt());
+
+	QJsonObject inputAxisOptions_ = json["inputAxisOptions"].toObject();
+
+	for (const auto& key : inputAxisOptions_.keys())
+	{
+		Ds4Buttons_t flags;
+		deserializeFlags(Ds4Buttons)(key.toStdString(), flags);
+		InputAxisOptions[flags] = fromJson<::InputAxisOptions>(inputAxisOptions_[key].toObject());
+	}
+}
+
+void InputMapBase::writeJson(QJsonObject& json) const
+{
+	json["inputType"]         = serializeFlags(InputType)(inputType).c_str();
+	json["inputButtons"]      = serializeFlags(Ds4Buttons)(InputButtons).c_str();
+	json["inputRegion"]       = InputRegion.c_str();
+	json["toggle"]            = Toggle;
+	json["rapidFire"]         = RapidFire;
+	json["rapidFireInterval"] = RapidFireInterval.count();
+
+	QJsonObject inputAxisOptions_;
+
+	for (const auto& pair : InputAxisOptions)
+	{
+		auto key = serializeFlags(Ds4Axis)(pair.first);
+		inputAxisOptions_[key.c_str()] = pair.second.toJson();
+	}
+
+	json["inputAxisOptions"] = inputAxisOptions_;
+}
+
+InputModifier::InputModifier(InputType_t type, Ds4Buttons::T buttons)
 	: InputMapBase(type, buttons)
 {
 }
 
-InputModifier::InputModifier(::InputType_t type, Ds4Axis::T axis)
+InputModifier::InputModifier(InputType_t type, Ds4Axis::T axis)
 	: InputMapBase(type, axis)
 {
 }
 
-InputModifier::InputModifier(::InputType_t type, const std::string& region)
+InputModifier::InputModifier(InputType_t type, const std::string& region)
 	: InputMapBase(type, region)
 {
 }
@@ -226,27 +272,53 @@ bool InputModifier::operator!=(const InputModifier& other) const
 	return !(*this == other);
 }
 
+void InputModifier::readJson(const QJsonObject& json)
+{
+	InputMapBase::readJson(json);
+
+	auto bindings_ = json["bindings"].toArray();
+
+	for (const auto& value : bindings_)
+	{
+		Bindings.push_back(fromJson<InputMap>(value.toObject()));
+	}
+}
+
+void InputModifier::writeJson(QJsonObject& json) const
+{
+	InputMapBase::writeJson(json);
+	
+	QJsonArray bindings_;
+
+	for (const auto& binding : Bindings)
+	{
+		bindings_.append(binding.toJson());
+	}
+
+	json["bindings"] = bindings_;
+}
+
 InputMap::InputMap(const InputMap& other)
 	: InputMapBase(other)
 {
-	SimulatorType    = other.SimulatorType;
-	OutputType       = other.OutputType;
-	Action           = other.Action;
-	TouchDirection   = other.TouchDirection;
+	simulatorType    = other.simulatorType;
+	outputType       = other.outputType;
+	action           = other.action;
+	touchDirection   = other.touchDirection;
 	//KeyCode        = other.KeyCode;
-	MouseAxes        = other.MouseAxes;
+	mouseAxes        = other.mouseAxes;
 	//MouseButton    = other.MouseButton;
-	XInputButtons    = other.XInputButtons;
-	XInputAxes       = other.XInputAxes;
+	xinputButtons    = other.xinputButtons;
+	xinputAxes       = other.xinputAxes;
 
 	//KeyCodeModifiers = other.KeyCodeModifiers;
 }
 
-InputMap::InputMap(::SimulatorType simulatorType, InputType_t inputType, OutputType::T outputType)
+InputMap::InputMap(SimulatorType simulatorType, InputType_t inputType, OutputType::T outputType)
 	: InputMapBase(inputType)
 {
-	SimulatorType = simulatorType;
-	OutputType    = outputType;
+	simulatorType = simulatorType;
+	outputType    = outputType;
 }
 
 void InputMap::Press(const InputModifier& modifier)
@@ -263,19 +335,61 @@ void InputMap::Press(const InputModifier& modifier)
 
 bool InputMap::operator==(const InputMap& other) const
 {
-	return SimulatorType == other.SimulatorType
-	       && OutputType == other.OutputType
-	       && Action == other.Action
+	return simulatorType == other.simulatorType
+	       && outputType == other.outputType
+	       && action == other.action
 	       // TODO: && KeyCode == other.KeyCode
 	       // TODO: && KeyCodeModifiers == other.KeyCodeModifiers
-	       && XInputButtons == other.XInputButtons
-	       && XInputAxes == other.XInputAxes
-	       && MouseAxes == other.MouseAxes
-	       && TouchDirection == other.TouchDirection
+	       && xinputButtons == other.xinputButtons
+	       && xinputAxes == other.xinputAxes
+	       && mouseAxes == other.mouseAxes
+	       && touchDirection == other.touchDirection
 	       /* TODO: && MouseButton == other.MouseButton*/;
 }
 
 bool InputMap::operator!=(const InputMap& other) const
 {
 	return !(*this == other);
+}
+
+void InputMap::readJson(const QJsonObject& json)
+{
+	InputMapBase::readJson(json);
+	
+	deserializeFlags(OutputType)(json["outputType"].toString().toStdString(), outputType);
+	deserializeFlags(XInputButtons)(json["xinputButtons"].toString().toStdString(), xinputButtons);
+	deserializeFlags(Direction)(json["touchDirection"].toString().toStdString(), touchDirection);
+
+	if (json.contains("simulatorType"))
+	{
+		simulatorType = SimulatorType::_from_string(json["simulatorType"].toString("none").toStdString().c_str());
+	}
+
+	if (json.contains("action"))
+	{
+		action = ActionType::_from_string(json["action"].toString("none").toStdString().c_str());
+	}
+
+	if (json.contains("mouseAxes"))
+	{
+		mouseAxes = fromJson<MouseAxes>(json["mouseAxes"].toObject());
+	}
+
+	if (json.contains("xinputAxes"))
+	{
+		xinputAxes = fromJson<XInputAxes>(json["xinputAxes"].toObject());
+	}
+}
+
+void InputMap::writeJson(QJsonObject& json) const
+{
+	InputMapBase::writeJson(json);
+
+	json["outputType"]     = serializeFlags(OutputType)(outputType).c_str();
+	json["xinputButtons"]  = serializeFlags(XInputButtons)(xinputButtons).c_str();
+	json["touchDirection"] = serializeFlags(Direction)(touchDirection).c_str();
+	json["simulatorType"]  = simulatorType._to_string();
+	json["action"]         = action._to_string();
+	json["mouseAxes"]      = mouseAxes.toJson();
+	json["xinputAxes"]     = xinputAxes.toJson()
 }
