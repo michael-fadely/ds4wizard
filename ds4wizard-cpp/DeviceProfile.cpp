@@ -108,8 +108,8 @@ void DeviceProfile::writeJson(QJsonObject& json) const
 #pragma region trash
 const char* a = "{" \
 "  \"exclusiveMode\": true," \
-"  \"usexinput\": true," \
-"  \"autoxinputIndex\": true," \
+"  \"useXInput\": true," \
+"  \"autoXInputIndex\": true," \
 "  \"xinputIndex\": 0," \
 "  \"touchRegions\": {" \
 "    \"Left Half\": {" \
@@ -462,7 +462,7 @@ const char* a = "{" \
 "          \"inputType\": \"button\"," \
 "          \"inputButtons\": \"cross\"," \
 "          \"rapidFire\": true," \
-"          \"rapidFireInterval\": \"00:00:00.0170000\"" \
+"          \"rapidFireInterval\": 16666666" \
 "        }," \
 "        {" \
 "          \"simulatorType\": \"input\"," \
@@ -471,7 +471,7 @@ const char* a = "{" \
 "          \"inputType\": \"button\"," \
 "          \"inputButtons\": \"circle\"," \
 "          \"rapidFire\": true," \
-"          \"rapidFireInterval\": \"00:00:00.0170000\"" \
+"          \"rapidFireInterval\": 16666666" \
 "        }," \
 "        {" \
 "          \"simulatorType\": \"input\"," \
@@ -480,7 +480,7 @@ const char* a = "{" \
 "          \"inputType\": \"button\"," \
 "          \"inputButtons\": \"square\"," \
 "          \"rapidFire\": true," \
-"          \"rapidFireInterval\": \"00:00:00.0170000\"" \
+"          \"rapidFireInterval\": 16666666" \
 "        }," \
 "        {" \
 "          \"simulatorType\": \"input\"," \
@@ -489,7 +489,7 @@ const char* a = "{" \
 "          \"inputType\": \"button\"," \
 "          \"inputButtons\": \"triangle\"," \
 "          \"rapidFire\": true," \
-"          \"rapidFireInterval\": \"00:00:00.0170000\"" \
+"          \"rapidFireInterval\": 16666666" \
 "        }," \
 "        {" \
 "          \"simulatorType\": \"input\"," \
@@ -498,7 +498,7 @@ const char* a = "{" \
 "          \"inputType\": \"button\"," \
 "          \"inputButtons\": \"options\"," \
 "          \"rapidFire\": true," \
-"          \"rapidFireInterval\": \"00:00:00.0170000\"" \
+"          \"rapidFireInterval\": 16666666" \
 "        }," \
 "        {" \
 "          \"simulatorType\": \"input\"," \
@@ -507,7 +507,7 @@ const char* a = "{" \
 "          \"inputType\": \"button\"," \
 "          \"inputButtons\": \"share\"," \
 "          \"rapidFire\": true," \
-"          \"rapidFireInterval\": \"00:00:00.0170000\"" \
+"          \"rapidFireInterval\": 16666666" \
 "        }" \
 "      ]," \
 "      \"inputType\": \"touchRegion\"," \
