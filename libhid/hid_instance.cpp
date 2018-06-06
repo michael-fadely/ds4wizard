@@ -5,6 +5,11 @@
 
 using namespace hid;
 
+Handle::Handle(const Handle& other)
+{
+	*this = other;
+}
+
 Handle::Handle(Handle&& rhs) noexcept
 {
 	*this = rhs;
@@ -40,8 +45,20 @@ bool Handle::operator!=(const Handle& rhs) const
 	return !(*this == rhs);
 }
 
+Handle& Handle::operator=(const Handle& rhs)
+{
+	close();
+
+	nativeHandle = rhs.nativeHandle;
+	owner = rhs.owner;
+
+	return *this;
+}
+
 Handle& Handle::operator=(Handle&& rhs) noexcept
 {
+	close();
+
 	nativeHandle = rhs.nativeHandle;
 	owner = rhs.owner;
 
@@ -151,10 +168,8 @@ void HidInstance::read_metadata()
 	}
 
 #ifdef _MSC_VER
-	Handle h = CreateFile(path.c_str(), GENERIC_READ,
-		FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, 0, nullptr);
-
-	h.owner = true;
+	Handle h = Handle(CreateFile(path.c_str(), GENERIC_READ,
+	                             FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, 0, nullptr), true);
 
 	if (!h.isValid())
 	{
@@ -195,8 +210,8 @@ bool HidInstance::get_feature(const gsl::span<uint8_t>& buffer) const
 			return HidD_GetFeature(handle.nativeHandle, buffer.data(), static_cast<ULONG>(buffer.size_bytes()));
 		}
 
-		Handle h = CreateFile(path.c_str(), GENERIC_READ | GENERIC_WRITE,
-		                      FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, 0, nullptr);
+		Handle h = Handle(CreateFile(path.c_str(), GENERIC_READ | GENERIC_WRITE,
+		                      FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, 0, nullptr), true);
 
 		if (!h.isValid())
 		{
@@ -223,15 +238,14 @@ bool HidInstance::open(HidOpenFlags_t flags)
 	const uint32_t share_flags = exclusive ? 0 : FILE_SHARE_READ | FILE_SHARE_WRITE;
 	const uint32_t async_flags = !!(flags & HidOpenFlags::async) ? FILE_FLAG_OVERLAPPED : 0;
 
-	handle = CreateFile(path.c_str(), GENERIC_READ | GENERIC_WRITE, share_flags, nullptr,
-	                    OPEN_EXISTING, async_flags, nullptr);
+	handle = Handle(CreateFile(path.c_str(), GENERIC_READ | GENERIC_WRITE, share_flags, nullptr,
+	                           OPEN_EXISTING, async_flags, nullptr), true);
 
 	if (!handle.isValid())
 	{
 		return false;
 	}
 
-	handle.owner = true;
 	this->flags = flags;
 
 	if (is_async())

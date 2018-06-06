@@ -170,20 +170,6 @@ void Ds4DeviceManager::ToggleDeviceElevated(const std::wstring& instanceId)
 		return;
 	}
 
-	/*string currentProcess = Assembly.GetEntryAssembly().Location;
-
-	var info = new ProcessStartInfo(currentProcess)
-	{
-		UseShellExecute = true,
-		Verb = "runas",
-		Arguments = $"--toggle-device \"{instanceId}\""
-	};
-
-	using (Process p = Process.Start(info))
-	{
-		p?.WaitForExit();
-	}*/
-
 	std::wstring currentProcess = QCoreApplication::applicationFilePath().toStdWString();
 
 	std::wstring params = L"--toggle-device \"";
@@ -200,7 +186,7 @@ void Ds4DeviceManager::ToggleDevice(const std::wstring& instanceId)
 {
 	GUID guid;
 	HidD_GetHidGuid(&guid);
-	auto devInfoSet = SetupDiGetClassDevsW(&guid, instanceId.c_str(), nullptr, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
+	HDEVINFO devInfoSet = SetupDiGetClassDevs(&guid, instanceId.c_str(), nullptr, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
 
 	SP_DEVINFO_DATA devInfoData;
 	devInfoData.cbSize = sizeof(SP_DEVINFO_DATA);
@@ -218,9 +204,8 @@ void Ds4DeviceManager::ToggleDevice(const std::wstring& instanceId)
 
 	SP_PROPCHANGE_PARAMS propChangeParams {};
 
-	SP_CLASSINSTALL_HEADER& cih = propChangeParams.ClassInstallHeader;
-	cih.cbSize                  = sizeof(SP_CLASSINSTALL_HEADER);
-	cih.InstallFunction         = DIF_PROPERTYCHANGE;
+	propChangeParams.ClassInstallHeader.cbSize          = sizeof(SP_CLASSINSTALL_HEADER);
+	propChangeParams.ClassInstallHeader.InstallFunction = DIF_PROPERTYCHANGE;
 
 	propChangeParams.StateChange = DICS_DISABLE;
 	propChangeParams.HwProfile   = 0;
@@ -241,7 +226,7 @@ void Ds4DeviceManager::ToggleDevice(const std::wstring& instanceId)
 		throw std::runtime_error(message.str());
 	}
 
-	// Apply the changes, disabling the device->
+	// Apply the changes, disabling the device.
 	success = SetupDiCallClassInstaller(DIF_PROPERTYCHANGE, devInfoSet, &devInfoData);
 
 	if (!success)
@@ -273,7 +258,7 @@ void Ds4DeviceManager::ToggleDevice(const std::wstring& instanceId)
 		throw std::runtime_error(message.str());
 	}
 
-	// Apply the changes, enabling the device->
+	// Apply the changes, enabling the device.
 	success = SetupDiCallClassInstaller(DIF_PROPERTYCHANGE, devInfoSet, &devInfoData);
 
 	if (!success)

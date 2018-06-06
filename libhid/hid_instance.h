@@ -55,10 +55,10 @@ namespace hid
 		HANDLE nativeHandle = nullptr;
 
 		Handle() = default;
-		Handle(const Handle&) = default;
+		Handle(const Handle& other);
 
 		Handle(Handle&& rhs) noexcept;
-		Handle(HANDLE h, bool owner = false);
+		explicit Handle(HANDLE h, bool owner = false);
 		~Handle();
 
 		void close();
@@ -66,7 +66,7 @@ namespace hid
 		bool operator==(const Handle& rhs) const;
 		bool operator!=(const Handle& rhs) const;
 
-		Handle& operator=(const Handle&) = default;
+		Handle& operator=(const Handle& rhs);
 		Handle& operator=(Handle&& rhs) noexcept;
 
 		bool isValid() const;
