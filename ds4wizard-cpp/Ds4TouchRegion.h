@@ -15,7 +15,7 @@
 // TODO: Slider
 // TODO: Make auto-center an option instead of type?
 
-BETTER_ENUM(Ds4TouchRegionType, int, None, Button, Stick, StickAutoCenter)
+BETTER_ENUM(Ds4TouchRegionType, int, none, button, stick, stickAutoCenter)
 
 class Ds4TouchRegion : public JsonData
 {
@@ -31,7 +31,7 @@ public:
 
 	// TODO: toggle for multi-touch press
 
-	Ds4TouchRegionType Type = Ds4TouchRegionType::None;
+	Ds4TouchRegionType Type = Ds4TouchRegionType::none;
 
 	bool  AllowCrossOver = false;
 	short Left           = 0;

@@ -106,7 +106,7 @@ float Ds4TouchRegion::GetTouchDelta(Ds4Buttons_t sender, Direction_t direction, 
 	short x = std::clamp(point.X, Left, Right);
 	short y = std::clamp(point.Y, Top, Bottom);
 
-	if (Type == +Ds4TouchRegionType::StickAutoCenter)
+	if (Type == +Ds4TouchRegionType::stickAutoCenter)
 	{
 		Ds4Vector2 start = GetStartPoint(sender);
 
@@ -205,6 +205,24 @@ bool Ds4TouchRegion::operator!=(const Ds4TouchRegion& other) const
 
 void Ds4TouchRegion::readJson(const QJsonObject& json)
 {
+	Type           = Ds4TouchRegionType::_from_string(json["type"].toString().toStdString().c_str());
+	AllowCrossOver = json["allowCrossOver"].toBool();
+	Left           = json["left"].toInt();
+	Top            = json["top"].toInt();
+	Right          = json["right"].toInt();
+	Bottom         = json["bottom"].toInt();
+
+	auto touchAxisOptions_ = json["touchAxisOptions"].toObject();
+
+	for (const auto& key : touchAxisOptions_.keys())
+	{
+		auto stdstr = key.toStdString();
+
+		Direction_t value;
+		ENUM_DESERIALIZE_FLAGS(Direction)(stdstr, value);
+
+		TouchAxisOptions[value] = fromJson<InputAxisOptions>(touchAxisOptions_[key].toObject());
+	}
 }
 
 void Ds4TouchRegion::writeJson(QJsonObject& json) const
@@ -216,12 +234,12 @@ void Ds4TouchRegion::writeJson(QJsonObject& json) const
 	json["right"]          = Right;
 	json["bottom"]         = Bottom;
 
-	QJsonArray array;
+	QJsonObject touchAxisOptions_;
 
-	for (const auto& option : TouchAxisOptions)
+	for (const auto& pair : TouchAxisOptions)
 	{
-		// TODO
+		touchAxisOptions_[ENUM_SERIALIZE_FLAGS(Direction)(pair.first).c_str()] = pair.second.toJson();
 	}
 
-	json["touchAxisOptions"] = array;
+	json["touchAxisOptions"] = touchAxisOptions_;
 }

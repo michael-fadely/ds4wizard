@@ -567,7 +567,7 @@ void Ds4Device::Run()
 
 	if (DataReceived)
 	{
-		// TODO: RunMaps();
+		 RunMaps();
 
 		if (Latency.elapsed() >= 5ms)
 		{
@@ -822,7 +822,7 @@ bool Ds4Device::IsOverriddenByModifierSet(InputMapBase& map)
 	return false;
 }
 
-void Ds4Device::RunMap(InputMap m, InputModifier* modifier)
+void Ds4Device::RunMap(InputMap& m, InputModifier* modifier)
 {
 	if (m.inputType == 0)
 	{
@@ -877,7 +877,7 @@ void Ds4Device::RunMap(InputMap m, InputModifier* modifier)
 			{
 				Ds4TouchRegion region = Profile.TouchRegions[m.InputRegion];
 
-				if (region.Type == +Ds4TouchRegionType::Button || m.touchDirection == Direction::none)
+				if (region.Type == +Ds4TouchRegionType::button || m.touchDirection == Direction::none)
 				{
 					PressedState state = HandleTouchToggle(m, modifier, region.State1);
 					ApplyMap(m, modifier, state, Pressable::IsActiveState(state) ? 1.0f : 0.0f);
@@ -923,7 +923,7 @@ void Ds4Device::RunMap(InputMap m, InputModifier* modifier)
 	}
 }
 
-PressedState Ds4Device::HandleTouchToggle(InputMap m, InputModifier* modifier, Pressable pressable)
+PressedState Ds4Device::HandleTouchToggle(InputMap& m, InputModifier* modifier, Pressable pressable)
 {
 	if (m.touchDirection != Direction::none)
 	{
@@ -945,7 +945,7 @@ PressedState Ds4Device::HandleTouchToggle(InputMap m, InputModifier* modifier, P
 	return state;
 }
 
-void Ds4Device::ApplyMap(InputMap m, InputModifier* modifier, PressedState state, float analog)
+void Ds4Device::ApplyMap(InputMap& m, InputModifier* modifier, PressedState state, float analog)
 {
 	switch (m.simulatorType)
 	{
@@ -1212,7 +1212,7 @@ void Ds4Device::UpdateTouchRegions()
 #endif
 }
 
-void Ds4Device::UpdateTouchRegion(Ds4TouchRegion region, InputModifier* modifier, Ds4Buttons_t sender, Ds4Vector2& point, Ds4Buttons_t& disallow)
+void Ds4Device::UpdateTouchRegion(Ds4TouchRegion& region, InputModifier* modifier, Ds4Buttons_t sender, Ds4Vector2& point, Ds4Buttons_t& disallow)
 {
 	if ((disallow & sender) == 0 && (Input.HeldButtons & sender) != 0)
 	{
@@ -1361,12 +1361,12 @@ void Ds4Device::UpdatePressedState(InputModifier& modifier)
 	}
 }
 
-void Ds4Device::UpdatePressedState(InputMap map, InputModifier* modifier)
+void Ds4Device::UpdatePressedState(InputMap& map, InputModifier* modifier)
 {
 	UpdatePressedStateImpl(map, [&]() -> void { map.Press(modifier);  }, [&]() -> void { map.Release(); });
 }
 
-void Ds4Device::UpdateBindingState(InputMap m, InputModifier* modifier)
+void Ds4Device::UpdateBindingState(InputMap& m, InputModifier* modifier)
 {
 	if (modifier != nullptr)
 	{

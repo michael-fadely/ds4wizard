@@ -26,7 +26,7 @@ bool AxisOptions::operator!=(const AxisOptions& other) const
 void AxisOptions::readJson(const QJsonObject& json)
 {
 	Multiplier = static_cast<float>(json["multiplier"].toDouble());
-	Polarity   = AxisPolarity::_from_string(json["polarity"].toString().toStdString().c_str()); // oh god
+	Polarity   = AxisPolarity::_from_string(json["polarity"].toString("none").toStdString().c_str()); // oh god
 }
 
 void AxisOptions::writeJson(QJsonObject& json) const

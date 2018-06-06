@@ -73,7 +73,13 @@ void DeviceProfile::readJson(const QJsonObject& json)
 	AutoXInputIndex = json["autoXInput"].toBool();
 	XInputIndex     = json["xinputIndex"].toInt();
 
-	// TouchRegions
+	auto touchRegions_ = json["touchRegions"].toObject();
+
+	for (const auto& key : touchRegions_.keys())
+	{
+		auto stdstr = key.toStdString();
+		TouchRegions[stdstr] = fromJson<Ds4TouchRegion>(touchRegions_[key].toObject());
+	}
 
 	auto bindings_ = json["bindings"].toArray();
 
@@ -100,9 +106,32 @@ void DeviceProfile::writeJson(QJsonObject& json) const
 	json["autoXInput"]    = AutoXInputIndex;
 	json["xinputIndex"]   = XInputIndex;
 
-	// TouchRegions
-	// Bindings
-	// Modifiers
+	QJsonObject touchRegions_;
+
+	for (auto& pair : TouchRegions)
+	{
+		touchRegions_[pair.first.c_str()] = pair.second.toJson();
+	}
+
+	json["touchRegions"] = touchRegions_;
+
+	QJsonArray bindings_;
+
+	for (auto& binding : Modifiers)
+	{
+		bindings_.append(binding.toJson());
+	}
+
+	json["bindings"] = bindings_;
+
+	QJsonArray modifiers_;
+
+	for (auto& modifier : Modifiers)
+	{
+		modifiers_.append(modifier.toJson());
+	}
+
+	json["modifiers"] = modifiers_;
 }
 
 #pragma region trash
@@ -127,7 +156,7 @@ const char* a = "{" \
 "      \"top\": 0," \
 "      \"right\": 1919," \
 "      \"bottom\": 941," \
-"      \"touchAxisoptions\": {" \
+"      \"touchAxisOptions\": {" \
 "        \"up\": {" \
 "          \"deadZone\": 0.25" \
 "        }," \

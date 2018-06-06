@@ -146,12 +146,12 @@ private:
 
 	bool IsOverriddenByModifierSet(InputMapBase& map);
 
-	void RunMap(InputMap m, InputModifier* modifier);
+	void RunMap(InputMap& m, InputModifier* modifier);
 
-	static PressedState HandleTouchToggle(InputMap m, InputModifier* modifier, Pressable pressable);
+	static PressedState HandleTouchToggle(InputMap& m, InputModifier* modifier, Pressable pressable);
 
 #if true
-	void ApplyMap(InputMap m, InputModifier* modifier, PressedState state, float analog);
+	void ApplyMap(InputMap& m, InputModifier* modifier, PressedState state, float analog);
 #endif
 
 	void SimulateMouse(const InputMap& m, PressedState state, float analog);
@@ -166,14 +166,14 @@ private:
 
 	void UpdateTouchRegions();
 
-	void UpdateTouchRegion(Ds4TouchRegion region, InputModifier* modifier, Ds4Buttons_t sender, Ds4Vector2& point, Ds4Buttons_t& disallow);
+	void UpdateTouchRegion(Ds4TouchRegion& region, InputModifier* modifier, Ds4Buttons_t sender, Ds4Vector2& point, Ds4Buttons_t& disallow);
 
 	void UpdatePressedStateImpl(InputMapBase& instance, const std::function<void()>& press, const std::function<void()>& release);
 
 	void UpdatePressedState(InputModifier& modifier);
 
-	void UpdatePressedState(InputMap map, InputModifier* modifier);
+	void UpdatePressedState(InputMap& map, InputModifier* modifier);
 
-	void UpdateBindingState(InputMap m, InputModifier* modifier);
+	void UpdateBindingState(InputMap& m, InputModifier* modifier);
 #pragma endregion
 };
