@@ -325,11 +325,11 @@ InputMap::InputMap(SimulatorType simulatorType, InputType_t inputType, OutputTyp
 
 void InputMap::Press(const InputModifier* modifier)
 {
-	if (modifier && modifier->IsActive() != false)
+	if (!modifier || modifier->IsActive())
 	{
 		InputMapBase::Press();
 	}
-	else if (Toggle == true && RapidFire == true)
+	else if (Toggle && RapidFire)
 	{
 		UpdateRapidState();
 	}
