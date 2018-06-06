@@ -108,7 +108,8 @@ void Ds4DeviceManager::FindControllers()
 				device->Start();
 
 				auto& safe = device->SafeMacAddress;
-				devices[std::wstring(safe.begin(), safe.end())] = device;
+				auto wstr = std::wstring(safe.begin(), safe.end());
+				devices[wstr] = device;
 			}
 			else
 			{
