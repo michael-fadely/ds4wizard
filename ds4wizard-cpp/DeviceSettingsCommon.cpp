@@ -3,13 +3,13 @@
 
 DeviceSettingsCommon::DeviceSettingsCommon()
 {
-	Light = {};
-	Idle  = {};
-
-	notifiedLow        = false;
-	notifiedCharged    = true;
+	Light              = {};
+	Idle               = {};
 	NotifyFullyCharged = true;
 	NotifyBatteryLow   = 2;
+
+	notifiedLow     = false;
+	notifiedCharged = true;
 }
 
 DeviceSettingsCommon::DeviceSettingsCommon(const DeviceSettingsCommon& other)
@@ -69,12 +69,16 @@ bool DeviceSettingsCommon::operator!=(const DeviceSettingsCommon& other) const
 
 void DeviceSettingsCommon::readJson(const QJsonObject& json)
 {
+	Light              = fromJson<Ds4LightOptions>(json["light"].toObject());
+	Idle               = fromJson<DeviceIdleOptions>(json["idle"].toObject());
+	NotifyFullyCharged = json["notifyFullyCharged"].toBool(true);
+	NotifyBatteryLow   = static_cast<uint8_t>(json["notifyBatteryLow"].toInt(2));
 }
 
 void DeviceSettingsCommon::writeJson(QJsonObject& json) const
 {
-	json["light"] = Light.toJson();
-	json["idle"] = Idle.toJson();
+	json["light"]              = Light.toJson();
+	json["idle"]               = Idle.toJson();
 	json["notifyFullyCharged"] = NotifyFullyCharged;
-	json["notifyBatteryLow"] = NotifyFullyCharged;
+	json["notifyBatteryLow"]   = NotifyBatteryLow;
 }

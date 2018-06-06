@@ -702,10 +702,10 @@ void Ds4Device::SimulateXInputAxis(XInputAxes& axes, float m)
 
 		AxisOptions options = axes.GetAxisOptions(static_cast<XInputAxis::T>(bit));
 
-		auto trigger = (uint8_t)(255.0f * m);
+		auto trigger = static_cast<uint8_t>(255.0f * m);
 
 		auto axis = static_cast<short>(std::numeric_limits<short>::max() * m);
-		short workAxis = options.Polarity != +AxisPolarity::none && options.Polarity == +AxisPolarity::negative ? (short)-axis : axis;
+		short workAxis = options.Polarity == +AxisPolarity::negative ? static_cast<short>(-axis) : axis;
 
 		bool isFirst = (simulatedXInputAxis & bit) == 0;
 		simulatedXInputAxis |= bit;
@@ -854,12 +854,10 @@ void Ds4Device::RunMap(InputMap& m, InputModifier* modifier)
 
 			case InputType::axis:
 			{
-				/*
-				TODO: if (m.InputAxis == nullptr)
+				if (m.InputAxis == 0)
 				{
-					throw new ArgumentNullException(nameof(m.InputAxis));
+					throw /* TODO: new ArgumentNullException(nameof(m.InputAxis))*/;
 				}
-				*/
 
 				for (Ds4Axis_t bit : Ds4Axis_values)
 				{

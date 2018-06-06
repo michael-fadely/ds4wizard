@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "AxisOptions.h"
-#include <sstream>
 
 AxisOptions::AxisOptions(AxisPolarity polarity)
 {
@@ -25,8 +24,13 @@ bool AxisOptions::operator!=(const AxisOptions& other) const
 
 void AxisOptions::readJson(const QJsonObject& json)
 {
-	Multiplier = static_cast<float>(json["multiplier"].toDouble());
+	Multiplier = static_cast<float>(json["multiplier"].toDouble(1.0));
 	Polarity   = AxisPolarity::_from_string(json["polarity"].toString("none").toStdString().c_str()); // oh god
+
+	if (Polarity == +AxisPolarity::negative)
+	{
+		qDebug() << "that's numberwang";
+	}
 }
 
 void AxisOptions::writeJson(QJsonObject& json) const
@@ -64,7 +68,7 @@ void InputAxisOptions::ApplyDeadZone(float& analog) const
 			throw /*new ArgumentOutOfRangeException(nameof(DeadZoneMode), DeadZoneMode, "Invalid deadzone mode.")*/;
 	}
 
-	if (invert == true)
+	if (invert)
 	{
 		analog = 1.0f - analog;
 	}
@@ -89,7 +93,7 @@ void InputAxisOptions::readJson(const QJsonObject& json)
 {
 	AxisOptions::readJson(json);
 
-	invert       = json["invert"].toBool();
+	invert       = json["invert"].toBool(false);
 	deadZoneMode = DeadZoneMode::_from_string(json["deadZoneMode"].toString("scale").toStdString().c_str()); // I feel dirty
 	deadZone     = static_cast<float>(json["deadZone"].toDouble());
 }
@@ -148,7 +152,7 @@ bool XInputAxes::operator!=(const XInputAxes& other) const
 
 void XInputAxes::readJson(const QJsonObject& json)
 {
-	auto axes_ = json["axes"].toString().toStdString();
+	auto axes_ = json["axes"].toString("none").toStdString();
 
 	ENUM_DESERIALIZE_FLAGS(XInputAxis)(axes_, Axes);
 
