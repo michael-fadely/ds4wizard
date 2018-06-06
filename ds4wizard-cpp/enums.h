@@ -40,10 +40,10 @@ struct OutputType // TODO: vjoy output support
 {
 	enum T
 	{
-		None,
-		XInput   = 1 << 0,
-		Keyboard = 1 << 1,
-		Mouse    = 1 << 2
+		none,
+		xinput   = 1 << 0,
+		keyboard = 1 << 1,
+		mouse    = 1 << 2
 	};
 };
 
@@ -56,22 +56,22 @@ struct XInputButtons
 {
 	enum T : uint16_t
 	{
-		DPadUp        = 0x0001,
-		DPadDown      = 0x0002,
-		DPadLeft      = 0x0004,
-		DPadRight     = 0x0008,
-		Start         = 0x0010,
-		Back          = 0x0020,
-		LeftThumb     = 0x0040,
-		RightThumb    = 0x0080,
-		LeftShoulder  = 0x0100,
-		RightShoulder = 0x0200,
-		Guide         = 0x0400,
-		Dummy         = 0x0800,
-		A             = 0x1000,
-		B             = 0x2000,
-		X             = 0x4000,
-		Y             = 0x8000,
+		dPadUp        = 0x0001,
+		dPadDown      = 0x0002,
+		dPadLeft      = 0x0004,
+		dPadRight     = 0x0008,
+		start         = 0x0010,
+		back          = 0x0020,
+		leftThumb     = 0x0040,
+		rightThumb    = 0x0080,
+		leftShoulder  = 0x0100,
+		rightShoulder = 0x0200,
+		guide         = 0x0400,
+		dummy         = 0x0800,
+		a             = 0x1000,
+		b             = 0x2000,
+		x             = 0x4000,
+		y             = 0x8000,
 	};
 };
 
@@ -153,26 +153,26 @@ struct Ds4Buttons
 {
 	enum T : uint32_t
 	{
-		Square      = 1 << 0,
-		Cross       = 1 << 1,
-		Circle      = 1 << 2,
-		Triangle    = 1 << 3,
-		L1          = 1 << 4,
-		R1          = 1 << 5,
-		L2          = 1 << 6,
-		R2          = 1 << 7,
-		Share       = 1 << 8,
-		Options     = 1 << 9,
-		L3          = 1 << 10,
-		R3          = 1 << 11,
-		PS          = 1 << 12,
-		TouchButton = 1 << 13,
-		Touch1      = 1 << 14,
-		Touch2      = 1 << 15,
-		Up          = 1 << 16,
-		Down        = 1 << 17,
-		Left        = 1 << 18,
-		Right       = 1 << 19
+		square      = 1 << 0,
+		cross       = 1 << 1,
+		circle      = 1 << 2,
+		triangle    = 1 << 3,
+		l1          = 1 << 4,
+		r1          = 1 << 5,
+		l2          = 1 << 6,
+		r2          = 1 << 7,
+		share       = 1 << 8,
+		options     = 1 << 9,
+		l3          = 1 << 10,
+		r3          = 1 << 11,
+		ps          = 1 << 12,
+		touchButton = 1 << 13,
+		touch1      = 1 << 14,
+		touch2      = 1 << 15,
+		up          = 1 << 16,
+		down        = 1 << 17,
+		left        = 1 << 18,
+		right       = 1 << 19
 	};
 };
 
@@ -185,18 +185,18 @@ struct Ds4Axis
 {
 	enum T : uint32_t
 	{
-		LeftStickX   = 1 << 0,
-		LeftStickY   = 1 << 1,
-		RightStickX  = 1 << 2,
-		RightStickY  = 1 << 3,
-		LeftTrigger  = 1 << 4,
-		RightTrigger = 1 << 5,
-		AccelX       = 1 << 6,
-		AccelY       = 1 << 7,
-		AccelZ       = 1 << 8,
-		GyroX        = 1 << 9,
-		GyroY        = 1 << 10,
-		GyroZ        = 1 << 11
+		leftStickX   = 1 << 0,
+		leftStickY   = 1 << 1,
+		rightStickX  = 1 << 2,
+		rightStickY  = 1 << 3,
+		leftTrigger  = 1 << 4,
+		rightTrigger = 1 << 5,
+		accelX       = 1 << 6,
+		accelY       = 1 << 7,
+		accelZ       = 1 << 8,
+		gyroX        = 1 << 9,
+		gyroY        = 1 << 10,
+		gyroZ        = 1 << 11
 	};
 };
 

@@ -11,7 +11,7 @@ void Ds4Input::_addButton(uint8_t pressed, Ds4Buttons_t buttons)
 
 void Ds4Input::Update(const gsl::span<uint8_t>& buffer, int i)
 {
-	const Ds4Buttons_t lastDpad = HeldButtons & (Ds4Buttons::Up | Ds4Buttons::Down | Ds4Buttons::Left | Ds4Buttons::Right);
+	const Ds4Buttons_t lastDpad = HeldButtons & (Ds4Buttons::up | Ds4Buttons::down | Ds4Buttons::left | Ds4Buttons::right);
 	HeldButtons = 0;
 
 	Data.LeftStick.X       = buffer[i + 0];
@@ -70,49 +70,49 @@ void Ds4Input::Update(const gsl::span<uint8_t>& buffer, int i)
 		Data.Battery = 10;
 	}
 
-	_addButton(Data.Cross, Ds4Buttons::Cross);
-	_addButton(Data.Circle, Ds4Buttons::Circle);
-	_addButton(Data.Square, Ds4Buttons::Square);
-	_addButton(Data.Triangle, Ds4Buttons::Triangle);
-	_addButton(Data.L1, Ds4Buttons::L1);
-	_addButton(Data.R1, Ds4Buttons::R1);
-	_addButton(Data.L2, Ds4Buttons::L2);
-	_addButton(Data.R2, Ds4Buttons::R2);
-	_addButton(Data.Share, Ds4Buttons::Share);
-	_addButton(Data.Options, Ds4Buttons::Options);
-	_addButton(Data.L3, Ds4Buttons::L3);
-	_addButton(Data.R3, Ds4Buttons::R3);
-	_addButton(Data.PS, Ds4Buttons::PS);
-	_addButton(Data.TouchButton, Ds4Buttons::TouchButton);
+	_addButton(Data.Cross, Ds4Buttons::cross);
+	_addButton(Data.Circle, Ds4Buttons::circle);
+	_addButton(Data.Square, Ds4Buttons::square);
+	_addButton(Data.Triangle, Ds4Buttons::triangle);
+	_addButton(Data.L1, Ds4Buttons::l1);
+	_addButton(Data.R1, Ds4Buttons::r1);
+	_addButton(Data.L2, Ds4Buttons::l2);
+	_addButton(Data.R2, Ds4Buttons::r2);
+	_addButton(Data.Share, Ds4Buttons::share);
+	_addButton(Data.Options, Ds4Buttons::options);
+	_addButton(Data.L3, Ds4Buttons::l3);
+	_addButton(Data.R3, Ds4Buttons::r3);
+	_addButton(Data.PS, Ds4Buttons::ps);
+	_addButton(Data.TouchButton, Ds4Buttons::touchButton);
 
-	_addButton((uint8_t)(Data.Touch1 ? 1 : 0), Ds4Buttons::Touch1);
-	_addButton((uint8_t)(Data.Touch2 ? 1 : 0), Ds4Buttons::Touch2);
+	_addButton((uint8_t)(Data.Touch1 ? 1 : 0), Ds4Buttons::touch1);
+	_addButton((uint8_t)(Data.Touch2 ? 1 : 0), Ds4Buttons::touch2);
 
 	switch (Data.DPad)
 	{
 		case Hat::north:
-			_addButton(1, Ds4Buttons::Up);
+			_addButton(1, Ds4Buttons::up);
 			break;
 		case Hat::northEast:
-			_addButton(1, Ds4Buttons::Up | Ds4Buttons::Right);
+			_addButton(1, Ds4Buttons::up | Ds4Buttons::right);
 			break;
 		case Hat::east:
-			_addButton(1, Ds4Buttons::Right);
+			_addButton(1, Ds4Buttons::right);
 			break;
 		case Hat::southEast:
-			_addButton(1, Ds4Buttons::Right | Ds4Buttons::Down);
+			_addButton(1, Ds4Buttons::right | Ds4Buttons::down);
 			break;
 		case Hat::south:
-			_addButton(1, Ds4Buttons::Down);
+			_addButton(1, Ds4Buttons::down);
 			break;
 		case Hat::southWest:
-			_addButton(1, Ds4Buttons::Down | Ds4Buttons::Left);
+			_addButton(1, Ds4Buttons::down | Ds4Buttons::left);
 			break;
 		case Hat::west:
-			_addButton(1, Ds4Buttons::Left);
+			_addButton(1, Ds4Buttons::left);
 			break;
 		case Hat::northWest:
-			_addButton(1, Ds4Buttons::Left | Ds4Buttons::Up);
+			_addButton(1, Ds4Buttons::left | Ds4Buttons::up);
 			break;
 		case Hat::none:
 			break;
@@ -131,7 +131,7 @@ void Ds4Input::UpdateChangedState()
 	LastHeldButtons = HeldButtons;
 	ButtonsChanged  = ReleasedButtons != 0 || PressedButtons != 0;
 
-	const Ds4Buttons_t touchMask = Ds4Buttons::Touch1 | Ds4Buttons::Touch2 | Ds4Buttons::TouchButton;
+	const Ds4Buttons_t touchMask = Ds4Buttons::touch1 | Ds4Buttons::touch2 | Ds4Buttons::touchButton;
 
 	TouchChanged = lastTouchFrame != Data.TouchFrame
 	               || (PressedButtons & touchMask) != 0
@@ -157,48 +157,48 @@ float Ds4Input::GetAxis(Ds4Axis_t axis, AxisPolarity* polarity) const
 
 	switch (axis)
 	{
-		case Ds4Axis::LeftStickX:
+		case Ds4Axis::leftStickX:
 			result = std::min(1.0f, std::clamp(Data.LeftStick.X - 128, -127, 127) / 127.0f);
 			result = std::clamp(result, -1.0f, 1.0f);
 			break;
-		case Ds4Axis::LeftStickY:
+		case Ds4Axis::leftStickY:
 			result = -std::min(1.0f, std::clamp(Data.LeftStick.Y - 128, -127, 127) / 127.0f);
 			result = std::clamp(result, -1.0f, 1.0f);
 			break;
 
-		case Ds4Axis::RightStickX:
+		case Ds4Axis::rightStickX:
 			result = std::min(1.0f, std::clamp(Data.RightStick.X - 128, -127, 127) / 127.0f);
 			result = std::clamp(result, -1.0f, 1.0f);
 			break;
-		case Ds4Axis::RightStickY:
+		case Ds4Axis::rightStickY:
 			result = -std::min(1.0f, std::clamp(Data.RightStick.Y - 128, -127, 127) / 127.0f);
 			result = std::clamp(result, -1.0f, 1.0f);
 			break;
 
-		case Ds4Axis::LeftTrigger:
+		case Ds4Axis::leftTrigger:
 			result = Data.LeftTrigger / 255.0f;
 			break;
-		case Ds4Axis::RightTrigger:
+		case Ds4Axis::rightTrigger:
 			result = Data.RightTrigger / 255.0f;
 			break;
 
-		case Ds4Axis::AccelX:
+		case Ds4Axis::accelX:
 			result = std::clamp(Data.Accel.X / (std::numeric_limits<short>::max() + 1.0f), 0.0f, 1.0f);
 			break;
-		case Ds4Axis::AccelY:
+		case Ds4Axis::accelY:
 			result = std::clamp(Data.Accel.Y / (std::numeric_limits<short>::max() + 1.0f), 0.0f, 1.0f);
 			break;
-		case Ds4Axis::AccelZ:
+		case Ds4Axis::accelZ:
 			result = std::clamp(Data.Accel.Z / (std::numeric_limits<short>::max() + 1.0f), 0.0f, 1.0f);
 			break;
 
-		case Ds4Axis::GyroX:
+		case Ds4Axis::gyroX:
 			result = std::clamp(Data.Gyro.X / (std::numeric_limits<short>::max() + 1.0f), 0.0f, 1.0f);
 			break;
-		case Ds4Axis::GyroY:
+		case Ds4Axis::gyroY:
 			result = std::clamp(Data.Gyro.Y / (std::numeric_limits<short>::max() + 1.0f), 0.0f, 1.0f);
 			break;
-		case Ds4Axis::GyroZ:
+		case Ds4Axis::gyroZ:
 			result = std::clamp(Data.Gyro.Z / (std::numeric_limits<short>::max() + 1.0f), 0.0f, 1.0f);
 			break;
 

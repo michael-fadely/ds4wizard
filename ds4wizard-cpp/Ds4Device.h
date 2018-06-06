@@ -136,7 +136,7 @@ private:
 	void OnBatteryLevelChanged();
 
 #pragma region shit
-	const Ds4Buttons_t touchMask = Ds4Buttons::Touch1 | Ds4Buttons::Touch2;
+	const Ds4Buttons_t touchMask = Ds4Buttons::touch1 | Ds4Buttons::touch2;
 
 	void SimulateXInputButton(XInputButtons_t buttons, PressedState state);
 

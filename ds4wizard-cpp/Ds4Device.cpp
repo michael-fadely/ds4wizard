@@ -545,12 +545,12 @@ void Ds4Device::Run()
 		}
 	}
 
-	const float lx = Input.GetAxis(Ds4Axis::LeftStickX, nullptr);
-	const float ly = Input.GetAxis(Ds4Axis::LeftStickY, nullptr);
+	const float lx = Input.GetAxis(Ds4Axis::leftStickX, nullptr);
+	const float ly = Input.GetAxis(Ds4Axis::leftStickY, nullptr);
 	const auto  ls = static_cast<float>(std::sqrt(lx * lx + ly * ly));
 
-	const float rx = Input.GetAxis(Ds4Axis::RightStickX, nullptr);
-	const float ry = Input.GetAxis(Ds4Axis::RightStickY, nullptr);
+	const float rx = Input.GetAxis(Ds4Axis::rightStickX, nullptr);
+	const float ry = Input.GetAxis(Ds4Axis::rightStickY, nullptr);
 	const auto  rs = static_cast<float>(std::sqrt(rx * rx + ry * ry));
 
 	// TODO: gyro/accel
@@ -892,7 +892,7 @@ void Ds4Device::RunMap(InputMap& m, InputModifier* modifier)
 					float deadZone = region.GetDeadZone(direction);
 
 					PressedState state = HandleTouchToggle(m, modifier, region.State1);
-					float analog = region.GetTouchDelta(Ds4Buttons::Touch1, direction, Input.Data.TouchPoint1);
+					float analog = region.GetTouchDelta(Ds4Buttons::touch1, direction, Input.Data.TouchPoint1);
 
 					if (analog < deadZone)
 					{
@@ -903,7 +903,7 @@ void Ds4Device::RunMap(InputMap& m, InputModifier* modifier)
 					ApplyMap(m, modifier, state, analog);
 
 					state  = HandleTouchToggle(m, modifier, region.State2);
-					analog = region.GetTouchDelta(Ds4Buttons::Touch2, direction, Input.Data.TouchPoint2);
+					analog = region.GetTouchDelta(Ds4Buttons::touch2, direction, Input.Data.TouchPoint2);
 
 					if (analog < deadZone)
 					{
@@ -952,7 +952,7 @@ void Ds4Device::ApplyMap(InputMap& m, InputModifier* modifier, PressedState stat
 		case SimulatorType::input:
 			switch (m.outputType)
 			{
-				case OutputType::XInput:
+				case OutputType::xinput:
 					if (m.xinputButtons)
 					{
 						SimulateXInputButton(m.xinputButtons, state);
@@ -965,12 +965,12 @@ void Ds4Device::ApplyMap(InputMap& m, InputModifier* modifier, PressedState stat
 
 					break;
 
-				case OutputType::Keyboard:
+				case OutputType::keyboard:
 					SimulateKeyboard(m, state);
 					break;
 
 					// TODO: AxisOptions thing for mouse
-				case OutputType::Mouse:
+				case OutputType::mouse:
 					SimulateMouse(m, state, analog);
 					break;
 

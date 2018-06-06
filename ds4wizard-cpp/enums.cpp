@@ -85,106 +85,106 @@ static const char* XInputAxis_names[] = {
 SERIALIZE_DEF(XInputAxis)
 
 static const XInputButtons_t XInputButtons_values[] = {
-	XInputButtons::DPadUp,
-	XInputButtons::DPadDown,
-	XInputButtons::DPadLeft,
-	XInputButtons::DPadRight,
-	XInputButtons::Start,
-	XInputButtons::Back,
-	XInputButtons::LeftThumb,
-	XInputButtons::RightThumb,
-	XInputButtons::LeftShoulder,
-	XInputButtons::RightShoulder,
-	XInputButtons::Guide,
-	XInputButtons::Dummy,
-	XInputButtons::A,
-	XInputButtons::B,
-	XInputButtons::X,
-	XInputButtons::Y
+	XInputButtons::dPadUp,
+	XInputButtons::dPadDown,
+	XInputButtons::dPadLeft,
+	XInputButtons::dPadRight,
+	XInputButtons::start,
+	XInputButtons::back,
+	XInputButtons::leftThumb,
+	XInputButtons::rightThumb,
+	XInputButtons::leftShoulder,
+	XInputButtons::rightShoulder,
+	XInputButtons::guide,
+	XInputButtons::dummy,
+	XInputButtons::a,
+	XInputButtons::b,
+	XInputButtons::x,
+	XInputButtons::y
 };
 
 static const char* XInputButtons_names[] = {
-	"DPadUp",
-	"DPadDown",
-	"DPadLeft",
-	"DPadRight",
-	"Start",
-	"Back",
-	"LeftThumb",
-	"RightThumb",
-	"LeftShoulder",
-	"RightShoulder",
-	"Guide",
-	"Dummy",
-	"A",
-	"B",
-	"X",
-	"Y"
+	"dPadUp",
+	"dPadDown",
+	"dPadLeft",
+	"dPadRight",
+	"start",
+	"back",
+	"leftThumb",
+	"rightThumb",
+	"leftShoulder",
+	"rightShoulder",
+	"guide",
+	"dummy",
+	"a",
+	"b",
+	"x",
+	"y"
 };
 
 SERIALIZE_DEF(XInputButtons)
 
 static const Ds4Buttons_t Ds4Buttons_values[] = {
-	Ds4Buttons::Square,
-	Ds4Buttons::Cross,
-	Ds4Buttons::Circle,
-	Ds4Buttons::Triangle,
-	Ds4Buttons::L1,
-	Ds4Buttons::R1,
-	Ds4Buttons::L2,
-	Ds4Buttons::R2,
-	Ds4Buttons::Share,
-	Ds4Buttons::Options,
-	Ds4Buttons::L3,
-	Ds4Buttons::R3,
-	Ds4Buttons::PS,
-	Ds4Buttons::TouchButton,
-	Ds4Buttons::Touch1,
-	Ds4Buttons::Touch2,
-	Ds4Buttons::Up,
-	Ds4Buttons::Down,
-	Ds4Buttons::Left,
-	Ds4Buttons::Right
+	Ds4Buttons::square,
+	Ds4Buttons::cross,
+	Ds4Buttons::circle,
+	Ds4Buttons::triangle,
+	Ds4Buttons::l1,
+	Ds4Buttons::r1,
+	Ds4Buttons::l2,
+	Ds4Buttons::r2,
+	Ds4Buttons::share,
+	Ds4Buttons::options,
+	Ds4Buttons::l3,
+	Ds4Buttons::r3,
+	Ds4Buttons::ps,
+	Ds4Buttons::touchButton,
+	Ds4Buttons::touch1,
+	Ds4Buttons::touch2,
+	Ds4Buttons::up,
+	Ds4Buttons::down,
+	Ds4Buttons::left,
+	Ds4Buttons::right
 };
 
 static const char* Ds4Buttons_names[] = {
-	"Square",
-	"Cross",
-	"Circle",
-	"Triangle",
-	"L1",
-	"R1",
-	"L2",
-	"R2",
-	"Share",
-	"Options",
-	"L3",
-	"R3",
-	"PS",
-	"TouchButton",
-	"Touch1",
-	"Touch2",
-	"Up",
-	"Down",
-	"Left",
-	"Right"
+	"square",
+	"cross",
+	"circle",
+	"triangle",
+	"l1",
+	"r1",
+	"l2",
+	"r2",
+	"share",
+	"options",
+	"l3",
+	"r3",
+	"ps",
+	"touchButton",
+	"touch1",
+	"touch2",
+	"up",
+	"down",
+	"left",
+	"right"
 };
 
 SERIALIZE_DEF(Ds4Buttons)
 
 static const Ds4Axis_t Ds4Axis_values[] = {
-	Ds4Axis::LeftStickX,
-	Ds4Axis::LeftStickY,
-	Ds4Axis::RightStickX,
-	Ds4Axis::RightStickY,
-	Ds4Axis::LeftTrigger,
-	Ds4Axis::RightTrigger,
-	Ds4Axis::AccelX,
-	Ds4Axis::AccelY,
-	Ds4Axis::AccelZ,
-	Ds4Axis::GyroX,
-	Ds4Axis::GyroY,
-	Ds4Axis::GyroZ,
+	Ds4Axis::leftStickX,
+	Ds4Axis::leftStickY,
+	Ds4Axis::rightStickX,
+	Ds4Axis::rightStickY,
+	Ds4Axis::leftTrigger,
+	Ds4Axis::rightTrigger,
+	Ds4Axis::accelX,
+	Ds4Axis::accelY,
+	Ds4Axis::accelZ,
+	Ds4Axis::gyroX,
+	Ds4Axis::gyroY,
+	Ds4Axis::gyroZ,
 };
 
 static const char* Ds4Axis_names[] = {
@@ -194,12 +194,12 @@ static const char* Ds4Axis_names[] = {
 	"rightStickY",
 	"leftTrigger",
 	"rightTrigger",
-	"AccelX",
-	"AccelY",
-	"AccelZ",
-	"GyroX",
-	"GyroY",
-	"GyroZ"
+	"accelX",
+	"accelY",
+	"accelZ",
+	"gyroX",
+	"gyroY",
+	"gyroZ"
 };
 
 SERIALIZE_DEF(Ds4Axis)
@@ -237,15 +237,15 @@ static const char* Direction_names[] = {
 SERIALIZE_DEF(Direction)
 
 static const OutputType_t OutputType_values[] = {
-	OutputType::XInput,
-	OutputType::Keyboard,
-	OutputType::Mouse,
+	OutputType::xinput,
+	OutputType::keyboard,
+	OutputType::mouse,
 };
 
 static const char* OutputType_names[] = {
-	"XInput",
-	"Keyboard",
-	"Mouse"
+	"xinput",
+	"keyboard",
+	"mouse"
 };
 
 SERIALIZE_DEF(OutputType)

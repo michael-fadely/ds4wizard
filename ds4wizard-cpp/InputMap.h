@@ -2,7 +2,6 @@
 #include "Pressable.h"
 #include "Stopwatch.h"
 #include "AxisOptions.h"
-#include "XInputGamepad.h"
 
 class InputMapBase : public Pressable, public JsonData
 {

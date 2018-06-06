@@ -200,6 +200,7 @@ void InputMapBase::readJson(const QJsonObject& json)
 {
 	ENUM_DESERIALIZE_FLAGS(InputType)(json["inputType"].toString().toStdString(), inputType);
 	ENUM_DESERIALIZE_FLAGS(Ds4Buttons)(json["inputButtons"].toString().toStdString(), InputButtons);
+	ENUM_DESERIALIZE_FLAGS(Ds4Axis)(json["inputAxis"].toString().toStdString(), InputAxis);
 
 	InputRegion       = json["inputRegion"].toString().toStdString();
 	Toggle            = json["toggle"].toBool();
@@ -220,6 +221,7 @@ void InputMapBase::writeJson(QJsonObject& json) const
 {
 	json["inputType"]         = ENUM_SERIALIZE_FLAGS(InputType)(inputType).c_str();
 	json["inputButtons"]      = ENUM_SERIALIZE_FLAGS(Ds4Buttons)(InputButtons).c_str();
+	json["inputAxis"]         = ENUM_SERIALIZE_FLAGS(Ds4Axis)(InputAxis).c_str();
 	json["inputRegion"]       = InputRegion.c_str();
 	json["toggle"]            = Toggle;
 	json["rapidFire"]         = RapidFire;

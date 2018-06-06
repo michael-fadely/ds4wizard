@@ -39,12 +39,12 @@ bool Ds4TouchRegion::IsInRegion(Ds4Buttons_t sender, short x, short y) const
 
 Ds4Vector2 Ds4TouchRegion::GetStartPoint(Ds4Buttons_t sender) const
 {
-	if ((sender & Ds4Buttons::Touch1) != 0)
+	if ((sender & Ds4Buttons::touch1) != 0)
 	{
 		return PointStart1;
 	}
 
-	if ((sender & Ds4Buttons::Touch2) != 0)
+	if ((sender & Ds4Buttons::touch2) != 0)
 	{
 		return PointStart2;
 	}
@@ -59,12 +59,12 @@ bool Ds4TouchRegion::IsActive(Ds4Buttons_t sender) const
 
 void Ds4TouchRegion::SetActive(Ds4Buttons_t sender, const Ds4Vector2& point)
 {
-	if ((sender & Ds4Buttons::Touch1) != 0)
+	if ((sender & Ds4Buttons::touch1) != 0)
 	{
 		State1.Press();
 	}
 
-	if ((sender & Ds4Buttons::Touch2) != 0)
+	if ((sender & Ds4Buttons::touch2) != 0)
 	{
 		State2.Press();
 	}
@@ -76,11 +76,11 @@ void Ds4TouchRegion::SetActive(Ds4Buttons_t sender, const Ds4Vector2& point)
 
 	Active |= sender;
 
-	if ((sender & Ds4Buttons::Touch1) != 0)
+	if ((sender & Ds4Buttons::touch1) != 0)
 	{
 		PointStart1 = point;
 	}
-	else if ((sender & Ds4Buttons::Touch2) != 0)
+	else if ((sender & Ds4Buttons::touch2) != 0)
 	{
 		PointStart2 = point;
 	}
@@ -90,12 +90,12 @@ void Ds4TouchRegion::SetInactive(Ds4Buttons_t sender)
 {
 	Active &= ~sender;
 
-	if ((sender & Ds4Buttons::Touch1) != 0)
+	if ((sender & Ds4Buttons::touch1) != 0)
 	{
 		State1.Release();
 	}
 
-	if ((sender & Ds4Buttons::Touch2) != 0)
+	if ((sender & Ds4Buttons::touch2) != 0)
 	{
 		State2.Release();
 	}
