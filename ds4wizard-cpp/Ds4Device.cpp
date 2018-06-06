@@ -658,3 +658,760 @@ void Ds4Device::OnBatteryLevelChanged()
 {
 	// TODO: BatteryLevelChanged.Invoke(this, EventArgs.Empty);
 }
+
+void Ds4Device::SimulateXInputButton(XInputButtons_t buttons, PressedState state)
+{
+	XInputButtons_t dest = Input.Gamepad.wButtons;
+
+	switch (state)
+	{
+		case PressedState::off:
+			break;
+
+		case PressedState::released:
+			dest &= ~buttons;
+			break;
+
+		case PressedState::on:
+		case PressedState::pressed:
+			dest |= buttons;
+			break;
+
+		default:
+			throw /* TODO new ArgumentOutOfRangeException(nameof(state), state, "Invalied pressed state.")*/;
+	}
+
+	Input.Gamepad.wButtons = dest;
+}
+
+void Ds4Device::SimulateXInputAxis(XInputAxes axes, float m)
+{
+	for (XInputAxis_t bit : XInputAxis_values)
+	{
+		if ((axes.Axes & bit) == 0)
+		{
+			continue;
+		}
+
+		AxisOptions options = axes.GetAxisOptions(static_cast<XInputAxis::T>(bit));
+
+		auto trigger = (uint8_t)(255.0f * m);
+
+		auto axis = static_cast<short>(std::numeric_limits<short>::max() * m);
+		short workAxis = options.Polarity != +AxisPolarity::none && options.Polarity == +AxisPolarity::negative ? (short)-axis : axis;
+
+		bool isFirst = (simulatedXInputAxis & bit) == 0;
+		simulatedXInputAxis |= bit;
+
+		switch (bit)
+		{
+			case XInputAxis::leftStickX:
+				if (isFirst || axis > std::abs(Input.Gamepad.sThumbLX))
+				{
+					Input.Gamepad.sThumbLX = workAxis;
+				}
+
+				break;
+
+			case XInputAxis::leftStickY:
+				if (isFirst || axis > std::abs(Input.Gamepad.sThumbLY))
+				{
+					Input.Gamepad.sThumbLY = workAxis;
+				}
+
+				break;
+
+			case XInputAxis::rightStickX:
+				if (isFirst || axis > std::abs(Input.Gamepad.sThumbRX))
+				{
+					Input.Gamepad.sThumbRX = workAxis;
+				}
+
+				break;
+
+			case XInputAxis::rightStickY:
+				if (isFirst || axis > std::abs(Input.Gamepad.sThumbRY))
+				{
+					Input.Gamepad.sThumbRY = workAxis;
+				}
+
+				break;
+
+			case XInputAxis::leftTrigger:
+				if (isFirst || trigger > Input.Gamepad.bLeftTrigger)
+				{
+					Input.Gamepad.bLeftTrigger = trigger;
+				}
+
+				break;
+
+			case XInputAxis::rightTrigger:
+				if (isFirst || trigger > Input.Gamepad.bRightTrigger)
+				{
+					Input.Gamepad.bRightTrigger = trigger;
+				}
+
+				break;
+
+			default:
+				throw /* TODO: new ArgumentOutOfRangeException(nameof(options), options, "Invalid XInput axis.")*/;
+		}
+	}
+}
+
+bool Ds4Device::IsOverriddenByModifierSet(InputMapBase& map)
+{
+	if (Profile.Modifiers.empty())
+	{
+		return false;
+	}
+
+	/*std::list<InputMap> maps = Profile.Modifiers
+		.Where(x = > x.IsActive)
+		.Select(y = > y.Bindings)
+		.Where(x = > x != nullptr)
+		.SelectMany(x = > x)
+		.Where(x = > !ReferenceEquals(x, map))
+		.ToList();*/
+
+	std::list<InputMap*> maps;
+
+	for (InputModifier& mod : Profile.Modifiers)
+	{
+		if (!mod.IsActive())
+		{
+			continue;
+		}
+
+		for (InputMap& binding : mod.Bindings)
+		{
+			if (&binding != &map)
+			{
+				maps.push_back(&binding);
+			}
+		}
+	}
+
+	if ((map.inputType & InputType::button) != 0)
+	{
+		//if (maps.Any(x =  > (x.inputType & InputType::button) != 0 && (x.InputButtons & map.InputButtons) != 0))
+		if (std::any_of(maps.begin(), maps.end(), [&](InputMap* x) -> bool { return (x->inputType & InputType::button) != 0 && (x->InputButtons & map.InputButtons) != 0; }))
+		{
+			return true;
+		}
+	}
+
+	if ((map.inputType & InputType::axis) != 0)
+	{
+		//if (maps.Any(x =  > (x.inputType & InputType::axis) != 0 && (x.InputAxis & map.InputAxis) != 0))
+		if (std::any_of(maps.begin(), maps.end(), [&](InputMap* x) -> bool { return (x->inputType & InputType::axis) != 0 && (x->InputAxis & map.InputAxis) != 0; }))
+		{
+			return true;
+		}
+	}
+
+	if ((map.inputType & InputType::touchRegion) != 0)
+	{
+		//if (maps.Any(x =  > (x.inputType & InputType::touchRegion) != 0 && x.InputRegion == map.InputRegion))
+		if (std::any_of(maps.begin(), maps.end(), [&](InputMap* x) -> bool { return (x->inputType & InputType::touchRegion) != 0 && x->InputRegion == map.InputRegion; }))
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void Ds4Device::RunMap(InputMap m, InputModifier* modifier)
+{
+	if (m.inputType == 0)
+	{
+		throw /* TODO: new ArgumentOutOfRangeException(nameof(m.inputType), m.inputType, "InputType must be non-zero.")*/;
+	}
+
+	for (InputType_t value : InputType_values)
+	{
+		if ((m.inputType & value) == 0)
+		{
+			continue;
+		}
+
+		switch (value)
+		{
+			case InputType::button:
+			{
+				PressedState state = m.SimulatedState();
+				ApplyMap(m, modifier, state, m.IsActive() && ((modifier && modifier->IsActive()) || m.IsToggled) ? 1.0f : 0.0f);
+				break;
+			}
+
+			case InputType::axis:
+			{
+				/*
+				TODO: if (m.InputAxis == nullptr)
+				{
+					throw new ArgumentNullException(nameof(m.InputAxis));
+				}
+				*/
+
+				for (Ds4Axis_t bit : Ds4Axis_values)
+				{
+					if ((m.InputAxis & bit) == 0)
+					{
+						continue;
+					}
+
+					InputAxisOptions options = m.GetAxisOptions(bit);
+
+					float analog = Input.GetAxis(m.InputAxis, &options.Polarity);
+					options.ApplyDeadZone(analog);
+
+					PressedState state = m.SimulatedState();
+					ApplyMap(m, modifier, state, analog);
+				}
+
+				break;
+			}
+
+			case InputType::touchRegion:
+			{
+				Ds4TouchRegion region = Profile.TouchRegions[m.InputRegion];
+
+				if (region.Type == +Ds4TouchRegionType::Button || m.touchDirection == Direction::none)
+				{
+					PressedState state = HandleTouchToggle(m, modifier, region.State1);
+					ApplyMap(m, modifier, state, Pressable::IsActiveState(state) ? 1.0f : 0.0f);
+
+					state = HandleTouchToggle(m, modifier, region.State2);
+					ApplyMap(m, modifier, state, Pressable::IsActiveState(state) ? 1.0f : 0.0f);
+				}
+				else
+				{
+					Direction_t direction = m.touchDirection;
+
+					float deadZone = region.GetDeadZone(direction);
+
+					PressedState state = HandleTouchToggle(m, modifier, region.State1);
+					float analog = region.GetTouchDelta(Ds4Buttons::Touch1, direction, Input.Data.TouchPoint1);
+
+					if (analog < deadZone)
+					{
+						Pressable::Release(state);
+					}
+
+					region.ApplyDeadZone(direction, analog);
+					ApplyMap(m, modifier, state, analog);
+
+					state  = HandleTouchToggle(m, modifier, region.State2);
+					analog = region.GetTouchDelta(Ds4Buttons::Touch2, direction, Input.Data.TouchPoint2);
+
+					if (analog < deadZone)
+					{
+						Pressable::Release(state);
+					}
+
+					region.ApplyDeadZone(direction, analog);
+					ApplyMap(m, modifier, state, analog);
+				}
+
+				return;
+			}
+
+			default:
+				throw /* TODO: new ArgumentOutOfRangeException()*/;
+		}
+	}
+}
+
+PressedState Ds4Device::HandleTouchToggle(InputMap m, InputModifier* modifier, Pressable pressable)
+{
+	if (m.touchDirection != Direction::none)
+	{
+		return m.IsToggled ? m.SimulatedState() : pressable.State;
+	}
+
+	if (m.RapidFire == true)
+	{
+		return m.SimulatedState();
+	}
+
+	PressedState state = (m.IsToggled || (modifier && modifier->IsActive() == true)) ? pressable.State : m.State;
+
+	if (!Pressable::IsActiveState(state))
+	{
+		state = m.SimulatedState();
+	}
+
+	return state;
+}
+
+void Ds4Device::ApplyMap(InputMap m, InputModifier* modifier, PressedState state, float analog)
+{
+	switch (m.simulatorType)
+	{
+		case SimulatorType::input:
+			switch (m.outputType)
+			{
+				case OutputType::XInput:
+					if (m.xinputButtons)
+					{
+						SimulateXInputButton(m.xinputButtons, state);
+					}
+
+					/* TODO: if (m.XInputAxes != nullptr)
+					{
+						SimulateXInputAxis(m.XInputAxes, analog);
+					}*/
+
+					break;
+
+				case OutputType::Keyboard:
+					SimulateKeyboard(m, state);
+					break;
+
+					// TODO: AxisOptions thing for mouse
+				case OutputType::Mouse:
+					SimulateMouse(m, state, analog);
+					break;
+
+				default:
+					throw /* TODO: new ArgumentOutOfRangeException(nameof(m.outputType), m.outputType, "Invalid output type.")*/;
+			}
+
+			break;
+
+		case SimulatorType::action:
+			if (m.action == +ActionType::none)
+			{
+				throw /* TODO: new ArgumentNullException(nameof(m.action))*/;
+			}
+
+			if (m.IsActive() && (modifier && modifier->IsActive()))
+			{
+				RunAction(m.action);
+			}
+
+			break;
+
+		default:
+			throw /* TODO: new ArgumentOutOfRangeException(nameof(m.simulatorType), m.simulatorType, "Invalid map type.")*/;
+	}
+}
+
+void Ds4Device::SimulateMouse(const InputMap& m, PressedState state, float analog)
+{
+	// TODO
+#if 0
+	if (m.MouseButton.HasValue)
+	{
+		switch (state)
+		{
+			case PressedState::Pressed:
+				switch (m.MouseButton.Value)
+				{
+					case MouseButton.LeftButton:
+						MouseSimulator.LeftButtonDown();
+						break;
+					case MouseButton.MiddleButton:
+						MouseSimulator.MiddleButtonDown();
+						break;
+					case MouseButton.RightButton:
+						MouseSimulator.RightButtonDown();
+						break;
+				}
+
+				break;
+
+			case PressedState::Released:
+				switch (m.MouseButton.Value)
+				{
+					case MouseButton.LeftButton:
+						MouseSimulator.LeftButtonUp();
+						break;
+					case MouseButton.MiddleButton:
+						MouseSimulator.MiddleButtonUp();
+						break;
+					case MouseButton.RightButton:
+						MouseSimulator.RightButtonUp();
+						break;
+				}
+
+				break;
+		}
+	}
+
+	if (m.MouseAxes == nullptr)
+	{
+		return;
+	}
+
+	analog *= deltaTime;
+
+	// TODO: /!\ actually the thing (GetAxisOptions)
+	Direction direction = m.MouseAxes.Directions;
+
+	int x = 0, y = 0;
+
+	if ((direction & (Direction::Left | Direction::Right)) != (Direction::Left | Direction::Right))
+	{
+		if ((direction & Direction::Right) != 0)
+		{
+			x = (int)analog;
+		}
+		else if ((direction & Direction::Left) != 0)
+		{
+			x = (int)-analog;
+		}
+	}
+	else
+	{
+		x = 0;
+	}
+
+	if ((direction & (Direction::Up | Direction::Down)) != (Direction::Up | Direction::Down))
+	{
+		if ((direction & Direction::Up) != 0)
+		{
+			y = (int)-analog;
+		}
+		else if ((direction & Direction::Down) != 0)
+		{
+			y = (int)analog;
+		}
+	}
+	else
+	{
+		y = 0;
+	}
+
+	if (x != 0 || y != 0)
+	{
+		MouseSimulator.MoveMouseBy(x, y);
+	}
+#endif
+}
+
+void Ds4Device::SimulateKeyboard(const InputMap& m, PressedState state)
+{
+	// TODO
+#if 0
+	if (m.KeyCode == nullptr)
+	{
+		return;
+	}
+
+	VirtualKeyCode keyCode = m.KeyCode.Value;
+
+	switch (state)
+	{
+		case PressedState::Pressed:
+			KeyboardSimulator.KeyDown(keyCode);
+
+			if (m.KeyCodeModifiers != nullptr)
+			{
+				foreach(VirtualKeyCode k in m.KeyCodeModifiers)
+				{
+					KeyboardSimulator.KeyDown(k);
+				}
+			}
+
+			break;
+
+		case PressedState::Released:
+			KeyboardSimulator.KeyUp(keyCode);
+
+			if (m.KeyCodeModifiers != nullptr)
+			{
+				foreach(VirtualKeyCode k in m.KeyCodeModifiers)
+				{
+					KeyboardSimulator.KeyUp(k);
+				}
+			}
+
+			break;
+	}
+#endif
+}
+
+void Ds4Device::RunAction(ActionType action)
+{
+	switch (action)
+	{
+		case ActionType::bluetoothDisconnect:
+			if (BluetoothConnected())
+			{
+				DisconnectBluetooth();
+				// TODO: Logger.WriteLine(LogLevel.Info, Name, Resources.BluetoothDisconnected);
+			}
+
+			break;
+
+		default:
+			throw /* TODO: new ArgumentOutOfRangeException(nameof(action), action, "Invalid action type.")*/;
+	}
+}
+
+void Ds4Device::RunMaps()
+{
+	simulatedXInputAxis = 0;
+
+	for (InputModifier& modifier : Profile.Modifiers)
+	{
+		UpdatePressedState(modifier);
+	}
+
+	if (Input.TouchChanged)
+	{
+		UpdateTouchRegions();
+	}
+
+	for (InputMap& m : Profile.Bindings)
+	{
+		UpdateBindingState(m, nullptr);
+	}
+}
+
+void Ds4Device::RunPersistent()
+{
+	simulatedXInputAxis = 0;
+
+	for (InputModifier& modifier : Profile.Modifiers)
+	{
+		if (modifier.IsPersistent())
+		{
+			UpdatePressedState(modifier);
+		}
+	}
+
+	for (InputMap& m : Profile.Bindings)
+	{
+		if (m.IsPersistent())
+		{
+			UpdateBindingState(m, nullptr);
+		}
+	}
+}
+
+void Ds4Device::UpdateTouchRegions()
+{
+	// TODO
+#if 0
+	Ds4Buttons_t disallow = 0;
+
+	foreach(Ds4TouchRegion region in Profile.TouchRegions.Values.OrderBy(x = > !x.IsActive(touchMask) && !x.AllowCrossOver))
+	{
+		if ((Input.HeldButtons & touchMask) == 0)
+		{
+			region.SetInactive(touchMask);
+			continue;
+		}
+
+		UpdateTouchRegion(region, /* TODO */ nullptr, Ds4Buttons::Touch1, ref Input.Data.TouchPoint1, ref disallow);
+		UpdateTouchRegion(region, /* TODO */ nullptr, Ds4Buttons::Touch2, ref Input.Data.TouchPoint2, ref disallow);
+	}
+#endif
+}
+
+void Ds4Device::UpdateTouchRegion(Ds4TouchRegion region, InputModifier* modifier, Ds4Buttons_t sender, Ds4Vector2& point, Ds4Buttons_t& disallow)
+{
+	if ((disallow & sender) == 0 && (Input.HeldButtons & sender) != 0)
+	{
+		if (region.IsInRegion(sender, point) && modifier)
+		{
+			if (modifier ->IsActive() == false)
+			{
+				UpdatePressedState(*modifier);
+			}
+
+			if (modifier && modifier->IsActive() != false)
+			{
+				region.SetActive(sender, point);
+
+				if (!region.AllowCrossOver)
+				{
+					disallow |= sender;
+				}
+
+				return;
+			}
+		}
+	}
+
+	region.SetInactive(sender);
+}
+
+void Ds4Device::UpdatePressedStateImpl(InputMapBase& instance, const std::function<void()>& press, const std::function<void()>& release)
+{
+	if (IsOverriddenByModifierSet(instance))
+	{
+		release();
+		return;
+	}
+
+	for (InputType_t value : InputType_values)
+	{
+		if ((instance.inputType & value) == 0)
+		{
+			continue;
+		}
+
+		switch (value)
+		{
+			case InputType::button:
+				if ((instance.InputButtons & Input.HeldButtons) == instance.InputButtons)
+				{
+					press();
+				}
+				else
+				{
+					release();
+				}
+
+				break;
+
+			case InputType::axis:
+			{
+				if (instance.InputAxis == 0)
+				{
+					throw /* TODO: new ArgumentNullException(nameof(instance.InputAxis))*/;
+				}
+
+				const gsl::span<const Ds4Axis_t> s(Ds4Axis_values);
+
+				size_t target = std::count_if(s.begin(), s.end(), [&](Ds4Axis_t x) -> bool { return (x & instance.InputAxis) != 0; });
+				size_t count  = 0;
+
+				for (Ds4Axis_t bit : Ds4Axis_values)
+				{
+					if ((instance.InputAxis & bit) == 0)
+					{
+						continue;
+					}
+
+					InputAxisOptions options = instance.GetAxisOptions(bit);
+
+					// ReSharper disable once PossibleInvalidOperationException
+					float axis = Input.GetAxis(instance.InputAxis, &options.Polarity);
+
+					if (axis >= options.deadZone)
+					{
+						++count;
+					}
+					else
+					{
+						break;
+					}
+				}
+
+				if (count == target)
+				{
+					press();
+				}
+				else
+				{
+					release();
+				}
+
+				break;
+			}
+
+			case InputType::touchRegion:
+			{
+				auto it = Profile.TouchRegions.find(instance.InputRegion);
+				if (it == Profile.TouchRegions.end())
+				{
+					break;
+				}
+
+				auto& region = it->second;
+
+				if (region.IsActive(touchMask))
+				{
+					press();
+				}
+				else
+				{
+					release();
+				}
+
+				break;
+			}
+
+			case InputType::none:
+				break;
+
+			default:
+				throw; // TODO
+		}
+	}
+}
+
+void Ds4Device::UpdatePressedState(InputModifier& modifier)
+{
+	UpdatePressedStateImpl(modifier, [&]() -> void { modifier.Press(); }, [&]() -> void { modifier.Release(); });
+
+	if (modifier.Bindings.empty())
+	{
+		return;
+	}
+
+	for (InputMap& bind : modifier.Bindings)
+	{
+		UpdateBindingState(bind, &modifier);
+	}
+}
+
+void Ds4Device::UpdatePressedState(InputMap map, InputModifier* modifier)
+{
+	UpdatePressedStateImpl(map, [&]() -> void { map.Press(modifier);  }, [&]() -> void { map.Release(); });
+}
+
+void Ds4Device::UpdateBindingState(InputMap m, InputModifier* modifier)
+{
+	if (modifier != nullptr)
+	{
+		if (m.Toggle != true)
+		{
+			if (!modifier->IsActive())
+			{
+				m.Release();
+				RunMap(m, modifier);
+				return;
+			}
+		}
+	}
+
+	switch (m.inputType)
+	{
+		case InputType::touchRegion:
+		{
+			auto it = Profile.TouchRegions.find(m.InputRegion);
+			if (it == Profile.TouchRegions.end())
+			{
+				break;
+			}
+
+			auto& region = it->second;
+
+			if (m.touchDirection == Direction::none)
+			{
+				if (region.IsActive(touchMask))
+				{
+					m.Press(modifier);
+				}
+				else
+				{
+					m.Release();
+				}
+			}
+
+			break;
+		}
+
+		default:
+			UpdatePressedState(m, modifier);
+			break;
+	}
+
+	RunMap(m, modifier);
+}

@@ -3,12 +3,14 @@
 #include <cstdint>
 #include <enum.h>
 
-#define serializableFlags(TYPE) \
+#define ENUM_FLAGS(TYPE) \
 	std::string serializeFlags_ ## TYPE ## (TYPE ## _t value); \
 	void deserializeFlags_ ## TYPE ## (const std::string& input, TYPE ## _t& value)
 
-#define serializeFlags(TYPE) serializeFlags_ ## TYPE
-#define deserializeFlags(TYPE) deserializeFlags_ ## TYPE
+#define ENUM_SERIALIZE_FLAGS(TYPE) serializeFlags_ ## TYPE
+#define ENUM_DESERIALIZE_FLAGS(TYPE) deserializeFlags_ ## TYPE
+
+#define ENUM_VALUES(TYPE, LENGTH) extern const TYPE ## _t TYPE ## _values[LENGTH]
 
 BETTER_ENUM(AxisPolarity, int, none, positive, negative);
 BETTER_ENUM(DeadZoneMode, int, none, hardLimit, scale);
@@ -22,7 +24,7 @@ struct InputType
 {
 	enum T
 	{
-		None,
+		none,
 		button      = 1 << 0,
 		axis        = 1 << 1,
 		touchRegion = 1 << 2
@@ -31,7 +33,8 @@ struct InputType
 
 using InputType_t = uint32_t;
 
-serializableFlags(InputType);
+ENUM_FLAGS(InputType);
+ENUM_VALUES(InputType, 3);
 
 struct OutputType // TODO: vjoy output support
 {
@@ -46,7 +49,8 @@ struct OutputType // TODO: vjoy output support
 
 using OutputType_t = uint32_t;
 
-serializableFlags(OutputType);
+ENUM_FLAGS(OutputType);
+ENUM_VALUES(OutputType, 3);
 
 struct XInputButtons
 {
@@ -72,7 +76,8 @@ struct XInputButtons
 };
 
 using XInputButtons_t = uint16_t;
-serializableFlags(XInputButtons);
+ENUM_FLAGS(XInputButtons);
+ENUM_VALUES(XInputButtons, 16);
 
 struct XInputAxis
 {
@@ -89,7 +94,8 @@ struct XInputAxis
 };
 
 using XInputAxis_t = uint32_t;
-serializableFlags(XInputAxis);
+ENUM_FLAGS(XInputAxis);
+ENUM_VALUES(XInputAxis, 6);
 
 struct Direction
 {
@@ -104,7 +110,8 @@ struct Direction
 };
 
 using Direction_t = uint32_t;
-serializableFlags(Direction);
+ENUM_FLAGS(Direction);
+ENUM_VALUES(Direction, 4);
 
 enum class Hat
 {
@@ -171,7 +178,8 @@ struct Ds4Buttons
 
 using Ds4Buttons_t = uint32_t;
 
-serializableFlags(Ds4Buttons);
+ENUM_FLAGS(Ds4Buttons);
+ENUM_VALUES(Ds4Buttons, 20);
 
 struct Ds4Axis
 {
@@ -193,7 +201,8 @@ struct Ds4Axis
 };
 
 using Ds4Axis_t = uint32_t;
-serializableFlags(Ds4Axis);
+ENUM_FLAGS(Ds4Axis);
+ENUM_VALUES(Ds4Axis, 12);
 
 struct Ds4Extensions
 {
@@ -207,4 +216,5 @@ struct Ds4Extensions
 };
 
 using Ds4Extensions_t = uint8_t;
-serializableFlags(Ds4Extensions);
+ENUM_FLAGS(Ds4Extensions);
+ENUM_VALUES(Ds4Extensions, 4);

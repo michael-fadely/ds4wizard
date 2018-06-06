@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <memory>
 #include <thread>
+#include <functional>
 
 #include "DeviceSettings.h"
 #include "DeviceProfile.h"
@@ -133,4 +134,46 @@ public:
 
 private:
 	void OnBatteryLevelChanged();
+
+#pragma region shit
+	const Ds4Buttons_t touchMask = Ds4Buttons::Touch1 | Ds4Buttons::Touch2;
+
+	void SimulateXInputButton(XInputButtons_t buttons, PressedState state);
+
+	XInputAxis_t simulatedXInputAxis = 0;
+
+	void SimulateXInputAxis(XInputAxes axes, float m);
+
+	bool IsOverriddenByModifierSet(InputMapBase& map);
+
+	void RunMap(InputMap m, InputModifier* modifier);
+
+	static PressedState HandleTouchToggle(InputMap m, InputModifier* modifier, Pressable pressable);
+
+#if true
+	void ApplyMap(InputMap m, InputModifier* modifier, PressedState state, float analog);
+#endif
+
+	void SimulateMouse(const InputMap& m, PressedState state, float analog);
+
+	void SimulateKeyboard(const InputMap& m, PressedState state);
+
+	void RunAction(ActionType action);
+
+	void RunMaps();
+
+	void RunPersistent();
+
+	void UpdateTouchRegions();
+
+	void UpdateTouchRegion(Ds4TouchRegion region, InputModifier* modifier, Ds4Buttons_t sender, Ds4Vector2& point, Ds4Buttons_t& disallow);
+
+	void UpdatePressedStateImpl(InputMapBase& instance, const std::function<void()>& press, const std::function<void()>& release);
+
+	void UpdatePressedState(InputModifier& modifier);
+
+	void UpdatePressedState(InputMap map, InputModifier* modifier);
+
+	void UpdateBindingState(InputMap m, InputModifier* modifier);
+#pragma endregion
 };

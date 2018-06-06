@@ -10,7 +10,7 @@ std::string serializeFlags_ ## TYPE (TYPE ## _t value)                          
 	std::stringstream ss;                                                       \
     size_t i = 0;                                                               \
                                                                                 \
-	for (auto bit : TYPE ## _bits)                                              \
+	for (auto bit : TYPE ## _values)                                              \
 	{                                                                           \
 		if (value & bit)                                                        \
 		{                                                                       \
@@ -42,7 +42,7 @@ void deserializeFlags_ ## TYPE ## (const std::string& input, TYPE ## _t& value) 
 		{                                                                       \
 			if (name == l)                                                      \
 			{                                                                   \
-				value |= TYPE ## _bits[i];                                      \
+				value |= TYPE ## _values[i];                                      \
 				break;                                                          \
 			}                                                                   \
 			++i;                                                                \
@@ -50,7 +50,7 @@ void deserializeFlags_ ## TYPE ## (const std::string& input, TYPE ## _t& value) 
 	}                                                                           \
 }
 
-static const InputType_t InputType_bits[] = {
+static const InputType_t InputType_values[] = {
 	InputType::button,
 	InputType::axis,
 	InputType::touchRegion
@@ -64,7 +64,7 @@ static const char* InputType_names[] = {
 
 SERIALIZE_DEF(InputType)
 
-static const XInputAxis_t XInputAxis_bits[] = {
+static const XInputAxis_t XInputAxis_values[] = {
 	XInputAxis::leftStickX,
 	XInputAxis::leftStickY,
 	XInputAxis::rightStickX,
@@ -84,7 +84,7 @@ static const char* XInputAxis_names[] = {
 
 SERIALIZE_DEF(XInputAxis)
 
-static const XInputButtons_t XInputButtons_bits[] = {
+static const XInputButtons_t XInputButtons_values[] = {
 	XInputButtons::DPadUp,
 	XInputButtons::DPadDown,
 	XInputButtons::DPadLeft,
@@ -124,7 +124,7 @@ static const char* XInputButtons_names[] = {
 
 SERIALIZE_DEF(XInputButtons)
 
-static const Ds4Buttons_t Ds4Buttons_bits[] = {
+static const Ds4Buttons_t Ds4Buttons_values[] = {
 	Ds4Buttons::Square,
 	Ds4Buttons::Cross,
 	Ds4Buttons::Circle,
@@ -172,7 +172,7 @@ static const char* Ds4Buttons_names[] = {
 
 SERIALIZE_DEF(Ds4Buttons)
 
-static const Ds4Axis_t Ds4Axis_bits[] = {
+static const Ds4Axis_t Ds4Axis_values[] = {
 	Ds4Axis::LeftStickX,
 	Ds4Axis::LeftStickY,
 	Ds4Axis::RightStickX,
@@ -204,7 +204,7 @@ static const char* Ds4Axis_names[] = {
 
 SERIALIZE_DEF(Ds4Axis)
 
-static const Ds4Extensions_t Ds4Extensions_bits[] = {
+static const Ds4Extensions_t Ds4Extensions_values[] = {
 	Ds4Extensions::Cable,
 	Ds4Extensions::Headphones,
 	Ds4Extensions::Microphone,
@@ -220,7 +220,7 @@ static const char* Ds4Extensions_names[] = {
 
 SERIALIZE_DEF(Ds4Extensions)
 
-static const Direction_t Direction_bits[] = {
+static const Direction_t Direction_values[] = {
 	Direction::up,
 	Direction::down,
 	Direction::left,
@@ -236,7 +236,7 @@ static const char* Direction_names[] = {
 
 SERIALIZE_DEF(Direction)
 
-static const OutputType_t OutputType_bits[] = {
+static const OutputType_t OutputType_values[] = {
 	OutputType::XInput,
 	OutputType::Keyboard,
 	OutputType::Mouse,

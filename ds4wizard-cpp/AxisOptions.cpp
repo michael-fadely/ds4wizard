@@ -150,7 +150,7 @@ void XInputAxes::readJson(const QJsonObject& json)
 {
 	auto axes_ = json["axes"].toString().toStdString();
 
-	deserializeFlags(XInputAxis)(axes_, Axes);
+	ENUM_DESERIALIZE_FLAGS(XInputAxis)(axes_, Axes);
 
 	auto options_ = json["options"].toObject();
 
@@ -158,20 +158,20 @@ void XInputAxes::readJson(const QJsonObject& json)
 	{
 		auto stdstr = key.toStdString();
 		XInputAxis_t value;
-		deserializeFlags(XInputAxis)(stdstr, value);
+		ENUM_DESERIALIZE_FLAGS(XInputAxis)(stdstr, value);
 		Options[value] = fromJson<AxisOptions>(options_[key].toObject());
 	}
 }
 
 void XInputAxes::writeJson(QJsonObject& json) const
 {
-	json["axes"] = serializeFlags(XInputAxis)(Axes).c_str();
+	json["axes"] = ENUM_SERIALIZE_FLAGS(XInputAxis)(Axes).c_str();
 
 	QJsonObject options_;
 
 	for (const auto& pair : Options)
 	{
-		auto key = serializeFlags(XInputAxis)(pair.first);
+		auto key = ENUM_SERIALIZE_FLAGS(XInputAxis)(pair.first);
 		options_[key.c_str()] = pair.second.toJson();
 	}
 

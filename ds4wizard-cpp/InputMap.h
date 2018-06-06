@@ -197,7 +197,7 @@ public:
 
 	InputMap(::SimulatorType simulatorType, InputType_t inputType, OutputType::T outputType);
 
-	void Press(const InputModifier& modifier);
+	void Press(const InputModifier* modifier);
 
 	bool operator==(const InputMap& other) const;
 	bool operator!=(const InputMap& other) const;

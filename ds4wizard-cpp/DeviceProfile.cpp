@@ -563,7 +563,7 @@ const char* a = "{" \
 DeviceProfile DeviceProfile::Default()
 {
 	auto obj = QJsonDocument::fromJson(QString(a).toUtf8());
-	DeviceProfile result = fromJson<DeviceProfile>(obj.object());
+	auto result = fromJson<DeviceProfile>(obj.object());
 
 /*
 	result.Light = Ds4LightOptions(Ds4Color(0, 0, 255));

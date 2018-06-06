@@ -198,8 +198,8 @@ bool InputMapBase::operator!=(const InputMapBase& other) const
 
 void InputMapBase::readJson(const QJsonObject& json)
 {
-	deserializeFlags(InputType)(json["inputType"].toString().toStdString(), inputType);
-	deserializeFlags(Ds4Buttons)(json["inputButtons"].toString().toStdString(), InputButtons);
+	ENUM_DESERIALIZE_FLAGS(InputType)(json["inputType"].toString().toStdString(), inputType);
+	ENUM_DESERIALIZE_FLAGS(Ds4Buttons)(json["inputButtons"].toString().toStdString(), InputButtons);
 
 	InputRegion       = json["inputRegion"].toString().toStdString();
 	Toggle            = json["toggle"].toBool();
@@ -211,15 +211,15 @@ void InputMapBase::readJson(const QJsonObject& json)
 	for (const auto& key : inputAxisOptions_.keys())
 	{
 		Ds4Buttons_t flags;
-		deserializeFlags(Ds4Buttons)(key.toStdString(), flags);
+		ENUM_DESERIALIZE_FLAGS(Ds4Buttons)(key.toStdString(), flags);
 		InputAxisOptions[flags] = fromJson<::InputAxisOptions>(inputAxisOptions_[key].toObject());
 	}
 }
 
 void InputMapBase::writeJson(QJsonObject& json) const
 {
-	json["inputType"]         = serializeFlags(InputType)(inputType).c_str();
-	json["inputButtons"]      = serializeFlags(Ds4Buttons)(InputButtons).c_str();
+	json["inputType"]         = ENUM_SERIALIZE_FLAGS(InputType)(inputType).c_str();
+	json["inputButtons"]      = ENUM_SERIALIZE_FLAGS(Ds4Buttons)(InputButtons).c_str();
 	json["inputRegion"]       = InputRegion.c_str();
 	json["toggle"]            = Toggle;
 	json["rapidFire"]         = RapidFire;
@@ -229,7 +229,7 @@ void InputMapBase::writeJson(QJsonObject& json) const
 
 	for (const auto& pair : InputAxisOptions)
 	{
-		auto key = serializeFlags(Ds4Axis)(pair.first);
+		auto key = ENUM_SERIALIZE_FLAGS(Ds4Axis)(pair.first);
 		inputAxisOptions_[key.c_str()] = pair.second.toJson();
 	}
 
@@ -317,13 +317,13 @@ InputMap::InputMap(const InputMap& other)
 InputMap::InputMap(SimulatorType simulatorType, InputType_t inputType, OutputType::T outputType)
 	: InputMapBase(inputType)
 {
-	simulatorType = simulatorType;
-	outputType    = outputType;
+	this->simulatorType = simulatorType;
+	this->outputType    = outputType;
 }
 
-void InputMap::Press(const InputModifier& modifier)
+void InputMap::Press(const InputModifier* modifier)
 {
-	if (modifier.IsActive() != false)
+	if (modifier && modifier->IsActive() != false)
 	{
 		InputMapBase::Press();
 	}
@@ -356,9 +356,9 @@ void InputMap::readJson(const QJsonObject& json)
 {
 	InputMapBase::readJson(json);
 	
-	deserializeFlags(OutputType)(json["outputType"].toString().toStdString(), outputType);
-	deserializeFlags(XInputButtons)(json["xinputButtons"].toString().toStdString(), xinputButtons);
-	deserializeFlags(Direction)(json["touchDirection"].toString().toStdString(), touchDirection);
+	ENUM_DESERIALIZE_FLAGS(OutputType)(json["outputType"].toString().toStdString(), outputType);
+	ENUM_DESERIALIZE_FLAGS(XInputButtons)(json["xinputButtons"].toString().toStdString(), xinputButtons);
+	ENUM_DESERIALIZE_FLAGS(Direction)(json["touchDirection"].toString().toStdString(), touchDirection);
 
 	if (json.contains("simulatorType"))
 	{
@@ -385,9 +385,9 @@ void InputMap::writeJson(QJsonObject& json) const
 {
 	InputMapBase::writeJson(json);
 
-	json["outputType"]     = serializeFlags(OutputType)(outputType).c_str();
-	json["xinputButtons"]  = serializeFlags(XInputButtons)(xinputButtons).c_str();
-	json["touchDirection"] = serializeFlags(Direction)(touchDirection).c_str();
+	json["outputType"]     = ENUM_SERIALIZE_FLAGS(OutputType)(outputType).c_str();
+	json["xinputButtons"]  = ENUM_SERIALIZE_FLAGS(XInputButtons)(xinputButtons).c_str();
+	json["touchDirection"] = ENUM_SERIALIZE_FLAGS(Direction)(touchDirection).c_str();
 	json["simulatorType"]  = simulatorType._to_string();
 	json["action"]         = action._to_string();
 	json["mouseAxes"]      = mouseAxes.toJson();
