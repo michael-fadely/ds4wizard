@@ -129,6 +129,13 @@ void Ds4Device::ApplyProfile()
 		Profile = *profile;
 	}
 
+	touchRegions.clear();
+
+	for (auto& pair : Profile.TouchRegions)
+	{
+		touchRegions.push_back(&pair.second);
+	}
+
 	if (Profile.UseXInput)
 	{
 		if (!ScpDeviceOpen())
@@ -620,7 +627,7 @@ void Ds4Device::Run()
 	else
 	{
 		Input.UpdateChangedState();
-		// TODO: RunPersistent();
+		RunPersistent();
 		std::this_thread::sleep_for(1ms);
 	}
 }
@@ -684,7 +691,7 @@ void Ds4Device::SimulateXInputButton(XInputButtons_t buttons, PressedState state
 	Input.Gamepad.wButtons = dest;
 }
 
-void Ds4Device::SimulateXInputAxis(XInputAxes axes, float m)
+void Ds4Device::SimulateXInputAxis(XInputAxes& axes, float m)
 {
 	for (XInputAxis_t bit : XInputAxis_values)
 	{
@@ -958,10 +965,10 @@ void Ds4Device::ApplyMap(InputMap& m, InputModifier* modifier, PressedState stat
 						SimulateXInputButton(m.xinputButtons, state);
 					}
 
-					/* TODO: if (m.XInputAxes != nullptr)
+					if (m.xinputAxes.Axes)
 					{
-						SimulateXInputAxis(m.XInputAxes, analog);
-					}*/
+						SimulateXInputAxis(m.xinputAxes, analog);
+					}
 
 					break;
 
@@ -1194,22 +1201,26 @@ void Ds4Device::RunPersistent()
 
 void Ds4Device::UpdateTouchRegions()
 {
-	// TODO
-#if 0
 	Ds4Buttons_t disallow = 0;
 
-	foreach(Ds4TouchRegion region in Profile.TouchRegions.Values.OrderBy(x = > !x.IsActive(touchMask) && !x.AllowCrossOver))
+	//foreach(Ds4TouchRegion region in Profile.TouchRegions.Values.OrderBy(x = > !x.IsActive(touchMask) && !x.AllowCrossOver))
+
+	std::sort(touchRegions.begin(), touchRegions.end(), [](const Ds4TouchRegion* a, const Ds4TouchRegion* b)
+	{
+		return (a->IsActive(touchMask) && !a->AllowCrossOver) && !(b->IsActive(touchMask) && !b->AllowCrossOver);
+	});
+
+	for (auto& region : touchRegions)
 	{
 		if ((Input.HeldButtons & touchMask) == 0)
 		{
-			region.SetInactive(touchMask);
+			region->SetInactive(touchMask);
 			continue;
 		}
 
-		UpdateTouchRegion(region, /* TODO */ nullptr, Ds4Buttons::Touch1, ref Input.Data.TouchPoint1, ref disallow);
-		UpdateTouchRegion(region, /* TODO */ nullptr, Ds4Buttons::Touch2, ref Input.Data.TouchPoint2, ref disallow);
+		UpdateTouchRegion(*region, /* TODO */ nullptr, Ds4Buttons::touch1, Input.Data.TouchPoint1, disallow);
+		UpdateTouchRegion(*region, /* TODO */ nullptr, Ds4Buttons::touch2, Input.Data.TouchPoint2, disallow);
 	}
-#endif
 }
 
 void Ds4Device::UpdateTouchRegion(Ds4TouchRegion& region, InputModifier* modifier, Ds4Buttons_t sender, Ds4Vector2& point, Ds4Buttons_t& disallow)
@@ -1218,7 +1229,7 @@ void Ds4Device::UpdateTouchRegion(Ds4TouchRegion& region, InputModifier* modifie
 	{
 		if (region.IsInRegion(sender, point) && modifier)
 		{
-			if (modifier ->IsActive() == false)
+			if (modifier->IsActive() == false)
 			{
 				UpdatePressedState(*modifier);
 			}
@@ -1348,8 +1359,16 @@ void Ds4Device::UpdatePressedStateImpl(InputMapBase& instance, const std::functi
 
 void Ds4Device::UpdatePressedState(InputModifier& modifier)
 {
-	const auto a = [&]() -> void { modifier.Press(); };
-	const auto b = [&]() -> void { modifier.Release(); };
+	const auto a = [&]() -> void
+	{
+		modifier.Press();
+	};
+
+	const auto b = [&]() -> void
+	{
+		modifier.Release();
+	};
+
 	UpdatePressedStateImpl(modifier, a, b);
 
 	if (modifier.Bindings.empty())
@@ -1365,8 +1384,16 @@ void Ds4Device::UpdatePressedState(InputModifier& modifier)
 
 void Ds4Device::UpdatePressedState(InputMap& map, InputModifier* modifier)
 {
-	const auto a = [&]() -> void { map.Press(modifier); };
-	const auto b = [&]() -> void { map.Release(); };
+	const auto a = [&]() -> void
+	{
+		map.Press(modifier);
+	};
+
+	const auto b = [&]() -> void
+	{
+		map.Release();
+	};
+
 	UpdatePressedStateImpl(map, a, b);
 }
 

@@ -4,6 +4,7 @@
 #include <memory>
 #include <thread>
 #include <functional>
+#include <deque>
 
 #include "DeviceSettings.h"
 #include "DeviceProfile.h"
@@ -20,6 +21,8 @@
 	// and I suspect it might be due to async file IO that is used with hid.
 	bool running = false;
 	std::recursive_mutex sync_lock;
+
+	std::deque<Ds4TouchRegion*> touchRegions;
 
 	// Read-Only
 	Stopwatch idleTime {};
@@ -136,13 +139,13 @@ private:
 	void OnBatteryLevelChanged();
 
 #pragma region shit
-	const Ds4Buttons_t touchMask = Ds4Buttons::touch1 | Ds4Buttons::touch2;
+	static constexpr Ds4Buttons_t touchMask = Ds4Buttons::touch1 | Ds4Buttons::touch2;
 
 	void SimulateXInputButton(XInputButtons_t buttons, PressedState state);
 
 	XInputAxis_t simulatedXInputAxis = 0;
 
-	void SimulateXInputAxis(XInputAxes axes, float m);
+	void SimulateXInputAxis(XInputAxes& axes, float m);
 
 	bool IsOverriddenByModifierSet(InputMapBase& map);
 
