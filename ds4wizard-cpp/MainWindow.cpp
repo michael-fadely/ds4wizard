@@ -115,10 +115,6 @@ bool MainWindow::nativeEvent(const QByteArray& eventType, void* message, long* r
 
 		auto devinterface = reinterpret_cast<DEV_BROADCAST_DEVICEINTERFACE*>(msg->lParam);
 
-		qDebug() << "DEVICE DETECTED";
-
-		// TODO
-
 		try
 		{
 			if (Ds4DeviceManager::IsDs4(devinterface->dbcc_name))
