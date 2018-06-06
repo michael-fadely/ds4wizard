@@ -1348,7 +1348,9 @@ void Ds4Device::UpdatePressedStateImpl(InputMapBase& instance, const std::functi
 
 void Ds4Device::UpdatePressedState(InputModifier& modifier)
 {
-	UpdatePressedStateImpl(modifier, [&]() -> void { modifier.Press(); }, [&]() -> void { modifier.Release(); });
+	const auto a = [&]() -> void { modifier.Press(); };
+	const auto b = [&]() -> void { modifier.Release(); };
+	UpdatePressedStateImpl(modifier, a, b);
 
 	if (modifier.Bindings.empty())
 	{
@@ -1363,7 +1365,9 @@ void Ds4Device::UpdatePressedState(InputModifier& modifier)
 
 void Ds4Device::UpdatePressedState(InputMap& map, InputModifier* modifier)
 {
-	UpdatePressedStateImpl(map, [&]() -> void { map.Press(modifier);  }, [&]() -> void { map.Release(); });
+	const auto a = [&]() -> void { map.Press(modifier); };
+	const auto b = [&]() -> void { map.Release(); };
+	UpdatePressedStateImpl(map, a, b);
 }
 
 void Ds4Device::UpdateBindingState(InputMap& m, InputModifier* modifier)
