@@ -53,14 +53,7 @@ InputMapBase::InputMapBase(const InputMapBase& other)
 	Toggle            = other.Toggle;
 	RapidFire         = other.RapidFire;
 	RapidFireInterval = other.RapidFireInterval;
-
-	if (!other.InputAxisOptions.empty())
-	{
-		for (auto& pair : other.InputAxisOptions)
-		{
-			InputAxisOptions[pair.first] = pair.second;
-		}
-	}
+	InputAxisOptions  = other.InputAxisOptions;
 }
 
 InputMapBase::InputMapBase(InputType_t inputType)
@@ -211,8 +204,8 @@ void InputMapBase::readJson(const QJsonObject& json)
 
 	for (const auto& key : inputAxisOptions_.keys())
 	{
-		Ds4Buttons_t flags;
-		ENUM_DESERIALIZE_FLAGS(Ds4Buttons)(key.toStdString(), flags);
+		Ds4Axis_t flags;
+		ENUM_DESERIALIZE_FLAGS(Ds4Axis)(key.toStdString(), flags);
 		InputAxisOptions[flags] = fromJson<::InputAxisOptions>(inputAxisOptions_[key].toObject());
 	}
 }

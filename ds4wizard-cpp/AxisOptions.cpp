@@ -26,11 +26,6 @@ void AxisOptions::readJson(const QJsonObject& json)
 {
 	Multiplier = static_cast<float>(json["multiplier"].toDouble(1.0));
 	Polarity   = AxisPolarity::_from_string(json["polarity"].toString("none").toStdString().c_str()); // oh god
-
-	if (Polarity == +AxisPolarity::negative)
-	{
-		qDebug() << "that's numberwang";
-	}
 }
 
 void AxisOptions::writeJson(QJsonObject& json) const
