@@ -13,7 +13,6 @@
 #include "Bluetooth.h"
 #include "Ds4AutoLightColor.h"
 #include "ScpDevice.h"
-#include <locale>
 
 using namespace std::chrono;
 
