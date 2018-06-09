@@ -32,13 +32,16 @@ MainWindow::MainWindow(QWidget* parent)
 
 	registerDeviceNotification();
 
+	deviceManager = std::make_shared<Ds4DeviceManager>();
+	Program::ProfileCache.setDevices(deviceManager);
+
 	Program::ProfileCache.Load();
-	deviceManager.FindControllers();
+	deviceManager->FindControllers();
 }
 
 MainWindow::~MainWindow()
 {
-	deviceManager.Close();
+	deviceManager->Close();
 	delete trayIcon;
 }
 
@@ -120,7 +123,7 @@ bool MainWindow::nativeEvent(const QByteArray& eventType, void* message, long* r
 			if (Ds4DeviceManager::IsDs4(devinterface->dbcc_name))
 			{
 				// TODO: pull required metadata (instance id) from device and open directly instead of re-scanning everything
-				deviceManager.FindControllers();
+				deviceManager->FindControllers();
 			}
 		}
 		catch (const std::exception&)

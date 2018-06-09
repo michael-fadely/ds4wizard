@@ -2,6 +2,11 @@
 #include "DeviceProfileCache.h"
 #include "lock.h"
 
+void DeviceProfileCache::setDevices(const std::shared_ptr<Ds4DeviceManager>& deviceManager)
+{
+	this->deviceManager = deviceManager;
+}
+
 void DeviceProfileCache::Load()
 {
 	LoadImpl();
@@ -188,12 +193,12 @@ void DeviceProfileCache::OnLoaded() const
 
 void DeviceProfileCache::OnProfileChanged(const std::string& oldName, const std::string& newName) const
 {
-	// TODO
+	// TODO: deviceManager
 #if 0
 	{
-		lock(devices);
+		lock(deviceManager);
 
-		foreach(Ds4Device device in devices.Enumerate().Where(device = > device.Settings.Profile == oldName))
+		foreach(Ds4Device device in deviceManager.Enumerate().Where(device = > device.Settings.Profile == oldName))
 		{
 			device.OnProfileChanged(newName);
 		}

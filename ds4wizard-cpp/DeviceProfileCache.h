@@ -9,10 +9,11 @@
 #include "DeviceSettings.h"
 #include "DeviceProfile.h"
 #include "program.h"
+#include "Ds4DeviceManager.h"
 
 class DeviceProfileCache
 {
-	// TODO: Ds4DeviceManager devices;
+	std::shared_ptr<Ds4DeviceManager> deviceManager;
 	std::unordered_map<std::string, DeviceSettings> deviceSettings;
 
 public:
@@ -24,10 +25,9 @@ public:
 	// TODO: event EventHandler Loaded;
 	// TODO: event EventHandler ProfileChanged;
 
-	/* TODO: DeviceProfileCache(Ds4DeviceManager devices)
-	{
-		this.devices = devices;
-	}*/
+	DeviceProfileCache() = default;
+
+	void setDevices(const std::shared_ptr<Ds4DeviceManager>& devices);
 
 	void Load();
 

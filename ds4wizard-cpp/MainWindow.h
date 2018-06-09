@@ -15,7 +15,7 @@ public:
 	void changeEvent(QEvent* e) override;
 
 private:
-	Ds4DeviceManager deviceManager;
+	std::shared_ptr<Ds4DeviceManager> deviceManager;
 
 	Ui::MainWindow ui;
 	bool supportsSystemTray = false;
