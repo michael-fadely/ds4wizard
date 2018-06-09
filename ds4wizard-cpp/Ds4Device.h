@@ -14,7 +14,7 @@
 #include "Ds4Input.h"
 #include "Ds4Output.h"
 
-/*partial TODO*/ class Ds4Device
+class Ds4Device
 {
 	// HACK: work around for what may or may not be a bug with recursive_mutex;
 	// the main thread fails to acquire a lock when the mutex is UNLOCKED,
@@ -31,7 +31,7 @@
 	// Delta time (for things like mouse movement).
 	// Assumes 1000 Hz virtual polling rate.
 	Stopwatch deltaStopwatch {};
-	float deltaTime      = 1.0f;
+	float deltaTime = 1.0f;
 
 	int colorIndex = -1;
 
@@ -42,7 +42,7 @@
 
 public:
 	Stopwatch Latency;
-	bool      DataReceived = false;
+	bool DataReceived = false;
 
 private:
 	std::unique_ptr<std::thread> deviceThread = nullptr;
@@ -67,9 +67,9 @@ public:
 	//event EventHandler BatteryLevelChanged; // TODO
 
 	DeviceSettings Settings;
-	DeviceProfile  Profile;
+	DeviceProfile Profile;
 
-	Ds4Input  Input {};
+	Ds4Input Input {};
 	Ds4Output Output {};
 
 	std::string MacAddress; // TODO: getter
@@ -146,37 +146,20 @@ private:
 	XInputAxis_t simulatedXInputAxis = 0;
 
 	void SimulateXInputAxis(XInputAxes& axes, float m);
-
 	bool IsOverriddenByModifierSet(InputMapBase& map);
-
 	void RunMap(InputMap& m, InputModifier* modifier);
-
-	static PressedState HandleTouchToggle(InputMap& m, InputModifier* modifier, Pressable pressable);
-
-#if true
+	static PressedState HandleTouchToggle(InputMap& m, InputModifier* modifier, const Pressable& pressable);
 	void ApplyMap(InputMap& m, InputModifier* modifier, PressedState state, float analog);
-#endif
-
 	void SimulateMouse(const InputMap& m, PressedState state, float analog);
-
 	void SimulateKeyboard(const InputMap& m, PressedState state);
-
 	void RunAction(ActionType action);
-
 	void RunMaps();
-
 	void RunPersistent();
-
 	void UpdateTouchRegions();
-
 	void UpdateTouchRegion(Ds4TouchRegion& region, InputModifier* modifier, Ds4Buttons_t sender, Ds4Vector2& point, Ds4Buttons_t& disallow);
-
 	void UpdatePressedStateImpl(InputMapBase& instance, const std::function<void()>& press, const std::function<void()>& release);
-
 	void UpdatePressedState(InputModifier& modifier);
-
 	void UpdatePressedState(InputMap& map, InputModifier* modifier);
-
 	void UpdateBindingState(InputMap& m, InputModifier* modifier);
 #pragma endregion
 };

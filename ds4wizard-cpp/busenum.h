@@ -22,7 +22,7 @@ typedef struct _BUSENUM_UNPLUG_HARDWARE {
 
 	ULONG Reserved[1];
 
-	static _BUSENUM_UNPLUG_HARDWARE Create(int i)
+	static _BUSENUM_UNPLUG_HARDWARE create(int i)
 	{
 		_BUSENUM_UNPLUG_HARDWARE result {};
 

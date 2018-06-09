@@ -5,9 +5,6 @@
 #include "busenum.h"
 #include "lock.h"
 
-// {F679F562-3164-42CE-A4DB-E7DDBE723909}
-extern const GUID GUID_DEVINTERFACE_SCPVBUS;
-
 int ScpDevice::GetFreePort()
 {
 	lock(portLock);
@@ -24,9 +21,9 @@ int ScpDevice::GetFreePort()
 	return -1;
 }
 
-ScpDevice::ScpDevice(HANDLE handle)
+ScpDevice::ScpDevice(hid::Handle&& handle)
 {
-	this->handle = handle;
+	this->handle = std::move(handle);
 
 	uint64_t version;
 	if (GetDriverVersion(version) != 0)
@@ -34,19 +31,19 @@ ScpDevice::ScpDevice(HANDLE handle)
 		return;
 	}
 
-	Version[0] = static_cast<short>(version >> 48);
-	Version[1] = static_cast<short>((version >> 32) & 0xFFFF);
-	Version[2] = static_cast<short>((version >> 16) & 0xFFFF);
-	Version[3] = static_cast<short>(version & 0xFFFF);
+	driverVersion[0] = static_cast<short>(version >> 48);
+	driverVersion[1] = static_cast<short>((version >> 32) & 0xFFFF);
+	driverVersion[2] = static_cast<short>((version >> 16) & 0xFFFF);
+	driverVersion[3] = static_cast<short>(version & 0xFFFF);
 }
 
 int ScpDevice::GetDriverVersion(uint64_t& version)
 {
 	version = 0;
 
-	HANDLE invalid = INVALID_HANDLE_VALUE;
 	auto devInfoSet = SetupDiGetClassDevs(&GUID_DEVINTERFACE_SCPVBUS, nullptr, nullptr, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
-	if (devInfoSet == invalid)
+
+	if (devInfoSet == INVALID_HANDLE_VALUE)
 	{
 		return GetLastError();
 	}
@@ -67,8 +64,7 @@ int ScpDevice::GetDriverVersion(uint64_t& version)
 		return GetLastError();
 	}
 
-	// DI_FLAGSEX_INSTALLEDDRIVER
-	p.FlagsEx |= 0x04000000;
+	p.FlagsEx |= DI_FLAGSEX_INSTALLEDDRIVER;
 
 	if (!SetupDiSetDeviceInstallParams(devInfoSet, &devInfo, &p))
 	{
@@ -95,11 +91,7 @@ int ScpDevice::GetDriverVersion(uint64_t& version)
 
 void ScpDevice::Close()
 {
-	if (handle != nullptr && handle != INVALID_HANDLE_VALUE)
-	{
-		CloseHandle(handle);
-		handle = nullptr;
-	}
+	handle.close();
 }
 
 bool ScpDevice::Connect(int userIndex)
@@ -109,12 +101,12 @@ bool ScpDevice::Connect(int userIndex)
 		throw /*new IndexOutOfRangeException("User index must be in the range 0 to 3.") // TODO */;
 	}
 
-	BUSENUM_UNPLUG_HARDWARE buffer = BUSENUM_UNPLUG_HARDWARE::Create(userIndex);
+	auto buffer = BUSENUM_UNPLUG_HARDWARE::create(userIndex);
 
-	int flags = Version[0] < 17 ? 0x2A4000 : 0x2AA004;
+	const int flags = driverVersion[0] < 17 ? 0x2A4000 : 0x2AA004;
 
-	bool result = DeviceIoControl(handle, flags,
-			&buffer, buffer.Size, nullptr, 0, nullptr, nullptr);
+	bool result = DeviceIoControl(handle.nativeHandle, flags,
+	                              &buffer, buffer.Size, nullptr, 0, nullptr, nullptr);
 
 	if (result)
 	{
@@ -152,17 +144,17 @@ bool ScpDevice::Disconnect(int userIndex, bool force)
 		}
 	}
 
-	BUSENUM_UNPLUG_HARDWARE buffer = BUSENUM_UNPLUG_HARDWARE::Create(userIndex);
+	auto buffer = BUSENUM_UNPLUG_HARDWARE::create(userIndex);
 
-	if (Version[0] >= 17)
+	if (driverVersion[0] >= 17)
 	{
 		buffer.Flags = force ? 0x0001 : 0x0000;
 	}
 
-	int flags = Version[0] < 17 ? 0x2A4004 : 0x2AA008;
+	const int flags = driverVersion[0] < 17 ? 0x2A4004 : 0x2AA008;
 
-	return DeviceIoControl(handle, flags,
-			&buffer, buffer.Size, nullptr, 0, nullptr, nullptr);
+	return DeviceIoControl(handle.nativeHandle, flags,
+	                       &buffer, buffer.Size, nullptr, 0, nullptr, nullptr);
 }
 
 VBusStatus ScpDevice::SyncState(int userIndex, const XInputGamepad& gamepad)
@@ -173,7 +165,7 @@ VBusStatus ScpDevice::SyncState(int userIndex, const XInputGamepad& gamepad)
 
 VBusStatus ScpDevice::SyncState(int userIndex)
 {
-	int busIndex = userIndex + 1;
+	const int busIndex = userIndex + 1;
 
 	// This would be BUSENUM_REPORT_HARDWARE but
 	// I can't be bothered to deal with the embedded
@@ -190,10 +182,10 @@ VBusStatus ScpDevice::SyncState(int userIndex)
 
 	gamepads[userIndex].toBytes(writeBuffer.data(), 10);
 
-	int flags = Version[0] < 17 ? 0x2A400C : 0x2AE010;
+	const int flags = driverVersion[0] < 17 ? 0x2A400C : 0x2AE010;
 	DWORD bytesReturned = 0;
 
-	bool result = DeviceIoControl(handle, flags,
+	bool result = DeviceIoControl(handle.nativeHandle, flags,
 	                              writeBuffer.data(), writeBuffer.size(), readBuffer.data(), readBuffer.size(), &bytesReturned, nullptr);
 
 	if (!result || bytesReturned == 0)
@@ -206,14 +198,14 @@ VBusStatus ScpDevice::SyncState(int userIndex)
 	//bSmallMotor = readBuffer[4];
 	//bLed        = readBuffer[8];
 
-	if (Version[0] >= 17 || readBuffer[1] == 0x08)
+	if (driverVersion[0] >= 17 || readBuffer[1] == 0x08)
 	{
-		vibration[userIndex].LeftMotor  = readBuffer[3];
-		vibration[userIndex].RightMotor = readBuffer[4];
+		vibration[userIndex].leftMotor  = readBuffer[3];
+		vibration[userIndex].rightMotor = readBuffer[4];
 		leds[userIndex]                 = readBuffer[8];
 	}
 
-	if (Version[0] < 17)
+	if (driverVersion[0] < 17)
 	{
 		return VBusStatus::Success;
 	}
@@ -228,9 +220,10 @@ XInputGamepad ScpDevice::GetGamepad(int userIndex)
 
 void ScpDevice::GetVibration(int userIndex, uint8_t& leftMotor, uint8_t& rightMotor)
 {
-	ScpVibration vib = vibration[userIndex];
-	leftMotor        = vib.LeftMotor;
-	rightMotor       = vib.RightMotor;
+	const ScpVibration& vib = vibration[userIndex];
+
+	leftMotor  = vib.leftMotor;
+	rightMotor = vib.rightMotor;
 }
 
 uint8_t ScpDevice::GetLed(int userIndex)

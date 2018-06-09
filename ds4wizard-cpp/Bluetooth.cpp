@@ -3,8 +3,9 @@
 #include <winioctl.h>
 #include <BluetoothAPIs.h>
 #include <Bthioctl.h>
+#include <hid_instance.h>
 
-bool Bluetooth::DisconnectDevice(const gsl::span<uint8_t>& macAddress)
+bool Bluetooth::disconnectDevice(const gsl::span<uint8_t>& macAddress)
 {
 	bool result = false;
 
@@ -18,16 +19,17 @@ bool Bluetooth::DisconnectDevice(const gsl::span<uint8_t>& macAddress)
 	BLUETOOTH_FIND_RADIO_PARAMS findParams {};
 	findParams.dwSize = sizeof(BLUETOOTH_FIND_RADIO_PARAMS);
 
-	HANDLE phRadio = nullptr;
-	auto hFind   = BluetoothFindFirstRadio(&findParams, &phRadio);
+	hid::Handle phRadio(nullptr, true);
+
+	auto hFind = BluetoothFindFirstRadio(&findParams, &phRadio.nativeHandle);
 	DWORD _;
 
-	while (phRadio != nullptr)
+	while (phRadio.nativeHandle != nullptr)
 	{
-		bool success = DeviceIoControl(phRadio, IOCTL_BTH_DISCONNECT_DEVICE, buffer.data(), buffer.size(),
-		                               nullptr, 0, &_, nullptr);
+		bool success = DeviceIoControl(phRadio.nativeHandle, IOCTL_BTH_DISCONNECT_DEVICE,
+		                               buffer.data(), buffer.size(), nullptr, 0, &_, nullptr);
 
-		CloseHandle(phRadio);
+		phRadio.close();
 
 		if (success)
 		{
@@ -35,7 +37,7 @@ bool Bluetooth::DisconnectDevice(const gsl::span<uint8_t>& macAddress)
 			break;
 		}
 
-		if (!BluetoothFindNextRadio(hFind, &phRadio))
+		if (!BluetoothFindNextRadio(hFind, &phRadio.nativeHandle))
 		{
 			break;
 		}

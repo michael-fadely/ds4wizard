@@ -316,7 +316,7 @@ InputMap::InputMap(SimulatorType simulatorType, InputType_t inputType, OutputTyp
 	this->outputType    = outputType;
 }
 
-void InputMap::Press(const InputModifier* modifier)
+void InputMap::pressModifier(const InputModifier* modifier)
 {
 	if (!modifier || modifier->IsActive())
 	{

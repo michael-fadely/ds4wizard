@@ -20,7 +20,7 @@ public:
 	static const QString& settingsFilePath();
 	static const QString& profilesPath();
 	static const QString& devicesFilePath();
-	static bool isElevated() { return isElevated_; }
+	static bool isElevated();
 
 	static void initialize();
 	static void loadSettings();

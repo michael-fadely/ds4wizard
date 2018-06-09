@@ -4,21 +4,21 @@
 
 Ds4Color::Ds4Color(uint8_t r, uint8_t g, uint8_t b)
 {
-	Red   = r;
-	Green = g;
-	Blue  = b;
+	red   = r;
+	green = g;
+	blue  = b;
 }
 
 Ds4Color::Ds4Color(const Ds4Color& color)
 {
-	Red   = color.Red;
-	Green = color.Green;
-	Blue  = color.Blue;
+	red   = color.red;
+	green = color.green;
+	blue  = color.blue;
 }
 
 bool Ds4Color::operator==(const Ds4Color& other) const
 {
-	return Red == other.Red && Green == other.Green && Blue == other.Blue;
+	return red == other.red && green == other.green && blue == other.blue;
 }
 
 bool Ds4Color::operator!=(const Ds4Color& other) const
@@ -30,23 +30,23 @@ Ds4Color Ds4Color::lerp(const Ds4Color& a, const Ds4Color& b, float f)
 {
 	Ds4Color dest;
 
-	dest.Red   = ::lerp(a.Red, b.Red, f);
-	dest.Green = ::lerp(a.Green, b.Green, f);
-	dest.Blue  = ::lerp(a.Blue, b.Blue, f);
+	dest.red   = ::lerp(a.red, b.red, f);
+	dest.green = ::lerp(a.green, b.green, f);
+	dest.blue  = ::lerp(a.blue, b.blue, f);
 
 	return dest;
 }
 
 void Ds4Color::readJson(const QJsonObject& json)
 {
-	Red   = json["r"].toInt();
-	Green = json["g"].toInt();
-	Blue  = json["b"].toInt();
+	red   = json["r"].toInt();
+	green = json["g"].toInt();
+	blue  = json["b"].toInt();
 }
 
 void Ds4Color::writeJson(QJsonObject& json) const
 {
-	json["r"] = Red;
-	json["g"] = Green;
-	json["b"] = Blue;
+	json["r"] = red;
+	json["g"] = green;
+	json["b"] = blue;
 }

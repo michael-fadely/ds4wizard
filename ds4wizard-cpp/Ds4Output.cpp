@@ -6,45 +6,45 @@ bool Ds4Output::Update(const gsl::span<uint8_t>& buffer, int n) const
 {
 	int i = n;
 
-	bool result = buffer[i] != RightMotor;
-	buffer[i++] = RightMotor;
+	bool result = buffer[i] != rightMotor;
+	buffer[i++] = rightMotor;
 
-	result      = result || buffer[i] != LeftMotor;
-	buffer[i++] = LeftMotor;
+	result      = result || buffer[i] != leftMotor;
+	buffer[i++] = leftMotor;
 
-	result      = result || buffer[i] != LightColor.Red;
-	buffer[i++] = LightColor.Red;
+	result      = result || buffer[i] != lightColor.red;
+	buffer[i++] = lightColor.red;
 
-	result      = result || buffer[i] != LightColor.Green;
-	buffer[i++] = LightColor.Green;
+	result      = result || buffer[i] != lightColor.green;
+	buffer[i++] = lightColor.green;
 
-	result      = result || buffer[i] != LightColor.Blue;
-	buffer[i++] = LightColor.Blue;
+	result      = result || buffer[i] != lightColor.blue;
+	buffer[i++] = lightColor.blue;
 
-	result      = result || buffer[i] != FlashOnDur;
-	buffer[i++] = FlashOnDur;
+	result      = result || buffer[i] != flashOnDur;
+	buffer[i++] = flashOnDur;
 
-	result    = result || buffer[i] != FlashOffDur;
-	buffer[i] = FlashOffDur;
+	result    = result || buffer[i] != flashOffDur;
+	buffer[i] = flashOffDur;
 
 	i = n + 17;
 
-	result      = result || buffer[i] != VolumeLeft;
-	buffer[i++] = VolumeLeft;
+	result      = result || buffer[i] != volumeLeft;
+	buffer[i++] = volumeLeft;
 
-	result      = result || buffer[i] != VolumeRight;
-	buffer[i++] = VolumeRight;
+	result      = result || buffer[i] != volumeRight;
+	buffer[i++] = volumeRight;
 
-	result      = result || buffer[i] != VolumeMic;
-	buffer[i++] = VolumeMic;
+	result      = result || buffer[i] != volumeMic;
+	buffer[i++] = volumeMic;
 
-	result    = result || buffer[i] != VolumeSpeaker;
-	buffer[i] = VolumeSpeaker;
+	result    = result || buffer[i] != volumeSpeaker;
+	buffer[i] = volumeSpeaker;
 
 	return result;
 }
 
 void Ds4Output::FromXInput(int index, std::unique_ptr<ScpDevice>& device)
 {
-	device->GetVibration(index, LeftMotor, RightMotor);
+	device->GetVibration(index, leftMotor, rightMotor);
 }

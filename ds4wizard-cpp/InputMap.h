@@ -194,9 +194,9 @@ public:
 	/// <param name="other">The instance to copy from.</param>
 	InputMap(const InputMap& other);
 
-	InputMap(::SimulatorType simulatorType, InputType_t inputType, OutputType::T outputType);
+	InputMap(SimulatorType simulatorType, InputType_t inputType, OutputType::T outputType);
 
-	void Press(const InputModifier* modifier);
+	void pressModifier(const InputModifier* modifier);
 
 	bool operator==(const InputMap& other) const;
 	bool operator!=(const InputMap& other) const;

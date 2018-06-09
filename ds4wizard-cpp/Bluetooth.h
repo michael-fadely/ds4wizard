@@ -10,5 +10,5 @@ public:
 	/// </summary>
 	/// <param name="macAddress">The MAC address to search for.</param>
 	/// <returns><value>true</value> on success.</returns>
-	static bool DisconnectDevice(const gsl::span<uint8_t>& macAddress);
+	static bool disconnectDevice(const gsl::span<uint8_t>& macAddress);
 };

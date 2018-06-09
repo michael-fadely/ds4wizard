@@ -202,16 +202,16 @@ bool Ds4Device::ScpDeviceOpen()
 		return false;
 	}
 
-	HANDLE handle = CreateFile(info->path.c_str(), GENERIC_READ | GENERIC_WRITE,
-	                           FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, 0, nullptr);
+	auto handle = hid::Handle(CreateFile(info->path.c_str(), GENERIC_READ | GENERIC_WRITE,
+	                                     FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, 0, nullptr), true);
 
-	if (handle == INVALID_HANDLE_VALUE || handle == nullptr)
+	if (!handle.isValid())
 	{
 		// TODO: Logger.WriteLine(LogLevel.Warning, Resources.ScpVBusOpenFailed);
 		return false;
 	}
 
-	scpDevice = std::make_unique<ScpDevice>(handle);
+	scpDevice = std::make_unique<ScpDevice>(std::move(handle));
 
 	if (scpDevice->Connect(index))
 	{
@@ -339,7 +339,7 @@ void Ds4Device::DisconnectBluetooth()
 		return;
 	}
 
-	for (size_t i = 0; !Bluetooth::DisconnectDevice(bluetoothDevice->serial) && i < 5; i++)
+	for (size_t i = 0; !Bluetooth::disconnectDevice(bluetoothDevice->serial) && i < 5; i++)
 	{
 		std::this_thread::sleep_for(125ms);
 	}
@@ -498,7 +498,7 @@ void Ds4Device::Run()
 	deltaStopwatch.start();
 
 	// HACK: make this class manage the light state
-	Output.LightColor = activeLight.Color;
+	Output.lightColor = activeLight.Color;
 
 	// HACK: see above
 	/*if (activeLight.IdleFade)
@@ -902,6 +902,10 @@ void Ds4Device::RunMap(InputMap& m, InputModifier* modifier)
 					{
 						Pressable::Release(state);
 					}
+					else if (m.InputRegion == "Right Half")
+					{
+						qDebug() << "that's deadzone-wang";
+					}
 
 					region.ApplyDeadZone(direction, analog);
 					ApplyMap(m, modifier, state, analog);
@@ -927,7 +931,7 @@ void Ds4Device::RunMap(InputMap& m, InputModifier* modifier)
 	}
 }
 
-PressedState Ds4Device::HandleTouchToggle(InputMap& m, InputModifier* modifier, Pressable pressable)
+PressedState Ds4Device::HandleTouchToggle(InputMap& m, InputModifier* modifier, const Pressable& pressable)
 {
 	if (m.touchDirection != Direction::none)
 	{
@@ -951,6 +955,7 @@ PressedState Ds4Device::HandleTouchToggle(InputMap& m, InputModifier* modifier, 
 
 void Ds4Device::ApplyMap(InputMap& m, InputModifier* modifier, PressedState state, float analog)
 {
+#if true
 	switch (m.simulatorType)
 	{
 		case SimulatorType::input:
@@ -1000,6 +1005,7 @@ void Ds4Device::ApplyMap(InputMap& m, InputModifier* modifier, PressedState stat
 		default:
 			throw /* TODO: new ArgumentOutOfRangeException(nameof(m.simulatorType), m.simulatorType, "Invalid map type.")*/;
 	}
+#endif
 }
 
 void Ds4Device::SimulateMouse(const InputMap& m, PressedState state, float analog)
@@ -1383,7 +1389,7 @@ void Ds4Device::UpdatePressedState(InputMap& map, InputModifier* modifier)
 {
 	const auto a = [&]() -> void
 	{
-		map.Press(modifier);
+		map.pressModifier(modifier);
 	};
 
 	const auto b = [&]() -> void
@@ -1425,7 +1431,7 @@ void Ds4Device::UpdateBindingState(InputMap& m, InputModifier* modifier)
 			{
 				if (region.IsActive(touchMask))
 				{
-					m.Press(modifier);
+					m.pressModifier(modifier);
 				}
 				else
 				{

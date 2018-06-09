@@ -54,6 +54,11 @@ const QString& Program::devicesFilePath()
 	return devicesFilePath_;
 }
 
+bool Program::isElevated()
+{
+	return isElevated_;
+}
+
 void Program::initialize()
 {
 	// HACK: don't do this?

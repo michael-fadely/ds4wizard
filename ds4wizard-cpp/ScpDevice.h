@@ -4,10 +4,12 @@
 #include <cstdint>
 #include <mutex>
 
+#include <hid_instance.h>
+
 #include "XInputGamepad.h"
 
 // {F679F562-3164-42CE-A4DB-E7DDBE723909}
-const GUID GUID_DEVINTERFACE_SCPVBUS = { 0xf679f562, 0x3164, 0x42ce, 0xa4, 0xdb, 0xe7, 0xdd, 0xbe, 0x72, 0x39, 0x9 };
+const GUID GUID_DEVINTERFACE_SCPVBUS = { 0xf679f562, 0x3164, 0x42ce, { 0xa4, 0xdb, 0xe7, 0xdd, 0xbe, 0x72, 0x39, 0x9 } };
 
 enum class VBusStatus
 {
@@ -21,7 +23,8 @@ enum class VBusStatus
 
 struct ScpVibration
 {
-	uint8_t LeftMotor, RightMotor;
+	uint8_t leftMotor;
+	uint8_t rightMotor;
 };
 
 class ScpDevice
@@ -49,16 +52,16 @@ private:
 	std::array<uint8_t, 10> readBuffer {};
 	std::array<uint8_t, 28> writeBuffer {};
 
-	HANDLE handle = nullptr;
+	hid::Handle handle = hid::Handle(nullptr, true);
 
 public:
-	std::array<short, 4> Version {};
+	std::array<short, 4> driverVersion {};
 
 	/// <summary>
 	/// Initializes the ScpVBus device using the given handle.
 	/// </summary>
 	/// <param name="handle">A valid handle to the ScpVBus device.</param>
-	ScpDevice(HANDLE handle);
+	ScpDevice(hid::Handle&& handle);
 
 private:
 	static int GetDriverVersion(uint64_t& version);
