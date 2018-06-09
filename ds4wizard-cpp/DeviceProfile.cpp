@@ -135,7 +135,8 @@ void DeviceProfile::writeJson(QJsonObject& json) const
 }
 
 #pragma region trash
-const char* a = "{" \
+
+const char* defaultProfileJson = "{" \
 "  \"exclusiveMode\": true," \
 "  \"useXInput\": true," \
 "  \"autoXInputIndex\": true," \
@@ -204,6 +205,281 @@ const char* a = "{" \
 "      \"xinputButtons\": \"dPadRight\"," \
 "      \"inputType\": \"touchRegion\"," \
 "      \"inputRegion\": \"Right Half\"" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputButtons\": \"a\"," \
+"      \"inputType\": \"button\"," \
+"      \"inputButtons\": \"cross\"" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputButtons\": \"b\"," \
+"      \"inputType\": \"button\"," \
+"      \"inputButtons\": \"circle\"" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputButtons\": \"x\"," \
+"      \"inputType\": \"button\"," \
+"      \"inputButtons\": \"square\"" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputButtons\": \"y\"," \
+"      \"inputType\": \"button\"," \
+"      \"inputButtons\": \"triangle\"" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputButtons\": \"leftShoulder\"," \
+"      \"inputType\": \"button\"," \
+"      \"inputButtons\": \"l1\"" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputButtons\": \"rightShoulder\"," \
+"      \"inputType\": \"button\"," \
+"      \"inputButtons\": \"r1\"" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputButtons\": \"leftThumb\"," \
+"      \"inputType\": \"button\"," \
+"      \"inputButtons\": \"l3\"" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputButtons\": \"rightThumb\"," \
+"      \"inputType\": \"button\"," \
+"      \"inputButtons\": \"r3\"" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputButtons\": \"start\"," \
+"      \"inputType\": \"button\"," \
+"      \"inputButtons\": \"options\"" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputButtons\": \"back\"," \
+"      \"inputType\": \"button\"," \
+"      \"inputButtons\": \"share\"" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputButtons\": \"dPadUp\"," \
+"      \"inputType\": \"button\"," \
+"      \"inputButtons\": \"up\"" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputButtons\": \"dPadDown\"," \
+"      \"inputType\": \"button\"," \
+"      \"inputButtons\": \"down\"" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputButtons\": \"dPadLeft\"," \
+"      \"inputType\": \"button\"," \
+"      \"inputButtons\": \"left\"" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputButtons\": \"dPadRight\"," \
+"      \"inputType\": \"button\"," \
+"      \"inputButtons\": \"right\"" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputButtons\": \"guide\"," \
+"      \"inputType\": \"button\"," \
+"      \"inputButtons\": \"ps\"" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputAxes\": {" \
+"        \"axes\": \"leftStickY\"," \
+"        \"options\": {" \
+"          \"leftStickY\": {" \
+"            \"polarity\": \"positive\"" \
+"          }" \
+"        }" \
+"      }," \
+"      \"inputType\": \"axis\"," \
+"      \"inputAxis\": \"leftStickY\"," \
+"      \"inputAxisOptions\": {" \
+"        \"leftStickY\": {" \
+"          \"polarity\": \"positive\"" \
+"        }" \
+"      }" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputAxes\": {" \
+"        \"axes\": \"leftStickY\"," \
+"        \"options\": {" \
+"          \"leftStickY\": {" \
+"            \"polarity\": \"negative\"" \
+"          }" \
+"        }" \
+"      }," \
+"      \"inputType\": \"axis\"," \
+"      \"inputAxis\": \"leftStickY\"," \
+"      \"inputAxisOptions\": {" \
+"        \"leftStickY\": {" \
+"          \"polarity\": \"negative\"" \
+"        }" \
+"      }" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputAxes\": {" \
+"        \"axes\": \"leftStickX\"," \
+"        \"options\": {" \
+"          \"leftStickX\": {" \
+"            \"polarity\": \"positive\"" \
+"          }" \
+"        }" \
+"      }," \
+"      \"inputType\": \"axis\"," \
+"      \"inputAxis\": \"leftStickX\"," \
+"      \"inputAxisOptions\": {" \
+"        \"leftStickX\": {" \
+"          \"polarity\": \"positive\"" \
+"        }" \
+"      }" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputAxes\": {" \
+"        \"axes\": \"leftStickX\"," \
+"        \"options\": {" \
+"          \"leftStickX\": {" \
+"            \"polarity\": \"negative\"" \
+"          }" \
+"        }" \
+"      }," \
+"      \"inputType\": \"axis\"," \
+"      \"inputAxis\": \"leftStickX\"," \
+"      \"inputAxisOptions\": {" \
+"        \"leftStickX\": {" \
+"          \"polarity\": \"negative\"" \
+"        }" \
+"      }" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputAxes\": {" \
+"        \"axes\": \"rightStickY\"," \
+"        \"options\": {" \
+"          \"rightStickY\": {" \
+"            \"polarity\": \"positive\"" \
+"          }" \
+"        }" \
+"      }," \
+"      \"inputType\": \"axis\"," \
+"      \"inputAxis\": \"rightStickY\"," \
+"      \"inputAxisOptions\": {" \
+"        \"rightStickY\": {" \
+"          \"polarity\": \"positive\"" \
+"        }" \
+"      }" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputAxes\": {" \
+"        \"axes\": \"rightStickY\"," \
+"        \"options\": {" \
+"          \"rightStickY\": {" \
+"            \"polarity\": \"negative\"" \
+"          }" \
+"        }" \
+"      }," \
+"      \"inputType\": \"axis\"," \
+"      \"inputAxis\": \"rightStickY\"," \
+"      \"inputAxisOptions\": {" \
+"        \"rightStickY\": {" \
+"          \"polarity\": \"negative\"" \
+"        }" \
+"      }" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputAxes\": {" \
+"        \"axes\": \"rightStickX\"," \
+"        \"options\": {" \
+"          \"rightStickX\": {" \
+"            \"polarity\": \"positive\"" \
+"          }" \
+"        }" \
+"      }," \
+"      \"inputType\": \"axis\"," \
+"      \"inputAxis\": \"rightStickX\"," \
+"      \"inputAxisOptions\": {" \
+"        \"rightStickX\": {" \
+"          \"polarity\": \"positive\"" \
+"        }" \
+"      }" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputAxes\": {" \
+"        \"axes\": \"rightStickX\"," \
+"        \"options\": {" \
+"          \"rightStickX\": {" \
+"            \"polarity\": \"negative\"" \
+"          }" \
+"        }" \
+"      }," \
+"      \"inputType\": \"axis\"," \
+"      \"inputAxis\": \"rightStickX\"," \
+"      \"inputAxisOptions\": {" \
+"        \"rightStickX\": {" \
+"          \"polarity\": \"negative\"" \
+"        }" \
+"      }" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputAxes\": {" \
+"        \"axes\": \"leftTrigger\"" \
+"      }," \
+"      \"inputType\": \"axis\"," \
+"      \"inputAxis\": \"leftTrigger\"" \
+"    }," \
+"    {" \
+"      \"simulatorType\": \"input\"," \
+"      \"outputType\": \"xinput\"," \
+"      \"xinputAxes\": {" \
+"        \"axes\": \"rightTrigger\"" \
+"      }," \
+"      \"inputType\": \"axis\"," \
+"      \"inputAxis\": \"rightTrigger\"" \
 "    }" \
 "  ]," \
 "  \"modifiers\": [" \
@@ -312,11 +588,12 @@ const char* a = "{" \
 "  \"notifyBatteryLow\": 2," \
 "  \"name\": \"wangis\"" \
 "}";
+
 #pragma endregion
 
 DeviceProfile DeviceProfile::Default()
 {
-	auto obj = QJsonDocument::fromJson(QString(a).toUtf8());
+	auto obj = QJsonDocument::fromJson(QString(defaultProfileJson).toUtf8());
 	auto result = fromJson<DeviceProfile>(obj.object());
 
 /*
