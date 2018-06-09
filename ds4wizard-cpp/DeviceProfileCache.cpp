@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "DeviceProfileCache.h"
 #include "lock.h"
+#include <sstream>
 
 void DeviceProfileCache::setDevices(const std::shared_ptr<Ds4DeviceManager>& deviceManager)
 {
@@ -154,10 +155,22 @@ void DeviceProfileCache::loadImpl()
 		QDir dir(Program::profilesPath());
 		if (dir.exists())
 		{
-			for (auto& f : dir.entryList({ "*.json" }, QDir::Files))
+			for (QString& filename : dir.entryList({ "*.json" }, QDir::Files))
 			{
-				// TODO: DeviceProfile
-				qDebug() << "PROFILE " + f;
+				QFile file(filename);
+
+				if (!file.open(QFile::ReadOnly))
+				{
+					std::stringstream msg;
+					msg << "unable to open device profile " << filename.toStdString() << " for reading";
+
+					throw std::runtime_error(msg.str());
+				}
+
+				const QByteArray data = file.readAll();
+				auto profile = JsonData::fromJson<DeviceProfile>(QJsonDocument::fromJson(data).object());
+
+				profiles.push_back(std::move(profile));
 			}
 		}
 	}
