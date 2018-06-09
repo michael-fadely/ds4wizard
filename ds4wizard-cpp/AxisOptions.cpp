@@ -24,14 +24,28 @@ bool AxisOptions::operator!=(const AxisOptions& other) const
 
 void AxisOptions::readJson(const QJsonObject& json)
 {
-	Multiplier = static_cast<float>(json["multiplier"].toDouble(1.0));
-	Polarity   = AxisPolarity::_from_string(json["polarity"].toString("none").toStdString().c_str()); // oh god
+	if (json.contains("multiplier"))
+	{
+		Multiplier = static_cast<float>(json["multiplier"].toDouble(1.0));
+	}
+
+	if (json.contains("polarity"))
+	{
+		Polarity = AxisPolarity::_from_string(json["polarity"].toString("none").toStdString().c_str());
+	}
 }
 
 void AxisOptions::writeJson(QJsonObject& json) const
 {
-	json["multiplier"] = Multiplier;
-	json["polarity"] = Polarity._to_string();
+	if (Multiplier.has_value())
+	{
+		json["multiplier"] = Multiplier.value();
+	}
+
+	if (Polarity.has_value())
+	{
+		json["polarity"] = Polarity.value()._to_string();
+	}
 }
 
 InputAxisOptions::InputAxisOptions(AxisPolarity polarity)
@@ -49,26 +63,31 @@ InputAxisOptions::InputAxisOptions(const InputAxisOptions& other)
 
 void InputAxisOptions::ApplyDeadZone(float& analog) const
 {
-	switch (deadZoneMode)
+	const auto dzValue = deadZone.value_or(0.0f);
+
+	switch (deadZoneMode.value_or(DeadZoneMode::scale))
 	{
 		case DeadZoneMode::hardLimit:
-			analog = analog >= deadZone ? analog : 0.0f;
+			analog = analog >= dzValue ? analog : 0.0f;
 			break;
 
 		case DeadZoneMode::scale:
-			analog = std::max(0.0f, (analog - deadZone) / (1.0f - deadZone));
+			analog = std::max(0.0f, (analog - dzValue) / (1.0f - dzValue));
 			break;
 
 		default:
 			throw /*new ArgumentOutOfRangeException(nameof(DeadZoneMode), DeadZoneMode, "Invalid deadzone mode.")*/;
 	}
 
-	if (invert)
+	if (invert.value_or(false))
 	{
 		analog = 1.0f - analog;
 	}
 
-	analog *= Multiplier;
+	if (Multiplier.has_value())
+	{
+		analog *= Multiplier.value();
+	}
 }
 
 bool InputAxisOptions::operator==(const InputAxisOptions& other) const
@@ -88,56 +107,78 @@ void InputAxisOptions::readJson(const QJsonObject& json)
 {
 	AxisOptions::readJson(json);
 
-	invert       = json["invert"].toBool(false);
-	deadZoneMode = DeadZoneMode::_from_string(json["deadZoneMode"].toString("scale").toStdString().c_str()); // I feel dirty
-	deadZone     = static_cast<float>(json["deadZone"].toDouble());
+	if (json.contains("invert"))
+	{
+		invert = json["invert"].toBool(false);
+	}
+
+	if (json.contains("deadZoneMode"))
+	{
+		deadZoneMode = DeadZoneMode::_from_string(json["deadZoneMode"].toString("scale").toStdString().c_str());
+	}
+
+	if (json.contains("deadZone"))
+	{
+		deadZone = static_cast<float>(json["deadZone"].toDouble());
+	}
 }
 
 void InputAxisOptions::writeJson(QJsonObject& json) const
 {
 	AxisOptions::writeJson(json);
 
-	json["invert"]       = invert;
-	json["deadZoneMode"] = deadZoneMode._to_string();
-	json["deadZone"]     = deadZone;
+	if (invert.has_value())
+	{
+		json["invert"] = invert.value();
+	}
+
+	if (deadZoneMode.has_value())
+	{
+		json["deadZoneMode"] = deadZoneMode.value()._to_string();
+	}
+
+	if (deadZone.has_value())
+	{
+		json["deadZone"] = deadZone.value();
+	}
 }
 
 XInputAxes::XInputAxes(const XInputAxes& other)
 {
-	Axes = other.Axes;
+	axes = other.axes;
 
-	if (!other.Options.empty())
+	if (!other.options.empty())
 	{
-		for (auto& pair : other.Options)
+		for (auto& pair : other.options)
 		{
-			Options[pair.first] = pair.second;
+			options[pair.first] = pair.second;
 		}
 	}
 }
 
 AxisOptions XInputAxes::GetAxisOptions(XInputAxis::T axis)
 {
-	if (Options.empty())
+	if (options.empty())
 	{
 		return AxisOptions();
 	}
 
-	const auto it = Options.find(axis);
+	const auto it = options.find(axis);
 
-	if (it != Options.end())
+	if (it != options.end())
 	{
 		return it->second;
 	}
 
 	// HACK: separate into its own cache
 	AxisOptions result {};
-	Options[axis] = result;
+	options[axis] = result;
 	return result;
 }
 
 bool XInputAxes::operator==(const XInputAxes& other) const
 {
-	return Axes == other.Axes && Options == other.Options;
+	return axes == other.axes && options == other.options;
 }
 
 bool XInputAxes::operator!=(const XInputAxes& other) const
@@ -149,7 +190,7 @@ void XInputAxes::readJson(const QJsonObject& json)
 {
 	auto axes_ = json["axes"].toString("none").toStdString();
 
-	ENUM_DESERIALIZE_FLAGS(XInputAxis)(axes_, Axes);
+	ENUM_DESERIALIZE_FLAGS(XInputAxis)(axes_, axes);
 
 	auto options_ = json["options"].toObject();
 
@@ -158,17 +199,17 @@ void XInputAxes::readJson(const QJsonObject& json)
 		auto stdstr = key.toStdString();
 		XInputAxis_t value;
 		ENUM_DESERIALIZE_FLAGS(XInputAxis)(stdstr, value);
-		Options[value] = fromJson<AxisOptions>(options_[key].toObject());
+		options[value] = fromJson<AxisOptions>(options_[key].toObject());
 	}
 }
 
 void XInputAxes::writeJson(QJsonObject& json) const
 {
-	json["axes"] = ENUM_SERIALIZE_FLAGS(XInputAxis)(Axes).c_str();
+	json["axes"] = ENUM_SERIALIZE_FLAGS(XInputAxis)(axes).c_str();
 
 	QJsonObject options_;
 
-	for (const auto& pair : Options)
+	for (const auto& pair : options)
 	{
 		auto key = ENUM_SERIALIZE_FLAGS(XInputAxis)(pair.first);
 		options_[key.c_str()] = pair.second.toJson();
@@ -179,41 +220,41 @@ void XInputAxes::writeJson(QJsonObject& json) const
 
 MouseAxes::MouseAxes(const MouseAxes& other)
 {
-	Directions = other.Directions;
+	directions = other.directions;
 
-	if (!other.Options.empty())
+	if (!other.options.empty())
 	{
-		for (auto& pair : other.Options)
+		for (auto& pair : other.options)
 		{
-			Options[pair.first] = pair.second;
+			options[pair.first] = pair.second;
 		}
 	}
 }
 
 AxisOptions MouseAxes::GetAxisOptions(Direction_t axis)
 {
-	if (Options.empty())
+	if (options.empty())
 	{
 		return AxisOptions();
 	}
 
-	const auto it = Options.find(axis);
+	const auto it = options.find(axis);
 
-	if (it != Options.end())
+	if (it != options.end())
 	{
 		return it->second;
 	}
 
 	// HACK: separate into its own cache
 	AxisOptions result {};
-	Options[axis] = result;
+	options[axis] = result;
 	return result;
 }
 
 bool MouseAxes::operator==(const MouseAxes& other) const
 {
-	return Directions == other.Directions
-	       && Options == other.Options;
+	return directions == other.directions
+	       && options == other.options;
 }
 
 void MouseAxes::readJson(const QJsonObject& json)

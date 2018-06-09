@@ -6,7 +6,7 @@
 class InputMapBase : public Pressable, public JsonData
 {
 public:
-	/*[JsonIgnore]*/ bool IsToggled = false;
+	/*[JsonIgnore]*/ bool isToggled = false;
 
 	/*[JsonIgnore]*/
 	bool PerformRapidFire() const;
@@ -31,17 +31,16 @@ public:
 
 	InputType_t inputType = 0;
 
-	Ds4Buttons_t InputButtons = 0;
-	Ds4Axis_t    InputAxis = 0;
-	std::string  InputRegion;
+	std::optional<Ds4Buttons_t> inputButtons;
+	std::optional<Ds4Axis_t> inputAxis;
+	std::string  inputRegion;
 
-	bool Toggle = false;
-	bool RapidFire = false;
+	std::optional<bool> toggle;
+	std::optional<bool> rapidFire;
 
-	// TODO: /!\ fix TimeSpan.ToString rounding
-	std::chrono::nanoseconds RapidFireInterval {};
+	std::optional<std::chrono::nanoseconds> rapidFireInterval;
 
-	std::unordered_map<Ds4Axis_t, InputAxisOptions> InputAxisOptions;
+	std::unordered_map<Ds4Axis_t, InputAxisOptions> inputAxisOptions;
 
 	InputMapBase() = default;
 	InputMapBase(const InputMapBase& other);
@@ -156,11 +155,11 @@ public:
 	SimulatorType simulatorType = SimulatorType::none;
 	OutputType_t  outputType = 0;
 
-	ActionType action = ActionType::none;
+	std::optional<ActionType> action;
 
 	#pragma region Touch
 
-	Direction_t touchDirection = 0;
+	std::optional<Direction_t> touchDirection;
 
 	#pragma endregion
 
@@ -181,8 +180,8 @@ public:
 
 	#pragma region XInput
 
-	XInputButtons_t xinputButtons = 0;
-	XInputAxes      xinputAxes;
+	std::optional<XInputButtons_t> xinputButtons = 0;
+	std::optional<XInputAxes     > xinputAxes;
 
 	#pragma endregion
 

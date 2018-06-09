@@ -2,12 +2,13 @@
 
 #include "enums.h"
 #include "JsonData.h"
+#include <optional>
 
 class AxisOptions : public JsonData
 {
 public:
-	float Multiplier      = 1.0f;
-	AxisPolarity Polarity = AxisPolarity::positive;
+	std::optional<float> Multiplier;
+	std::optional<AxisPolarity> Polarity;
 
 	AxisOptions() = default;
 
@@ -23,9 +24,9 @@ public:
 class InputAxisOptions : public AxisOptions
 {
 public:
-	bool         invert       = false;
-	DeadZoneMode deadZoneMode = DeadZoneMode::scale;
-	float        deadZone     = 0.0f;
+	std::optional<bool> invert;
+	std::optional<DeadZoneMode> deadZoneMode;
+	std::optional<float> deadZone;
 
 	InputAxisOptions() = default;
 	explicit InputAxisOptions(AxisPolarity polarity);
@@ -43,8 +44,8 @@ public:
 class XInputAxes : public JsonData
 {
 public:
-	XInputAxis_t Axes = 0;
-	std::unordered_map<XInputAxis_t, AxisOptions> Options;
+	XInputAxis_t axes = 0;
+	std::unordered_map<XInputAxis_t, AxisOptions> options;
 
 	XInputAxes() = default;
 	XInputAxes(const XInputAxes& other);
@@ -60,8 +61,8 @@ public:
 class MouseAxes : public JsonData
 {
 public:
-	Direction_t Directions = 0;
-	std::unordered_map<Direction_t, AxisOptions> Options;
+	Direction_t directions = 0;
+	std::unordered_map<Direction_t, AxisOptions> options;
 
 	MouseAxes() = default;
 	MouseAxes(const MouseAxes& other);

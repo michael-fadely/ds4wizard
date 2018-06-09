@@ -551,12 +551,12 @@ void Ds4Device::Run()
 		}
 	}
 
-	const float lx = Input.GetAxis(Ds4Axis::leftStickX, nullptr);
-	const float ly = Input.GetAxis(Ds4Axis::leftStickY, nullptr);
+	const float lx = Input.GetAxis(Ds4Axis::leftStickX, std::nullopt);
+	const float ly = Input.GetAxis(Ds4Axis::leftStickY, std::nullopt);
 	const auto  ls = static_cast<float>(std::sqrt(lx * lx + ly * ly));
 
-	const float rx = Input.GetAxis(Ds4Axis::rightStickX, nullptr);
-	const float ry = Input.GetAxis(Ds4Axis::rightStickY, nullptr);
+	const float rx = Input.GetAxis(Ds4Axis::rightStickX, std::nullopt);
+	const float ry = Input.GetAxis(Ds4Axis::rightStickY, std::nullopt);
 	const auto  rs = static_cast<float>(std::sqrt(rx * rx + ry * ry));
 
 	// TODO: gyro/accel
@@ -694,19 +694,22 @@ void Ds4Device::SimulateXInputAxis(XInputAxes& axes, float m)
 {
 	for (XInputAxis_t bit : XInputAxis_values)
 	{
-		if ((axes.Axes & bit) == 0)
+		if (!(axes.axes & bit))
 		{
 			continue;
 		}
 
 		AxisOptions options = axes.GetAxisOptions(static_cast<XInputAxis::T>(bit));
 
-		auto trigger = static_cast<uint8_t>(255.0f * m);
+		const auto trigger = static_cast<uint8_t>(255.0f * m);
 
-		auto axis = static_cast<short>(std::numeric_limits<short>::max() * m);
-		short workAxis = options.Polarity == +AxisPolarity::negative ? static_cast<short>(-axis) : axis;
+		const auto axis = static_cast<short>(std::numeric_limits<short>::max() * m);
 
-		bool isFirst = (simulatedXInputAxis & bit) == 0;
+		const short workAxis = options.Polarity.value_or(AxisPolarity::positive) == +AxisPolarity::negative
+			                 ? static_cast<short>(-axis)
+			                 : axis;
+
+		const bool isFirst = !(simulatedXInputAxis & bit);
 		simulatedXInputAxis |= bit;
 
 		switch (bit)
@@ -801,7 +804,10 @@ bool Ds4Device::IsOverriddenByModifierSet(InputMapBase& map)
 	if ((map.inputType & InputType::button) != 0)
 	{
 		//if (maps.Any(x =  > (x.inputType & InputType::button) != 0 && (x.InputButtons & map.InputButtons) != 0))
-		if (std::any_of(maps.begin(), maps.end(), [&](InputMap* x) -> bool { return (x->inputType & InputType::button) != 0 && (x->InputButtons & map.InputButtons) != 0; }))
+		if (std::any_of(maps.begin(), maps.end(), [&](InputMap* x) -> bool
+		{
+			return (x->inputType & InputType::button) != 0 && (x->inputButtons.value_or(0) & map.inputButtons.value_or(0)) != 0;
+		}))
 		{
 			return true;
 		}
@@ -810,7 +816,10 @@ bool Ds4Device::IsOverriddenByModifierSet(InputMapBase& map)
 	if ((map.inputType & InputType::axis) != 0)
 	{
 		//if (maps.Any(x =  > (x.inputType & InputType::axis) != 0 && (x.InputAxis & map.InputAxis) != 0))
-		if (std::any_of(maps.begin(), maps.end(), [&](InputMap* x) -> bool { return (x->inputType & InputType::axis) != 0 && (x->InputAxis & map.InputAxis) != 0; }))
+		if (std::any_of(maps.begin(), maps.end(), [&](InputMap* x) -> bool
+		{
+			return (x->inputType & InputType::axis) != 0 && (x->inputAxis.value_or(0) & map.inputAxis.value_or(0)) != 0;
+		}))
 		{
 			return true;
 		}
@@ -819,7 +828,10 @@ bool Ds4Device::IsOverriddenByModifierSet(InputMapBase& map)
 	if ((map.inputType & InputType::touchRegion) != 0)
 	{
 		//if (maps.Any(x =  > (x.inputType & InputType::touchRegion) != 0 && x.InputRegion == map.InputRegion))
-		if (std::any_of(maps.begin(), maps.end(), [&](InputMap* x) -> bool { return (x->inputType & InputType::touchRegion) != 0 && x->InputRegion == map.InputRegion; }))
+		if (std::any_of(maps.begin(), maps.end(), [&](InputMap* x) -> bool
+		{
+			return (x->inputType & InputType::touchRegion) != 0 && x->inputRegion == map.inputRegion;
+		}))
 		{
 			return true;
 		}
@@ -847,27 +859,27 @@ void Ds4Device::RunMap(InputMap& m, InputModifier* modifier)
 			case InputType::button:
 			{
 				PressedState state = m.SimulatedState();
-				ApplyMap(m, modifier, state, m.IsActive() && ((modifier && modifier->IsActive()) || m.IsToggled) ? 1.0f : 0.0f);
+				ApplyMap(m, modifier, state, m.IsActive() && ((modifier && modifier->IsActive()) || m.isToggled) ? 1.0f : 0.0f);
 				break;
 			}
 
 			case InputType::axis:
 			{
-				if (m.InputAxis == 0)
+				if (m.inputAxis.value_or(0) == 0)
 				{
 					throw /* TODO: new ArgumentNullException(nameof(m.InputAxis))*/;
 				}
 
 				for (Ds4Axis_t bit : Ds4Axis_values)
 				{
-					if ((m.InputAxis & bit) == 0)
+					if (!(m.inputAxis.value() & bit))
 					{
 						continue;
 					}
 
 					InputAxisOptions options = m.GetAxisOptions(bit);
 
-					float analog = Input.GetAxis(m.InputAxis, &options.Polarity);
+					float analog = Input.GetAxis(m.inputAxis.value(), options.Polarity);
 					options.ApplyDeadZone(analog);
 
 					PressedState state = m.SimulatedState();
@@ -879,9 +891,9 @@ void Ds4Device::RunMap(InputMap& m, InputModifier* modifier)
 
 			case InputType::touchRegion:
 			{
-				Ds4TouchRegion region = Profile.TouchRegions[m.InputRegion];
+				Ds4TouchRegion region = Profile.TouchRegions[m.inputRegion];
 
-				if (region.Type == +Ds4TouchRegionType::button || m.touchDirection == Direction::none)
+				if (region.Type == +Ds4TouchRegionType::button || !m.touchDirection.has_value() || m.touchDirection == Direction::none)
 				{
 					PressedState state = HandleTouchToggle(m, modifier, region.State1);
 					ApplyMap(m, modifier, state, Pressable::IsActiveState(state) ? 1.0f : 0.0f);
@@ -891,7 +903,7 @@ void Ds4Device::RunMap(InputMap& m, InputModifier* modifier)
 				}
 				else
 				{
-					Direction_t direction = m.touchDirection;
+					Direction_t direction = m.touchDirection.value();
 
 					float deadZone = region.GetDeadZone(direction);
 
@@ -931,15 +943,15 @@ PressedState Ds4Device::HandleTouchToggle(InputMap& m, InputModifier* modifier, 
 {
 	if (m.touchDirection != Direction::none)
 	{
-		return m.IsToggled ? m.SimulatedState() : pressable.State;
+		return m.isToggled ? m.SimulatedState() : pressable.State;
 	}
 
-	if (m.RapidFire == true)
+	if (m.rapidFire == true)
 	{
 		return m.SimulatedState();
 	}
 
-	PressedState state = (m.IsToggled || (modifier && modifier->IsActive())) ? pressable.State : m.State;
+	PressedState state = (m.isToggled || (modifier && modifier->IsActive())) ? pressable.State : m.State;
 
 	if (!Pressable::IsActiveState(state))
 	{
@@ -958,14 +970,14 @@ void Ds4Device::ApplyMap(InputMap& m, InputModifier* modifier, PressedState stat
 			switch (m.outputType)
 			{
 				case OutputType::xinput:
-					if (m.xinputButtons)
+					if (m.xinputButtons.has_value())
 					{
-						SimulateXInputButton(m.xinputButtons, state);
+						SimulateXInputButton(m.xinputButtons.value(), state);
 					}
 
-					if (m.xinputAxes.Axes)
+					if (m.xinputAxes.has_value())
 					{
-						SimulateXInputAxis(m.xinputAxes, analog);
+						SimulateXInputAxis(m.xinputAxes.value(), analog);
 					}
 
 					break;
@@ -986,14 +998,14 @@ void Ds4Device::ApplyMap(InputMap& m, InputModifier* modifier, PressedState stat
 			break;
 
 		case SimulatorType::action:
-			if (m.action == +ActionType::none)
+			if (m.action.value_or(ActionType::none) == +ActionType::none)
 			{
 				throw /* TODO: new ArgumentNullException(nameof(m.action))*/;
 			}
 
 			if (m.IsActive() && (modifier && modifier->IsActive()))
 			{
-				RunAction(m.action);
+				RunAction(m.action.value());
 			}
 
 			break;
@@ -1268,7 +1280,7 @@ void Ds4Device::UpdatePressedStateImpl(InputMapBase& instance, const std::functi
 		switch (value)
 		{
 			case InputType::button:
-				if ((instance.InputButtons & Input.HeldButtons) == instance.InputButtons)
+				if ((instance.inputButtons.value() & Input.HeldButtons) == instance.inputButtons)
 				{
 					press();
 				}
@@ -1281,19 +1293,19 @@ void Ds4Device::UpdatePressedStateImpl(InputMapBase& instance, const std::functi
 
 			case InputType::axis:
 			{
-				if (instance.InputAxis == 0)
+				if (instance.inputAxis.value_or(0) == 0)
 				{
 					throw /* TODO: new ArgumentNullException(nameof(instance.InputAxis))*/;
 				}
 
 				const gsl::span<const Ds4Axis_t> s(Ds4Axis_values);
 
-				size_t target = std::count_if(s.begin(), s.end(), [&](Ds4Axis_t x) -> bool { return (x & instance.InputAxis) != 0; });
+				size_t target = std::count_if(s.begin(), s.end(), [&](Ds4Axis_t x) -> bool { return (x & instance.inputAxis.value_or(0)) != 0; });
 				size_t count  = 0;
 
 				for (Ds4Axis_t bit : Ds4Axis_values)
 				{
-					if ((instance.InputAxis & bit) == 0)
+					if (!(instance.inputAxis.value() & bit))
 					{
 						continue;
 					}
@@ -1301,9 +1313,9 @@ void Ds4Device::UpdatePressedStateImpl(InputMapBase& instance, const std::functi
 					InputAxisOptions options = instance.GetAxisOptions(bit);
 
 					// ReSharper disable once PossibleInvalidOperationException
-					float axis = Input.GetAxis(instance.InputAxis, &options.Polarity);
+					float axis = Input.GetAxis(instance.inputAxis.value(), options.Polarity);
 
-					if (axis >= options.deadZone)
+					if (axis >= options.deadZone.value_or(0.0f))
 					{
 						++count;
 					}
@@ -1327,7 +1339,7 @@ void Ds4Device::UpdatePressedStateImpl(InputMapBase& instance, const std::functi
 
 			case InputType::touchRegion:
 			{
-				auto it = Profile.TouchRegions.find(instance.InputRegion);
+				auto it = Profile.TouchRegions.find(instance.inputRegion);
 				if (it == Profile.TouchRegions.end())
 				{
 					break;
@@ -1400,7 +1412,7 @@ void Ds4Device::UpdateBindingState(InputMap& m, InputModifier* modifier)
 {
 	if (modifier != nullptr)
 	{
-		if (m.Toggle != true)
+		if (m.toggle != true)
 		{
 			if (!modifier->IsActive())
 			{
@@ -1415,7 +1427,7 @@ void Ds4Device::UpdateBindingState(InputMap& m, InputModifier* modifier)
 	{
 		case InputType::touchRegion:
 		{
-			auto it = Profile.TouchRegions.find(m.InputRegion);
+			auto it = Profile.TouchRegions.find(m.inputRegion);
 			if (it == Profile.TouchRegions.end())
 			{
 				break;

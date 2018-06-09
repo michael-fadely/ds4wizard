@@ -5,6 +5,7 @@
 #include "Ds4InputData.h"
 #include "ScpDevice.h"
 #include "XInputGamepad.h"
+#include <optional>
 
 class Ds4Input
 {
@@ -33,5 +34,5 @@ public:
 	void Update(const gsl::span<uint8_t>& buffer, int i);
 	void UpdateChangedState();
 	void ToXInput(int index, std::unique_ptr<ScpDevice>& device);
-	float GetAxis(Ds4Axis_t axis, AxisPolarity* polarity) const;
+	float GetAxis(Ds4Axis_t axis, std::optional<AxisPolarity> polarity) const;
 };

@@ -3,17 +3,17 @@
 
 bool InputMapBase::PerformRapidFire() const
 {
-	return rapidStopwatch.elapsed() >= RapidFireInterval;
+	return rapidStopwatch.elapsed() >= rapidFireInterval;
 }
 
 PressedState InputMapBase::SimulatedState() const
 {
-	if (RapidFire == true)
+	if (rapidFire == true)
 	{
 		return rapidState;
 	}
 
-	if (Toggle != true)
+	if (toggle != true)
 	{
 		return State;
 	}
@@ -29,9 +29,9 @@ PressedState InputMapBase::SimulatedState() const
 bool InputMapBase::IsActive() const
 {
 	{
-		if (Toggle == true)
+		if (toggle == true)
 		{
-			return IsToggled;
+			return isToggled;
 		}
 
 		return Pressable::IsActive();
@@ -40,20 +40,20 @@ bool InputMapBase::IsActive() const
 
 bool InputMapBase::IsPersistent() const
 {
-	return RapidFire == true;
+	return rapidFire == true;
 }
 
 InputMapBase::InputMapBase(const InputMapBase& other)
 	: Pressable(other)
 {
 	inputType         = other.inputType;
-	InputButtons      = other.InputButtons;
-	InputAxis         = other.InputAxis;
-	InputRegion       = other.InputRegion;
-	Toggle            = other.Toggle;
-	RapidFire         = other.RapidFire;
-	RapidFireInterval = other.RapidFireInterval;
-	InputAxisOptions  = other.InputAxisOptions;
+	inputButtons      = other.inputButtons;
+	inputAxis         = other.inputAxis;
+	inputRegion       = other.inputRegion;
+	toggle            = other.toggle;
+	rapidFire         = other.rapidFire;
+	rapidFireInterval = other.rapidFireInterval;
+	inputAxisOptions  = other.inputAxisOptions;
 }
 
 InputMapBase::InputMapBase(InputType_t inputType)
@@ -64,31 +64,31 @@ InputMapBase::InputMapBase(InputType_t inputType)
 InputMapBase::InputMapBase(InputType_t inputType, Ds4Buttons::T input)
 {
 	this->inputType    = inputType;
-	InputButtons = input;
+	inputButtons = input;
 }
 
 InputMapBase::InputMapBase(InputType_t inputType, Ds4Axis::T input)
 {
 	this->inputType = inputType;
-	InputAxis = input;
+	inputAxis = input;
 }
 
 InputMapBase::InputMapBase(InputType_t inputType, const std::string& input)
 {
 	this->inputType   = inputType;
-	InputRegion = input;
+	inputRegion = input;
 }
 
 void InputMapBase::Press()
 {
-	if (Toggle == true && State == PressedState::pressed)
+	if (toggle == true && State == PressedState::pressed)
 	{
-		IsToggled = !IsToggled;
+		isToggled = !isToggled;
 	}
 
 	Pressable::Press();
 
-	if (RapidFire == true)
+	if (rapidFire == true)
 	{
 		UpdateRapidState();
 	}
@@ -147,7 +147,7 @@ void InputMapBase::Release()
 {
 	Pressable::Release();
 
-	if (RapidFire == true)
+	if (rapidFire == true)
 	{
 		UpdateRapidState();
 	}
@@ -155,15 +155,15 @@ void InputMapBase::Release()
 
 InputAxisOptions InputMapBase::GetAxisOptions(Ds4Axis_t axis)
 {
-	if (InputAxisOptions.empty())
+	if (inputAxisOptions.empty())
 	{
 		// HACK: remove
 		return ::InputAxisOptions();
 	}
 
-	const auto it = InputAxisOptions.find(axis);
+	const auto it = inputAxisOptions.find(axis);
 
-	if (it != InputAxisOptions.end())
+	if (it != inputAxisOptions.end())
 	{
 		return it->second;
 	}
@@ -175,13 +175,13 @@ InputAxisOptions InputMapBase::GetAxisOptions(Ds4Axis_t axis)
 bool InputMapBase::operator==(const InputMapBase& other) const
 {
 	return inputType == other.inputType
-	       && InputButtons == other.InputButtons
-	       && InputAxis == other.InputAxis
-	       && InputRegion == other.InputRegion
-	       && Toggle == other.Toggle
-	       && RapidFire == other.RapidFire
-	       && RapidFireInterval == other.RapidFireInterval
-	       && InputAxisOptions == other.InputAxisOptions;
+	       && inputButtons == other.inputButtons
+	       && inputAxis == other.inputAxis
+	       && inputRegion == other.inputRegion
+	       && toggle == other.toggle
+	       && rapidFire == other.rapidFire
+	       && rapidFireInterval == other.rapidFireInterval
+	       && inputAxisOptions == other.inputAxisOptions;
 }
 
 bool InputMapBase::operator!=(const InputMapBase& other) const
@@ -191,14 +191,43 @@ bool InputMapBase::operator!=(const InputMapBase& other) const
 
 void InputMapBase::readJson(const QJsonObject& json)
 {
-	ENUM_DESERIALIZE_FLAGS(InputType)(json["inputType"].toString().toStdString(), inputType);
-	ENUM_DESERIALIZE_FLAGS(Ds4Buttons)(json["inputButtons"].toString().toStdString(), InputButtons);
-	ENUM_DESERIALIZE_FLAGS(Ds4Axis)(json["inputAxis"].toString().toStdString(), InputAxis);
+	if (json.contains("inputType"))
+	{
+		InputType_t inputType_;
+		ENUM_DESERIALIZE_FLAGS(InputType)(json["inputType"].toString().toStdString(), inputType_);
+		inputType = inputType_;
+	}
 
-	InputRegion       = json["inputRegion"].toString().toStdString();
-	Toggle            = json["toggle"].toBool();
-	RapidFire         = json["rapidFire"].toBool();
-	RapidFireInterval = std::chrono::nanoseconds(json["rapidFireInterval"].toInt());
+	if (json.contains("inputButtons"))
+	{
+		Ds4Buttons_t inputButtons_;
+		ENUM_DESERIALIZE_FLAGS(Ds4Buttons)(json["inputButtons"].toString().toStdString(), inputButtons_);
+		inputButtons = inputButtons_;
+	}
+
+	if (json.contains("inputAxis"))
+	{
+		Ds4Axis_t inputAxis_;
+		ENUM_DESERIALIZE_FLAGS(Ds4Axis)(json["inputAxis"].toString().toStdString(), inputAxis_);
+		inputAxis = inputAxis_;
+	}
+
+	inputRegion = json["inputRegion"].toString().toStdString();
+
+	if (json.contains("toggle"))
+	{
+		toggle = json["toggle"].toBool();
+	}
+
+	if (json.contains("rapidFire"))
+	{
+		rapidFire = json["rapidFire"].toBool();
+	}
+
+	if (json.contains("rapidFireInterval"))
+	{
+		rapidFireInterval = std::chrono::nanoseconds(json["rapidFireInterval"].toInt());
+	}
 
 	QJsonObject inputAxisOptions_ = json["inputAxisOptions"].toObject();
 
@@ -206,23 +235,44 @@ void InputMapBase::readJson(const QJsonObject& json)
 	{
 		Ds4Axis_t flags;
 		ENUM_DESERIALIZE_FLAGS(Ds4Axis)(key.toStdString(), flags);
-		InputAxisOptions[flags] = fromJson<::InputAxisOptions>(inputAxisOptions_[key].toObject());
+		inputAxisOptions[flags] = fromJson<::InputAxisOptions>(inputAxisOptions_[key].toObject());
 	}
 }
 
 void InputMapBase::writeJson(QJsonObject& json) const
 {
-	json["inputType"]         = ENUM_SERIALIZE_FLAGS(InputType)(inputType).c_str();
-	json["inputButtons"]      = ENUM_SERIALIZE_FLAGS(Ds4Buttons)(InputButtons).c_str();
-	json["inputAxis"]         = ENUM_SERIALIZE_FLAGS(Ds4Axis)(InputAxis).c_str();
-	json["inputRegion"]       = InputRegion.c_str();
-	json["toggle"]            = Toggle;
-	json["rapidFire"]         = RapidFire;
-	json["rapidFireInterval"] = RapidFireInterval.count();
+	json["inputType"] = ENUM_SERIALIZE_FLAGS(InputType)(inputType).c_str();
+
+	if (inputButtons.has_value())
+	{
+		json["inputButtons"] = ENUM_SERIALIZE_FLAGS(Ds4Buttons)(inputButtons.value()).c_str();
+	}
+
+	if (inputAxis.has_value())
+	{
+		json["inputAxis"] = ENUM_SERIALIZE_FLAGS(Ds4Axis)(inputAxis.value()).c_str();
+	}
+
+	json["inputRegion"] = inputRegion.c_str();
+
+	if (toggle.has_value())
+	{
+		json["toggle"] = toggle.value();
+	}
+
+	if (rapidFire.has_value())
+	{
+		json["rapidFire"] = rapidFire.value();
+	}
+
+	if (rapidFireInterval.has_value())
+	{
+		json["rapidFireInterval"] = rapidFireInterval.value().count();
+	}
 
 	QJsonObject inputAxisOptions_;
 
-	for (const auto& pair : InputAxisOptions)
+	for (const auto& pair : inputAxisOptions)
 	{
 		auto key = ENUM_SERIALIZE_FLAGS(Ds4Axis)(pair.first);
 		inputAxisOptions_[key.c_str()] = pair.second.toJson();
@@ -322,7 +372,7 @@ void InputMap::pressModifier(const InputModifier* modifier)
 	{
 		InputMapBase::Press();
 	}
-	else if (Toggle && RapidFire)
+	else if (toggle && rapidFire)
 	{
 		UpdateRapidState();
 	}
@@ -352,8 +402,20 @@ void InputMap::readJson(const QJsonObject& json)
 	InputMapBase::readJson(json);
 	
 	ENUM_DESERIALIZE_FLAGS(OutputType)(json["outputType"].toString().toStdString(), outputType);
-	ENUM_DESERIALIZE_FLAGS(XInputButtons)(json["xinputButtons"].toString().toStdString(), xinputButtons);
-	ENUM_DESERIALIZE_FLAGS(Direction)(json["touchDirection"].toString().toStdString(), touchDirection);
+
+	if (json.contains("xinputButtons"))
+	{
+		XInputButtons_t xinputButtons_;
+		ENUM_DESERIALIZE_FLAGS(XInputButtons)(json["xinputButtons"].toString().toStdString(), xinputButtons_);
+		xinputButtons = xinputButtons_;
+	}
+
+	if (json.contains("touchDirection"))
+	{
+		Direction_t touchDirection_;
+		ENUM_DESERIALIZE_FLAGS(Direction)(json["touchDirection"].toString().toStdString(), touchDirection_);
+		touchDirection = touchDirection_;
+	}
 
 	if (json.contains("simulatorType"))
 	{
@@ -380,11 +442,29 @@ void InputMap::writeJson(QJsonObject& json) const
 {
 	InputMapBase::writeJson(json);
 
-	json["outputType"]     = ENUM_SERIALIZE_FLAGS(OutputType)(outputType).c_str();
-	json["xinputButtons"]  = ENUM_SERIALIZE_FLAGS(XInputButtons)(xinputButtons).c_str();
-	json["touchDirection"] = ENUM_SERIALIZE_FLAGS(Direction)(touchDirection).c_str();
-	json["simulatorType"]  = simulatorType._to_string();
-	json["action"]         = action._to_string();
-	json["mouseAxes"]      = mouseAxes.toJson();
-	json["xinputAxes"]     = xinputAxes.toJson();
+	json["outputType"] = ENUM_SERIALIZE_FLAGS(OutputType)(outputType).c_str();
+
+	if (xinputButtons.has_value())
+	{
+		json["xinputButtons"] = ENUM_SERIALIZE_FLAGS(XInputButtons)(xinputButtons.value()).c_str();
+	}
+
+	if (touchDirection.has_value())
+	{
+		json["touchDirection"] = ENUM_SERIALIZE_FLAGS(Direction)(touchDirection.value()).c_str();
+	}
+
+	json["simulatorType"] = simulatorType._to_string();
+
+	if (action.has_value())
+	{
+		json["action"] = action.value()._to_string();
+	}
+
+	json["mouseAxes"] = mouseAxes.toJson();
+
+	if (xinputAxes.has_value())
+	{
+		json["xinputAxes"] = xinputAxes.value().toJson();
+	}
 }

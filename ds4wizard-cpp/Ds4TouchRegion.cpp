@@ -105,6 +105,7 @@ float Ds4TouchRegion::GetTouchDelta(Ds4Buttons_t sender, Direction_t direction, 
 {
 	short x = std::clamp(point.x, Left, Right);
 	short y = std::clamp(point.y, Top, Bottom);
+	float result;
 
 	if (Type == +Ds4TouchRegionType::stickAutoCenter)
 	{
@@ -115,8 +116,6 @@ float Ds4TouchRegion::GetTouchDelta(Ds4Buttons_t sender, Direction_t direction, 
 
 		short sx = start.x;
 		short sy = start.y;
-
-		float result;
 
 		switch (direction)
 		{
@@ -135,8 +134,6 @@ float Ds4TouchRegion::GetTouchDelta(Ds4Buttons_t sender, Direction_t direction, 
 			default:
 				throw /*new ArgumentOutOfRangeException(nameof(direction), direction, null) // TODO */;
 		}
-
-		return result;
 	}
 	else
 	{
@@ -148,8 +145,6 @@ float Ds4TouchRegion::GetTouchDelta(Ds4Buttons_t sender, Direction_t direction, 
 
 		int cx = width / 2;
 		int cy = height / 2;
-
-		float result;
 
 		switch (direction)
 		{
@@ -172,14 +167,14 @@ float Ds4TouchRegion::GetTouchDelta(Ds4Buttons_t sender, Direction_t direction, 
 			default:
 				throw /*new ArgumentOutOfRangeException(nameof(direction), direction, null)*/;
 		}
-
-		return result;
 	}
+
+	return result;
 }
 
 float Ds4TouchRegion::GetDeadZone(Direction_t direction)
 {
-	return TouchAxisOptions[direction].deadZone;
+	return TouchAxisOptions[direction].deadZone.value_or(0.0f);
 }
 
 void Ds4TouchRegion::ApplyDeadZone(Direction_t direction, float& analog)
