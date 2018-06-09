@@ -2,14 +2,13 @@
 #include "Ds4LightOptions.h"
 
 Ds4LightOptions::Ds4LightOptions(const Ds4Color& color)
+	: color(color)
 {
-	this->color = color;
 }
 
 Ds4LightOptions::Ds4LightOptions(const Ds4LightOptions& other)
+	: color(other.color), idleFade(other.idleFade)
 {
-	color           = other.color;
-	idleFade        = other.idleFade;
 }
 
 // TODO: replace with IComparable (if this were C#)

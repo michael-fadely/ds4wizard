@@ -5,6 +5,8 @@
 #include <sstream>
 #include <iomanip>
 
+#include <handle.h>
+
 #include "Ds4Device.h"
 #include "lock.h"
 #include "program.h"
@@ -34,13 +36,13 @@ bool Ds4Device::isIdle() const
 bool Ds4Device::bluetoothConnected()
 {
 	lock(sync);
-	return bluetoothDevice != nullptr && bluetoothDevice->is_open();
+	return bluetoothDevice != nullptr && bluetoothDevice->isOpen();
 }
 
 bool Ds4Device::usbConnected()
 {
 	lock(sync);
-	return usbDevice != nullptr && usbDevice->is_open();
+	return usbDevice != nullptr && usbDevice->isOpen();
 }
 
 bool Ds4Device::connected()
@@ -82,7 +84,7 @@ Ds4Device::Ds4Device(hid::HidInstance& device)
 	safeMacAddress.erase(std::remove(safeMacAddress.begin(), safeMacAddress.end(), ':'), safeMacAddress.end());
 	std::transform(safeMacAddress.begin(), safeMacAddress.end(), safeMacAddress.begin(), tolower);
 
-	if (device.caps().input_report_size != 64)
+	if (device.caps().inputReportSize != 64)
 	{
 		bluetoothDevice = std::make_unique<hid::HidInstance>(std::move(device));
 		setupBluetoothOutputBuffer();
@@ -156,14 +158,14 @@ void Ds4Device::applyProfile()
 
 	activeLight = Ds4LightOptions(l);
 
-	if (usbDevice != nullptr && (!usbConnected() || usbDevice->is_exclusive() != profile.exclusiveMode))
+	if (usbDevice != nullptr && (!usbConnected() || usbDevice->isExclusive() != profile.exclusiveMode))
 	{
 		closeUsbDevice();
 		hid::HidInstance inst = std::move(*usbDevice);
 		openUsbDevice(inst);
 	}
 
-	if (bluetoothDevice != nullptr && (!bluetoothConnected() || bluetoothDevice->is_exclusive() != profile.exclusiveMode))
+	if (bluetoothDevice != nullptr && (!bluetoothConnected() || bluetoothDevice->isExclusive() != profile.exclusiveMode))
 	{
 		closeBluetoothDevice();
 		hid::HidInstance inst = std::move(*bluetoothDevice);
@@ -202,7 +204,7 @@ bool Ds4Device::scpDeviceOpen()
 		return false;
 	}
 
-	auto handle = hid::Handle(CreateFile(info->path.c_str(), GENERIC_READ | GENERIC_WRITE,
+	auto handle = Handle(CreateFile(info->path.c_str(), GENERIC_READ | GENERIC_WRITE,
 	                                     FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, 0, nullptr), true);
 
 	if (!handle.isValid())
@@ -324,7 +326,7 @@ void Ds4Device::closeBluetoothDevice()
 {
 	lock(sync);
 
-	if (bluetoothDevice != nullptr && bluetoothDevice->is_open())
+	if (bluetoothDevice != nullptr && bluetoothDevice->isOpen())
 	{
 		bluetoothDevice->close();
 	}
@@ -351,7 +353,7 @@ void Ds4Device::closeUsbDevice()
 {
 	lock(sync);
 
-	if (usbDevice != nullptr && usbDevice->is_open())
+	if (usbDevice != nullptr && usbDevice->isOpen())
 	{
 		usbDevice->close();
 	}
@@ -384,7 +386,7 @@ void Ds4Device::openBluetoothDevice(hid::HidInstance& device)
 			return;
 		}
 
-		if (profile.exclusiveMode && !device.is_exclusive())
+		if (profile.exclusiveMode && !device.isExclusive())
 		{
 			// TODO: Logger.WriteLine(LogLevel.Warning, Name, Resources.BluetoothExclusiveOpenFailed);
 		}
@@ -400,7 +402,7 @@ void Ds4Device::openBluetoothDevice(hid::HidInstance& device)
 		std::array<uint8_t, 37> temp {};
 		temp[0] = 0x02;
 
-		if (bluetoothDevice->get_feature(temp))
+		if (bluetoothDevice->getFeature(temp))
 		{
 			// success
 		}
@@ -425,7 +427,7 @@ void Ds4Device::openUsbDevice(hid::HidInstance& device)
 			return;
 		}
 
-		if (profile.exclusiveMode && !device.is_exclusive())
+		if (profile.exclusiveMode && !device.isExclusive())
 		{
 			// TODO: Logger.WriteLine(LogLevel.Warning, Name, Resources.UsbExclusiveOpenFailed);
 		}
@@ -454,7 +456,7 @@ void Ds4Device::setupUsbOutputBuffer() const
 
 void Ds4Device::writeUsbAsync()
 {
-	if (usbDevice->pending_write())
+	if (usbDevice->writePending())
 	{
 		return;
 	}

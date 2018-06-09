@@ -4,17 +4,17 @@
 const DeviceIdleOptions DeviceIdleOptions::defaultIdleOptions(std::chrono::seconds(5), true, TimeUnit::minutes);
 
 DeviceIdleOptions::DeviceIdleOptions(std::chrono::nanoseconds timeout, bool disconnect, TimeUnit unit)
+	: timeout(timeout),
+	  disconnect(disconnect),
+	  unit(unit)
 {
-	this->timeout    = timeout;
-	this->disconnect = disconnect;
-	this->unit       = unit;
 }
 
 DeviceIdleOptions::DeviceIdleOptions(const DeviceIdleOptions& other)
+	: timeout(other.timeout),
+	  disconnect(other.disconnect),
+	  unit(other.unit)
 {
-	timeout    = other.timeout;
-	disconnect = other.disconnect;
-	unit       = other.unit;
 }
 
 bool DeviceIdleOptions::operator==(const DeviceIdleOptions& other) const

@@ -2,20 +2,20 @@
 #include "DeviceSettings.h"
 
 DeviceSettings::DeviceSettings()
+	: idle(DeviceIdleOptions::defaultIdleOptions)
 {
 	useProfileLight = false;
 	useProfileIdle  = false;
-	idle            = DeviceIdleOptions::defaultIdleOptions;
 }
 
-DeviceSettings::DeviceSettings(const DeviceSettings& s)
-	: DeviceSettingsCommon(s)
+DeviceSettings::DeviceSettings(const DeviceSettings& other)
+	: DeviceSettingsCommon(other),
+	  name(other.name),
+	  profile(other.profile),
+	  useProfileLight(other.useProfileLight),
+	  useProfileIdle(other.useProfileIdle),
+	  idle(other.idle)
 {
-	name            = s.name;
-	profile         = s.profile;
-	useProfileLight = s.useProfileLight;
-	useProfileIdle  = s.useProfileIdle;
-	idle            = s.idle;
 }
 
 bool DeviceSettings::operator==(const DeviceSettings& other) const

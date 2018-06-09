@@ -21,7 +21,7 @@ int ScpDevice::GetFreePort()
 	return -1;
 }
 
-ScpDevice::ScpDevice(hid::Handle&& handle)
+ScpDevice::ScpDevice(Handle&& handle)
 {
 	this->handle = std::move(handle);
 

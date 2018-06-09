@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <mutex>
 
-#include <hid_instance.h>
+#include <handle.h>
 
 #include "XInputGamepad.h"
 
@@ -52,7 +52,7 @@ private:
 	std::array<uint8_t, 10> readBuffer {};
 	std::array<uint8_t, 28> writeBuffer {};
 
-	hid::Handle handle = hid::Handle(nullptr, true);
+	Handle handle = Handle(nullptr, true);
 
 public:
 	std::array<short, 4> driverVersion {};
@@ -61,7 +61,7 @@ public:
 	/// Initializes the ScpVBus device using the given handle.
 	/// </summary>
 	/// <param name="handle">A valid handle to the ScpVBus device.</param>
-	ScpDevice(hid::Handle&& handle);
+	explicit ScpDevice(Handle&& handle);
 
 	~ScpDevice();
 

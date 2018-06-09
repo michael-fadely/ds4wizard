@@ -140,10 +140,12 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="handle.h" />
     <ClInclude Include="hid_instance.h" />
     <ClInclude Include="util.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="handle.cpp" />
     <ClCompile Include="hid_instance.cpp" />
     <ClCompile Include="util.cpp" />
   </ItemGroup>

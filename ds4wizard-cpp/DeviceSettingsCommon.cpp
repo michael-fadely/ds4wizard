@@ -2,26 +2,22 @@
 #include "DeviceSettingsCommon.h"
 
 DeviceSettingsCommon::DeviceSettingsCommon()
+	: notifiedLow(false),
+	  notifiedCharged(false),
+	  idle({}),
+	  notifyFullyCharged(true),
+	  notifyBatteryLow(2)
 {
-	light              = {};
-	idle               = {};
-	notifyFullyCharged = true;
-	notifyBatteryLow   = 2;
-
-	notifiedLow     = false;
-	notifiedCharged = true;
 }
 
 DeviceSettingsCommon::DeviceSettingsCommon(const DeviceSettingsCommon& other)
+	: notifiedLow(other.notifiedLow),
+	  notifiedCharged(other.notifiedCharged),
+	  light(other.light),
+	  idle(other.idle),
+	  notifyFullyCharged(other.notifyFullyCharged),
+	  notifyBatteryLow(other.notifyBatteryLow)
 {
-	light = other.light;
-	idle  = other.idle;
-
-	notifyFullyCharged = other.notifyFullyCharged;
-	notifyBatteryLow   = other.notifyBatteryLow;
-
-	notifiedLow     = other.notifiedLow;
-	notifiedCharged = other.notifiedCharged;
 }
 
 void DeviceSettingsCommon::displayNotifications(Ds4Device* device)

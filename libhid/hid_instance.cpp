@@ -1,91 +1,28 @@
 #include <Windows.h>
 #include <hidsdi.h>
 #include <hidpi.h>
+#include <utility>
 #include "hid_instance.h"
+#include "handle.h"
 
 using namespace hid;
 
-Handle::Handle(const Handle& other)
+HidInstance::HidInstance(std::wstring path, std::wstring instanceId, bool readInfo)
+	: path(std::move(path)),
+	  instanceId(std::move(instanceId))
 {
-	*this = other;
-}
-
-Handle::Handle(Handle&& rhs) noexcept
-{
-	*this = rhs;
-}
-
-Handle::Handle(HANDLE h, bool owner)
-{
-	nativeHandle = h;
-	this->owner = owner;
-}
-
-Handle::~Handle()
-{
-	close();
-}
-
-void Handle::close()
-{
-	if (owner && isValid())
+	if (readInfo)
 	{
-		CloseHandle(nativeHandle);
-		nativeHandle = nullptr;
+		readMetadata();
 	}
 }
 
-bool Handle::operator==(const Handle& rhs) const
+HidInstance::HidInstance(std::wstring path, bool readInfo)
+	: path(std::move(path))
 {
-	return nativeHandle == rhs.nativeHandle;
-}
-
-bool Handle::operator!=(const Handle& rhs) const
-{
-	return !(*this == rhs);
-}
-
-Handle& Handle::operator=(const Handle& rhs)
-{
-	close();
-
-	nativeHandle = rhs.nativeHandle;
-	owner = rhs.owner;
-
-	return *this;
-}
-
-Handle& Handle::operator=(Handle&& rhs) noexcept
-{
-	close();
-
-	nativeHandle = rhs.nativeHandle;
-	owner = rhs.owner;
-
-	rhs.nativeHandle = nullptr;
-	rhs.owner = false;
-
-	return *this;
-}
-
-bool Handle::isValid() const
-{
-	return nativeHandle && nativeHandle != INVALID_HANDLE_VALUE;
-}
-
-HidInstance::HidInstance(const std::wstring& path, const std::wstring& instance_id, bool read_info)
-	: HidInstance(path, read_info)
-{
-	this->instance_id = instance_id;
-}
-
-HidInstance::HidInstance(const std::wstring& path, bool read_info)
-{
-	this->path = path;
-
-	if (read_info)
+	if (readInfo)
 	{
-		read_metadata();
+		readMetadata();
 	}
 }
 
@@ -101,14 +38,14 @@ HidInstance::~HidInstance()
 
 HidInstance& HidInstance::operator=(HidInstance&& other) noexcept
 {
-	handle        = std::move(other.handle);
-	flags         = other.flags;
-	caps_         = other.caps_;
-	attributes_   = other.attributes_;
-	serial_string = std::move(other.serial_string);
-	serial        = std::move(other.serial);
-	path          = std::move(other.path);
-	instance_id   = std::move(other.instance_id);
+	handle       = std::move(other.handle);
+	flags        = other.flags;
+	caps_        = other.caps_;
+	attributes_  = other.attributes_;
+	serialString = std::move(other.serialString);
+	serial       = std::move(other.serial);
+	path         = std::move(other.path);
+	instanceId   = std::move(other.instanceId);
 
 	input_buffer   = std::move(other.input_buffer);
 	output_buffer  = std::move(other.output_buffer);
@@ -122,27 +59,27 @@ HidInstance& HidInstance::operator=(HidInstance&& other) noexcept
 	return *this;
 }
 
-bool HidInstance::is_open() const
+bool HidInstance::isOpen() const
 {
 	return handle.isValid();
 }
 
-bool HidInstance::is_exclusive() const
+bool HidInstance::isExclusive() const
 {
 	return !!(flags & HidOpenFlags::exclusive);
 }
 
-bool HidInstance::is_async() const
+bool HidInstance::isAsync() const
 {
 	return !!(flags & HidOpenFlags::async);
 }
 
-bool HidInstance::pending_read() const
+bool HidInstance::readPending() const
 {
 	return pending_read_;
 }
 
-bool HidInstance::pending_write() const
+bool HidInstance::writePending() const
 {
 	return pending_write_;
 }
@@ -157,13 +94,13 @@ const HidAttributes& HidInstance::attributes() const
 	return attributes_;
 }
 
-void HidInstance::read_metadata()
+void HidInstance::readMetadata()
 {
-	if (is_open())
+	if (isOpen())
 	{
-		get_caps();
-		get_attributes();
-		//get_serial();
+		readCaps();
+		readAttributes();
+		//readSerial();
 		return;
 	}
 
@@ -181,37 +118,37 @@ void HidInstance::read_metadata()
 	#error __FUNCTION__ not implemented on this platform.
 #endif
 
-	get_caps(h.nativeHandle);
-	get_attributes(h.nativeHandle);
-	//get_serial(h.handle);
+	readCaps(h.nativeHandle);
+	readAttributes(h.nativeHandle);
+	//readSerial(h.handle);
 }
 
-void HidInstance::get_caps()
+void HidInstance::readCaps()
 {
-	get_caps(handle.nativeHandle);
+	readCaps(handle.nativeHandle);
 }
 
-bool HidInstance::get_serial()
+bool HidInstance::readSerial()
 {
-	return get_serial(handle.nativeHandle);
+	return readSerial(handle.nativeHandle);
 }
 
-bool HidInstance::get_attributes()
+bool HidInstance::readAttributes()
 {
-	return get_attributes(handle.nativeHandle);
+	return readAttributes(handle.nativeHandle);
 }
 
-bool HidInstance::get_feature(const gsl::span<uint8_t>& buffer) const
+bool HidInstance::getFeature(const gsl::span<uint8_t>& buffer) const
 {
 	try
 	{
-		if (is_open())
+		if (isOpen())
 		{
 			return HidD_GetFeature(handle.nativeHandle, buffer.data(), static_cast<ULONG>(buffer.size_bytes()));
 		}
 
 		Handle h = Handle(CreateFile(path.c_str(), GENERIC_READ | GENERIC_WRITE,
-		                      FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, 0, nullptr), true);
+		                             FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, 0, nullptr), true);
 
 		if (!h.isValid())
 		{
@@ -230,7 +167,7 @@ bool HidInstance::get_feature(const gsl::span<uint8_t>& buffer) const
 bool HidInstance::open(HidOpenFlags_t flags)
 {
 	bool exclusive = !!(flags & HidOpenFlags::exclusive);
-	if (exclusive != is_exclusive())
+	if (exclusive != isExclusive())
 	{
 		close();
 	}
@@ -248,9 +185,9 @@ bool HidInstance::open(HidOpenFlags_t flags)
 
 	this->flags = flags;
 
-	if (is_async())
+	if (isAsync())
 	{
-		overlap_in.hEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+		overlap_in.hEvent  = CreateEvent(nullptr, FALSE, FALSE, nullptr);
 		overlap_out.hEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
 	}
 
@@ -259,16 +196,16 @@ bool HidInstance::open(HidOpenFlags_t flags)
 
 void HidInstance::close()
 {
-	if (is_open())
+	if (isOpen())
 	{
 		handle.close();
 	}
 
-	if (is_async())
+	if (isAsync())
 	{
 		CloseHandle(overlap_in.hEvent);
 		CloseHandle(overlap_out.hEvent);
-		pending_read_ = false;
+		pending_read_  = false;
 		pending_write_ = false;
 	}
 
@@ -277,7 +214,7 @@ void HidInstance::close()
 
 bool HidInstance::read(void* buffer, size_t size) const
 {
-	if (!is_open())
+	if (!isOpen())
 	{
 		return false;
 	}
@@ -392,7 +329,7 @@ bool HidInstance::writeAsync()
 
 bool HidInstance::set_output_report(const gsl::span<uint8_t>& buffer) const
 {
-	if (!is_open())
+	if (!isOpen())
 	{
 		return false;
 	}
@@ -405,31 +342,31 @@ bool HidInstance::set_output_report()
 	return set_output_report(output_buffer);
 }
 
-void HidInstance::get_caps(HANDLE h)
+void HidInstance::readCaps(HANDLE h)
 {
 #ifdef _MSC_VER
-	HIDP_CAPS c = {};
+	HIDP_CAPS c              = {};
 	PHIDP_PREPARSED_DATA ptr = nullptr;
 
 	if (HidD_GetPreparsedData(h, &ptr))
 	{
 		if (HidP_GetCaps(ptr, &c))
 		{
-			caps_.usage                 = c.Usage;
-			caps_.usage_page            = c.UsagePage;
-			caps_.input_report_size     = c.InputReportByteLength;
-			caps_.output_report_size    = c.OutputReportByteLength;
-			caps_.feature_report_size   = c.FeatureReportByteLength;
-			caps_.link_collection_nodes = c.NumberLinkCollectionNodes;
-			caps_.input_button_caps     = c.NumberInputButtonCaps;
-			caps_.input_value_caps      = c.NumberInputValueCaps;
-			caps_.input_data_indices    = c.NumberInputDataIndices;
-			caps_.output_button_caps    = c.NumberOutputButtonCaps;
-			caps_.output_value_caps     = c.NumberOutputValueCaps;
-			caps_.output_data_indices   = c.NumberOutputDataIndices;
-			caps_.feature_button_caps   = c.NumberFeatureButtonCaps;
-			caps_.feature_value_caps    = c.NumberFeatureValueCaps;
-			caps_.feature_data_indices  = c.NumberFeatureDataIndices;
+			caps_.usage               = c.Usage;
+			caps_.usagePage           = c.UsagePage;
+			caps_.inputReportSize     = c.InputReportByteLength;
+			caps_.outputReportSize    = c.OutputReportByteLength;
+			caps_.featureReportSize   = c.FeatureReportByteLength;
+			caps_.linkCollectionNodes = c.NumberLinkCollectionNodes;
+			caps_.inputButtonCaps     = c.NumberInputButtonCaps;
+			caps_.inputValueCaps      = c.NumberInputValueCaps;
+			caps_.inputDataIndices    = c.NumberInputDataIndices;
+			caps_.outputButtonCaps    = c.NumberOutputButtonCaps;
+			caps_.outputValueCaps     = c.NumberOutputValueCaps;
+			caps_.outputDataIndices   = c.NumberOutputDataIndices;
+			caps_.featureButtonCaps   = c.NumberFeatureButtonCaps;
+			caps_.featureValueCaps    = c.NumberFeatureValueCaps;
+			caps_.featureDataIndices  = c.NumberFeatureDataIndices;
 		}
 
 		HidD_FreePreparsedData(ptr);
@@ -438,11 +375,11 @@ void HidInstance::get_caps(HANDLE h)
 	#error __FUNCTION__ not implemented on this platform.
 #endif
 
-	input_buffer.resize(caps().input_report_size);
-	output_buffer.resize(caps().output_report_size);
+	input_buffer.resize(caps().inputReportSize);
+	output_buffer.resize(caps().outputReportSize);
 }
 
-bool HidInstance::get_serial(HANDLE h)
+bool HidInstance::readSerial(HANDLE h)
 {
 	serial.clear();
 
@@ -453,11 +390,11 @@ bool HidInstance::get_serial(HANDLE h)
 
 	if (result)
 	{
-		serial_string = std::wstring(reinterpret_cast<wchar_t*>(buffer.data()));
+		serialString = std::wstring(reinterpret_cast<wchar_t*>(buffer.data()));
 
 		for (size_t i = 0; i < 6; i++)
 		{
-			const auto sub = serial_string.substr(i * 2, 2);
+			const auto sub = serialString.substr(i * 2, 2);
 			serial.push_back(static_cast<uint8_t>(std::stoul(sub, nullptr, 16)));
 		}
 	}
@@ -468,15 +405,15 @@ bool HidInstance::get_serial(HANDLE h)
 #endif
 }
 
-bool HidInstance::get_attributes(HANDLE h)
+bool HidInstance::readAttributes(HANDLE h)
 {
 #ifdef _MSC_VER
 	HIDD_ATTRIBUTES attributes {};
 	bool result = HidD_GetAttributes(h, &attributes);
 
-	attributes_.vendor_id = attributes.VendorID;
-	attributes_.product_id = attributes.ProductID;
-	attributes_.version_number = attributes.VersionNumber;
+	attributes_.vendorId      = attributes.VendorID;
+	attributes_.productId     = attributes.ProductID;
+	attributes_.versionNumber = attributes.VersionNumber;
 
 	return result;
 #else

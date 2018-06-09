@@ -10,11 +10,11 @@
 
 bool Ds4DeviceManager::isDS4(const hid::HidInstance& hid)
 {
-	if (hid.attributes().vendor_id == vendorId)
+	if (hid.attributes().vendorId == vendorId)
 	{
 		for (auto id : productIds)
 		{
-			if (id == hid.attributes().product_id)
+			if (id == hid.attributes().productId)
 			{
 				return true;
 			}
@@ -36,12 +36,12 @@ void Ds4DeviceManager::findControllers()
 
 	hid::enum_hid([&](hid::HidInstance& hid) -> bool
 	{
-		if (hid.attributes().vendor_id != vendorId)
+		if (hid.attributes().vendorId != vendorId)
 		{
 			return false;
 		}
 
-		if (std::find(productIds.begin(), productIds.end(), hid.attributes().product_id) == productIds.end())
+		if (std::find(productIds.begin(), productIds.end(), hid.attributes().productId) == productIds.end())
 		{
 			return false;
 		}
@@ -50,7 +50,7 @@ void Ds4DeviceManager::findControllers()
 
 		try
 		{
-			isBluetooth = hid.caps().input_report_size != 64;
+			isBluetooth = hid.caps().inputReportSize != 64;
 
 			// USB connection type
 			if (!isBluetooth)
@@ -59,7 +59,7 @@ void Ds4DeviceManager::findControllers()
 				std::array<uint8_t, 16> buffer {};
 				buffer[0] = 18;
 
-				if (!hid.get_feature(buffer))
+				if (!hid.getFeature(buffer))
 				{
 					throw /* TODO std::runtime_error(std::wstring.Format(Resources.DeviceReadMACFailed, hid.path)) */;
 				}
@@ -75,10 +75,10 @@ void Ds4DeviceManager::findControllers()
 				serialString << std::setw(2) << std::setfill(L'0') << std::hex
 					<< buffer[6] << buffer[5] << buffer[4] << buffer[3] << buffer[2] << buffer[1];
 
-				hid.serial_string = serialString.str();
+				hid.serialString = serialString.str();
 			}
 
-			if (hid.serial_string.empty())
+			if (hid.serialString.empty())
 			{
 				throw /* TODO std::runtime_error(std::wstring.Format(Resources.DeviceReturnedEmptyMAC, hid.Path)) */;
 			}
@@ -95,12 +95,12 @@ void Ds4DeviceManager::findControllers()
 		{
 			lock(devices);
 
-			const auto it = devices.find(hid.serial_string);
+			const auto it = devices.find(hid.serialString);
 			std::shared_ptr<Ds4Device> device = nullptr;
 
 			if (it == devices.end())
 			{
-				queueDeviceToggle(hid.instance_id);
+				queueDeviceToggle(hid.instanceId);
 				device = std::make_shared<Ds4Device>(hid);
 				// TODO: device->DeviceClosed += OnDs4DeviceClosed
 
@@ -117,7 +117,7 @@ void Ds4DeviceManager::findControllers()
 				{
 					if (!device->bluetoothConnected())
 					{
-						queueDeviceToggle(hid.instance_id);
+						queueDeviceToggle(hid.instanceId);
 						device->openBluetoothDevice(hid);
 					}
 				}
@@ -125,7 +125,7 @@ void Ds4DeviceManager::findControllers()
 				{
 					if (!device->usbConnected())
 					{
-						queueDeviceToggle(hid.instance_id);
+						queueDeviceToggle(hid.instanceId);
 						device->openUsbDevice(hid);
 					}
 				}

@@ -7,6 +7,7 @@
 #include <vector>
 
 #include <gsl/span>
+#include "handle.h"
 
 namespace hid
 {
@@ -15,8 +16,8 @@ namespace hid
 		enum T : uint32_t
 		{
 			none,
-			exclusive = 1u << 0,
-			async     = 1u << 1
+			exclusive = 1u << 0u,
+			async     = 1u << 1u
 		};
 	};
 
@@ -25,51 +26,27 @@ namespace hid
 	struct HidCaps
 	{
 		uint16_t usage;
-		uint16_t usage_page;
-		uint16_t input_report_size;
-		uint16_t output_report_size;
-		uint16_t feature_report_size;
-		uint16_t link_collection_nodes;
-		uint16_t input_button_caps;
-		uint16_t input_value_caps;
-		uint16_t input_data_indices;
-		uint16_t output_button_caps;
-		uint16_t output_value_caps;
-		uint16_t output_data_indices;
-		uint16_t feature_button_caps;
-		uint16_t feature_value_caps;
-		uint16_t feature_data_indices;
+		uint16_t usagePage;
+		uint16_t inputReportSize;
+		uint16_t outputReportSize;
+		uint16_t featureReportSize;
+		uint16_t linkCollectionNodes;
+		uint16_t inputButtonCaps;
+		uint16_t inputValueCaps;
+		uint16_t inputDataIndices;
+		uint16_t outputButtonCaps;
+		uint16_t outputValueCaps;
+		uint16_t outputDataIndices;
+		uint16_t featureButtonCaps;
+		uint16_t featureValueCaps;
+		uint16_t featureDataIndices;
 	};
 
 	struct HidAttributes
 	{
-		uint16_t vendor_id;
-		uint16_t product_id;
-		uint16_t version_number;
-	};
-
-	class Handle
-	{
-	public:
-		bool owner = false;
-		HANDLE nativeHandle = nullptr;
-
-		Handle() = default;
-		Handle(const Handle& other);
-
-		Handle(Handle&& rhs) noexcept;
-		explicit Handle(HANDLE h, bool owner = false);
-		~Handle();
-
-		void close();
-
-		bool operator==(const Handle& rhs) const;
-		bool operator!=(const Handle& rhs) const;
-
-		Handle& operator=(const Handle& rhs);
-		Handle& operator=(Handle&& rhs) noexcept;
-
-		bool isValid() const;
+		uint16_t vendorId;
+		uint16_t productId;
+		uint16_t versionNumber;
 	};
 
 	class HidInstance
@@ -89,8 +66,8 @@ namespace hid
 
 	public:
 		std::wstring path;
-		std::wstring instance_id;
-		std::wstring serial_string;
+		std::wstring instanceId;
+		std::wstring serialString;
 		std::vector<uint8_t> serial;
 
 		std::vector<uint8_t> input_buffer;
@@ -99,27 +76,27 @@ namespace hid
 		HidInstance(const HidInstance&) = delete;
 		HidInstance& operator=(const HidInstance&) = delete;
 
-		HidInstance(const std::wstring& path, const std::wstring& instance_id, bool read_info);
-		HidInstance(const std::wstring& path, bool read_info);
+		HidInstance(std::wstring path, std::wstring instanceId, bool readInfo);
+		HidInstance(std::wstring path, bool readInfo);
 		HidInstance(HidInstance&& other) noexcept;
 
 		~HidInstance();
 
 		HidInstance& operator=(HidInstance&& other) noexcept;
 
-		bool is_open() const;
-		bool is_exclusive() const;
-		bool is_async() const;
-		bool pending_read() const;
-		bool pending_write() const;
+		bool isOpen() const;
+		bool isExclusive() const;
+		bool isAsync() const;
+		bool readPending() const;
+		bool writePending() const;
 		const HidCaps& caps() const;
 		const HidAttributes& attributes() const;
 
-		void read_metadata();
-		void get_caps();
-		bool get_serial();
-		bool get_attributes();
-		bool get_feature(const gsl::span<uint8_t>& buffer) const;
+		void readMetadata();
+		void readCaps();
+		bool readSerial();
+		bool readAttributes();
+		bool getFeature(const gsl::span<uint8_t>& buffer) const;
 
 		bool open(HidOpenFlags_t flags);
 		void close();
@@ -144,9 +121,8 @@ namespace hid
 		bool set_output_report();
 
 	private:
-		void get_caps(HANDLE h);
-		bool get_serial(HANDLE h);
-		bool get_attributes(HANDLE h);
+		void readCaps(HANDLE h);
+		bool readSerial(HANDLE h);
+		bool readAttributes(HANDLE h);
 	};
-
 }

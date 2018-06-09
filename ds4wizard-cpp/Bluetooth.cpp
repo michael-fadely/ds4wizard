@@ -3,7 +3,7 @@
 #include <winioctl.h>
 #include <BluetoothAPIs.h>
 #include <Bthioctl.h>
-#include <hid_instance.h>
+#include <handle.h>
 
 bool Bluetooth::disconnectDevice(const gsl::span<uint8_t>& macAddress)
 {
@@ -19,7 +19,7 @@ bool Bluetooth::disconnectDevice(const gsl::span<uint8_t>& macAddress)
 	BLUETOOTH_FIND_RADIO_PARAMS findParams {};
 	findParams.dwSize = sizeof(BLUETOOTH_FIND_RADIO_PARAMS);
 
-	hid::Handle phRadio(nullptr, true);
+	Handle phRadio(nullptr, true);
 
 	auto hFind = BluetoothFindFirstRadio(&findParams, &phRadio.nativeHandle);
 	DWORD _;
