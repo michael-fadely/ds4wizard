@@ -10,19 +10,19 @@
 class Ds4Input
 {
 public:
-	Ds4Buttons_t HeldButtons = 0; // TODO: private set
-	Ds4Buttons_t PressedButtons = 0; // TODO: private set
-	Ds4Buttons_t ReleasedButtons = 0; // TODO: private set
+	Ds4Buttons_t heldButtons = 0; // TODO: private set
+	Ds4Buttons_t pressedButtons = 0; // TODO: private set
+	Ds4Buttons_t releasedButtons = 0; // TODO: private set
 
 private:
-	Ds4Buttons_t LastHeldButtons = 0;
+	Ds4Buttons_t lastHeldButtons = 0;
 
 public:
-	bool ButtonsChanged = false; // TODO: private set
-	bool TouchChanged = false; // TODO: private set
+	bool buttonsChanged = false; // TODO: private set
+	bool touchChanged = false; // TODO: private set
 
-	Ds4InputData Data {};
-	XInputGamepad Gamepad {};
+	Ds4InputData data {};
+	XInputGamepad gamepad {};
 
 private:
 	XInputGamepad lastGamepad {};
@@ -31,8 +31,8 @@ private:
 	void addButton(bool pressed, Ds4Buttons_t buttons);
 
 public:
-	void Update(const gsl::span<uint8_t>& buffer, int i);
-	void UpdateChangedState();
-	void ToXInput(int index, std::unique_ptr<ScpDevice>& device);
-	float GetAxis(Ds4Axis_t axis, std::optional<AxisPolarity> polarity) const;
+	void update(const gsl::span<uint8_t>& buffer, int i);
+	void updateChangedState();
+	void toXInput(int index, std::unique_ptr<ScpDevice>& device);
+	float getAxis(Ds4Axis_t axis, std::optional<AxisPolarity> polarity) const;
 };

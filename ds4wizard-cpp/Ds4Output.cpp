@@ -2,7 +2,7 @@
 #include "ScpDevice.h"
 #include "Ds4Output.h"
 
-bool Ds4Output::Update(const gsl::span<uint8_t>& buffer, int n) const
+bool Ds4Output::update(const gsl::span<uint8_t>& buffer, int n) const
 {
 	int i = n;
 
@@ -44,7 +44,7 @@ bool Ds4Output::Update(const gsl::span<uint8_t>& buffer, int n) const
 	return result;
 }
 
-void Ds4Output::FromXInput(int index, std::unique_ptr<ScpDevice>& device)
+void Ds4Output::fromXInput(int index, std::unique_ptr<ScpDevice>& device)
 {
-	device->GetVibration(index, leftMotor, rightMotor);
+	device->getVibration(index, leftMotor, rightMotor);
 }

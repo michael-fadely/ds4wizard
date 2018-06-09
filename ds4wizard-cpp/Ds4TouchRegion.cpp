@@ -3,41 +3,41 @@
 
 Ds4TouchRegion::Ds4TouchRegion(Ds4TouchRegionType type, short left, short top, short right, short bottom, bool allowCrossOver)
 {
-	Type           = type;
-	AllowCrossOver = allowCrossOver;
-	Left           = left;
-	Top            = top;
-	Right          = right;
-	Bottom         = bottom;
+	this->type           = type;
+	this->allowCrossOver = allowCrossOver;
+	this->left           = left;
+	this->top            = top;
+	this->right          = right;
+	this->bottom         = bottom;
 }
 
 Ds4TouchRegion::Ds4TouchRegion(const Ds4TouchRegion& other)
 {
-	Type             = other.Type;
-	AllowCrossOver   = other.AllowCrossOver;
-	Left             = other.Left;
-	Top              = other.Top;
-	Right            = other.Right;
-	Bottom           = other.Bottom;
-	TouchAxisOptions = other.TouchAxisOptions;
+	type             = other.type;
+	allowCrossOver   = other.allowCrossOver;
+	left             = other.left;
+	top              = other.top;
+	right            = other.right;
+	bottom           = other.bottom;
+	touchAxisOptions = other.touchAxisOptions;
 }
 
-bool Ds4TouchRegion::IsInRegion(Ds4Buttons_t sender, const Ds4Vector2& point) const
+bool Ds4TouchRegion::isInRegion(Ds4Buttons_t sender, const Ds4Vector2& point) const
 {
-	return IsInRegion(sender, point.x, point.y);
+	return isInRegion(sender, point.x, point.y);
 }
 
-bool Ds4TouchRegion::IsInRegion(Ds4Buttons_t sender, short x, short y) const
+bool Ds4TouchRegion::isInRegion(Ds4Buttons_t sender, short x, short y) const
 {
-	if (x >= Left && x <= Right && y >= Top && y <= Bottom)
+	if (x >= left && x <= right && y >= top && y <= bottom)
 	{
 		return true;
 	}
 
-	return !AllowCrossOver && IsActive(sender);
+	return !allowCrossOver && isActive(sender);
 }
 
-Ds4Vector2 Ds4TouchRegion::GetStartPoint(Ds4Buttons_t sender) const
+Ds4Vector2 Ds4TouchRegion::getStartPoint(Ds4Buttons_t sender) const
 {
 	if ((sender & Ds4Buttons::touch1) != 0)
 	{
@@ -52,29 +52,29 @@ Ds4Vector2 Ds4TouchRegion::GetStartPoint(Ds4Buttons_t sender) const
 	return {};
 }
 
-bool Ds4TouchRegion::IsActive(Ds4Buttons_t sender) const
+bool Ds4TouchRegion::isActive(Ds4Buttons_t sender) const
 {
-	return (Active & sender) != 0;
+	return (activeButtons & sender) != 0;
 }
 
-void Ds4TouchRegion::SetActive(Ds4Buttons_t sender, const Ds4Vector2& point)
+void Ds4TouchRegion::setActive(Ds4Buttons_t sender, const Ds4Vector2& point)
 {
 	if ((sender & Ds4Buttons::touch1) != 0)
 	{
-		State1.Press();
+		state1.press();
 	}
 
 	if ((sender & Ds4Buttons::touch2) != 0)
 	{
-		State2.Press();
+		state2.press();
 	}
 
-	if (IsActive(sender))
+	if (isActive(sender))
 	{
 		return;
 	}
 
-	Active |= sender;
+	activeButtons |= sender;
 
 	if ((sender & Ds4Buttons::touch1) != 0)
 	{
@@ -86,33 +86,33 @@ void Ds4TouchRegion::SetActive(Ds4Buttons_t sender, const Ds4Vector2& point)
 	}
 }
 
-void Ds4TouchRegion::SetInactive(Ds4Buttons_t sender)
+void Ds4TouchRegion::setInactive(Ds4Buttons_t sender)
 {
-	Active &= ~sender;
+	activeButtons &= ~sender;
 
 	if ((sender & Ds4Buttons::touch1) != 0)
 	{
-		State1.Release();
+		state1.release();
 	}
 
 	if ((sender & Ds4Buttons::touch2) != 0)
 	{
-		State2.Release();
+		state2.release();
 	}
 }
 
-float Ds4TouchRegion::GetTouchDelta(Ds4Buttons_t sender, Direction_t direction, const Ds4Vector2& point) const
+float Ds4TouchRegion::getTouchDelta(Ds4Buttons_t sender, Direction_t direction, const Ds4Vector2& point) const
 {
-	short x = std::clamp(point.x, Left, Right);
-	short y = std::clamp(point.y, Top, Bottom);
+	short x = std::clamp(point.x, left, right);
+	short y = std::clamp(point.y, top, bottom);
 	float result;
 
-	if (Type == +Ds4TouchRegionType::stickAutoCenter)
+	if (type == +Ds4TouchRegionType::stickAutoCenter)
 	{
-		Ds4Vector2 start = GetStartPoint(sender);
+		Ds4Vector2 start = getStartPoint(sender);
 
-		int width  = std::max(start.x - Left, Right - start.x);
-		int height = std::max(start.y - Top, Bottom - start.y);
+		int width  = std::max(start.x - left, right - start.x);
+		int height = std::max(start.y - top, bottom - start.y);
 
 		short sx = start.x;
 		short sy = start.y;
@@ -137,11 +137,11 @@ float Ds4TouchRegion::GetTouchDelta(Ds4Buttons_t sender, Direction_t direction, 
 	}
 	else
 	{
-		x -= Left;
-		y -= Top;
+		x -= left;
+		y -= top;
 
-		int width  = Right - Left;
-		int height = Bottom - Top;
+		int width  = right - left;
+		int height = bottom - top;
 
 		int cx = width / 2;
 		int cy = height / 2;
@@ -172,25 +172,25 @@ float Ds4TouchRegion::GetTouchDelta(Ds4Buttons_t sender, Direction_t direction, 
 	return result;
 }
 
-float Ds4TouchRegion::GetDeadZone(Direction_t direction)
+float Ds4TouchRegion::getDeadZone(Direction_t direction)
 {
-	return TouchAxisOptions[direction].deadZone.value_or(0.0f);
+	return touchAxisOptions[direction].deadZone.value_or(0.0f);
 }
 
-void Ds4TouchRegion::ApplyDeadZone(Direction_t direction, float& analog)
+void Ds4TouchRegion::applyDeadZone(Direction_t direction, float& analog)
 {
-	InputAxisOptions options = TouchAxisOptions[direction];
-	options.ApplyDeadZone(analog);
+	InputAxisOptions options = touchAxisOptions[direction];
+	options.applyDeadZone(analog);
 }
 
 bool Ds4TouchRegion::operator==(const Ds4TouchRegion& other) const
 {
-	return AllowCrossOver == other.AllowCrossOver
-	       && Left == other.Left
-	       && Top == other.Top
-	       && Right == other.Right
-	       && Bottom == other.Bottom
-	       && TouchAxisOptions == other.TouchAxisOptions;
+	return allowCrossOver == other.allowCrossOver
+	       && left == other.left
+	       && top == other.top
+	       && right == other.right
+	       && bottom == other.bottom
+	       && touchAxisOptions == other.touchAxisOptions;
 }
 
 bool Ds4TouchRegion::operator!=(const Ds4TouchRegion& other) const
@@ -200,12 +200,12 @@ bool Ds4TouchRegion::operator!=(const Ds4TouchRegion& other) const
 
 void Ds4TouchRegion::readJson(const QJsonObject& json)
 {
-	Type           = Ds4TouchRegionType::_from_string(json["type"].toString().toStdString().c_str());
-	AllowCrossOver = json["allowCrossOver"].toBool();
-	Left           = json["left"].toInt();
-	Top            = json["top"].toInt();
-	Right          = json["right"].toInt();
-	Bottom         = json["bottom"].toInt();
+	type           = Ds4TouchRegionType::_from_string(json["type"].toString().toStdString().c_str());
+	allowCrossOver = json["allowCrossOver"].toBool();
+	left           = json["left"].toInt();
+	top            = json["top"].toInt();
+	right          = json["right"].toInt();
+	bottom         = json["bottom"].toInt();
 
 	auto touchAxisOptions_ = json["touchAxisOptions"].toObject();
 
@@ -216,22 +216,22 @@ void Ds4TouchRegion::readJson(const QJsonObject& json)
 		Direction_t value;
 		ENUM_DESERIALIZE_FLAGS(Direction)(stdstr, value);
 
-		TouchAxisOptions[value] = fromJson<InputAxisOptions>(touchAxisOptions_[key].toObject());
+		touchAxisOptions[value] = fromJson<InputAxisOptions>(touchAxisOptions_[key].toObject());
 	}
 }
 
 void Ds4TouchRegion::writeJson(QJsonObject& json) const
 {
-	json["type"]           = Type._to_string();
-	json["allowCrossOver"] = AllowCrossOver;
-	json["left"]           = Left;
-	json["top"]            = Top;
-	json["right"]          = Right;
-	json["bottom"]         = Bottom;
+	json["type"]           = type._to_string();
+	json["allowCrossOver"] = allowCrossOver;
+	json["left"]           = left;
+	json["top"]            = top;
+	json["right"]          = right;
+	json["bottom"]         = bottom;
 
 	QJsonObject touchAxisOptions_;
 
-	for (const auto& pair : TouchAxisOptions)
+	for (const auto& pair : touchAxisOptions)
 	{
 		touchAxisOptions_[ENUM_SERIALIZE_FLAGS(Direction)(pair.first).c_str()] = pair.second.toJson();
 	}

@@ -26,7 +26,7 @@ ScpDevice::ScpDevice(hid::Handle&& handle)
 	this->handle = std::move(handle);
 
 	uint64_t version;
-	if (GetDriverVersion(version) != 0)
+	if (getDriverVersion(version) != 0)
 	{
 		return;
 	}
@@ -37,7 +37,12 @@ ScpDevice::ScpDevice(hid::Handle&& handle)
 	driverVersion[3] = static_cast<short>(version & 0xFFFF);
 }
 
-int ScpDevice::GetDriverVersion(uint64_t& version)
+ScpDevice::~ScpDevice()
+{
+	close();
+}
+
+int ScpDevice::getDriverVersion(uint64_t& version)
 {
 	version = 0;
 
@@ -89,12 +94,12 @@ int ScpDevice::GetDriverVersion(uint64_t& version)
 	return 0;
 }
 
-void ScpDevice::Close()
+void ScpDevice::close()
 {
 	handle.close();
 }
 
-bool ScpDevice::Connect(int userIndex)
+bool ScpDevice::connect(int userIndex)
 {
 	if (userIndex < 0 || userIndex > 3)
 	{
@@ -119,7 +124,7 @@ bool ScpDevice::Connect(int userIndex)
 	return result;
 }
 
-bool ScpDevice::Disconnect(int userIndex, bool force)
+bool ScpDevice::disconnect(int userIndex, bool force)
 {
 	if (userIndex < -1 || userIndex > 3)
 	{
@@ -157,13 +162,13 @@ bool ScpDevice::Disconnect(int userIndex, bool force)
 	                       &buffer, buffer.Size, nullptr, 0, nullptr, nullptr);
 }
 
-VBusStatus ScpDevice::SyncState(int userIndex, const XInputGamepad& gamepad)
+VBusStatus ScpDevice::syncState(int userIndex, const XInputGamepad& gamepad)
 {
 	gamepads[userIndex] = gamepad;
-	return SyncState(userIndex);
+	return syncState(userIndex);
 }
 
-VBusStatus ScpDevice::SyncState(int userIndex)
+VBusStatus ScpDevice::syncState(int userIndex)
 {
 	const int busIndex = userIndex + 1;
 
@@ -213,12 +218,12 @@ VBusStatus ScpDevice::SyncState(int userIndex)
 	return readBuffer[9] == 0 ? VBusStatus::DeviceNotReady : VBusStatus::Success;
 }
 
-XInputGamepad ScpDevice::GetGamepad(int userIndex)
+XInputGamepad ScpDevice::getGamepad(int userIndex)
 {
 	return gamepads[userIndex];
 }
 
-void ScpDevice::GetVibration(int userIndex, uint8_t& leftMotor, uint8_t& rightMotor)
+void ScpDevice::getVibration(int userIndex, uint8_t& leftMotor, uint8_t& rightMotor)
 {
 	const ScpVibration& vib = vibration[userIndex];
 
@@ -226,7 +231,7 @@ void ScpDevice::GetVibration(int userIndex, uint8_t& leftMotor, uint8_t& rightMo
 	rightMotor = vib.rightMotor;
 }
 
-uint8_t ScpDevice::GetLed(int userIndex)
+uint8_t ScpDevice::getLed(int userIndex)
 {
 	return leds[userIndex];
 }

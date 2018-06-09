@@ -16,164 +16,164 @@
 
 using namespace std::chrono;
 
-bool Ds4Device::DisconnectOnIdle() const
+bool Ds4Device::disconnectOnIdle() const
 {
-	return Settings.UseProfileIdle ? Profile.Idle.Disconnect : Settings.Idle.Disconnect;
+	return settings.useProfileIdle ? profile.idle.disconnect : settings.idle.disconnect;
 }
 
-nanoseconds Ds4Device::IdleTimeout() const
+nanoseconds Ds4Device::idleTimeout() const
 {
-	return Settings.UseProfileIdle ? Profile.Idle.Timeout : Settings.Idle.Timeout;
+	return settings.useProfileIdle ? profile.idle.timeout : settings.idle.timeout;
 }
 
-bool Ds4Device::IsIdle() const
+bool Ds4Device::isIdle() const
 {
-	return idleTime.elapsed() >= IdleTimeout();
+	return idleTime.elapsed() >= idleTimeout();
 }
 
-bool Ds4Device::BluetoothConnected()
+bool Ds4Device::bluetoothConnected()
 {
 	lock(sync);
 	return bluetoothDevice != nullptr && bluetoothDevice->is_open();
 }
 
-bool Ds4Device::UsbConnected()
+bool Ds4Device::usbConnected()
 {
 	lock(sync);
 	return usbDevice != nullptr && usbDevice->is_open();
 }
 
-bool Ds4Device::Connected()
+bool Ds4Device::connected()
 {
-	return BluetoothConnected() || UsbConnected();
+	return bluetoothConnected() || usbConnected();
 }
 
-uint8_t Ds4Device::Battery() const
+uint8_t Ds4Device::battery() const
 {
-	return Input.Data.battery;
+	return input.data.battery;
 }
 
-bool Ds4Device::Charging() const
+bool Ds4Device::charging() const
 {
-	return Input.Data.charging;
+	return input.data.charging;
 }
 
-const std::string& Ds4Device::Name() const
+const std::string& Ds4Device::name() const
 {
-	return Settings.Name.empty() ? MacAddress : Settings.Name;
+	return settings.name.empty() ? macAddress : settings.name;
 }
 
 Ds4Device::Ds4Device(hid::HidInstance& device)
 {
-	std::stringstream macAddress;
+	std::stringstream macaddr;
 
-	macAddress << std::hex << std::uppercase << std::setw(2) << std::setfill('0')
+	macaddr << std::hex << std::uppercase << std::setw(2) << std::setfill('0')
 		<< static_cast<int>(device.serial[0]);
 
 	for (size_t i = 1; i < device.serial.size(); ++i)
 	{
-		macAddress << ':' << std::hex << std::uppercase << std::setw(2) << std::setfill('0')
+		macaddr << ':' << std::hex << std::uppercase << std::setw(2) << std::setfill('0')
 			<< static_cast<int>(device.serial[i]);
 	}
 
-	MacAddress = macAddress.str();
-	SafeMacAddress = MacAddress;
+	macAddress = macaddr.str();
+	safeMacAddress = macAddress;
 
-	SafeMacAddress.erase(std::remove(SafeMacAddress.begin(), SafeMacAddress.end(), ':'), SafeMacAddress.end());
-	std::transform(SafeMacAddress.begin(), SafeMacAddress.end(), SafeMacAddress.begin(), tolower);
+	safeMacAddress.erase(std::remove(safeMacAddress.begin(), safeMacAddress.end(), ':'), safeMacAddress.end());
+	std::transform(safeMacAddress.begin(), safeMacAddress.end(), safeMacAddress.begin(), tolower);
 
 	if (device.caps().input_report_size != 64)
 	{
 		bluetoothDevice = std::make_unique<hid::HidInstance>(std::move(device));
-		SetupBluetoothOutputBuffer();
+		setupBluetoothOutputBuffer();
 	}
 	else
 	{
 		usbDevice = std::make_unique<hid::HidInstance>(std::move(device));
-		SetupUsbOutputBuffer();
+		setupUsbOutputBuffer();
 	}
 
-	auto settings = Program::ProfileCache.GetSettings(MacAddress);
+	auto settings = Program::ProfileCache.getSettings(macAddress);
 	if (!settings.has_value())
 	{
-		Settings = {};
+		settings = {};
 	}
 	else
 	{
-		Settings = *settings;
+		settings = *settings;
 	}
 
-	ApplyProfile();
+	applyProfile();
 }
 
-void Ds4Device::SaveSettings()
+void Ds4Device::saveSettings()
 {
 	lock(sync);
-	Program::ProfileCache.SaveSettings(MacAddress, Settings);
+	Program::ProfileCache.saveSettings(macAddress, settings);
 }
 
-void Ds4Device::ApplyProfile()
+void Ds4Device::applyProfile()
 {
 	lock(sync);
-	ReleaseAutoColor();
+	releaseAutoColor();
 
-	auto profile = Program::ProfileCache.GetProfile(Settings.Profile);
-	if (!profile.has_value())
+	auto cachedProfile = Program::ProfileCache.getProfile(settings.profile);
+	if (!cachedProfile.has_value())
 	{
-		Settings.Profile = {};
-		Profile = DeviceProfile::Default();
+		settings.profile = {};
+		profile = DeviceProfile::defaultProfile();
 	}
 	else
 	{
-		Profile = *profile;
+		profile = *cachedProfile;
 	}
 
 	touchRegions.clear();
 
-	for (auto& pair : Profile.TouchRegions)
+	for (auto& pair : profile.touchRegions)
 	{
 		touchRegions.push_back(&pair.second);
 	}
 
-	if (Profile.UseXInput)
+	if (profile.useXInput)
 	{
-		if (!ScpDeviceOpen())
+		if (!scpDeviceOpen())
 		{
-			ScpDeviceClose();
+			scpDeviceClose();
 		}
 	}
 	else
 	{
-		ScpDeviceClose();
+		scpDeviceClose();
 	}
 
-	Ds4LightOptions l = Settings.UseProfileLight ? Profile.Light : Settings.Light;
+	Ds4LightOptions l = settings.useProfileLight ? profile.light : settings.light;
 
-	if (l.AutomaticColor)
+	if (l.automaticColor)
 	{
-		l.Color = Ds4AutoLightColor::GetColor(colorIndex);
+		l.color = Ds4AutoLightColor::getColor(colorIndex);
 	}
 
 	activeLight = Ds4LightOptions(l);
 
-	if (usbDevice != nullptr && (!UsbConnected() || usbDevice->is_exclusive() != Profile.ExclusiveMode))
+	if (usbDevice != nullptr && (!usbConnected() || usbDevice->is_exclusive() != profile.exclusiveMode))
 	{
-		CloseUsbDevice();
+		closeUsbDevice();
 		hid::HidInstance inst = std::move(*usbDevice);
-		OpenUsbDevice(inst);
+		openUsbDevice(inst);
 	}
 
-	if (bluetoothDevice != nullptr && (!BluetoothConnected() || bluetoothDevice->is_exclusive() != Profile.ExclusiveMode))
+	if (bluetoothDevice != nullptr && (!bluetoothConnected() || bluetoothDevice->is_exclusive() != profile.exclusiveMode))
 	{
-		CloseBluetoothDevice();
+		closeBluetoothDevice();
 		hid::HidInstance inst = std::move(*bluetoothDevice);
-		OpenBluetoothDevice(inst);
+		openBluetoothDevice(inst);
 	}
 
 	idleTime.start();
 }
 
-bool Ds4Device::ScpDeviceOpen()
+bool Ds4Device::scpDeviceOpen()
 {
 	if (scpDevice != nullptr)
 	{
@@ -181,7 +181,7 @@ bool Ds4Device::ScpDeviceOpen()
 	}
 
 	// TODO: detect toggle of auto index and disconnect/reconnect the device
-	int index = Profile.AutoXInputIndex ? ScpDevice::GetFreePort() : Profile.XInputIndex;
+	int index = profile.autoXInputIndex ? ScpDevice::GetFreePort() : profile.xinputIndex;
 
 	if (index < 0)
 	{
@@ -213,7 +213,7 @@ bool Ds4Device::ScpDeviceOpen()
 
 	scpDevice = std::make_unique<ScpDevice>(std::move(handle));
 
-	if (scpDevice->Connect(index))
+	if (scpDevice->connect(index))
 	{
 		realXInputIndex = index;
 		return true;
@@ -222,14 +222,14 @@ bool Ds4Device::ScpDeviceOpen()
 	// If connecting an emulated XInput controller failed,
 	// it's likely because it's already connected. Disconnect
 	// it before continuing.
-	scpDevice->Disconnect(index);
+	scpDevice->disconnect(index);
 
 	bool ok = false;
 
 	// Try up to 4 times to recover the virtual controller.
 	for (size_t i = 0; i < 4; i++)
 	{
-		ok = scpDevice->Connect(index);
+		ok = scpDevice->connect(index);
 
 		if (ok)
 		{
@@ -250,7 +250,7 @@ bool Ds4Device::ScpDeviceOpen()
 	return true;
 }
 
-void Ds4Device::ScpDeviceClose()
+void Ds4Device::scpDeviceClose()
 {
 	lock(sync);
 
@@ -261,36 +261,36 @@ void Ds4Device::ScpDeviceClose()
 
 	if (realXInputIndex >= 0)
 	{
-		scpDevice->Disconnect(realXInputIndex);
+		scpDevice->disconnect(realXInputIndex);
 	}
 
-	scpDevice->Close();
+	scpDevice->close();
 	scpDevice = nullptr;
 }
 
-void Ds4Device::ReleaseAutoColor()
+void Ds4Device::releaseAutoColor()
 {
 	lock(sync);
-	Ds4AutoLightColor::ReleaseColor(colorIndex);
+	Ds4AutoLightColor::releaseColor(colorIndex);
 	colorIndex = -1;
 }
 
 void Ds4Device::OnProfileChanged(const std::string& newName)
 {
 	lock(sync);
-	Settings.Profile = newName.empty() ? std::string() : newName;
-	SaveSettings();
-	ApplyProfile();
+	settings.profile = newName.empty() ? std::string() : newName;
+	saveSettings();
+	applyProfile();
 }
 
 Ds4Device::~Ds4Device()
 {
-	Close();
+	close();
 }
 
 void Ds4Device::closeImpl()
 {
-	if (!Connected())
+	if (!connected())
 	{
 		return;
 	}
@@ -298,16 +298,16 @@ void Ds4Device::closeImpl()
 	{
 		lock(sync);
 
-		CloseUsbDevice();
-		CloseBluetoothDevice();
-		ScpDeviceClose();
-		ReleaseAutoColor();
+		closeUsbDevice();
+		closeBluetoothDevice();
+		scpDeviceClose();
+		releaseAutoColor();
 	}
 
 	OnDeviceClosed();
 }
 
-void Ds4Device::Close()
+void Ds4Device::close()
 {
 	if (!deviceThread)
 	{
@@ -320,7 +320,7 @@ void Ds4Device::Close()
 	deviceThread = nullptr;
 }
 
-void Ds4Device::CloseBluetoothDevice()
+void Ds4Device::closeBluetoothDevice()
 {
 	lock(sync);
 
@@ -332,9 +332,9 @@ void Ds4Device::CloseBluetoothDevice()
 	idleTime.start();
 }
 
-void Ds4Device::DisconnectBluetooth()
+void Ds4Device::disconnectBluetooth()
 {
-	if (!BluetoothConnected())
+	if (!bluetoothConnected())
 	{
 		return;
 	}
@@ -344,10 +344,10 @@ void Ds4Device::DisconnectBluetooth()
 		std::this_thread::sleep_for(125ms);
 	}
 
-	CloseBluetoothDevice();
+	closeBluetoothDevice();
 }
 
-void Ds4Device::CloseUsbDevice()
+void Ds4Device::closeUsbDevice()
 {
 	lock(sync);
 
@@ -359,7 +359,7 @@ void Ds4Device::CloseUsbDevice()
 	idleTime.start();
 }
 
-bool Ds4Device::OpenDevice(hid::HidInstance& device, bool exclusive)
+bool Ds4Device::openDevice(hid::HidInstance& device, bool exclusive)
 {
 	if (device.open((exclusive ? hid::HidOpenFlags::exclusive : 0) | hid::HidOpenFlags::async))
 	{
@@ -369,22 +369,22 @@ bool Ds4Device::OpenDevice(hid::HidInstance& device, bool exclusive)
 	return exclusive && device.open(hid::HidOpenFlags::async);
 }
 
-void Ds4Device::OpenBluetoothDevice(hid::HidInstance& device)
+void Ds4Device::openBluetoothDevice(hid::HidInstance& device)
 {
 	lock(sync);
 	{
-		if (BluetoothConnected())
+		if (bluetoothConnected())
 		{
 			return;
 		}
 
-		if (!OpenDevice(device, Profile.ExclusiveMode))
+		if (!openDevice(device, profile.exclusiveMode))
 		{
 			// TODO
 			return;
 		}
 
-		if (Profile.ExclusiveMode && !device.is_exclusive())
+		if (profile.exclusiveMode && !device.is_exclusive())
 		{
 			// TODO: Logger.WriteLine(LogLevel.Warning, Name, Resources.BluetoothExclusiveOpenFailed);
 		}
@@ -405,27 +405,27 @@ void Ds4Device::OpenBluetoothDevice(hid::HidInstance& device)
 			// success
 		}
 
-		SetupBluetoothOutputBuffer();
+		setupBluetoothOutputBuffer();
 		idleTime.start();
 	}
 }
 
-void Ds4Device::OpenUsbDevice(hid::HidInstance& device)
+void Ds4Device::openUsbDevice(hid::HidInstance& device)
 {
 	lock(sync);
 	{
-		if (UsbConnected())
+		if (usbConnected())
 		{
 			return;
 		}
 
-		if (!OpenDevice(device, Profile.ExclusiveMode))
+		if (!openDevice(device, profile.exclusiveMode))
 		{
 			// TODO
 			return;
 		}
 
-		if (Profile.ExclusiveMode && !device.is_exclusive())
+		if (profile.exclusiveMode && !device.is_exclusive())
 		{
 			// TODO: Logger.WriteLine(LogLevel.Warning, Name, Resources.UsbExclusiveOpenFailed);
 		}
@@ -435,37 +435,37 @@ void Ds4Device::OpenUsbDevice(hid::HidInstance& device)
 		}
 
 		usbDevice = std::make_unique<hid::HidInstance>(std::move(device));
-		SetupUsbOutputBuffer();
+		setupUsbOutputBuffer();
 	}
 }
 
-void Ds4Device::SetupBluetoothOutputBuffer() const
+void Ds4Device::setupBluetoothOutputBuffer() const
 {
 	bluetoothDevice->output_buffer[0] = 0x11;
 	bluetoothDevice->output_buffer[1] = 0x80; // For HID + CRC, use 0xC0.
 	bluetoothDevice->output_buffer[3] = 0x0F;
 }
 
-void Ds4Device::SetupUsbOutputBuffer() const
+void Ds4Device::setupUsbOutputBuffer() const
 {
 	usbDevice->output_buffer[0] = 0x05;
 	usbDevice->output_buffer[1] = 0xFF;
 }
 
-void Ds4Device::WriteUsbAsync()
+void Ds4Device::writeUsbAsync()
 {
 	if (usbDevice->pending_write())
 	{
 		return;
 	}
 
-	if (Profile.UseXInput && scpDevice != nullptr)
+	if (profile.useXInput && scpDevice != nullptr)
 	{
-		scpDevice->SyncState(realXInputIndex);
-		Output.FromXInput(realXInputIndex, scpDevice);
+		scpDevice->syncState(realXInputIndex);
+		output.fromXInput(realXInputIndex, scpDevice);
 	}
 
-	if (!Output.Update(usbDevice->output_buffer, 4))
+	if (!output.update(usbDevice->output_buffer, 4))
 	{
 		return;
 	}
@@ -473,32 +473,32 @@ void Ds4Device::WriteUsbAsync()
 	usbDevice->writeAsync();
 }
 
-void Ds4Device::WriteBluetooth()
+void Ds4Device::writeBluetooth()
 {
-	if (Profile.UseXInput && scpDevice != nullptr)
+	if (profile.useXInput && scpDevice != nullptr)
 	{
-		scpDevice->SyncState(realXInputIndex);
-		Output.FromXInput(realXInputIndex, scpDevice);
+		scpDevice->syncState(realXInputIndex);
+		output.fromXInput(realXInputIndex, scpDevice);
 	}
 
-	if (!Output.Update(bluetoothDevice->output_buffer, 6))
+	if (!output.update(bluetoothDevice->output_buffer, 6))
 	{
 		return;
 	}
 
 	if (!bluetoothDevice->set_output_report())
 	{
-		CloseBluetoothDevice();
+		closeBluetoothDevice();
 	}
 }
 
-void Ds4Device::Run()
+void Ds4Device::run()
 {
 	deltaTime = static_cast<float>(duration_cast<milliseconds>(deltaStopwatch.elapsed()).count());
 	deltaStopwatch.start();
 
 	// HACK: make this class manage the light state
-	Output.lightColor = activeLight.Color;
+	output.lightColor = activeLight.color;
 
 	// HACK: see above
 	/*if (activeLight.IdleFade)
@@ -509,88 +509,88 @@ void Ds4Device::Run()
 		Output.LightColor = Ds4Color::Lerp(l.Color, fadeColor, static_cast<float>(m));
 	}*/
 
-	const bool charging = Charging();
-	const uint8_t battery = Battery();
+	const bool charging_ = charging();
+	const uint8_t battery_ = battery();
 
 	// cache
-	const bool usb = UsbConnected();
-	const bool bluetooth = BluetoothConnected();
+	const bool usb = usbConnected();
+	const bool bluetooth = bluetoothConnected();
 
 	const ConnectionType preferredConnection = Program::settings.preferredConnection;
 	const bool useUsb = usb && (preferredConnection == +ConnectionType::usb || !bluetooth);
 	const bool useBluetooth = bluetooth && (preferredConnection == +ConnectionType::bluetooth|| !usb);
 
-	DataReceived = false;
+	dataReceived = false;
 
 	if (useUsb)
 	{
-		WriteUsbAsync();
+		writeUsbAsync();
 
 		if (usbDevice->readAsync())
 		{
-			DataReceived = true;
-			Input.Update(usbDevice->input_buffer, 1);
+			dataReceived = true;
+			input.update(usbDevice->input_buffer, 1);
 		}
 
 		// If the controller gets disconnected from USB while idle,
 		// reset the idle timer so that it doesn't get immediately
 		// disconnected from bluetooth (if connected).
-		if (!UsbConnected())
+		if (!usbConnected())
 		{
 			idleTime.start();
 		}
 	}
 	else if (useBluetooth)
 	{
-		WriteBluetooth();
+		writeBluetooth();
 
 		if (bluetoothDevice->readAsync() && bluetoothDevice->input_buffer[0] == 0x11)
 		{
-			DataReceived = true;
-			Input.Update(bluetoothDevice->input_buffer, 3);
+			dataReceived = true;
+			input.update(bluetoothDevice->input_buffer, 3);
 		}
 	}
 
-	const float lx = Input.GetAxis(Ds4Axis::leftStickX, std::nullopt);
-	const float ly = Input.GetAxis(Ds4Axis::leftStickY, std::nullopt);
+	const float lx = input.getAxis(Ds4Axis::leftStickX, std::nullopt);
+	const float ly = input.getAxis(Ds4Axis::leftStickY, std::nullopt);
 	const auto  ls = static_cast<float>(std::sqrt(lx * lx + ly * ly));
 
-	const float rx = Input.GetAxis(Ds4Axis::rightStickX, std::nullopt);
-	const float ry = Input.GetAxis(Ds4Axis::rightStickY, std::nullopt);
+	const float rx = input.getAxis(Ds4Axis::rightStickX, std::nullopt);
+	const float ry = input.getAxis(Ds4Axis::rightStickY, std::nullopt);
 	const auto  rs = static_cast<float>(std::sqrt(rx * rx + ry * ry));
 
 	// TODO: gyro/accel
-	if (Input.ButtonsChanged || Input.HeldButtons != 0
+	if (input.buttonsChanged || input.heldButtons != 0
 	    || ls >= 0.25f || rs >= 0.25f)
 	{
 		idleTime.start();
 	}
-	else if (DisconnectOnIdle() && useBluetooth && IsIdle())
+	else if (disconnectOnIdle() && useBluetooth && isIdle())
 	{
-		DisconnectBluetooth();
+		disconnectBluetooth();
 		// TODO: Logger.WriteLine(LogLevel.Info, Name, std::string.Format(Resources.IdleDisconnect, IdleTimeout));
 	}
 
-	if (DataReceived)
+	if (dataReceived)
 	{
-		 RunMaps();
+		 runMaps();
 
-		if (Latency.elapsed() >= 5ms)
+		if (latency.elapsed() >= 5ms)
 		{
 			// TODO: configurable latency target & light flash (although that increases latency on send)
 			// TODO: Debug.WriteLine($"{Latency.Elapsed.TotalMilliseconds} ms");
 		}
 
-		Latency.start();
+		latency.start();
 
-		if (Profile.UseXInput)
+		if (profile.useXInput)
 		{
-			Input.ToXInput(realXInputIndex, scpDevice);
+			input.toXInput(realXInputIndex, scpDevice);
 		}
 
-		if (charging != Charging() || battery != Battery())
+		if (charging_ != charging() || battery_ != battery())
 		{
-			Settings.DisplayNotifications(this);
+			settings.displayNotifications(this);
 			OnBatteryLevelChanged();
 		}
 
@@ -625,22 +625,22 @@ void Ds4Device::Run()
 	}
 	else
 	{
-		Input.UpdateChangedState();
-		RunPersistent();
+		input.updateChangedState();
+		runPersistent();
 		std::this_thread::sleep_for(1ms);
 	}
 }
 
-void Ds4Device::ControllerThread()
+void Ds4Device::controllerThread()
 {
-	Latency.start();
+	latency.start();
 	idleTime.start();
 	deltaStopwatch.start();
 
-	while (Connected() && running)
+	while (connected() && running)
 	{
 		lock(sync);
-		Run();
+		run();
 	}
 
 	closeImpl();
@@ -651,12 +651,12 @@ void Ds4Device::OnDeviceClosed()
 	// TODO: DeviceClosed.Invoke(this, EventArgs.Empty);
 }
 
-void Ds4Device::Start()
+void Ds4Device::start()
 {
 	if (deviceThread == nullptr)
 	{
 		running = true;
-		deviceThread = std::make_unique<std::thread>(&Ds4Device::ControllerThread, this);
+		deviceThread = std::make_unique<std::thread>(&Ds4Device::controllerThread, this);
 	}
 }
 
@@ -665,9 +665,9 @@ void Ds4Device::OnBatteryLevelChanged()
 	// TODO: BatteryLevelChanged.Invoke(this, EventArgs.Empty);
 }
 
-void Ds4Device::SimulateXInputButton(XInputButtons_t buttons, PressedState state)
+void Ds4Device::simulateXInputButton(XInputButtons_t buttons, PressedState state)
 {
-	XInputButtons_t dest = Input.Gamepad.wButtons;
+	XInputButtons_t dest = input.gamepad.wButtons;
 
 	switch (state)
 	{
@@ -687,10 +687,10 @@ void Ds4Device::SimulateXInputButton(XInputButtons_t buttons, PressedState state
 			throw /* TODO new ArgumentOutOfRangeException(nameof(state), state, "Invalied pressed state.")*/;
 	}
 
-	Input.Gamepad.wButtons = dest;
+	input.gamepad.wButtons = dest;
 }
 
-void Ds4Device::SimulateXInputAxis(XInputAxes& axes, float m)
+void Ds4Device::simulateXInputAxis(XInputAxes& axes, float m)
 {
 	for (XInputAxis_t bit : XInputAxis_values)
 	{
@@ -699,13 +699,13 @@ void Ds4Device::SimulateXInputAxis(XInputAxes& axes, float m)
 			continue;
 		}
 
-		AxisOptions options = axes.GetAxisOptions(static_cast<XInputAxis::T>(bit));
+		AxisOptions options = axes.getAxisOptions(static_cast<XInputAxis::T>(bit));
 
 		const auto trigger = static_cast<uint8_t>(255.0f * m);
 
 		const auto axis = static_cast<short>(std::numeric_limits<short>::max() * m);
 
-		const short workAxis = options.Polarity.value_or(AxisPolarity::positive) == +AxisPolarity::negative
+		const short workAxis = options.polarity.value_or(AxisPolarity::positive) == +AxisPolarity::negative
 			                 ? static_cast<short>(-axis)
 			                 : axis;
 
@@ -715,49 +715,49 @@ void Ds4Device::SimulateXInputAxis(XInputAxes& axes, float m)
 		switch (bit)
 		{
 			case XInputAxis::leftStickX:
-				if (isFirst || axis > std::abs(Input.Gamepad.sThumbLX))
+				if (isFirst || axis > std::abs(input.gamepad.sThumbLX))
 				{
-					Input.Gamepad.sThumbLX = workAxis;
+					input.gamepad.sThumbLX = workAxis;
 				}
 
 				break;
 
 			case XInputAxis::leftStickY:
-				if (isFirst || axis > std::abs(Input.Gamepad.sThumbLY))
+				if (isFirst || axis > std::abs(input.gamepad.sThumbLY))
 				{
-					Input.Gamepad.sThumbLY = workAxis;
+					input.gamepad.sThumbLY = workAxis;
 				}
 
 				break;
 
 			case XInputAxis::rightStickX:
-				if (isFirst || axis > std::abs(Input.Gamepad.sThumbRX))
+				if (isFirst || axis > std::abs(input.gamepad.sThumbRX))
 				{
-					Input.Gamepad.sThumbRX = workAxis;
+					input.gamepad.sThumbRX = workAxis;
 				}
 
 				break;
 
 			case XInputAxis::rightStickY:
-				if (isFirst || axis > std::abs(Input.Gamepad.sThumbRY))
+				if (isFirst || axis > std::abs(input.gamepad.sThumbRY))
 				{
-					Input.Gamepad.sThumbRY = workAxis;
+					input.gamepad.sThumbRY = workAxis;
 				}
 
 				break;
 
 			case XInputAxis::leftTrigger:
-				if (isFirst || trigger > Input.Gamepad.bLeftTrigger)
+				if (isFirst || trigger > input.gamepad.bLeftTrigger)
 				{
-					Input.Gamepad.bLeftTrigger = trigger;
+					input.gamepad.bLeftTrigger = trigger;
 				}
 
 				break;
 
 			case XInputAxis::rightTrigger:
-				if (isFirst || trigger > Input.Gamepad.bRightTrigger)
+				if (isFirst || trigger > input.gamepad.bRightTrigger)
 				{
-					Input.Gamepad.bRightTrigger = trigger;
+					input.gamepad.bRightTrigger = trigger;
 				}
 
 				break;
@@ -768,9 +768,9 @@ void Ds4Device::SimulateXInputAxis(XInputAxes& axes, float m)
 	}
 }
 
-bool Ds4Device::IsOverriddenByModifierSet(InputMapBase& map)
+bool Ds4Device::isOverriddenByModifierSet(InputMapBase& map)
 {
-	if (Profile.Modifiers.empty())
+	if (profile.modifiers.empty())
 	{
 		return false;
 	}
@@ -785,14 +785,14 @@ bool Ds4Device::IsOverriddenByModifierSet(InputMapBase& map)
 
 	std::list<InputMap*> maps;
 
-	for (InputModifier& mod : Profile.Modifiers)
+	for (InputModifier& mod : profile.modifiers)
 	{
-		if (!mod.IsActive())
+		if (!mod.isActive())
 		{
 			continue;
 		}
 
-		for (InputMap& binding : mod.Bindings)
+		for (InputMap& binding : mod.bindings)
 		{
 			if (&binding != &map)
 			{
@@ -840,7 +840,7 @@ bool Ds4Device::IsOverriddenByModifierSet(InputMapBase& map)
 	return false;
 }
 
-void Ds4Device::RunMap(InputMap& m, InputModifier* modifier)
+void Ds4Device::runMap(InputMap& m, InputModifier* modifier)
 {
 	if (m.inputType == 0)
 	{
@@ -858,8 +858,8 @@ void Ds4Device::RunMap(InputMap& m, InputModifier* modifier)
 		{
 			case InputType::button:
 			{
-				PressedState state = m.SimulatedState();
-				ApplyMap(m, modifier, state, m.IsActive() && ((modifier && modifier->IsActive()) || m.isToggled) ? 1.0f : 0.0f);
+				PressedState state = m.simulatedState();
+				applyMap(m, modifier, state, m.isActive() && ((modifier && modifier->isActive()) || m.isToggled) ? 1.0f : 0.0f);
 				break;
 			}
 
@@ -877,13 +877,13 @@ void Ds4Device::RunMap(InputMap& m, InputModifier* modifier)
 						continue;
 					}
 
-					InputAxisOptions options = m.GetAxisOptions(bit);
+					InputAxisOptions options = m.getAxisOptions(bit);
 
-					float analog = Input.GetAxis(m.inputAxis.value(), options.Polarity);
-					options.ApplyDeadZone(analog);
+					float analog = input.getAxis(m.inputAxis.value(), options.polarity);
+					options.applyDeadZone(analog);
 
-					PressedState state = m.SimulatedState();
-					ApplyMap(m, modifier, state, analog);
+					PressedState state = m.simulatedState();
+					applyMap(m, modifier, state, analog);
 				}
 
 				break;
@@ -891,43 +891,43 @@ void Ds4Device::RunMap(InputMap& m, InputModifier* modifier)
 
 			case InputType::touchRegion:
 			{
-				Ds4TouchRegion region = Profile.TouchRegions[m.inputRegion];
+				Ds4TouchRegion region = profile.touchRegions[m.inputRegion];
 
-				if (region.Type == +Ds4TouchRegionType::button || !m.touchDirection.has_value() || m.touchDirection == Direction::none)
+				if (region.type == +Ds4TouchRegionType::button || !m.touchDirection.has_value() || m.touchDirection == Direction::none)
 				{
-					PressedState state = HandleTouchToggle(m, modifier, region.State1);
-					ApplyMap(m, modifier, state, Pressable::IsActiveState(state) ? 1.0f : 0.0f);
+					PressedState state = handleTouchToggle(m, modifier, region.state1);
+					applyMap(m, modifier, state, Pressable::isActiveState(state) ? 1.0f : 0.0f);
 
-					state = HandleTouchToggle(m, modifier, region.State2);
-					ApplyMap(m, modifier, state, Pressable::IsActiveState(state) ? 1.0f : 0.0f);
+					state = handleTouchToggle(m, modifier, region.state2);
+					applyMap(m, modifier, state, Pressable::isActiveState(state) ? 1.0f : 0.0f);
 				}
 				else
 				{
 					Direction_t direction = m.touchDirection.value();
 
-					float deadZone = region.GetDeadZone(direction);
+					float deadZone = region.getDeadZone(direction);
 
-					PressedState state = HandleTouchToggle(m, modifier, region.State1);
-					float analog = region.GetTouchDelta(Ds4Buttons::touch1, direction, Input.Data.touchPoint1);
-
-					if (analog < deadZone)
-					{
-						Pressable::Release(state);
-					}
-
-					region.ApplyDeadZone(direction, analog);
-					ApplyMap(m, modifier, state, analog);
-
-					state  = HandleTouchToggle(m, modifier, region.State2);
-					analog = region.GetTouchDelta(Ds4Buttons::touch2, direction, Input.Data.touchPoint2);
+					PressedState state = handleTouchToggle(m, modifier, region.state1);
+					float analog = region.getTouchDelta(Ds4Buttons::touch1, direction, input.data.touchPoint1);
 
 					if (analog < deadZone)
 					{
-						Pressable::Release(state);
+						Pressable::release(state);
 					}
 
-					region.ApplyDeadZone(direction, analog);
-					ApplyMap(m, modifier, state, analog);
+					region.applyDeadZone(direction, analog);
+					applyMap(m, modifier, state, analog);
+
+					state  = handleTouchToggle(m, modifier, region.state2);
+					analog = region.getTouchDelta(Ds4Buttons::touch2, direction, input.data.touchPoint2);
+
+					if (analog < deadZone)
+					{
+						Pressable::release(state);
+					}
+
+					region.applyDeadZone(direction, analog);
+					applyMap(m, modifier, state, analog);
 				}
 
 				return;
@@ -939,29 +939,29 @@ void Ds4Device::RunMap(InputMap& m, InputModifier* modifier)
 	}
 }
 
-PressedState Ds4Device::HandleTouchToggle(InputMap& m, InputModifier* modifier, const Pressable& pressable)
+PressedState Ds4Device::handleTouchToggle(InputMap& m, InputModifier* modifier, const Pressable& pressable)
 {
 	if (m.touchDirection != Direction::none)
 	{
-		return m.isToggled ? m.SimulatedState() : pressable.State;
+		return m.isToggled ? m.simulatedState() : pressable.pressedState;
 	}
 
 	if (m.rapidFire == true)
 	{
-		return m.SimulatedState();
+		return m.simulatedState();
 	}
 
-	PressedState state = (m.isToggled || (modifier && modifier->IsActive())) ? pressable.State : m.State;
+	PressedState state = (m.isToggled || (modifier && modifier->isActive())) ? pressable.pressedState : m.pressedState;
 
-	if (!Pressable::IsActiveState(state))
+	if (!Pressable::isActiveState(state))
 	{
-		state = m.SimulatedState();
+		state = m.simulatedState();
 	}
 
 	return state;
 }
 
-void Ds4Device::ApplyMap(InputMap& m, InputModifier* modifier, PressedState state, float analog)
+void Ds4Device::applyMap(InputMap& m, InputModifier* modifier, PressedState state, float analog)
 {
 #if true
 	switch (m.simulatorType)
@@ -972,23 +972,23 @@ void Ds4Device::ApplyMap(InputMap& m, InputModifier* modifier, PressedState stat
 				case OutputType::xinput:
 					if (m.xinputButtons.has_value())
 					{
-						SimulateXInputButton(m.xinputButtons.value(), state);
+						simulateXInputButton(m.xinputButtons.value(), state);
 					}
 
 					if (m.xinputAxes.has_value())
 					{
-						SimulateXInputAxis(m.xinputAxes.value(), analog);
+						simulateXInputAxis(m.xinputAxes.value(), analog);
 					}
 
 					break;
 
 				case OutputType::keyboard:
-					SimulateKeyboard(m, state);
+					simulateKeyboard(m, state);
 					break;
 
 					// TODO: AxisOptions thing for mouse
 				case OutputType::mouse:
-					SimulateMouse(m, state, analog);
+					simulateMouse(m, state, analog);
 					break;
 
 				default:
@@ -1003,9 +1003,9 @@ void Ds4Device::ApplyMap(InputMap& m, InputModifier* modifier, PressedState stat
 				throw /* TODO: new ArgumentNullException(nameof(m.action))*/;
 			}
 
-			if (m.IsActive() && (modifier && modifier->IsActive()))
+			if (m.isActive() && (modifier && modifier->isActive()))
 			{
-				RunAction(m.action.value());
+				runAction(m.action.value());
 			}
 
 			break;
@@ -1016,7 +1016,7 @@ void Ds4Device::ApplyMap(InputMap& m, InputModifier* modifier, PressedState stat
 #endif
 }
 
-void Ds4Device::SimulateMouse(const InputMap& m, PressedState state, float analog)
+void Ds4Device::simulateMouse(const InputMap& m, PressedState state, float analog)
 {
 	// TODO
 #if 0
@@ -1109,7 +1109,7 @@ void Ds4Device::SimulateMouse(const InputMap& m, PressedState state, float analo
 #endif
 }
 
-void Ds4Device::SimulateKeyboard(const InputMap& m, PressedState state)
+void Ds4Device::simulateKeyboard(const InputMap& m, PressedState state)
 {
 	// TODO
 #if 0
@@ -1151,14 +1151,14 @@ void Ds4Device::SimulateKeyboard(const InputMap& m, PressedState state)
 #endif
 }
 
-void Ds4Device::RunAction(ActionType action)
+void Ds4Device::runAction(ActionType action)
 {
 	switch (action)
 	{
 		case ActionType::bluetoothDisconnect:
-			if (BluetoothConnected())
+			if (bluetoothConnected())
 			{
-				DisconnectBluetooth();
+				disconnectBluetooth();
 				// TODO: Logger.WriteLine(LogLevel.Info, Name, Resources.BluetoothDisconnected);
 			}
 
@@ -1169,48 +1169,48 @@ void Ds4Device::RunAction(ActionType action)
 	}
 }
 
-void Ds4Device::RunMaps()
+void Ds4Device::runMaps()
 {
 	simulatedXInputAxis = 0;
 
-	for (InputModifier& modifier : Profile.Modifiers)
+	for (InputModifier& modifier : profile.modifiers)
 	{
-		UpdatePressedState(modifier);
+		updatePressedState(modifier);
 	}
 
-	if (Input.TouchChanged)
+	if (input.touchChanged)
 	{
-		UpdateTouchRegions();
+		updateTouchRegions();
 	}
 
-	for (InputMap& m : Profile.Bindings)
+	for (InputMap& m : profile.bindings)
 	{
-		UpdateBindingState(m, nullptr);
+		updateBindingState(m, nullptr);
 	}
 }
 
-void Ds4Device::RunPersistent()
+void Ds4Device::runPersistent()
 {
 	simulatedXInputAxis = 0;
 
-	for (InputModifier& modifier : Profile.Modifiers)
+	for (InputModifier& modifier : profile.modifiers)
 	{
-		if (modifier.IsPersistent())
+		if (modifier.isPersistent())
 		{
-			UpdatePressedState(modifier);
+			updatePressedState(modifier);
 		}
 	}
 
-	for (InputMap& m : Profile.Bindings)
+	for (InputMap& m : profile.bindings)
 	{
-		if (m.IsPersistent())
+		if (m.isPersistent())
 		{
-			UpdateBindingState(m, nullptr);
+			updateBindingState(m, nullptr);
 		}
 	}
 }
 
-void Ds4Device::UpdateTouchRegions()
+void Ds4Device::updateTouchRegions()
 {
 	Ds4Buttons_t disallow = 0;
 
@@ -1218,38 +1218,38 @@ void Ds4Device::UpdateTouchRegions()
 
 	std::sort(touchRegions.begin(), touchRegions.end(), [](const Ds4TouchRegion* a, const Ds4TouchRegion* b)
 	{
-		return (a->IsActive(touchMask) && !a->AllowCrossOver) && !(b->IsActive(touchMask) && !b->AllowCrossOver);
+		return (a->isActive(touchMask) && !a->allowCrossOver) && !(b->isActive(touchMask) && !b->allowCrossOver);
 	});
 
 	for (auto& region : touchRegions)
 	{
-		if ((Input.HeldButtons & touchMask) == 0)
+		if ((input.heldButtons & touchMask) == 0)
 		{
-			region->SetInactive(touchMask);
+			region->setInactive(touchMask);
 			continue;
 		}
 
-		UpdateTouchRegion(*region, /* TODO */ nullptr, Ds4Buttons::touch1, Input.Data.touchPoint1, disallow);
-		UpdateTouchRegion(*region, /* TODO */ nullptr, Ds4Buttons::touch2, Input.Data.touchPoint2, disallow);
+		updateTouchRegion(*region, /* TODO */ nullptr, Ds4Buttons::touch1, input.data.touchPoint1, disallow);
+		updateTouchRegion(*region, /* TODO */ nullptr, Ds4Buttons::touch2, input.data.touchPoint2, disallow);
 	}
 }
 
-void Ds4Device::UpdateTouchRegion(Ds4TouchRegion& region, InputModifier* modifier, Ds4Buttons_t sender, Ds4Vector2& point, Ds4Buttons_t& disallow)
+void Ds4Device::updateTouchRegion(Ds4TouchRegion& region, InputModifier* modifier, Ds4Buttons_t sender, Ds4Vector2& point, Ds4Buttons_t& disallow)
 {
-	if ((disallow & sender) == 0 && (Input.HeldButtons & sender) != 0)
+	if ((disallow & sender) == 0 && (input.heldButtons & sender) != 0)
 	{
-		if (region.IsInRegion(sender, point))
+		if (region.isInRegion(sender, point))
 		{
-			if (modifier && !modifier->IsActive())
+			if (modifier && !modifier->isActive())
 			{
-				UpdatePressedState(*modifier);
+				updatePressedState(*modifier);
 			}
 
-			if (!modifier || modifier->IsActive())
+			if (!modifier || modifier->isActive())
 			{
-				region.SetActive(sender, point);
+				region.setActive(sender, point);
 
-				if (!region.AllowCrossOver)
+				if (!region.allowCrossOver)
 				{
 					disallow |= sender;
 				}
@@ -1259,12 +1259,12 @@ void Ds4Device::UpdateTouchRegion(Ds4TouchRegion& region, InputModifier* modifie
 		}
 	}
 
-	region.SetInactive(sender);
+	region.setInactive(sender);
 }
 
-void Ds4Device::UpdatePressedStateImpl(InputMapBase& instance, const std::function<void()>& press, const std::function<void()>& release)
+void Ds4Device::updatePressedStateImpl(InputMapBase& instance, const std::function<void()>& press, const std::function<void()>& release)
 {
-	if (IsOverriddenByModifierSet(instance))
+	if (isOverriddenByModifierSet(instance))
 	{
 		release();
 		return;
@@ -1280,7 +1280,7 @@ void Ds4Device::UpdatePressedStateImpl(InputMapBase& instance, const std::functi
 		switch (value)
 		{
 			case InputType::button:
-				if ((instance.inputButtons.value() & Input.HeldButtons) == instance.inputButtons)
+				if ((instance.inputButtons.value() & input.heldButtons) == instance.inputButtons)
 				{
 					press();
 				}
@@ -1310,10 +1310,10 @@ void Ds4Device::UpdatePressedStateImpl(InputMapBase& instance, const std::functi
 						continue;
 					}
 
-					InputAxisOptions options = instance.GetAxisOptions(bit);
+					InputAxisOptions options = instance.getAxisOptions(bit);
 
 					// ReSharper disable once PossibleInvalidOperationException
-					float axis = Input.GetAxis(instance.inputAxis.value(), options.Polarity);
+					float axis = input.getAxis(instance.inputAxis.value(), options.polarity);
 
 					if (axis >= options.deadZone.value_or(0.0f))
 					{
@@ -1339,15 +1339,15 @@ void Ds4Device::UpdatePressedStateImpl(InputMapBase& instance, const std::functi
 
 			case InputType::touchRegion:
 			{
-				auto it = Profile.TouchRegions.find(instance.inputRegion);
-				if (it == Profile.TouchRegions.end())
+				auto it = profile.touchRegions.find(instance.inputRegion);
+				if (it == profile.touchRegions.end())
 				{
 					break;
 				}
 
 				auto& region = it->second;
 
-				if (region.IsActive(touchMask))
+				if (region.isActive(touchMask))
 				{
 					press();
 				}
@@ -1368,32 +1368,32 @@ void Ds4Device::UpdatePressedStateImpl(InputMapBase& instance, const std::functi
 	}
 }
 
-void Ds4Device::UpdatePressedState(InputModifier& modifier)
+void Ds4Device::updatePressedState(InputModifier& modifier)
 {
 	const auto a = [&]() -> void
 	{
-		modifier.Press();
+		modifier.press();
 	};
 
 	const auto b = [&]() -> void
 	{
-		modifier.Release();
+		modifier.release();
 	};
 
-	UpdatePressedStateImpl(modifier, a, b);
+	updatePressedStateImpl(modifier, a, b);
 
-	if (modifier.Bindings.empty())
+	if (modifier.bindings.empty())
 	{
 		return;
 	}
 
-	for (InputMap& bind : modifier.Bindings)
+	for (InputMap& bind : modifier.bindings)
 	{
-		UpdateBindingState(bind, &modifier);
+		updateBindingState(bind, &modifier);
 	}
 }
 
-void Ds4Device::UpdatePressedState(InputMap& map, InputModifier* modifier)
+void Ds4Device::updatePressedState(InputMap& map, InputModifier* modifier)
 {
 	const auto a = [&]() -> void
 	{
@@ -1402,22 +1402,22 @@ void Ds4Device::UpdatePressedState(InputMap& map, InputModifier* modifier)
 
 	const auto b = [&]() -> void
 	{
-		map.Release();
+		map.release();
 	};
 
-	UpdatePressedStateImpl(map, a, b);
+	updatePressedStateImpl(map, a, b);
 }
 
-void Ds4Device::UpdateBindingState(InputMap& m, InputModifier* modifier)
+void Ds4Device::updateBindingState(InputMap& m, InputModifier* modifier)
 {
 	if (modifier != nullptr)
 	{
 		if (m.toggle != true)
 		{
-			if (!modifier->IsActive())
+			if (!modifier->isActive())
 			{
-				m.Release();
-				RunMap(m, modifier);
+				m.release();
+				runMap(m, modifier);
 				return;
 			}
 		}
@@ -1427,8 +1427,8 @@ void Ds4Device::UpdateBindingState(InputMap& m, InputModifier* modifier)
 	{
 		case InputType::touchRegion:
 		{
-			auto it = Profile.TouchRegions.find(m.inputRegion);
-			if (it == Profile.TouchRegions.end())
+			auto it = profile.touchRegions.find(m.inputRegion);
+			if (it == profile.touchRegions.end())
 			{
 				break;
 			}
@@ -1437,13 +1437,13 @@ void Ds4Device::UpdateBindingState(InputMap& m, InputModifier* modifier)
 
 			if (m.touchDirection == Direction::none)
 			{
-				if (region.IsActive(touchMask))
+				if (region.isActive(touchMask))
 				{
 					m.pressModifier(modifier);
 				}
 				else
 				{
-					m.Release();
+					m.release();
 				}
 			}
 
@@ -1451,9 +1451,9 @@ void Ds4Device::UpdateBindingState(InputMap& m, InputModifier* modifier)
 		}
 
 		default:
-			UpdatePressedState(m, modifier);
+			updatePressedState(m, modifier);
 			break;
 	}
 
-	RunMap(m, modifier);
+	runMap(m, modifier);
 }

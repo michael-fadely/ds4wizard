@@ -1,12 +1,12 @@
 #include "stdafx.h"
 #include "Pressable.h"
 
-bool Pressable::IsActive() const
+bool Pressable::isActive() const
 {
-	return IsActiveState(State);
+	return isActiveState(pressedState);
 }
 
-void Pressable::Press(PressedState& state)
+void Pressable::press(PressedState& state)
 {
 	switch (state)
 	{
@@ -21,7 +21,7 @@ void Pressable::Press(PressedState& state)
 	}
 }
 
-void Pressable::Release(PressedState& state)
+void Pressable::release(PressedState& state)
 {
 	switch (state)
 	{
@@ -36,17 +36,17 @@ void Pressable::Release(PressedState& state)
 	}
 }
 
-bool Pressable::IsActiveState(PressedState state)
+bool Pressable::isActiveState(PressedState state)
 {
 	return state == PressedState::on || state == PressedState::pressed;
 }
 
-void Pressable::Press()
+void Pressable::press()
 {
-	Press(State);
+	press(pressedState);
 }
 
-void Pressable::Release()
+void Pressable::release()
 {
-	Release(State);
+	release(pressedState);
 }

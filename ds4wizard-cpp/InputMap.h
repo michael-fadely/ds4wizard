@@ -9,7 +9,7 @@ public:
 	/*[JsonIgnore]*/ bool isToggled = false;
 
 	/*[JsonIgnore]*/
-	bool PerformRapidFire() const;
+	bool performRapidFire() const;
 
 private:
 	/*[JsonIgnore]*/ bool rapidFiring = false;
@@ -18,16 +18,16 @@ private:
 
 public:
 	/*[JsonIgnore]*/
-	PressedState SimulatedState() const;
+	PressedState simulatedState() const;
 
 	/*[JsonIgnore]*/
-	virtual bool IsActive() const override;
+	virtual bool isActive() const override;
 
 	/// <summary>
 	/// Indicates if this instance has a persistent state.
 	/// </summary>
 	/*[JsonIgnore]*/
-	bool IsPersistent() const;
+	bool isPersistent() const;
 
 	InputType_t inputType = 0;
 
@@ -50,14 +50,14 @@ public:
 	InputMapBase(InputType_t inputType, Ds4Axis::T input);
 	InputMapBase(InputType_t inputType, const std::string& input);
 
-	virtual void Press() override;
+	virtual void press() override;
 
 protected:
 	void UpdateRapidState();
 
 public:
-	virtual void Release() override;
-	::InputAxisOptions GetAxisOptions(Ds4Axis_t axis);
+	virtual void release() override;
+	InputAxisOptions getAxisOptions(Ds4Axis_t axis);
 
 	bool operator==(const InputMapBase& other) const;
 	bool operator!=(const InputMapBase& other) const;
@@ -132,7 +132,7 @@ public:
 	/// <summary>
 	/// The bindings associated with this modifier set.
 	/// </summary>
-	std::list<InputMap> Bindings;
+	std::list<InputMap> bindings;
 
 	InputModifier() = default;
 

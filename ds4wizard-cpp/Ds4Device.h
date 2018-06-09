@@ -41,8 +41,8 @@ class Ds4Device
 	IMouseSimulator         MouseSimulator    => InputSimulator.Mouse;*/
 
 public:
-	Stopwatch Latency;
-	bool DataReceived = false;
+	Stopwatch latency;
+	bool dataReceived = false;
 
 private:
 	std::unique_ptr<std::thread> deviceThread = nullptr;
@@ -58,37 +58,37 @@ private:
 
 	Ds4LightOptions activeLight;
 
-	bool DisconnectOnIdle() const;
-	std::chrono::nanoseconds IdleTimeout() const;
-	bool IsIdle() const;
+	bool disconnectOnIdle() const;
+	std::chrono::nanoseconds idleTimeout() const;
+	bool isIdle() const;
 
 public:
 	//event EventHandler DeviceClosed; // TODO
 	//event EventHandler BatteryLevelChanged; // TODO
 
-	DeviceSettings Settings;
-	DeviceProfile Profile;
+	DeviceSettings settings;
+	DeviceProfile profile;
 
-	Ds4Input Input {};
-	Ds4Output Output {};
+	Ds4Input input {};
+	Ds4Output output {};
 
-	std::string MacAddress; // TODO: getter
-	std::string SafeMacAddress; // TODO: getter
+	std::string macAddress; // TODO: getter
+	std::string safeMacAddress; // TODO: getter
 
-	bool BluetoothConnected();
-	bool UsbConnected();
-	bool Connected();
+	bool bluetoothConnected();
+	bool usbConnected();
+	bool connected();
 	/// <summary>
 	/// Gets the battery charge level in the range 1 to 10.
 	/// </summary>
-	uint8_t Battery() const;
+	uint8_t battery() const;
 
 	/// <summary>
 	/// Indicates if the controller is charging.
 	/// </summary>
-	bool Charging() const;
+	bool charging() const;
 
-	const std::string& Name() const;
+	const std::string& name() const;
 
 	explicit Ds4Device(hid::HidInstance& device);
 	~Ds4Device();
@@ -97,43 +97,43 @@ private:
 	void closeImpl();
 
 public:
-	void SaveSettings();
+	void saveSettings();
 
 	/// <summary>
 	/// Applies changes made to the device profile and opens device handles.
 	/// </summary>
-	void ApplyProfile();
+	void applyProfile();
 
 private:
-	bool ScpDeviceOpen();
-	void ScpDeviceClose();
-	void ReleaseAutoColor();
+	bool scpDeviceOpen();
+	void scpDeviceClose();
+	void releaseAutoColor();
 
 public:
 	void OnProfileChanged(const std::string& newName);
-	void Close();
+	void close();
 
 private:
-	void CloseBluetoothDevice();
-	void DisconnectBluetooth();
-	void CloseUsbDevice();
-	static bool OpenDevice(hid::HidInstance& device, bool exclusive);
+	void closeBluetoothDevice();
+	void disconnectBluetooth();
+	void closeUsbDevice();
+	static bool openDevice(hid::HidInstance& device, bool exclusive);
 
 public:
-	void OpenBluetoothDevice(hid::HidInstance& device);
-	void OpenUsbDevice(hid::HidInstance& device);
+	void openBluetoothDevice(hid::HidInstance& device);
+	void openUsbDevice(hid::HidInstance& device);
 
 private:
-	void SetupBluetoothOutputBuffer() const;
-	void SetupUsbOutputBuffer() const;
-	void WriteUsbAsync();
-	void WriteBluetooth();
-	void Run();
-	void ControllerThread();
+	void setupBluetoothOutputBuffer() const;
+	void setupUsbOutputBuffer() const;
+	void writeUsbAsync();
+	void writeBluetooth();
+	void run();
+	void controllerThread();
 	void OnDeviceClosed();
 
 public:
-	void Start();
+	void start();
 
 private:
 	void OnBatteryLevelChanged();
@@ -141,25 +141,25 @@ private:
 #pragma region shit
 	static constexpr Ds4Buttons_t touchMask = Ds4Buttons::touch1 | Ds4Buttons::touch2;
 
-	void SimulateXInputButton(XInputButtons_t buttons, PressedState state);
+	void simulateXInputButton(XInputButtons_t buttons, PressedState state);
 
 	XInputAxis_t simulatedXInputAxis = 0;
 
-	void SimulateXInputAxis(XInputAxes& axes, float m);
-	bool IsOverriddenByModifierSet(InputMapBase& map);
-	void RunMap(InputMap& m, InputModifier* modifier);
-	static PressedState HandleTouchToggle(InputMap& m, InputModifier* modifier, const Pressable& pressable);
-	void ApplyMap(InputMap& m, InputModifier* modifier, PressedState state, float analog);
-	void SimulateMouse(const InputMap& m, PressedState state, float analog);
-	void SimulateKeyboard(const InputMap& m, PressedState state);
-	void RunAction(ActionType action);
-	void RunMaps();
-	void RunPersistent();
-	void UpdateTouchRegions();
-	void UpdateTouchRegion(Ds4TouchRegion& region, InputModifier* modifier, Ds4Buttons_t sender, Ds4Vector2& point, Ds4Buttons_t& disallow);
-	void UpdatePressedStateImpl(InputMapBase& instance, const std::function<void()>& press, const std::function<void()>& release);
-	void UpdatePressedState(InputModifier& modifier);
-	void UpdatePressedState(InputMap& map, InputModifier* modifier);
-	void UpdateBindingState(InputMap& m, InputModifier* modifier);
+	void simulateXInputAxis(XInputAxes& axes, float m);
+	bool isOverriddenByModifierSet(InputMapBase& map);
+	void runMap(InputMap& m, InputModifier* modifier);
+	static PressedState handleTouchToggle(InputMap& m, InputModifier* modifier, const Pressable& pressable);
+	void applyMap(InputMap& m, InputModifier* modifier, PressedState state, float analog);
+	void simulateMouse(const InputMap& m, PressedState state, float analog);
+	void simulateKeyboard(const InputMap& m, PressedState state);
+	void runAction(ActionType action);
+	void runMaps();
+	void runPersistent();
+	void updateTouchRegions();
+	void updateTouchRegion(Ds4TouchRegion& region, InputModifier* modifier, Ds4Buttons_t sender, Ds4Vector2& point, Ds4Buttons_t& disallow);
+	void updatePressedStateImpl(InputMapBase& instance, const std::function<void()>& press, const std::function<void()>& release);
+	void updatePressedState(InputModifier& modifier);
+	void updatePressedState(InputMap& map, InputModifier* modifier);
+	void updateBindingState(InputMap& m, InputModifier* modifier);
 #pragma endregion
 };

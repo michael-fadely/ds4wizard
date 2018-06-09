@@ -53,12 +53,12 @@ public:
 	/// <summary>
 	/// Defines the DualShock 4 Vendor ID.
 	/// </summary>
-	static const short Ds4VendorID = 0x54c;
+	static const short vendorId = 0x54c;
 
 	/// <summary>
 	/// Defines validated DualShock 4 Product IDs.
 	/// </summary>
-	inline static const std::array<short, 3> Ds4ProductIDs = { 0xba0, 0x5c4, 0x9cc };
+	inline static const std::array<short, 3> productIds = { 0xba0, 0x5c4, 0x9cc };
 
 	/// <summary>
 	/// Fired when a device is opened.
@@ -85,22 +85,22 @@ public:
 	/// </summary>
 	/// <param name="hid">The HID instance to be checked.</param>
 	/// <returns><value>true</value> if this device is a DualShock 4.</returns>
-	static bool IsDs4(const hid::HidInstance& hid);
+	static bool isDS4(const hid::HidInstance& hid);
 
 	/// <summary>
 	/// Checks if a device is a DualShock 4.
 	/// </summary>
 	/// <param name="devicePath">The path to the device to be checked.</param>
 	/// <returns><value>true</value> if this device is a DualShock 4.</returns>
-	static bool IsDs4(const std::wstring& devicePath);
+	static bool isDS4(const std::wstring& devicePath);
 
 	/// <summary>
 	/// Discovers and connects to all DualShock 4 devices.
 	/// </summary>
-	void FindControllers();
+	void findControllers();
 
 private:
-	/*void OnDs4DeviceClosed(object sender, EventArgs eventArgs) TODO
+	/* TODO: void OnDs4DeviceClosed(object sender, EventArgs eventArgs)
 	{
 		if (!(sender is Ds4Device device))
 		{
@@ -116,23 +116,23 @@ public:
 	/// <summary>
 	/// Closes and removes all managed devices.
 	/// </summary>
-	void Close();
+	void close();
 
 private:
-	static void QueueDeviceToggle(const std::wstring& instanceId);
+	static void queueDeviceToggle(const std::wstring& instanceId);
 
 public:
-	static void ToggleDeviceElevated(const std::wstring& instanceId);
+	static void toggleDeviceElevated(const std::wstring& instanceId);
 
 private:
-	static void ToggleDevice(const std::wstring& instanceId);
+	static void toggleDevice(const std::wstring& instanceId);
 
-	/*void OnDeviceOpened(DeviceOpenedEventArgs e) TODO
+	/* TODO: void OnDeviceOpened(DeviceOpenedEventArgs e)
 	{
 		DeviceOpened?.Invoke(this, e);
 	}*/
 
-	/*void OnDeviceClosed(DeviceClosedEventArgs e) TODO
+	/* TODO: void OnDeviceClosed(DeviceClosedEventArgs e)
 	{
 		DeviceClosed?.Invoke(this, e);
 	}*/

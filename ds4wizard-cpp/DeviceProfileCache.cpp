@@ -7,13 +7,13 @@ void DeviceProfileCache::setDevices(const std::shared_ptr<Ds4DeviceManager>& dev
 	this->deviceManager = deviceManager;
 }
 
-void DeviceProfileCache::Load()
+void DeviceProfileCache::load()
 {
-	LoadImpl();
+	loadImpl();
 	OnLoaded();
 }
 
-std::optional<DeviceProfile> DeviceProfileCache::GetProfile(const std::string& profileName)
+std::optional<DeviceProfile> DeviceProfileCache::getProfile(const std::string& profileName)
 {
 	if (profileName.empty())
 	{
@@ -22,10 +22,10 @@ std::optional<DeviceProfile> DeviceProfileCache::GetProfile(const std::string& p
 
 	lock(profile);
 
-	return FindProfile(profileName);
+	return findProfile(profileName);
 }
 
-std::optional<DeviceSettings> DeviceProfileCache::GetSettings(const std::string& id)
+std::optional<DeviceSettings> DeviceProfileCache::getSettings(const std::string& id)
 {
 	lock(deviceSettings);
 	const auto it = deviceSettings.find(id);
@@ -38,7 +38,7 @@ std::optional<DeviceSettings> DeviceProfileCache::GetSettings(const std::string&
 	return it->second;
 }
 
-void DeviceProfileCache::SaveSettings(const std::string& id, const DeviceSettings& settings)
+void DeviceProfileCache::saveSettings(const std::string& id, const DeviceSettings& settings)
 {
 	lock(deviceSettings);
 
@@ -70,21 +70,21 @@ void DeviceProfileCache::SaveSettings(const std::string& id, const DeviceSetting
 	deviceSettings[id] = settings;
 }
 
-void DeviceProfileCache::RemoveProfile(const DeviceProfile& profile)
+void DeviceProfileCache::removeProfile(const DeviceProfile& profile)
 {
 	{
 		lock(profile);
 		profiles.remove(profile);
 	}
 
-	OnProfileChanged(profile.Name, nullptr);
+	OnProfileChanged(profile.name, nullptr);
 
 	if (filesystem::directory_exists(Program::profilesPath().toStdString()))
 	{
 		return;
 	}
 
-	const std::string path = filesystem::combine_path(Program::profilesPath().toStdString(), profile.FileName());
+	const std::string path = filesystem::combine_path(Program::profilesPath().toStdString(), profile.fileName());
 
 	if (filesystem::file_exists(path))
 	{
@@ -92,7 +92,7 @@ void DeviceProfileCache::RemoveProfile(const DeviceProfile& profile)
 	}
 }
 
-void DeviceProfileCache::UpdateProfile(const DeviceProfile& last, const DeviceProfile& current)
+void DeviceProfileCache::updateProfile(const DeviceProfile& last, const DeviceProfile& current)
 {
 	{
 		lock(profile);
@@ -100,7 +100,7 @@ void DeviceProfileCache::UpdateProfile(const DeviceProfile& last, const DevicePr
 		profiles.push_back(current);
 	}
 
-	OnProfileChanged(last.Name, current.Name);
+	OnProfileChanged(last.name, current.name);
 
 	{
 		lock(profile);
@@ -109,7 +109,7 @@ void DeviceProfileCache::UpdateProfile(const DeviceProfile& last, const DevicePr
 			filesystem::create_directory(Program::profilesPath().toStdString());
 		}
 
-		std::string newPath = filesystem::combine_path(Program::profilesPath().toStdString(), current.FileName());
+		std::string newPath = filesystem::combine_path(Program::profilesPath().toStdString(), current.fileName());
 
 		QFile f(QString::fromStdString(newPath));
 
@@ -121,14 +121,14 @@ void DeviceProfileCache::UpdateProfile(const DeviceProfile& last, const DevicePr
 		f.write(QJsonDocument(current.toJson()).toJson(QJsonDocument::Indented));
 
 		// TODO: case insensitive
-		if (last.FileName() != current.FileName())
+		if (last.fileName() != current.fileName())
 		{
-			filesystem::remove(filesystem::combine_path(Program::profilesPath().toStdString(), last.FileName()));
+			filesystem::remove(filesystem::combine_path(Program::profilesPath().toStdString(), last.fileName()));
 		}
 	}
 }
 
-std::optional<DeviceProfile> DeviceProfileCache::FindProfile(const std::string& profileName)
+std::optional<DeviceProfile> DeviceProfileCache::findProfile(const std::string& profileName)
 {
 	/*return Profiles.FirstOrDefault(x => x.FileName.Equals(profileName, StringComparison.InvariantCultureIgnoreCase)
 	                                   || x.Name.Equals(profileName, StringComparison.InvariantCultureIgnoreCase));*/
@@ -136,7 +136,7 @@ std::optional<DeviceProfile> DeviceProfileCache::FindProfile(const std::string& 
 	for (auto& profile : profiles)
 	{
 		// TODO: case insensitive
-		if (profile.FileName() == profileName || profile.Name == profileName)
+		if (profile.fileName() == profileName || profile.name == profileName)
 		{
 			return profile;
 		}
@@ -145,7 +145,7 @@ std::optional<DeviceProfile> DeviceProfileCache::FindProfile(const std::string& 
 	return std::nullopt;
 }
 
-void DeviceProfileCache::LoadImpl()
+void DeviceProfileCache::loadImpl()
 {
 	{
 		lock(profile);

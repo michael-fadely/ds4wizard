@@ -8,11 +8,11 @@
 #include "Ds4Device.h"
 #include <iomanip>
 
-bool Ds4DeviceManager::IsDs4(const hid::HidInstance& hid)
+bool Ds4DeviceManager::isDS4(const hid::HidInstance& hid)
 {
-	if (hid.attributes().vendor_id == Ds4VendorID)
+	if (hid.attributes().vendor_id == vendorId)
 	{
-		for (auto id : Ds4ProductIDs)
+		for (auto id : productIds)
 		{
 			if (id == hid.attributes().product_id)
 			{
@@ -24,24 +24,24 @@ bool Ds4DeviceManager::IsDs4(const hid::HidInstance& hid)
 	return false;
 }
 
-bool Ds4DeviceManager::IsDs4(const std::wstring& devicePath)
+bool Ds4DeviceManager::isDS4(const std::wstring& devicePath)
 {
 	const hid::HidInstance hid(devicePath, true);
-	return IsDs4(hid);
+	return isDS4(hid);
 }
 
-void Ds4DeviceManager::FindControllers()
+void Ds4DeviceManager::findControllers()
 {
 	lock(sync);
 
 	hid::enum_hid([&](hid::HidInstance& hid) -> bool
 	{
-		if (hid.attributes().vendor_id != Ds4VendorID)
+		if (hid.attributes().vendor_id != vendorId)
 		{
 			return false;
 		}
 
-		if (std::find(Ds4ProductIDs.begin(), Ds4ProductIDs.end(), hid.attributes().product_id) == Ds4ProductIDs.end())
+		if (std::find(productIds.begin(), productIds.end(), hid.attributes().product_id) == productIds.end())
 		{
 			return false;
 		}
@@ -100,14 +100,14 @@ void Ds4DeviceManager::FindControllers()
 
 			if (it == devices.end())
 			{
-				QueueDeviceToggle(hid.instance_id);
+				queueDeviceToggle(hid.instance_id);
 				device = std::make_shared<Ds4Device>(hid);
 				// TODO: device->DeviceClosed += OnDs4DeviceClosed
 
 				// TODO: OnDeviceOpened(new DeviceOpenedEventArgs(device, true));
-				device->Start();
+				device->start();
 
-				auto& safe = device->SafeMacAddress;
+				auto& safe = device->safeMacAddress;
 				auto wstr = std::wstring(safe.begin(), safe.end());
 				devices[wstr] = device;
 			}
@@ -115,18 +115,18 @@ void Ds4DeviceManager::FindControllers()
 			{
 				if (isBluetooth)
 				{
-					if (!device->BluetoothConnected())
+					if (!device->bluetoothConnected())
 					{
-						QueueDeviceToggle(hid.instance_id);
-						device->OpenBluetoothDevice(hid);
+						queueDeviceToggle(hid.instance_id);
+						device->openBluetoothDevice(hid);
 					}
 				}
 				else
 				{
-					if (!device->UsbConnected())
+					if (!device->usbConnected())
 					{
-						QueueDeviceToggle(hid.instance_id);
-						device->OpenUsbDevice(hid);
+						queueDeviceToggle(hid.instance_id);
+						device->openUsbDevice(hid);
 					}
 				}
 
@@ -144,7 +144,7 @@ void Ds4DeviceManager::FindControllers()
 	});
 }
 
-void Ds4DeviceManager::Close()
+void Ds4DeviceManager::close()
 {
 	lock(devices);
 
@@ -157,16 +157,16 @@ void Ds4DeviceManager::Close()
 	devices.clear();
 }
 
-void Ds4DeviceManager::QueueDeviceToggle(const std::wstring& instanceId)
+void Ds4DeviceManager::queueDeviceToggle(const std::wstring& instanceId)
 {
-	ToggleDeviceElevated(instanceId);
+	toggleDeviceElevated(instanceId);
 }
 
-void Ds4DeviceManager::ToggleDeviceElevated(const std::wstring& instanceId)
+void Ds4DeviceManager::toggleDeviceElevated(const std::wstring& instanceId)
 {
 	if (Program::isElevated())
 	{
-		ToggleDevice(instanceId);
+		toggleDevice(instanceId);
 		return;
 	}
 
@@ -182,7 +182,7 @@ void Ds4DeviceManager::ToggleDeviceElevated(const std::wstring& instanceId)
 	WaitForSingleObject(hinst, INFINITE);
 }
 
-void Ds4DeviceManager::ToggleDevice(const std::wstring& instanceId)
+void Ds4DeviceManager::toggleDevice(const std::wstring& instanceId)
 {
 	GUID guid;
 	HidD_GetHidGuid(&guid);

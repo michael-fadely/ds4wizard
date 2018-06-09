@@ -1,25 +1,25 @@
 #include "stdafx.h"
 #include "DeviceIdleOptions.h"
 
-const DeviceIdleOptions DeviceIdleOptions::Default(std::chrono::seconds(5), true, TimeUnit::minutes);
+const DeviceIdleOptions DeviceIdleOptions::defaultIdleOptions(std::chrono::seconds(5), true, TimeUnit::minutes);
 
 DeviceIdleOptions::DeviceIdleOptions(std::chrono::nanoseconds timeout, bool disconnect, TimeUnit unit)
 {
-	this->Timeout    = timeout;
-	this->Disconnect = disconnect;
-	this->Unit       = unit;
+	this->timeout    = timeout;
+	this->disconnect = disconnect;
+	this->unit       = unit;
 }
 
 DeviceIdleOptions::DeviceIdleOptions(const DeviceIdleOptions& other)
 {
-	Timeout    = other.Timeout;
-	Disconnect = other.Disconnect;
-	Unit       = other.Unit;
+	timeout    = other.timeout;
+	disconnect = other.disconnect;
+	unit       = other.unit;
 }
 
 bool DeviceIdleOptions::operator==(const DeviceIdleOptions& other) const
 {
-	return Disconnect == other.Disconnect && Timeout == other.Timeout;
+	return disconnect == other.disconnect && timeout == other.timeout;
 }
 
 bool DeviceIdleOptions::operator!=(const DeviceIdleOptions& other) const
@@ -29,14 +29,14 @@ bool DeviceIdleOptions::operator!=(const DeviceIdleOptions& other) const
 
 void DeviceIdleOptions::readJson(const QJsonObject& json)
 {
-	this->Timeout    = std::chrono::milliseconds(json["timeout"].toInt());
-	this->Disconnect = json["disconnect"].toBool();
-	this->Unit       = TimeUnit::_from_string(json["unit"].toString().toStdString().c_str()); // this is disgusting
+	this->timeout    = std::chrono::milliseconds(json["timeout"].toInt());
+	this->disconnect = json["disconnect"].toBool();
+	this->unit       = TimeUnit::_from_string(json["unit"].toString().toStdString().c_str()); // this is disgusting
 }
 
 void DeviceIdleOptions::writeJson(QJsonObject& json) const
 {
-	json["timeout"]    = this->Timeout.count();
-	json["disconnect"] = this->Disconnect;
-	json["unit"]       = this->Unit._to_string();
+	json["timeout"]    = this->timeout.count();
+	json["disconnect"] = this->disconnect;
+	json["unit"]       = this->unit._to_string();
 }

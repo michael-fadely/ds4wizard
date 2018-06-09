@@ -7,8 +7,8 @@
 class AxisOptions : public JsonData
 {
 public:
-	std::optional<float> Multiplier;
-	std::optional<AxisPolarity> Polarity;
+	std::optional<float> multiplier;
+	std::optional<AxisPolarity> polarity;
 
 	AxisOptions() = default;
 
@@ -32,7 +32,7 @@ public:
 	explicit InputAxisOptions(AxisPolarity polarity);
 	InputAxisOptions(const InputAxisOptions& other);
 
-	void ApplyDeadZone(float& analog) const;
+	void applyDeadZone(float& analog) const;
 
 	bool operator==(const InputAxisOptions& other) const;
 	bool operator!=(const InputAxisOptions& other) const;
@@ -50,7 +50,7 @@ public:
 	XInputAxes() = default;
 	XInputAxes(const XInputAxes& other);
 
-	AxisOptions GetAxisOptions(XInputAxis::T axis);
+	AxisOptions getAxisOptions(XInputAxis::T axis);
 
 	bool operator==(const XInputAxes& other) const;
 	bool operator!=(const XInputAxes& other) const;
@@ -67,7 +67,7 @@ public:
 	MouseAxes() = default;
 	MouseAxes(const MouseAxes& other);
 
-	AxisOptions GetAxisOptions(Direction_t axis);
+	AxisOptions getAxisOptions(Direction_t axis);
 
 	bool operator==(const MouseAxes& other) const;
 	void readJson(const QJsonObject& json) override;

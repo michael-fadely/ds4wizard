@@ -24,11 +24,11 @@ std::array<Ds4AutoLightColor::Pair, 17> Ds4AutoLightColor::colors =
 };
 
 Ds4AutoLightColor::Pair::Pair(const Ds4Color& color)
-	: Color(color)
+	: color(color)
 {
 }
 
-Ds4Color Ds4AutoLightColor::GetColor(int& index)
+Ds4Color Ds4AutoLightColor::getColor(int& index)
 {
 	lock(sync);
 	int minIndex = 0;
@@ -38,26 +38,26 @@ Ds4Color Ds4AutoLightColor::GetColor(int& index)
 	{
 		const Pair& c = colors[i];
 
-		if (c.References == 0)
+		if (c.references == 0)
 		{
 			minIndex = i;
 			break;
 		}
 
-		if (c.References < refCount)
+		if (c.references < refCount)
 		{
 			minIndex = i;
-			refCount = c.References;
+			refCount = c.references;
 		}
 	}
 
 	Pair& pair = colors[minIndex];
-	++pair.References;
+	++pair.references;
 	index = minIndex;
-	return Ds4Color(pair.Color);
+	return Ds4Color(pair.color);
 }
 
-void Ds4AutoLightColor::ReleaseColor(int index)
+void Ds4AutoLightColor::releaseColor(int index)
 {
 	if (index < 0)
 	{
@@ -66,8 +66,8 @@ void Ds4AutoLightColor::ReleaseColor(int index)
 
 	lock(sync);
 	Pair& pair = colors[index];
-	if (pair.References > 0)
+	if (pair.references > 0)
 	{
-		--pair.References;
+		--pair.references;
 	}
 }

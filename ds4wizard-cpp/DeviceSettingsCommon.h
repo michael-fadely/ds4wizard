@@ -13,16 +13,15 @@ class DeviceSettingsCommon : public JsonData
 	bool notifiedCharged;
 
 public:
-	Ds4LightOptions Light;
-	DeviceIdleOptions Idle;
-
-	bool NotifyFullyCharged;
-	uint8_t NotifyBatteryLow;
+	Ds4LightOptions light;
+	DeviceIdleOptions idle;
+	bool notifyFullyCharged;
+	uint8_t notifyBatteryLow;
 
 	DeviceSettingsCommon();
 	DeviceSettingsCommon(const DeviceSettingsCommon& other);
 
-	void DisplayNotifications(Ds4Device* device);
+	void displayNotifications(Ds4Device* device);
 
 	bool operator==(const DeviceSettingsCommon& other) const;
 	bool operator!=(const DeviceSettingsCommon& other) const;

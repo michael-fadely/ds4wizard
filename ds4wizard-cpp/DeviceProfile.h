@@ -11,17 +11,17 @@
 class DeviceProfile : public DeviceSettingsCommon
 {
 public:
-	std::string FileName() const;
-	std::string Name;
-	bool        ExclusiveMode   = true;
-	bool        UseXInput       = true;
-	bool        AutoXInputIndex = true;
-	int         XInputIndex     = 0;
+	std::string fileName() const;
+	std::string name;
+	bool        exclusiveMode   = true;
+	bool        useXInput       = true;
+	bool        autoXInputIndex = true;
+	int         xinputIndex     = 0;
 
-	std::unordered_map<std::string, Ds4TouchRegion> TouchRegions;
+	std::unordered_map<std::string, Ds4TouchRegion> touchRegions;
 
-	std::list<InputMap>      Bindings;
-	std::list<InputModifier> Modifiers;
+	std::list<InputMap>      bindings;
+	std::list<InputModifier> modifiers;
 
 	DeviceProfile() = default;
 
@@ -31,5 +31,5 @@ public:
 
 	void readJson(const QJsonObject& json) override;
 	void writeJson(QJsonObject& json) const override;
-	static DeviceProfile Default();
+	static DeviceProfile defaultProfile();
 };

@@ -5,12 +5,12 @@
 class Pressable
 {
 public:
-	PressedState State = PressedState::off;
+	PressedState pressedState = PressedState::off;
 
-	virtual bool IsActive() const;
-	static void Press(PressedState& state);
-	static void Release(PressedState& state);
-	static bool IsActiveState(PressedState state);
-	virtual void Press();
-	virtual void Release();
+	virtual bool isActive() const;
+	static void press(PressedState& state);
+	static void release(PressedState& state);
+	static bool isActiveState(PressedState state);
+	virtual void press();
+	virtual void release();
 };

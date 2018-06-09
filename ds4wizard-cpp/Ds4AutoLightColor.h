@@ -9,10 +9,10 @@ class Ds4AutoLightColor
 {
 	struct Pair
 	{
-		const Ds4Color Color;
-		int References = 0;
+		const Ds4Color color;
+		int references = 0;
 
-		Pair(const Ds4Color& color);
+		explicit Pair(const Ds4Color& color);
 	};
 
 	inline static std::recursive_mutex sync_lock;
@@ -20,6 +20,6 @@ class Ds4AutoLightColor
 	static std::array<Pair, 17> colors;
 
 public:
-	static Ds4Color GetColor(int& index);
-	static void ReleaseColor(int index);
+	static Ds4Color getColor(int& index);
+	static void releaseColor(int index);
 };

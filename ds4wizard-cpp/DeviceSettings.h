@@ -6,11 +6,11 @@
 class DeviceSettings : public DeviceSettingsCommon
 {
 public:
-	std::string       Name;
-	std::string       Profile;
-	bool              UseProfileLight;
-	bool              UseProfileIdle;
-	DeviceIdleOptions Idle;
+	std::string       name;
+	std::string       profile;
+	bool              useProfileLight;
+	bool              useProfileIdle;
+	DeviceIdleOptions idle;
 
 	DeviceSettings();
 

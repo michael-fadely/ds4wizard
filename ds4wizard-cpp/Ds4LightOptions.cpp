@@ -3,25 +3,23 @@
 
 Ds4LightOptions::Ds4LightOptions(const Ds4Color& color)
 {
-	Color = color;
+	this->color = color;
 }
 
 Ds4LightOptions::Ds4LightOptions(const Ds4LightOptions& other)
 {
-	Color           = other.Color;
-	IdleFade        = other.IdleFade;
-	LowBatteryColor = other.LowBatteryColor;
+	color           = other.color;
+	idleFade        = other.idleFade;
 }
 
 // TODO: replace with IComparable (if this were C#)
 bool Ds4LightOptions::operator==(const Ds4LightOptions& other) const
 {
-	bool result = AutomaticColor == other.AutomaticColor &&
-	              LowBatteryColor == other.LowBatteryColor;
+	bool result = automaticColor == other.automaticColor;
 
-	if (!AutomaticColor || !other.AutomaticColor)
+	if (!automaticColor || !other.automaticColor)
 	{
-		result = result && Color == other.Color;
+		result = result && color == other.color;
 	}
 
 	return result;
@@ -34,16 +32,14 @@ bool Ds4LightOptions::operator!=(const Ds4LightOptions& other) const
 
 void Ds4LightOptions::readJson(const QJsonObject& json)
 {
-	AutomaticColor  = json["automaticColor"].toBool();
-	Color           = fromJson<Ds4Color>(json["color"].toObject());
-	IdleFade        = json["idleFade"].toBool();
-	LowBatteryColor = fromJson<Ds4Color>(json["lowBatteryColor"].toObject());
+	automaticColor  = json["automaticColor"].toBool();
+	color           = fromJson<Ds4Color>(json["color"].toObject());
+	idleFade        = json["idleFade"].toBool();
 }
 
 void Ds4LightOptions::writeJson(QJsonObject& json) const
 {
-	json["automaticColor"]  = AutomaticColor;
-	json["color"]           = Color.toJson();
-	json["idleFade"]        = IdleFade;
-	json["lowBatteryColor"] = LowBatteryColor.toJson();
+	json["automaticColor"]  = automaticColor;
+	json["color"]           = color.toJson();
+	json["idleFade"]        = idleFade;
 }

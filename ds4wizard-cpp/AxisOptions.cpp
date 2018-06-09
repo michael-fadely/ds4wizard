@@ -3,18 +3,18 @@
 
 AxisOptions::AxisOptions(AxisPolarity polarity)
 {
-	Polarity = polarity;
+	polarity = polarity;
 }
 
 AxisOptions::AxisOptions(const AxisOptions& other)
 {
-	Multiplier = other.Multiplier;
-	Polarity   = other.Polarity;
+	multiplier = other.multiplier;
+	polarity   = other.polarity;
 }
 
 bool AxisOptions::operator==(const AxisOptions& other) const
 {
-	return Multiplier == other.Multiplier && Polarity == other.Polarity;
+	return multiplier == other.multiplier && polarity == other.polarity;
 }
 
 bool AxisOptions::operator!=(const AxisOptions& other) const
@@ -26,25 +26,25 @@ void AxisOptions::readJson(const QJsonObject& json)
 {
 	if (json.contains("multiplier"))
 	{
-		Multiplier = static_cast<float>(json["multiplier"].toDouble(1.0));
+		multiplier = static_cast<float>(json["multiplier"].toDouble(1.0));
 	}
 
 	if (json.contains("polarity"))
 	{
-		Polarity = AxisPolarity::_from_string(json["polarity"].toString("none").toStdString().c_str());
+		polarity = AxisPolarity::_from_string(json["polarity"].toString("none").toStdString().c_str());
 	}
 }
 
 void AxisOptions::writeJson(QJsonObject& json) const
 {
-	if (Multiplier.has_value())
+	if (multiplier.has_value())
 	{
-		json["multiplier"] = Multiplier.value();
+		json["multiplier"] = multiplier.value();
 	}
 
-	if (Polarity.has_value())
+	if (polarity.has_value())
 	{
-		json["polarity"] = Polarity.value()._to_string();
+		json["polarity"] = polarity.value()._to_string();
 	}
 }
 
@@ -61,7 +61,7 @@ InputAxisOptions::InputAxisOptions(const InputAxisOptions& other)
 	deadZone     = other.deadZone;
 }
 
-void InputAxisOptions::ApplyDeadZone(float& analog) const
+void InputAxisOptions::applyDeadZone(float& analog) const
 {
 	const auto dzValue = deadZone.value_or(0.0f);
 
@@ -84,9 +84,9 @@ void InputAxisOptions::ApplyDeadZone(float& analog) const
 		analog = 1.0f - analog;
 	}
 
-	if (Multiplier.has_value())
+	if (multiplier.has_value())
 	{
-		analog *= Multiplier.value();
+		analog *= multiplier.value();
 	}
 }
 
@@ -156,7 +156,7 @@ XInputAxes::XInputAxes(const XInputAxes& other)
 	}
 }
 
-AxisOptions XInputAxes::GetAxisOptions(XInputAxis::T axis)
+AxisOptions XInputAxes::getAxisOptions(XInputAxis::T axis)
 {
 	if (options.empty())
 	{
@@ -231,7 +231,7 @@ MouseAxes::MouseAxes(const MouseAxes& other)
 	}
 }
 
-AxisOptions MouseAxes::GetAxisOptions(Direction_t axis)
+AxisOptions MouseAxes::getAxisOptions(Direction_t axis)
 {
 	if (options.empty())
 	{

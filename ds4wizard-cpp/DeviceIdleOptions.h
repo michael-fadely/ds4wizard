@@ -4,16 +4,16 @@
 #include "JsonData.h"
 #include <enum.h>
 
-BETTER_ENUM(TimeUnit, int, seconds = 0, minutes = 1, hours = 2);
+BETTER_ENUM(TimeUnit, int, seconds = 0, minutes = 1, hours = 2)
 
 struct DeviceIdleOptions : JsonData
 {
 	using clock = std::chrono::high_resolution_clock;
-	static const DeviceIdleOptions Default;
+	static const DeviceIdleOptions defaultIdleOptions;
 
-	std::chrono::nanoseconds Timeout = std::chrono::minutes(5);
-	bool Disconnect = true;
-	TimeUnit Unit = TimeUnit::minutes;
+	std::chrono::nanoseconds timeout = std::chrono::minutes(5);
+	bool disconnect = true;
+	TimeUnit unit = TimeUnit::minutes;
 
 	DeviceIdleOptions() = default;
 	DeviceIdleOptions(std::chrono::nanoseconds timeout, bool disconnect, TimeUnit unit);

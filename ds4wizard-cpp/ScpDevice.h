@@ -63,21 +63,23 @@ public:
 	/// <param name="handle">A valid handle to the ScpVBus device.</param>
 	ScpDevice(hid::Handle&& handle);
 
+	~ScpDevice();
+
 private:
-	static int GetDriverVersion(uint64_t& version);
+	static int getDriverVersion(uint64_t& version);
 
 public:
 	/// <summary>
 	/// Closes the handle to the ScpVBus device.
 	/// </summary>
-	void Close();
+	void close();
 
 	/// <summary>
 	/// Connects the specified emulated XInput device.
 	/// </summary>
 	/// <param name="userIndex">The index to connect.</param>
 	/// <returns><value>true</value> on success.</returns>
-	bool Connect(int userIndex);
+	bool connect(int userIndex);
 
 	/// <summary>
 	/// Disconnect the specified emulated XInput device.
@@ -85,7 +87,7 @@ public:
 	/// <param name="userIndex">The index to disconnect. -1 disconnects all devices.</param>
 	/// <param name="force">Force disconnect.</param>
 	/// <returns><value>true</value> on success.</returns>
-	bool Disconnect(int userIndex, bool force = true);
+	bool disconnect(int userIndex, bool force = true);
 
 	/// <summary>
 	/// Sets the current emulated XInput state and reads any pending data.
@@ -94,7 +96,7 @@ public:
 	/// <param name="gamepad">A gamepad structure containing the data to set.</param>
 	/// <returns><value>VBusStatus::Success</value> on success.</returns>
 	/// <seealso cref="VBusStatus"/>
-	VBusStatus SyncState(int userIndex, const XInputGamepad& gamepad);
+	VBusStatus syncState(int userIndex, const XInputGamepad& gamepad);
 
 	/// <summary>
 	/// Sets the emulated XInput state and reads any pending data.
@@ -102,7 +104,7 @@ public:
 	/// <param name="userIndex">The index of the emualted device.</param>
 	/// <returns><value>VBusStatus::Success</value> on success.</returns>
 	/// <seealso cref="VBusStatus"/>
-	VBusStatus SyncState(int userIndex);
+	VBusStatus syncState(int userIndex);
 
 	/// <summary>
 	/// Gets the last stored emulated XInput device state.
@@ -110,7 +112,7 @@ public:
 	/// <param name="userIndex">The emulated device index.</param>
 	/// <returns>The last stored emulated XInput device state.</returns>
 	/// <seealso cref="XInputGamepad"/>
-	XInputGamepad GetGamepad(int userIndex);
+	XInputGamepad getGamepad(int userIndex);
 
 	/// <summary>
 	/// Gets the last stored emulated XInput vibration state.
@@ -118,12 +120,12 @@ public:
 	/// <param name="userIndex">The emulated device index.</param>
 	/// <param name="leftMotor">The variable to receive the left (large) motor rumble state.</param>
 	/// <param name="rightMotor">The variable to receive the right (small) motor rumble state.</param>
-	void GetVibration(int userIndex, uint8_t& leftMotor, uint8_t& rightMotor);
+	void getVibration(int userIndex, uint8_t& leftMotor, uint8_t& rightMotor);
 
 	/// <summary>
 	/// Gets the last stored emulated LED ID.
 	/// </summary>
 	/// <param name="userIndex">The emulated device index.</param>
 	/// <returns>The last stored emulated LED ID.</returns>
-	uint8_t GetLed(int userIndex);
+	uint8_t getLed(int userIndex);
 };

@@ -1,12 +1,12 @@
 #include "stdafx.h"
 #include "InputMap.h"
 
-bool InputMapBase::PerformRapidFire() const
+bool InputMapBase::performRapidFire() const
 {
 	return rapidStopwatch.elapsed() >= rapidFireInterval;
 }
 
-PressedState InputMapBase::SimulatedState() const
+PressedState InputMapBase::simulatedState() const
 {
 	if (rapidFire == true)
 	{
@@ -15,18 +15,18 @@ PressedState InputMapBase::SimulatedState() const
 
 	if (toggle != true)
 	{
-		return State;
+		return pressedState;
 	}
 
-	if (IsActiveState(State))
+	if (isActiveState(pressedState))
 	{
-		return State;
+		return pressedState;
 	}
 
-	return IsActive() ? PressedState::on : State;
+	return isActive() ? PressedState::on : pressedState;
 }
 
-bool InputMapBase::IsActive() const
+bool InputMapBase::isActive() const
 {
 	{
 		if (toggle == true)
@@ -34,11 +34,11 @@ bool InputMapBase::IsActive() const
 			return isToggled;
 		}
 
-		return Pressable::IsActive();
+		return Pressable::isActive();
 	}
 }
 
-bool InputMapBase::IsPersistent() const
+bool InputMapBase::isPersistent() const
 {
 	return rapidFire == true;
 }
@@ -79,14 +79,14 @@ InputMapBase::InputMapBase(InputType_t inputType, const std::string& input)
 	inputRegion = input;
 }
 
-void InputMapBase::Press()
+void InputMapBase::press()
 {
-	if (toggle == true && State == PressedState::pressed)
+	if (toggle == true && pressedState == PressedState::pressed)
 	{
 		isToggled = !isToggled;
 	}
 
-	Pressable::Press();
+	Pressable::press();
 
 	if (rapidFire == true)
 	{
@@ -96,7 +96,7 @@ void InputMapBase::Press()
 
 void InputMapBase::UpdateRapidState()
 {
-	if (IsActive())
+	if (isActive())
 	{
 		if (!rapidStopwatch.running())
 		{
@@ -117,35 +117,35 @@ void InputMapBase::UpdateRapidState()
 
 	if (rapidFiring)
 	{
-		if (PerformRapidFire())
+		if (performRapidFire())
 		{
 			rapidFiring = false;
-			Pressable::Release(rapidState);
+			Pressable::release(rapidState);
 			rapidStopwatch.start();
 		}
 		else
 		{
-			Pressable::Press(rapidState);
+			Pressable::press(rapidState);
 		}
 	}
 	else
 	{
-		if (PerformRapidFire())
+		if (performRapidFire())
 		{
 			rapidFiring = true;
-			Pressable::Press(rapidState);
+			Pressable::press(rapidState);
 			rapidStopwatch.start();
 		}
 		else
 		{
-			Pressable::Release(rapidState);
+			Pressable::release(rapidState);
 		}
 	}
 }
 
-void InputMapBase::Release()
+void InputMapBase::release()
 {
-	Pressable::Release();
+	Pressable::release();
 
 	if (rapidFire == true)
 	{
@@ -153,7 +153,7 @@ void InputMapBase::Release()
 	}
 }
 
-InputAxisOptions InputMapBase::GetAxisOptions(Ds4Axis_t axis)
+InputAxisOptions InputMapBase::getAxisOptions(Ds4Axis_t axis)
 {
 	if (inputAxisOptions.empty())
 	{
@@ -299,17 +299,17 @@ InputModifier::InputModifier(InputType_t type, const std::string& region)
 InputModifier::InputModifier(const InputModifier& other)
 	: InputMapBase(other)
 {
-	if (other.Bindings.empty())
+	if (other.bindings.empty())
 	{
 		return;
 	}
 
-	Bindings = other.Bindings;
+	bindings = other.bindings;
 }
 
 bool InputModifier::operator==(const InputModifier& other) const
 {
-	return Bindings == other.Bindings;
+	return bindings == other.bindings;
 }
 
 bool InputModifier::operator!=(const InputModifier& other) const
@@ -325,7 +325,7 @@ void InputModifier::readJson(const QJsonObject& json)
 
 	for (const auto& value : bindings_)
 	{
-		Bindings.push_back(fromJson<InputMap>(value.toObject()));
+		bindings.push_back(fromJson<InputMap>(value.toObject()));
 	}
 }
 
@@ -335,7 +335,7 @@ void InputModifier::writeJson(QJsonObject& json) const
 	
 	QJsonArray bindings_;
 
-	for (const auto& binding : Bindings)
+	for (const auto& binding : bindings)
 	{
 		bindings_.append(binding.toJson());
 	}
@@ -368,9 +368,9 @@ InputMap::InputMap(SimulatorType simulatorType, InputType_t inputType, OutputTyp
 
 void InputMap::pressModifier(const InputModifier* modifier)
 {
-	if (!modifier || modifier->IsActive())
+	if (!modifier || modifier->isActive())
 	{
-		InputMapBase::Press();
+		InputMapBase::press();
 	}
 	else if (toggle && rapidFire)
 	{

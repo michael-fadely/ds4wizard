@@ -3,7 +3,7 @@
 
 using namespace std::chrono;
 
-std::string DeviceProfile::FileName() const
+std::string DeviceProfile::fileName() const
 {
 	// TODO
 	/*
@@ -25,27 +25,27 @@ std::string DeviceProfile::FileName() const
 	}
 	*/
 
-	return Name + ".json";
+	return name + ".json";
 }
 
 DeviceProfile::DeviceProfile(const DeviceProfile& other)
 	: DeviceSettingsCommon(other)
 {
-	Name            = other.Name;
-	ExclusiveMode   = other.ExclusiveMode;
-	UseXInput       = other.UseXInput;
-	AutoXInputIndex = other.AutoXInputIndex;
-	XInputIndex     = other.XInputIndex;
-	Idle            = other.Idle;
+	name            = other.name;
+	exclusiveMode   = other.exclusiveMode;
+	useXInput       = other.useXInput;
+	autoXInputIndex = other.autoXInputIndex;
+	xinputIndex     = other.xinputIndex;
+	idle            = other.idle;
 
-	Bindings  = other.Bindings;
-	Modifiers = other.Modifiers;
+	bindings  = other.bindings;
+	modifiers = other.modifiers;
 
-	if (!other.TouchRegions.empty())
+	if (!other.touchRegions.empty())
 	{
-		for (auto& pair : other.TouchRegions)
+		for (auto& pair : other.touchRegions)
 		{
-			TouchRegions[pair.first] = pair.second;
+			touchRegions[pair.first] = pair.second;
 		}
 	}
 }
@@ -53,46 +53,46 @@ DeviceProfile::DeviceProfile(const DeviceProfile& other)
 bool DeviceProfile::operator==(const DeviceProfile& other) const
 {
 	return DeviceSettingsCommon::operator==(other) &&
-	       Name == other.Name // TODO: case insensitive
-	       && ExclusiveMode == other.ExclusiveMode
-	       && UseXInput == other.UseXInput
-	       && AutoXInputIndex == other.AutoXInputIndex
-	       && XInputIndex == other.XInputIndex
-	       && TouchRegions == other.TouchRegions
-	       && Bindings == other.Bindings
-	       && Modifiers == other.Modifiers;
+	       name == other.name // TODO: case insensitive
+	       && exclusiveMode == other.exclusiveMode
+	       && useXInput == other.useXInput
+	       && autoXInputIndex == other.autoXInputIndex
+	       && xinputIndex == other.xinputIndex
+	       && touchRegions == other.touchRegions
+	       && bindings == other.bindings
+	       && modifiers == other.modifiers;
 }
 
 void DeviceProfile::readJson(const QJsonObject& json)
 {
 	DeviceSettingsCommon::readJson(json);
 
-	Name            = json["name"].toString().toStdString();
-	ExclusiveMode   = json["exclusiveMode"].toBool();
-	UseXInput       = json["useXInput"].toBool();
-	AutoXInputIndex = json["autoXInput"].toBool();
-	XInputIndex     = json["xinputIndex"].toInt();
+	name            = json["name"].toString().toStdString();
+	exclusiveMode   = json["exclusiveMode"].toBool();
+	useXInput       = json["useXInput"].toBool();
+	autoXInputIndex = json["autoXInput"].toBool();
+	xinputIndex     = json["xinputIndex"].toInt();
 
 	auto touchRegions_ = json["touchRegions"].toObject();
 
 	for (const auto& key : touchRegions_.keys())
 	{
 		auto stdstr = key.toStdString();
-		TouchRegions[stdstr] = fromJson<Ds4TouchRegion>(touchRegions_[key].toObject());
+		touchRegions[stdstr] = fromJson<Ds4TouchRegion>(touchRegions_[key].toObject());
 	}
 
 	auto bindings_ = json["bindings"].toArray();
 
 	for (auto& value : bindings_)
 	{
-		Bindings.push_back(fromJson<InputMap>(value.toObject()));
+		bindings.push_back(fromJson<InputMap>(value.toObject()));
 	}
 
 	auto modifiers_ = json["modifiers"].toArray();
 
 	for (auto& value : modifiers_)
 	{
-		Modifiers.push_back(fromJson<InputModifier>(value.toObject()));
+		modifiers.push_back(fromJson<InputModifier>(value.toObject()));
 	}
 }
 
@@ -100,15 +100,15 @@ void DeviceProfile::writeJson(QJsonObject& json) const
 {
 	DeviceSettingsCommon::writeJson(json);
 
-	json["name"]          = Name.c_str();
-	json["exclusiveMode"] = ExclusiveMode;
-	json["useXInput"]     = UseXInput;
-	json["autoXInput"]    = AutoXInputIndex;
-	json["xinputIndex"]   = XInputIndex;
+	json["name"]          = name.c_str();
+	json["exclusiveMode"] = exclusiveMode;
+	json["useXInput"]     = useXInput;
+	json["autoXInput"]    = autoXInputIndex;
+	json["xinputIndex"]   = xinputIndex;
 
 	QJsonObject touchRegions_;
 
-	for (auto& pair : TouchRegions)
+	for (auto& pair : touchRegions)
 	{
 		touchRegions_[pair.first.c_str()] = pair.second.toJson();
 	}
@@ -117,7 +117,7 @@ void DeviceProfile::writeJson(QJsonObject& json) const
 
 	QJsonArray bindings_;
 
-	for (auto& binding : Modifiers)
+	for (auto& binding : modifiers)
 	{
 		bindings_.append(binding.toJson());
 	}
@@ -126,7 +126,7 @@ void DeviceProfile::writeJson(QJsonObject& json) const
 
 	QJsonArray modifiers_;
 
-	for (auto& modifier : Modifiers)
+	for (auto& modifier : modifiers)
 	{
 		modifiers_.append(modifier.toJson());
 	}
@@ -591,396 +591,9 @@ const char* defaultProfileJson = "{" \
 
 #pragma endregion
 
-DeviceProfile DeviceProfile::Default()
+DeviceProfile DeviceProfile::defaultProfile()
 {
 	auto obj = QJsonDocument::fromJson(QString(defaultProfileJson).toUtf8());
 	auto result = fromJson<DeviceProfile>(obj.object());
-
-/*
-	result.Light = Ds4LightOptions(Ds4Color(0, 0, 255));
-	result.Idle  = DeviceIdleOptions(DeviceIdleOptions::Default);
-
-	Ds4TouchRegion leftHalf(Ds4TouchRegionType::button, 0, 0, 959, 941);
-	result.TouchRegions["Left Half"] = leftHalf;
-
-	Ds4TouchRegion rightHalf(Ds4TouchRegionType::StickAutoCenter, 960, 0, 1919, 941);
-
-	InputAxisOptions touchAxes[4] = {};
-
-	for (auto& a : touchAxes)
-	{
-		a.DeadZone = 0.25f;
-	}
-
-	rightHalf.TouchAxisOptions[Direction::Up]    = touchAxes[0];
-	rightHalf.TouchAxisOptions[Direction::Down]  = touchAxes[1];
-	rightHalf.TouchAxisOptions[Direction::Left]  = touchAxes[2];
-	rightHalf.TouchAxisOptions[Direction::Right] = touchAxes[3];
-
-	result.TouchRegions["Right Half"] = rightHalf;
-
-	InputModifier leftHalfModifier(InputType::touchRegion, "Left Half");
-
-	const auto rapidFireInterval = duration_cast<high_resolution_clock::duration>(duration<double, std::milli>(1000.0 / 60.0));
-	InputMap map;
-
-	map                   = InputMap(SimulatorType::Input, InputType::button, OutputType::XInput);
-	map.InputButtons      = Ds4Buttons::Cross;
-	map.RapidFire         = true;
-	map.RapidFireInterval = duration_cast<high_resolution_clock::duration>(duration<double, std::milli>(1000.0 / 60.0));
-	map.XInputButtons     = XInputButtons::A;
-
-	Modifiers.push_back(map);
-
-	map                   = InputMap(SimulatorType::Input, InputType::button, OutputType::XInput);
-	map.InputButtons      = Ds4Buttons::Circle;
-	map.RapidFire         = true;
-	map.RapidFireInterval = rapidFireInterval;
-	map.XInputButtons     = XInputButtons::B;
-
-	map                   = InputMap(SimulatorType::Input, InputType::button, OutputType::XInput);
-	map.InputButtons      = Ds4Buttons::Square;
-	map.RapidFire         = true;
-	map.RapidFireInterval = rapidFireInterval;
-	map.XInputButtons     = XInputButtons::X;
-
-	InputMap(SimulatorType::Input, InputType::button, OutputType::XInput)
-	{
-		InputButtons = Ds4Buttons::Triangle;
-		RapidFire = true;
-		RapidFireInterval = TimeSpan.FromMilliseconds(1000.0 / 60.0);
-		XInputButtons = XInputButtons::Y;
-	};
-	InputMap(SimulatorType::Input, InputType::button, OutputType::XInput)
-	{
-		InputButtons = Ds4Buttons::Options;
-		RapidFire = true;
-		RapidFireInterval = TimeSpan.FromMilliseconds(1000.0 / 60.0);
-		XInputButtons = XInputButtons::Start;
-	};
-	InputMap(SimulatorType::Input, InputType::button, OutputType::XInput)
-	{
-		InputButtons = Ds4Buttons::Share;
-		RapidFire = true;
-		RapidFireInterval = TimeSpan.FromMilliseconds(1000.0 / 60.0);
-		XInputButtons = XInputButtons::Back;
-	}
-
-	Modifiers = 
-	{
-		InputModifier()
-		{
-			Bindings =
-			{
-				
-			}
-		};
-		InputModifier(InputType::touchRegion, "Right Half")
-		{
-			Bindings = std::list<InputMap>
-			{
-				InputMap(SimulatorType::Input, InputType::button, OutputType::XInput)
-				{
-					InputButtons  = Ds4Buttons::TouchButton;
-					XInputButtons = XInputButtons::LeftThumb
-				}
-			}
-		};
-		InputModifier(InputType::button, Ds4Buttons::PS)
-		{
-			Bindings = std::list<InputMap>
-			{
-				InputMap(SimulatorType::Action, InputType::button, OutputType::None)
-				{
-					InputButtons = Ds4Buttons::Options;
-					Action       = ActionType::BluetoothDisconnect
-				}
-			}
-		}
-	};
-
-	Bindings = 
-	{
-		#pragma region Touch Binds
-
-		InputMap(SimulatorType::Input, InputType::touchRegion, OutputType::XInput)
-		{
-			InputRegion    = "Right Half";
-			TouchDirection = Direction::Up;
-			XInputButtons  = XInputButtons::DPadUp
-		};
-		InputMap(SimulatorType::Input, InputType::touchRegion, OutputType::XInput)
-		{
-			InputRegion    = "Right Half";
-			TouchDirection = Direction::Down;
-			XInputButtons  = XInputButtons::DPadDown
-		};
-		InputMap(SimulatorType::Input, InputType::touchRegion, OutputType::XInput)
-		{
-			InputRegion    = "Right Half";
-			TouchDirection = Direction::Left;
-			XInputButtons  = XInputButtons::DPadLeft
-		};
-		InputMap(SimulatorType::Input, InputType::touchRegion, OutputType::XInput)
-		{
-			InputRegion    = "Right Half";
-			TouchDirection = Direction::Right;
-			XInputButtons  = XInputButtons::DPadRight
-		};
-
-	#pragma endregion
-
-		#pragma region Buttons
-
-		InputMap(SimulatorType::Input, InputType::button, OutputType::XInput)
-		{
-			InputButtons  = Ds4Buttons::Cross;
-			XInputButtons = XInputButtons::A
-		};
-		InputMap(SimulatorType::Input, InputType::button, OutputType::XInput)
-		{
-			InputButtons  = Ds4Buttons::Circle;
-			XInputButtons = XInputButtons::B
-		};
-		InputMap(SimulatorType::Input, InputType::button, OutputType::XInput)
-		{
-			InputButtons  = Ds4Buttons::Square;
-			XInputButtons = XInputButtons::X
-		};
-		InputMap(SimulatorType::Input, InputType::button, OutputType::XInput)
-		{
-			InputButtons  = Ds4Buttons::Triangle;
-			XInputButtons = XInputButtons::Y
-		};
-
-		InputMap(SimulatorType::Input, InputType::button, OutputType::XInput)
-		{
-			InputButtons  = Ds4Buttons::L1;
-			XInputButtons = XInputButtons::LeftShoulder
-		};
-		InputMap(SimulatorType::Input, InputType::button, OutputType::XInput)
-		{
-			InputButtons  = Ds4Buttons::R1;
-			XInputButtons = XInputButtons::RightShoulder
-		};
-		InputMap(SimulatorType::Input, InputType::button, OutputType::XInput)
-		{
-			InputButtons  = Ds4Buttons::L3;
-			XInputButtons = XInputButtons::LeftThumb
-		};
-		InputMap(SimulatorType::Input, InputType::button, OutputType::XInput)
-		{
-			InputButtons  = Ds4Buttons::R3;
-			XInputButtons = XInputButtons::RightThumb
-		};
-
-		InputMap(SimulatorType::Input, InputType::button, OutputType::XInput)
-		{
-			InputButtons  = Ds4Buttons::Options;
-			XInputButtons = XInputButtons::Start
-		};
-		InputMap(SimulatorType::Input, InputType::button, OutputType::XInput)
-		{
-			InputButtons  = Ds4Buttons::Share;
-			XInputButtons = XInputButtons::Back
-		};
-
-		InputMap(SimulatorType::Input, InputType::button, OutputType::XInput)
-		{
-			InputButtons  = Ds4Buttons::Up;
-			XInputButtons = XInputButtons::DPadUp
-		};
-		InputMap(SimulatorType::Input, InputType::button, OutputType::XInput)
-		{
-			InputButtons  = Ds4Buttons::Down;
-			XInputButtons = XInputButtons::DPadDown
-		};
-		InputMap(SimulatorType::Input, InputType::button, OutputType::XInput)
-		{
-			InputButtons  = Ds4Buttons::Left;
-			XInputButtons = XInputButtons::DPadLeft
-		};
-		InputMap(SimulatorType::Input, InputType::button, OutputType::XInput)
-		{
-			InputButtons  = Ds4Buttons::Right;
-			XInputButtons = XInputButtons::DPadRight
-		};
-
-		InputMap(SimulatorType::Input, InputType::button, OutputType::XInput)
-		{
-			InputButtons  = Ds4Buttons::PS;
-			XInputButtons = XInputButtons::Guide
-		};
-
-	#pragma endregion
-
-		#pragma region Axes
-
-		InputMap(SimulatorType::Input, InputType::axis, OutputType::XInput)
-		{
-			InputAxis = Ds4Axis::leftStickY;
-
-			InputAxisOptions = std::unordered_map<Ds4Axis, InputAxisOptions>
-			{
-				{ Ds4Axis::leftStickY, InputAxisOptions(AxisPolarity::positive) }
-			};
-
-			XInputAxes = XInputAxes
-			{
-				Axes    = XInputAxis::leftStickY;
-				Options = std::unordered_map<XInputAxis, AxisOptions>
-				{
-					{ XInputAxis::leftStickY, AxisOptions(AxisPolarity::positive) }
-				}
-			}
-		};
-		InputMap(SimulatorType::Input, InputType::axis, OutputType::XInput)
-		{
-			InputAxis = Ds4Axis::leftStickY;
-
-			InputAxisOptions = std::unordered_map<Ds4Axis, InputAxisOptions>
-			{
-				{ Ds4Axis::leftStickY, InputAxisOptions(AxisPolarity::negative) }
-			};
-
-			XInputAxes = XInputAxes
-			{
-				Axes    = XInputAxis::leftStickY;
-				Options = std::unordered_map<XInputAxis, AxisOptions>
-				{
-					{ XInputAxis::leftStickY, AxisOptions(AxisPolarity::negative) }
-				}
-			}
-		};
-		InputMap(SimulatorType::Input, InputType::axis, OutputType::XInput)
-		{
-			InputAxis = Ds4Axis::leftStickX;
-
-			InputAxisOptions = std::unordered_map<Ds4Axis, InputAxisOptions>
-			{
-				{ Ds4Axis::leftStickX, InputAxisOptions(AxisPolarity::positive) }
-			};
-
-			XInputAxes = XInputAxes
-			{
-				Axes    = XInputAxis::leftStickX;
-				Options = std::unordered_map<XInputAxis, AxisOptions>
-				{
-					{ XInputAxis::leftStickX, AxisOptions(AxisPolarity::positive) }
-				}
-			}
-		};
-		InputMap(SimulatorType::Input, InputType::axis, OutputType::XInput)
-		{
-			InputAxis = Ds4Axis::leftStickX;
-
-			InputAxisOptions = std::unordered_map<Ds4Axis, InputAxisOptions>
-			{
-				{ Ds4Axis::leftStickX, InputAxisOptions(AxisPolarity::negative) }
-			};
-
-			XInputAxes = XInputAxes
-			{
-				Axes    = XInputAxis::leftStickX;
-				Options = std::unordered_map<XInputAxis, AxisOptions>
-				{
-					{ XInputAxis::leftStickX, AxisOptions(AxisPolarity::negative) }
-				}
-			}
-		};
-
-		InputMap(SimulatorType::Input, InputType::axis, OutputType::XInput)
-		{
-			InputAxis = Ds4Axis::rightStickY;
-
-			InputAxisOptions = std::unordered_map<Ds4Axis, InputAxisOptions>
-			{
-				{ Ds4Axis::rightStickY, InputAxisOptions(AxisPolarity::positive) }
-			};
-
-			XInputAxes = XInputAxes
-			{
-				Axes    = XInputAxis::rightStickY;
-				Options = std::unordered_map<XInputAxis, AxisOptions>
-				{
-					{ XInputAxis::rightStickY, AxisOptions(AxisPolarity::positive) }
-				}
-			}
-		};
-		InputMap(SimulatorType::Input, InputType::axis, OutputType::XInput)
-		{
-			InputAxis = Ds4Axis::rightStickY;
-
-			InputAxisOptions = std::unordered_map<Ds4Axis, InputAxisOptions>
-			{
-				{ Ds4Axis::rightStickY, InputAxisOptions(AxisPolarity::negative) }
-			};
-
-			XInputAxes = XInputAxes
-			{
-				Axes    = XInputAxis::rightStickY;
-				Options = std::unordered_map<XInputAxis, AxisOptions>
-				{
-					{ XInputAxis::rightStickY, AxisOptions(AxisPolarity::negative) }
-				}
-			}
-		};
-		InputMap(SimulatorType::Input, InputType::axis, OutputType::XInput)
-		{
-			InputAxis = Ds4Axis::rightStickX;
-
-			InputAxisOptions = std::unordered_map<Ds4Axis, InputAxisOptions>
-			{
-				{ Ds4Axis::rightStickX, InputAxisOptions(AxisPolarity::positive) }
-			};
-
-			XInputAxes = XInputAxes
-			{
-				Axes    = XInputAxis::rightStickX;
-				Options = std::unordered_map<XInputAxis, AxisOptions>
-				{
-					{ XInputAxis::rightStickX, AxisOptions(AxisPolarity::positive) }
-				}
-			}
-		};
-		InputMap(SimulatorType::Input, InputType::axis, OutputType::XInput)
-		{
-			InputAxis = Ds4Axis::rightStickX;
-
-			InputAxisOptions = std::unordered_map<Ds4Axis, InputAxisOptions>
-			{
-				{ Ds4Axis::rightStickX, InputAxisOptions(AxisPolarity::negative) }
-			};
-
-			XInputAxes = XInputAxes
-			{
-				Axes    = XInputAxis::rightStickX;
-				Options = std::unordered_map<XInputAxis, AxisOptions>
-				{
-					{ XInputAxis::rightStickX, AxisOptions(AxisPolarity::negative) }
-				}
-			}
-		};
-
-		InputMap(SimulatorType::Input, InputType::axis, OutputType::XInput)
-		{
-			InputAxis  = Ds4Axis::leftTrigger;
-			XInputAxes = XInputAxes
-			{
-				Axes = XInputAxis::leftTrigger
-			}
-		};
-		InputMap(SimulatorType::Input, InputType::axis, OutputType::XInput)
-		{
-			InputAxis  = Ds4Axis::rightTrigger;
-			XInputAxes = XInputAxes
-			{
-				Axes = XInputAxis::rightTrigger
-			}
-		}
-
-		#pragma endregion
-	}*/
-
 	return result;
 }
