@@ -902,10 +902,6 @@ void Ds4Device::RunMap(InputMap& m, InputModifier* modifier)
 					{
 						Pressable::Release(state);
 					}
-					else if (m.InputRegion == "Right Half")
-					{
-						qDebug() << "that's deadzone-wang";
-					}
 
 					region.ApplyDeadZone(direction, analog);
 					ApplyMap(m, modifier, state, analog);
