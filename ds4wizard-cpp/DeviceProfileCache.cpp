@@ -155,14 +155,15 @@ void DeviceProfileCache::loadImpl()
 		QDir dir(Program::profilesPath());
 		if (dir.exists())
 		{
-			for (QString& filename : dir.entryList({ "*.json" }, QDir::Files))
+			for (QString& fileName : dir.entryList({ "*.json" }, QDir::Files))
 			{
-				QFile file(filename);
+				QString filePath = dir.filePath(fileName);
+				QFile file(filePath);
 
 				if (!file.open(QFile::ReadOnly))
 				{
 					std::stringstream msg;
-					msg << "unable to open device profile " << filename.toStdString() << " for reading";
+					msg << "unable to open device profile " << filePath.toStdString() << " for reading";
 
 					throw std::runtime_error(msg.str());
 				}
