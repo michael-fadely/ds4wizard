@@ -261,3 +261,4 @@ __pycache__/
 *.pyc
 
 ds4wizard-cpp/GeneratedFiles/*
+/cppcheck-build-dir
