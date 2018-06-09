@@ -8,11 +8,11 @@ void DeviceProfileCache::Load()
 	OnLoaded();
 }
 
-std::unique_ptr<DeviceProfile> DeviceProfileCache::GetProfile(const std::string& profileName)
+std::optional<DeviceProfile> DeviceProfileCache::GetProfile(const std::string& profileName)
 {
 	if (profileName.empty())
 	{
-		return {};
+		return std::nullopt;
 	}
 
 	lock(profile);
@@ -20,17 +20,17 @@ std::unique_ptr<DeviceProfile> DeviceProfileCache::GetProfile(const std::string&
 	return FindProfile(profileName);
 }
 
-std::unique_ptr<DeviceSettings> DeviceProfileCache::GetSettings(const std::string& id)
+std::optional<DeviceSettings> DeviceProfileCache::GetSettings(const std::string& id)
 {
 	lock(deviceSettings);
 	const auto it = deviceSettings.find(id);
 
 	if (it == deviceSettings.end())
 	{
-		return nullptr;
+		return std::nullopt;
 	}
 
-	return std::make_unique<DeviceSettings>(it->second);
+	return it->second;
 }
 
 void DeviceProfileCache::SaveSettings(const std::string& id, const DeviceSettings& settings)
@@ -123,7 +123,7 @@ void DeviceProfileCache::UpdateProfile(const DeviceProfile& last, const DevicePr
 	}
 }
 
-std::unique_ptr<DeviceProfile> DeviceProfileCache::FindProfile(const std::string& profileName)
+std::optional<DeviceProfile> DeviceProfileCache::FindProfile(const std::string& profileName)
 {
 	/*return Profiles.FirstOrDefault(x => x.FileName.Equals(profileName, StringComparison.InvariantCultureIgnoreCase)
 	                                   || x.Name.Equals(profileName, StringComparison.InvariantCultureIgnoreCase));*/
@@ -133,11 +133,11 @@ std::unique_ptr<DeviceProfile> DeviceProfileCache::FindProfile(const std::string
 		// TODO: case insensitive
 		if (profile.FileName() == profileName || profile.Name == profileName)
 		{
-			return std::make_unique<DeviceProfile>(profile);
+			return profile;
 		}
 	}
 
-	return nullptr;
+	return std::nullopt;
 }
 
 void DeviceProfileCache::LoadImpl()

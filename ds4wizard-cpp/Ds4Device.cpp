@@ -94,7 +94,7 @@ Ds4Device::Ds4Device(hid::HidInstance& device)
 	}
 
 	auto settings = Program::ProfileCache.GetSettings(MacAddress);
-	if (settings == nullptr)
+	if (!settings.has_value())
 	{
 		Settings = {};
 	}
@@ -118,7 +118,7 @@ void Ds4Device::ApplyProfile()
 	ReleaseAutoColor();
 
 	auto profile = Program::ProfileCache.GetProfile(Settings.Profile);
-	if (profile == nullptr)
+	if (!profile.has_value())
 	{
 		Settings.Profile = {};
 		Profile = DeviceProfile::Default();
