@@ -4,7 +4,7 @@
 
 bool Ds4Stick::operator==(const Ds4Stick& other) const
 {
-	return X == other.X && Y == other.Y;
+	return x == other.x && y == other.y;
 }
 
 bool Ds4Stick::operator!=(const Ds4Stick& right) const
@@ -12,42 +12,42 @@ bool Ds4Stick::operator!=(const Ds4Stick& right) const
 	return !(*this == right);
 }
 
-double Ds4Stick::LengthSquared() const
+double Ds4Stick::lengthSquared() const
 {
-	return X * X + Y * Y;
+	return x * x + y * y;
 }
 
-double Ds4Stick::Length() const
+double Ds4Stick::length() const
 {
-	return std::sqrt(LengthSquared());
+	return std::sqrt(lengthSquared());
 }
 
-bool Ds4Vector2::operator==(Ds4Vector2 other) const
+bool Ds4Vector2::operator==(const Ds4Vector2& other) const
 {
-	return X == other.X && Y == other.Y;
+	return x == other.x && y == other.y;
 }
 
-double Ds4Vector2::LengthSquared() const
+double Ds4Vector2::lengthSquared() const
 {
-	return X * X + Y * Y;
+	return x * x + y * y;
 }
 
-double Ds4Vector2::Length() const
+double Ds4Vector2::length() const
 {
-	return std::sqrt(LengthSquared());
+	return std::sqrt(lengthSquared());
 }
 
-bool Ds4Vector3::operator==(Ds4Vector3 other) const
+bool Ds4Vector3::operator==(const Ds4Vector3& other) const
 {
-	return X == other.X && Y == other.Y && Z == other.Z;
+	return x == other.x && y == other.y && z == other.z;
 }
 
-double Ds4Vector3::LengthSquared() const
+double Ds4Vector3::lengthSquared() const
 {
-	return X * X + Y * Y + Z * Z;
+	return x * x + y * y + z * z;
 }
 
-double Ds4Vector3::Length() const
+double Ds4Vector3::length() const
 {
-	return std::sqrt(LengthSquared());
+	return std::sqrt(lengthSquared());
 }

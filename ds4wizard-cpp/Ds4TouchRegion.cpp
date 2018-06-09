@@ -24,7 +24,7 @@ Ds4TouchRegion::Ds4TouchRegion(const Ds4TouchRegion& other)
 
 bool Ds4TouchRegion::IsInRegion(Ds4Buttons_t sender, const Ds4Vector2& point) const
 {
-	return IsInRegion(sender, point.X, point.Y);
+	return IsInRegion(sender, point.x, point.y);
 }
 
 bool Ds4TouchRegion::IsInRegion(Ds4Buttons_t sender, short x, short y) const
@@ -103,18 +103,18 @@ void Ds4TouchRegion::SetInactive(Ds4Buttons_t sender)
 
 float Ds4TouchRegion::GetTouchDelta(Ds4Buttons_t sender, Direction_t direction, const Ds4Vector2& point) const
 {
-	short x = std::clamp(point.X, Left, Right);
-	short y = std::clamp(point.Y, Top, Bottom);
+	short x = std::clamp(point.x, Left, Right);
+	short y = std::clamp(point.y, Top, Bottom);
 
 	if (Type == +Ds4TouchRegionType::stickAutoCenter)
 	{
 		Ds4Vector2 start = GetStartPoint(sender);
 
-		int width  = std::max(start.X - Left, Right - start.X);
-		int height = std::max(start.Y - Top, Bottom - start.Y);
+		int width  = std::max(start.x - Left, Right - start.x);
+		int height = std::max(start.y - Top, Bottom - start.y);
 
-		short sx = start.X;
-		short sy = start.Y;
+		short sx = start.x;
+		short sy = start.y;
 
 		float result;
 

@@ -27,7 +27,7 @@ private:
 	XInputGamepad lastGamepad {};
 	uint8_t lastTouchFrame {};
 
-	void _addButton(uint8_t pressed, Ds4Buttons_t buttons);
+	void addButton(bool pressed, Ds4Buttons_t buttons);
 
 public:
 	void Update(const gsl::span<uint8_t>& buffer, int i);

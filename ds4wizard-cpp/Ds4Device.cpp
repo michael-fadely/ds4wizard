@@ -50,12 +50,12 @@ bool Ds4Device::Connected()
 
 uint8_t Ds4Device::Battery() const
 {
-	return Input.Data.Battery;
+	return Input.Data.battery;
 }
 
 bool Ds4Device::Charging() const
 {
-	return Input.Data.Charging;
+	return Input.Data.charging;
 }
 
 const std::string& Ds4Device::Name() const
@@ -896,7 +896,7 @@ void Ds4Device::RunMap(InputMap& m, InputModifier* modifier)
 					float deadZone = region.GetDeadZone(direction);
 
 					PressedState state = HandleTouchToggle(m, modifier, region.State1);
-					float analog = region.GetTouchDelta(Ds4Buttons::touch1, direction, Input.Data.TouchPoint1);
+					float analog = region.GetTouchDelta(Ds4Buttons::touch1, direction, Input.Data.touchPoint1);
 
 					if (analog < deadZone)
 					{
@@ -907,7 +907,7 @@ void Ds4Device::RunMap(InputMap& m, InputModifier* modifier)
 					ApplyMap(m, modifier, state, analog);
 
 					state  = HandleTouchToggle(m, modifier, region.State2);
-					analog = region.GetTouchDelta(Ds4Buttons::touch2, direction, Input.Data.TouchPoint2);
+					analog = region.GetTouchDelta(Ds4Buttons::touch2, direction, Input.Data.touchPoint2);
 
 					if (analog < deadZone)
 					{
@@ -939,7 +939,7 @@ PressedState Ds4Device::HandleTouchToggle(InputMap& m, InputModifier* modifier, 
 		return m.SimulatedState();
 	}
 
-	PressedState state = (m.IsToggled || (modifier && modifier->IsActive() == true)) ? pressable.State : m.State;
+	PressedState state = (m.IsToggled || (modifier && modifier->IsActive())) ? pressable.State : m.State;
 
 	if (!Pressable::IsActiveState(state))
 	{
@@ -1215,8 +1215,8 @@ void Ds4Device::UpdateTouchRegions()
 			continue;
 		}
 
-		UpdateTouchRegion(*region, /* TODO */ nullptr, Ds4Buttons::touch1, Input.Data.TouchPoint1, disallow);
-		UpdateTouchRegion(*region, /* TODO */ nullptr, Ds4Buttons::touch2, Input.Data.TouchPoint2, disallow);
+		UpdateTouchRegion(*region, /* TODO */ nullptr, Ds4Buttons::touch1, Input.Data.touchPoint1, disallow);
+		UpdateTouchRegion(*region, /* TODO */ nullptr, Ds4Buttons::touch2, Input.Data.touchPoint2, disallow);
 	}
 }
 
@@ -1224,14 +1224,14 @@ void Ds4Device::UpdateTouchRegion(Ds4TouchRegion& region, InputModifier* modifie
 {
 	if ((disallow & sender) == 0 && (Input.HeldButtons & sender) != 0)
 	{
-		if (region.IsInRegion(sender, point) && modifier)
+		if (region.IsInRegion(sender, point))
 		{
-			if (modifier->IsActive() == false)
+			if (modifier && !modifier->IsActive())
 			{
 				UpdatePressedState(*modifier);
 			}
 
-			if (modifier && modifier->IsActive() != false)
+			if (!modifier || modifier->IsActive())
 			{
 				region.SetActive(sender, point);
 
