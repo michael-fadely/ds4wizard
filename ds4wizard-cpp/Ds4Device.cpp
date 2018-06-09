@@ -183,7 +183,7 @@ bool Ds4Device::scpDeviceOpen()
 	}
 
 	// TODO: detect toggle of auto index and disconnect/reconnect the device
-	int index = profile.autoXInputIndex ? ScpDevice::GetFreePort() : profile.xinputIndex;
+	int index = profile.autoXInputIndex ? ScpDevice::getFreePort() : profile.xinputIndex;
 
 	if (index < 0)
 	{
@@ -707,7 +707,7 @@ void Ds4Device::simulateXInputAxis(XInputAxes& axes, float m)
 
 		const auto axis = static_cast<short>(std::numeric_limits<short>::max() * m);
 
-		const short workAxis = options.polarity.value_or(AxisPolarity::positive) == +AxisPolarity::negative
+		const short workAxis = options.polarity == +AxisPolarity::negative
 			                 ? static_cast<short>(-axis)
 			                 : axis;
 
@@ -943,7 +943,7 @@ void Ds4Device::runMap(InputMap& m, InputModifier* modifier)
 
 PressedState Ds4Device::handleTouchToggle(InputMap& m, InputModifier* modifier, const Pressable& pressable)
 {
-	if (m.touchDirection != Direction::none)
+	if (m.touchDirection.has_value() && m.touchDirection != Direction::none)
 	{
 		return m.isToggled ? m.simulatedState() : pressable.pressedState;
 	}
@@ -1000,7 +1000,7 @@ void Ds4Device::applyMap(InputMap& m, InputModifier* modifier, PressedState stat
 			break;
 
 		case SimulatorType::action:
-			if (m.action.value_or(ActionType::none) == +ActionType::none)
+			if (!m.action.has_value() || m.action.value() == +ActionType::none)
 			{
 				throw /* TODO: new ArgumentNullException(nameof(m.action))*/;
 			}
@@ -1295,14 +1295,14 @@ void Ds4Device::updatePressedStateImpl(InputMapBase& instance, const std::functi
 
 			case InputType::axis:
 			{
-				if (instance.inputAxis.value_or(0) == 0)
+				if (!instance.inputAxis.has_value() || instance.inputAxis.value() == 0)
 				{
 					throw /* TODO: new ArgumentNullException(nameof(instance.InputAxis))*/;
 				}
 
 				const gsl::span<const Ds4Axis_t> s(Ds4Axis_values);
 
-				size_t target = std::count_if(s.begin(), s.end(), [&](Ds4Axis_t x) -> bool { return (x & instance.inputAxis.value_or(0)) != 0; });
+				const size_t target = std::count_if(s.begin(), s.end(), [&](Ds4Axis_t x) -> bool { return (x & instance.inputAxis.value_or(0)) != 0; });
 				size_t count  = 0;
 
 				for (Ds4Axis_t bit : Ds4Axis_values)

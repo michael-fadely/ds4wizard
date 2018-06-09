@@ -53,7 +53,7 @@ public:
 	virtual void press() override;
 
 protected:
-	void UpdateRapidState();
+	void updateRapidState();
 
 public:
 	virtual void release() override;

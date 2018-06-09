@@ -8,7 +8,7 @@
 #include "Ds4Device.h"
 #include <iomanip>
 
-bool Ds4DeviceManager::isDS4(const hid::HidInstance& hid)
+bool Ds4DeviceManager::isDs4(const hid::HidInstance& hid)
 {
 	if (hid.attributes().vendorId == vendorId)
 	{
@@ -24,10 +24,10 @@ bool Ds4DeviceManager::isDS4(const hid::HidInstance& hid)
 	return false;
 }
 
-bool Ds4DeviceManager::isDS4(const std::wstring& devicePath)
+bool Ds4DeviceManager::isDs4(const std::wstring& devicePath)
 {
 	const hid::HidInstance hid(devicePath, true);
-	return isDS4(hid);
+	return isDs4(hid);
 }
 
 void Ds4DeviceManager::findControllers()

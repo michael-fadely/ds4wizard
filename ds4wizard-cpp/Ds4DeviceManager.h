@@ -85,14 +85,14 @@ public:
 	/// </summary>
 	/// <param name="hid">The HID instance to be checked.</param>
 	/// <returns><value>true</value> if this device is a DualShock 4.</returns>
-	static bool isDS4(const hid::HidInstance& hid);
+	static bool isDs4(const hid::HidInstance& hid);
 
 	/// <summary>
 	/// Checks if a device is a DualShock 4.
 	/// </summary>
 	/// <param name="devicePath">The path to the device to be checked.</param>
 	/// <returns><value>true</value> if this device is a DualShock 4.</returns>
-	static bool isDS4(const std::wstring& devicePath);
+	static bool isDs4(const std::wstring& devicePath);
 
 	/// <summary>
 	/// Discovers and connects to all DualShock 4 devices.

@@ -44,16 +44,16 @@ bool InputMapBase::isPersistent() const
 }
 
 InputMapBase::InputMapBase(const InputMapBase& other)
-	: Pressable(other)
+	: Pressable(other),
+	  inputType(other.inputType),
+	  inputButtons(other.inputButtons),
+	  inputAxis(other.inputAxis),
+	  inputRegion(other.inputRegion),
+	  toggle(other.toggle),
+	  rapidFire(other.rapidFire),
+	  rapidFireInterval(other.rapidFireInterval),
+	  inputAxisOptions(other.inputAxisOptions)
 {
-	inputType         = other.inputType;
-	inputButtons      = other.inputButtons;
-	inputAxis         = other.inputAxis;
-	inputRegion       = other.inputRegion;
-	toggle            = other.toggle;
-	rapidFire         = other.rapidFire;
-	rapidFireInterval = other.rapidFireInterval;
-	inputAxisOptions  = other.inputAxisOptions;
 }
 
 InputMapBase::InputMapBase(InputType_t inputType)
@@ -63,7 +63,7 @@ InputMapBase::InputMapBase(InputType_t inputType)
 
 InputMapBase::InputMapBase(InputType_t inputType, Ds4Buttons::T input)
 {
-	this->inputType    = inputType;
+	this->inputType = inputType;
 	inputButtons = input;
 }
 
@@ -75,7 +75,7 @@ InputMapBase::InputMapBase(InputType_t inputType, Ds4Axis::T input)
 
 InputMapBase::InputMapBase(InputType_t inputType, const std::string& input)
 {
-	this->inputType   = inputType;
+	this->inputType = inputType;
 	inputRegion = input;
 }
 
@@ -90,11 +90,11 @@ void InputMapBase::press()
 
 	if (rapidFire == true)
 	{
-		UpdateRapidState();
+		updateRapidState();
 	}
 }
 
-void InputMapBase::UpdateRapidState()
+void InputMapBase::updateRapidState()
 {
 	if (isActive())
 	{
@@ -149,7 +149,7 @@ void InputMapBase::release()
 
 	if (rapidFire == true)
 	{
-		UpdateRapidState();
+		updateRapidState();
 	}
 }
 
@@ -158,7 +158,7 @@ InputAxisOptions InputMapBase::getAxisOptions(Ds4Axis_t axis)
 	if (inputAxisOptions.empty())
 	{
 		// HACK: remove
-		return ::InputAxisOptions();
+		return InputAxisOptions();
 	}
 
 	const auto it = inputAxisOptions.find(axis);
@@ -169,7 +169,7 @@ InputAxisOptions InputMapBase::getAxisOptions(Ds4Axis_t axis)
 	}
 
 	// HACK: remove
-	return ::InputAxisOptions();
+	return InputAxisOptions();
 }
 
 bool InputMapBase::operator==(const InputMapBase& other) const
@@ -235,7 +235,7 @@ void InputMapBase::readJson(const QJsonObject& json)
 	{
 		Ds4Axis_t flags;
 		ENUM_DESERIALIZE_FLAGS(Ds4Axis)(key.toStdString(), flags);
-		inputAxisOptions[flags] = fromJson<::InputAxisOptions>(inputAxisOptions_[key].toObject());
+		inputAxisOptions[flags] = fromJson<InputAxisOptions>(inputAxisOptions_[key].toObject());
 	}
 }
 
@@ -299,12 +299,10 @@ InputModifier::InputModifier(InputType_t type, const std::string& region)
 InputModifier::InputModifier(const InputModifier& other)
 	: InputMapBase(other)
 {
-	if (other.bindings.empty())
+	if (!other.bindings.empty())
 	{
-		return;
+		bindings = other.bindings;
 	}
-
-	bindings = other.bindings;
 }
 
 bool InputModifier::operator==(const InputModifier& other) const
@@ -344,19 +342,18 @@ void InputModifier::writeJson(QJsonObject& json) const
 }
 
 InputMap::InputMap(const InputMap& other)
-	: InputMapBase(other)
+	: InputMapBase(other),
+	  simulatorType(other.simulatorType),
+	  outputType(other.outputType),
+	  action(other.action),
+	  touchDirection(other.touchDirection),
+	  //KeyCode(other.KeyCode),
+	  mouseAxes(other.mouseAxes),
+	  //MouseButton(other.MouseButton),
+	  xinputButtons(other.xinputButtons),
+	  xinputAxes(other.xinputAxes)
+	  //KeyCodeModifiers (other.KeyCodeModifiers),
 {
-	simulatorType    = other.simulatorType;
-	outputType       = other.outputType;
-	action           = other.action;
-	touchDirection   = other.touchDirection;
-	//KeyCode        = other.KeyCode;
-	mouseAxes        = other.mouseAxes;
-	//MouseButton    = other.MouseButton;
-	xinputButtons    = other.xinputButtons;
-	xinputAxes       = other.xinputAxes;
-
-	//KeyCodeModifiers = other.KeyCodeModifiers;
 }
 
 InputMap::InputMap(SimulatorType simulatorType, InputType_t inputType, OutputType::T outputType)
@@ -372,9 +369,9 @@ void InputMap::pressModifier(const InputModifier* modifier)
 	{
 		InputMapBase::press();
 	}
-	else if (toggle && rapidFire)
+	else if (toggle.value_or(false) && rapidFire.value_or(false))
 	{
-		UpdateRapidState();
+		updateRapidState();
 	}
 }
 

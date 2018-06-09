@@ -5,7 +5,7 @@
 #include "busenum.h"
 #include "lock.h"
 
-int ScpDevice::GetFreePort()
+int ScpDevice::getFreePort()
 {
 	lock(portLock);
 	{

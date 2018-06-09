@@ -41,7 +41,7 @@ class ScpDevice
 	};
 
 public:
-	static int GetFreePort();
+	static int getFreePort();
 
 private:
 	std::array<uint8_t, 4> leds {};

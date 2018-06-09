@@ -2,24 +2,24 @@
 #include "Ds4TouchRegion.h"
 
 Ds4TouchRegion::Ds4TouchRegion(Ds4TouchRegionType type, short left, short top, short right, short bottom, bool allowCrossOver)
+	: type(type),
+	  allowCrossOver(allowCrossOver),
+	  left(left),
+	  top(top),
+	  right(right),
+	  bottom(bottom)
 {
-	this->type           = type;
-	this->allowCrossOver = allowCrossOver;
-	this->left           = left;
-	this->top            = top;
-	this->right          = right;
-	this->bottom         = bottom;
 }
 
 Ds4TouchRegion::Ds4TouchRegion(const Ds4TouchRegion& other)
+	: type(other.type),
+	  allowCrossOver(other.allowCrossOver),
+	  left(other.left),
+	  top(other.top),
+	  right(other.right),
+	  bottom(other.bottom),
+	  touchAxisOptions(other.touchAxisOptions)
 {
-	type             = other.type;
-	allowCrossOver   = other.allowCrossOver;
-	left             = other.left;
-	top              = other.top;
-	right            = other.right;
-	bottom           = other.bottom;
-	touchAxisOptions = other.touchAxisOptions;
 }
 
 bool Ds4TouchRegion::isInRegion(Ds4Buttons_t sender, const Ds4Vector2& point) const
@@ -211,7 +211,7 @@ void Ds4TouchRegion::readJson(const QJsonObject& json)
 
 	for (const auto& key : touchAxisOptions_.keys())
 	{
-		auto stdstr = key.toStdString();
+		const std::string stdstr = key.toStdString();
 
 		Direction_t value;
 		ENUM_DESERIALIZE_FLAGS(Direction)(stdstr, value);

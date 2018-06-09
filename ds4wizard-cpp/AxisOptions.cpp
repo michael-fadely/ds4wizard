@@ -2,14 +2,14 @@
 #include "AxisOptions.h"
 
 AxisOptions::AxisOptions(AxisPolarity polarity)
+	: polarity(polarity)
 {
-	polarity = polarity;
 }
 
 AxisOptions::AxisOptions(const AxisOptions& other)
+	: multiplier(other.multiplier),
+	  polarity(other.polarity)
 {
-	multiplier = other.multiplier;
-	polarity   = other.polarity;
 }
 
 bool AxisOptions::operator==(const AxisOptions& other) const
