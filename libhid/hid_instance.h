@@ -7,7 +7,7 @@
 #include <vector>
 
 #include <gsl/span>
-#include "handle.h"
+#include "hid_handle.h"
 
 namespace hid
 {

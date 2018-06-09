@@ -140,14 +140,14 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="handle.h" />
+    <ClInclude Include="hid_handle.h" />
     <ClInclude Include="hid_instance.h" />
-    <ClInclude Include="util.h" />
+    <ClInclude Include="hid_util.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="handle.cpp" />
+    <ClCompile Include="hid_handle.cpp" />
     <ClCompile Include="hid_instance.cpp" />
-    <ClCompile Include="util.cpp" />
+    <ClCompile Include="hid_util.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

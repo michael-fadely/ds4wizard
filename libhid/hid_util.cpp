@@ -8,13 +8,13 @@
 #include <functional>
 
 #include "hid_instance.h"
-#include "util.h"
+#include "hid_util.h"
 
-std::wstring hid::get_device_path(const HDEVINFO dev_info_set, SP_DEVICE_INTERFACE_DATA* interface, SP_DEVINFO_DATA* data) noexcept
+std::wstring hid::getDevicePath(const HDEVINFO devInfoSet, SP_DEVICE_INTERFACE_DATA* interface, SP_DEVINFO_DATA* data) noexcept
 {
 	DWORD size = 0;
 
-	SetupDiGetDeviceInterfaceDetail(dev_info_set, interface, nullptr, 0, &size, data);
+	SetupDiGetDeviceInterfaceDetail(devInfoSet, interface, nullptr, 0, &size, data);
 
 	auto detail = static_cast<PSP_DEVICE_INTERFACE_DETAIL_DATA>(malloc(offsetof(SP_DEVICE_INTERFACE_DETAIL_DATA, DevicePath) + size + sizeof(TCHAR)));
 
@@ -25,7 +25,7 @@ std::wstring hid::get_device_path(const HDEVINFO dev_info_set, SP_DEVICE_INTERFA
 
 	detail->cbSize = sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA);
 
-	bool success = SetupDiGetDeviceInterfaceDetail(dev_info_set, interface, detail, size, &size, data);
+	bool success = SetupDiGetDeviceInterfaceDetail(devInfoSet, interface, detail, size, &size, data);
 
 	std::wstring result;
 
@@ -38,11 +38,11 @@ std::wstring hid::get_device_path(const HDEVINFO dev_info_set, SP_DEVICE_INTERFA
 	return result;
 }
 
-std::wstring hid::get_instance_id(const HDEVINFO dev_info_set, SP_DEVINFO_DATA* dev_info_data) noexcept
+std::wstring hid::getInstanceId(const HDEVINFO devInfoSet, SP_DEVINFO_DATA* devInfoData) noexcept
 {
 	std::wstring result;
 	DWORD required = 0;
-	SetupDiGetDeviceInstanceId(dev_info_set, dev_info_data, nullptr, 0, &required);
+	SetupDiGetDeviceInstanceId(devInfoSet, devInfoData, nullptr, 0, &required);
 
 	if (!required)
 	{
@@ -51,7 +51,7 @@ std::wstring hid::get_instance_id(const HDEVINFO dev_info_set, SP_DEVINFO_DATA* 
 
 	auto buffer = new wchar_t[required];
 
-	if (SetupDiGetDeviceInstanceId(dev_info_set, dev_info_data, buffer, required, &required))
+	if (SetupDiGetDeviceInstanceId(devInfoSet, devInfoData, buffer, required, &required))
 	{
 		result = std::wstring(buffer);
 	}
@@ -60,7 +60,7 @@ std::wstring hid::get_instance_id(const HDEVINFO dev_info_set, SP_DEVINFO_DATA* 
 	return result;
 }
 
-bool hid::enum_guid(const std::function<bool(const std::wstring& path, const std::wstring& instanceId)>& fn, const GUID& guid) noexcept
+bool hid::enumerateGUID(const std::function<bool(const std::wstring& path, const std::wstring& instanceId)>& fn, const GUID& guid) noexcept
 {
 	const HDEVINFO dev_info = SetupDiGetClassDevs(&guid, nullptr, nullptr, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
 
@@ -78,8 +78,8 @@ bool hid::enum_guid(const std::function<bool(const std::wstring& path, const std
 
 		for (size_t j = 0; SetupDiEnumDeviceInterfaces(dev_info, &dev_info_data, &guid, static_cast<DWORD>(j), &interface_data); j++)
 		{
-			std::wstring path(get_device_path(dev_info, &interface_data));
-			std::wstring instance_id(get_instance_id(dev_info, &dev_info_data));
+			std::wstring path(getDevicePath(dev_info, &interface_data));
+			std::wstring instance_id(getInstanceId(dev_info, &dev_info_data));
 
 			if (fn(path, instance_id))
 			{
@@ -98,7 +98,7 @@ bool hid::enum_guid(const std::function<bool(const std::wstring& path, const std
 	return false;
 }
 
-void hid::enum_hid(const std::function<bool(HidInstance& instance)>& fn) noexcept
+void hid::enumerateHID(const std::function<bool(HidInstance& instance)>& fn) noexcept
 {
 	GUID guid = {};
 	HidD_GetHidGuid(&guid);
@@ -118,10 +118,10 @@ void hid::enum_hid(const std::function<bool(HidInstance& instance)>& fn) noexcep
 		return false;
 	};
 
-	enum_guid(callback, guid);
+	enumerateGUID(callback, guid);
 }
 
-void hid::enum_usb(const std::function<bool(const std::wstring& path, const std::wstring& instanceId)>& fn) noexcept
+void hid::enumerateUSB(const std::function<bool(const std::wstring& path, const std::wstring& instanceId)>& fn) noexcept
 {
-	enum_guid(fn, GUID_DEVINTERFACE_USB_HUB);
+	enumerateGUID(fn, GUID_DEVINTERFACE_USB_HUB);
 }

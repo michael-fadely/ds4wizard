@@ -3,7 +3,7 @@
 #include <winioctl.h>
 #include <BluetoothAPIs.h>
 #include <Bthioctl.h>
-#include <handle.h>
+#include <hid_handle.h>
 
 bool Bluetooth::disconnectDevice(const gsl::span<uint8_t>& macAddress)
 {

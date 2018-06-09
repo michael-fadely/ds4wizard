@@ -5,13 +5,13 @@
 #include <sstream>
 #include <iomanip>
 
-#include <handle.h>
+#include <hid_handle.h>
+#include <hid_util.h>
 
 #include "Ds4Device.h"
 #include "lock.h"
 #include "program.h"
 #include "DeviceProfileCache.h"
-#include "util.h"
 #include "Bluetooth.h"
 #include "Ds4AutoLightColor.h"
 #include "ScpDevice.h"
@@ -95,7 +95,7 @@ Ds4Device::Ds4Device(hid::HidInstance& device)
 		setupUsbOutputBuffer();
 	}
 
-	auto settings = Program::ProfileCache.getSettings(macAddress);
+	auto settings = Program::profileCache.getSettings(macAddress);
 	if (!settings.has_value())
 	{
 		settings = {};
@@ -111,7 +111,7 @@ Ds4Device::Ds4Device(hid::HidInstance& device)
 void Ds4Device::saveSettings()
 {
 	lock(sync);
-	Program::ProfileCache.saveSettings(macAddress, settings);
+	Program::profileCache.saveSettings(macAddress, settings);
 }
 
 void Ds4Device::applyProfile()
@@ -119,7 +119,7 @@ void Ds4Device::applyProfile()
 	lock(sync);
 	releaseAutoColor();
 
-	auto cachedProfile = Program::ProfileCache.getProfile(settings.profile);
+	auto cachedProfile = Program::profileCache.getProfile(settings.profile);
 	if (!cachedProfile.has_value())
 	{
 		settings.profile = {};
@@ -192,7 +192,7 @@ bool Ds4Device::scpDeviceOpen()
 
 	std::unique_ptr<hid::HidInstance> info;
 
-	hid::enum_guid([&](const std::wstring& path, const std::wstring& instanceId) -> bool
+	hid::enumerateGUID([&](const std::wstring& path, const std::wstring& instanceId) -> bool
 	{
 		info = std::make_unique<hid::HidInstance>(path, instanceId, true);
 		return true;

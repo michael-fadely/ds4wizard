@@ -13,7 +13,7 @@ class Program
 	inline static bool isElevated_ = false;
 
 public:
-	static DeviceProfileCache ProfileCache;
+	static DeviceProfileCache profileCache;
 	static Settings settings;
 
 	static const QString& settingsPath();

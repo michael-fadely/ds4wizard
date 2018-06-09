@@ -3,7 +3,7 @@
 #include <hidpi.h>
 #include <utility>
 #include "hid_instance.h"
-#include "handle.h"
+#include "hid_handle.h"
 
 using namespace hid;
 

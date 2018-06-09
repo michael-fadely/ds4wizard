@@ -18,21 +18,21 @@
     <ClInclude Include="hid_instance.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="util.h">
+    <ClInclude Include="hid_util.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="handle.h">
+    <ClInclude Include="hid_handle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="util.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="hid_instance.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="handle.cpp">
+    <ClCompile Include="hid_util.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="hid_handle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

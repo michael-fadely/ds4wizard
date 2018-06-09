@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <mutex>
 
-#include <handle.h>
+#include <hid_handle.h>
 
 #include "XInputGamepad.h"
 

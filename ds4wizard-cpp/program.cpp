@@ -26,7 +26,7 @@ BOOL IsElevated()
 	return fRet;
 }
 
-DeviceProfileCache Program::ProfileCache {};
+DeviceProfileCache Program::profileCache {};
 Settings Program::settings {};
 Settings Program::lastSettings {};
 QString Program::settingsPath_;

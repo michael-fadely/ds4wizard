@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "Ds4DeviceManager.h"
 #include "lock.h"
-#include "util.h"
+#include <hid_util.h>
 #include <sstream>
 #include "program.h"
 #include <shellapi.h>
@@ -34,7 +34,7 @@ void Ds4DeviceManager::findControllers()
 {
 	lock(sync);
 
-	hid::enum_hid([&](hid::HidInstance& hid) -> bool
+	hid::enumerateHID([&](hid::HidInstance& hid) -> bool
 	{
 		if (hid.attributes().vendorId != vendorId)
 		{
@@ -202,7 +202,7 @@ void Ds4DeviceManager::toggleDevice(const std::wstring& instanceId)
 		throw std::runtime_error(message.str());
 	}
 
-	SP_PROPCHANGE_PARAMS propChangeParams {};
+	SP_PROPCHANGE_PARAMS propChangeParams;
 
 	propChangeParams.ClassInstallHeader.cbSize          = sizeof(SP_CLASSINSTALL_HEADER);
 	propChangeParams.ClassInstallHeader.InstallFunction = DIF_PROPERTYCHANGE;

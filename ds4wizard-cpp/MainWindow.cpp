@@ -33,9 +33,9 @@ MainWindow::MainWindow(QWidget* parent)
 	registerDeviceNotification();
 
 	deviceManager = std::make_shared<Ds4DeviceManager>();
-	Program::ProfileCache.setDevices(deviceManager);
+	Program::profileCache.setDevices(deviceManager);
 
-	Program::ProfileCache.load();
+	Program::profileCache.load();
 	deviceManager->findControllers();
 }
 
