@@ -22,7 +22,7 @@ void Logger::writeLine(LogLevel level, const std::string& line)
 	message << std::put_time(std::localtime(&t), "%F %T") << " [" << level._to_string() << "] " << line;
 
 	qDebug() << message.str().c_str();
-	onLineLogged(LineLoggedEventArgs(level, line));
+	onLineLogged(level, line);
 }
 
 void Logger::writeLine(LogLevel level, const std::string& context, const std::string& line)
@@ -33,8 +33,10 @@ void Logger::writeLine(LogLevel level, const std::string& context, const std::st
 	writeLine(level, message.str());
 }
 
-void Logger::onLineLogged(const LineLoggedEventArgs& e)
+void Logger::onLineLogged(LogLevel level, const std::string& line)
 {
 	lock(sync);
-	// TODO: LineLogged?.Invoke(null, e);
+
+	auto args = LineLoggedEventArgs(level, line);
+	lineLogged.invoke(nullptr, &args);
 }

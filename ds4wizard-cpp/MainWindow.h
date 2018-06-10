@@ -3,6 +3,7 @@
 #include <QtWidgets/QMainWindow>
 #include "ui_mainwindow.h"
 #include "Ds4DeviceManager.h"
+#include "Logger.h"
 
 class MainWindow : public QMainWindow
 {
@@ -21,6 +22,7 @@ private:
 	bool supportsSystemTray = false;
 	QSystemTrayIcon* trayIcon = nullptr;
 	PVOID notificationHandle = nullptr;
+	void something(void* sender, LineLoggedEventArgs* args) const;
 
 	void registerDeviceNotification();
 	void unregisterDeviceNotification();

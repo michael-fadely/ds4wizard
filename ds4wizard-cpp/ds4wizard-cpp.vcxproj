@@ -141,6 +141,7 @@
     <ClCompile Include="Ds4Output.cpp" />
     <ClCompile Include="Ds4TouchRegion.cpp" />
     <ClCompile Include="enums.cpp" />
+    <ClCompile Include="EventHandler.cpp" />
     <ClCompile Include="filesystem.cpp" />
     <ClCompile Include="InputMap.cpp" />
     <ClCompile Include="Logger.cpp" />
@@ -176,6 +177,7 @@
     <ClInclude Include="Ds4Output.h" />
     <ClInclude Include="Ds4TouchRegion.h" />
     <ClInclude Include="enums.h" />
+    <ClInclude Include="EventHandler.h" />
     <ClInclude Include="filesystem.h" />
     <ClInclude Include="InputMap.h" />
     <ClInclude Include="JsonData.h" />

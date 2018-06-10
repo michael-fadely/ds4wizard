@@ -4,6 +4,7 @@
 #include "DeviceProfileCache.h"
 #include "program.h"
 #include "Ds4DeviceManager.h"
+#include "Logger.h"
 
 MainWindow::MainWindow(QWidget* parent)
 	: QMainWindow(parent)
@@ -36,6 +37,8 @@ MainWindow::MainWindow(QWidget* parent)
 			show();
 		}
 	}
+
+	Logger::lineLogged += std::bind(&MainWindow::something, this, std::placeholders::_1, std::placeholders::_2);
 
 	ui.checkMinimizeToTray->setChecked(Program::settings.minimizeToTray);
 	ui.checkStartMinimized->setChecked(Program::settings.startMinimized);
@@ -80,6 +83,38 @@ void MainWindow::changeEvent(QEvent* e)
 	}
 
 	QMainWindow::changeEvent(e);
+}
+
+void MainWindow::something(void* sender, LineLoggedEventArgs* args) const
+{
+	if (!supportsSystemTray)
+	{
+		return;
+	}
+
+	QSystemTrayIcon::MessageIcon icon;
+	QString title;
+
+	switch (args->level)
+	{
+		default:
+		case LogLevel::info:
+			icon = QSystemTrayIcon::MessageIcon::Information;
+			title = "Info";
+			break;
+
+		case LogLevel::warning:
+			icon = QSystemTrayIcon::MessageIcon::Warning;
+			title = "Warning";
+			break;
+
+		case LogLevel::error:
+			icon = QSystemTrayIcon::MessageIcon::Critical;
+			title = "Error";
+			break;
+	}
+
+	trayIcon->showMessage(title, QString::fromStdString(args->line), icon);
 }
 
 void MainWindow::registerDeviceNotification()

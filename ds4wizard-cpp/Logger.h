@@ -4,6 +4,7 @@
 #include <mutex>
 #include <string>
 #include <enum.h>
+#include "EventHandler.h"
 
 BETTER_ENUM(LogLevel, int, info, warning, error);
 
@@ -37,7 +38,7 @@ class Logger
 	inline static std::recursive_mutex sync_lock;
 
 public:
-	// TODO: public static event EventHandler<LineLoggedEventArgs> LineLogged;
+	static inline EventHandler<LineLoggedEventArgs> lineLogged;
 
 	/// <summary>
 	/// Submits a line to the logger and notifies all registered events.
@@ -56,5 +57,5 @@ public:
 	static void writeLine(LogLevel level, const std::string& context, const std::string& line);
 
 private:
-	static void onLineLogged(const LineLoggedEventArgs& e);
+	static void onLineLogged(LogLevel level, const std::string& line);
 };
