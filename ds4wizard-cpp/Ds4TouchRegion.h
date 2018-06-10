@@ -20,13 +20,13 @@ BETTER_ENUM(Ds4TouchRegionType, int, none, button, stick, stickAutoCenter)
 class Ds4TouchRegion : public JsonData
 {
 	/*[JsonIgnore]*/
-	Ds4Vector2 PointStart1 {};
+	Ds4Vector2 pointStart1 {};
 	/*[JsonIgnore]*/
-	Ds4Vector2 PointStart2 {};
+	Ds4Vector2 pointStart2 {};
 
 public:
 	/*[JsonIgnore]*/
-	Ds4Buttons_t activeButtons = 0; // TODO: private set
+	Ds4Buttons_t activeButtons; // TODO: private set
 
 	/*[JsonIgnore]*/
 	Pressable state1;

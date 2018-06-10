@@ -2,7 +2,8 @@
 #include "Ds4TouchRegion.h"
 
 Ds4TouchRegion::Ds4TouchRegion(Ds4TouchRegionType type, short left, short top, short right, short bottom, bool allowCrossOver)
-	: type(type),
+	: activeButtons(0),
+	  type(type),
 	  allowCrossOver(allowCrossOver),
 	  left(left),
 	  top(top),
@@ -12,7 +13,8 @@ Ds4TouchRegion::Ds4TouchRegion(Ds4TouchRegionType type, short left, short top, s
 }
 
 Ds4TouchRegion::Ds4TouchRegion(const Ds4TouchRegion& other)
-	: type(other.type),
+	: activeButtons(0),
+	  type(other.type),
 	  allowCrossOver(other.allowCrossOver),
 	  left(other.left),
 	  top(other.top),
@@ -41,12 +43,12 @@ Ds4Vector2 Ds4TouchRegion::getStartPoint(Ds4Buttons_t sender) const
 {
 	if ((sender & Ds4Buttons::touch1) != 0)
 	{
-		return PointStart1;
+		return pointStart1;
 	}
 
 	if ((sender & Ds4Buttons::touch2) != 0)
 	{
-		return PointStart2;
+		return pointStart2;
 	}
 
 	return {};
@@ -54,7 +56,7 @@ Ds4Vector2 Ds4TouchRegion::getStartPoint(Ds4Buttons_t sender) const
 
 bool Ds4TouchRegion::isActive(Ds4Buttons_t sender) const
 {
-	return (activeButtons & sender) != 0;
+	return (activeButtons & (sender & (Ds4Buttons::touch1 | Ds4Buttons::touch2))) != 0;
 }
 
 void Ds4TouchRegion::setActive(Ds4Buttons_t sender, const Ds4Vector2& point)
@@ -74,21 +76,21 @@ void Ds4TouchRegion::setActive(Ds4Buttons_t sender, const Ds4Vector2& point)
 		return;
 	}
 
-	activeButtons |= sender;
+	activeButtons |= sender & (Ds4Buttons::touch1 | Ds4Buttons::touch2);
 
 	if ((sender & Ds4Buttons::touch1) != 0)
 	{
-		PointStart1 = point;
+		pointStart1 = point;
 	}
 	else if ((sender & Ds4Buttons::touch2) != 0)
 	{
-		PointStart2 = point;
+		pointStart2 = point;
 	}
 }
 
 void Ds4TouchRegion::setInactive(Ds4Buttons_t sender)
 {
-	activeButtons &= ~sender;
+	activeButtons &= ~(sender & (Ds4Buttons::touch1 | Ds4Buttons::touch2));
 
 	if ((sender & Ds4Buttons::touch1) != 0)
 	{
