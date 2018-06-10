@@ -893,7 +893,7 @@ void Ds4Device::runMap(InputMap& m, InputModifier* modifier)
 
 			case InputType::touchRegion:
 			{
-				Ds4TouchRegion region = profile.touchRegions[m.inputRegion];
+				Ds4TouchRegion& region = profile.touchRegions[m.inputRegion];
 
 				if (region.type == +Ds4TouchRegionType::button || !m.touchDirection.has_value() || m.touchDirection == Direction::none)
 				{
