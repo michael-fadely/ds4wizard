@@ -278,7 +278,7 @@ void Ds4Device::releaseAutoColor()
 	colorIndex = -1;
 }
 
-void Ds4Device::OnProfileChanged(const std::string& newName)
+void Ds4Device::onProfileChanged(const std::string& newName)
 {
 	lock(sync);
 	settings.profile = newName.empty() ? std::string() : newName;
@@ -288,37 +288,51 @@ void Ds4Device::OnProfileChanged(const std::string& newName)
 
 Ds4Device::~Ds4Device()
 {
-	close();
+	try
+	{
+		close();
+	}
+	catch (std::exception&)
+	{
+		// ignored
+	}
 }
 
 void Ds4Device::closeImpl()
 {
-	if (!connected())
+	lock(sync);
+	running = false;
+
+	bool was_connected = connected();
+
+	closeUsbDevice();
+	closeBluetoothDevice();
+
+	scpDeviceClose();
+	releaseAutoColor();
+
+	if (was_connected)
 	{
-		return;
+		onDeviceClosed();
 	}
-
-	{
-		lock(sync);
-
-		closeUsbDevice();
-		closeBluetoothDevice();
-		scpDeviceClose();
-		releaseAutoColor();
-	}
-
-	OnDeviceClosed();
 }
 
 void Ds4Device::close()
 {
+	running = false;
+
+	if (deviceThread->get_id() == std::this_thread::get_id())
+	{
+		deviceThread->detach();
+		deviceThread = nullptr;
+	}
+
 	if (!deviceThread)
 	{
 		closeImpl();
 		return;
 	}
 
-	running = false;
 	deviceThread->join();
 	deviceThread = nullptr;
 }
@@ -594,7 +608,7 @@ void Ds4Device::run()
 		if (charging_ != charging() || battery_ != battery())
 		{
 			settings.displayNotifications(this);
-			OnBatteryLevelChanged();
+			onBatteryLevelChanged();
 		}
 
 #if false
@@ -623,14 +637,13 @@ void Ds4Device::run()
 				usbDevice->Write(volume);
 			}
 #endif
-
-		std::this_thread::yield();
+		//std::this_thread::yield();
 	}
 	else
 	{
 		input.updateChangedState();
 		runPersistent();
-		std::this_thread::sleep_for(1ms);
+		//std::this_thread::sleep_for(1ms);
 	}
 }
 
@@ -642,16 +655,28 @@ void Ds4Device::controllerThread()
 
 	while (connected() && running)
 	{
-		lock(sync);
-		run();
+		{
+			lock(sync);
+			run();
+		}
+
+		if (dataReceived)
+		{
+			std::this_thread::yield();
+		}
+		else
+		{
+			std::this_thread::sleep_for(1ms);
+		}
 	}
 
 	closeImpl();
+	onDeviceClosed();
 }
 
-void Ds4Device::OnDeviceClosed()
+void Ds4Device::onDeviceClosed()
 {
-	// TODO: DeviceClosed.Invoke(this, EventArgs.Empty);
+	deviceClosed.invoke(this, nullptr);
 }
 
 void Ds4Device::start()
@@ -663,9 +688,9 @@ void Ds4Device::start()
 	}
 }
 
-void Ds4Device::OnBatteryLevelChanged()
+void Ds4Device::onBatteryLevelChanged()
 {
-	// TODO: BatteryLevelChanged.Invoke(this, EventArgs.Empty);
+	batteryLevelChanged.invoke(this, nullptr);
 }
 
 void Ds4Device::simulateXInputButton(XInputButtons_t buttons, PressedState state)

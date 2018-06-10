@@ -7,42 +7,43 @@
 
 #include <hid_instance.h>
 #include "Ds4Device.h"
+#include "EventHandler.h"
 
-/* TODO
 class DeviceOpenedEventArgs
 {
+public:
 	/// <summary>
 	/// The device that triggered the event.
 	/// </summary>
-	public Ds4Device Device { get; }
+	const std::shared_ptr<Ds4Device> Device;
 
 		/// <summary>
 		/// <value>true</value> if this is the first connection for this
 		/// device, <value>false</value> if an additional connection has
 		/// been added to this device.
 		/// </summary>
-	public bool Unique { get; }
+	const bool Unique;
 
-		public DeviceOpenedEventArgs(Ds4Device device, bool unique)
+	DeviceOpenedEventArgs(std::shared_ptr<Ds4Device> device, bool unique)
+		: Device(std::move(device)),
+		  Unique(unique)
 	{
-		Device = device;
-		Unique = unique;
 	}
-}
+};
 
-public class DeviceClosedEventArgs
+class DeviceClosedEventArgs
 {
+public:
 	/// <summary>
 	/// The device that triggered the event.
 	/// </summary>
-	public Ds4Device Device { get; }
+	const std::shared_ptr<Ds4Device> Device;
 
-		public DeviceClosedEventArgs(Ds4Device device)
+	explicit DeviceClosedEventArgs(std::shared_ptr<Ds4Device> device)
+		: Device(std::move(device))
 	{
-		Device = device;
 	}
-}
-*/
+};
 
 class Ds4DeviceManager
 {
@@ -64,13 +65,13 @@ public:
 	/// Fired when a device is opened.
 	/// </summary>
 	/// <seealso cref="DeviceOpenedEventArgs"/>
-	//event EventHandler<DeviceOpenedEventArgs> DeviceOpened; // TODO
+	EventHandler<DeviceOpenedEventArgs> DeviceOpened; // TODO
 
 	/// <summary>
 	/// Fired when a device is closed.
 	/// </summary>
 	/// <seealso cref="DeviceClosedEventArgs"/>
-	//event EventHandler<DeviceClosedEventArgs> DeviceClosed; // TODO
+	EventHandler<DeviceClosedEventArgs> DeviceClosed; // TODO
 
 	/* TODO
 	IEnumerable<Ds4Device> Enumerate()
@@ -100,17 +101,7 @@ public:
 	void findControllers();
 
 private:
-	/* TODO: void OnDs4DeviceClosed(object sender, EventArgs eventArgs)
-	{
-		if (!(sender is Ds4Device device))
-		{
-			return;
-		}
-
-		lock(devices);
-		OnDeviceClosed(new DeviceClosedEventArgs(device));
-		devices.Remove(device.SafeMacAddress);
-	}*/
+	void onDs4DeviceClosed(void* sender, EventArgs* eventArgs);
 
 public:
 	/// <summary>
@@ -127,13 +118,6 @@ public:
 private:
 	static void toggleDevice(const std::wstring& instanceId);
 
-	/* TODO: void OnDeviceOpened(DeviceOpenedEventArgs e)
-	{
-		DeviceOpened?.Invoke(this, e);
-	}*/
-
-	/* TODO: void OnDeviceClosed(DeviceClosedEventArgs e)
-	{
-		DeviceClosed?.Invoke(this, e);
-	}*/
+	void onDeviceOpened(DeviceOpenedEventArgs& e);
+	void onDeviceClosed(DeviceClosedEventArgs& e);
 };

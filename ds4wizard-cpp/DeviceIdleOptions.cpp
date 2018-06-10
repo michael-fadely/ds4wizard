@@ -1,10 +1,10 @@
 #include "stdafx.h"
 #include "DeviceIdleOptions.h"
 
-const DeviceIdleOptions DeviceIdleOptions::defaultIdleOptions(std::chrono::seconds(5), true, TimeUnit::minutes);
+const DeviceIdleOptions DeviceIdleOptions::defaultIdleOptions(std::chrono::minutes(5), true, TimeUnit::minutes);
 
-DeviceIdleOptions::DeviceIdleOptions(std::chrono::nanoseconds timeout, bool disconnect, TimeUnit unit)
-	: timeout(timeout),
+DeviceIdleOptions::DeviceIdleOptions(std::chrono::milliseconds timeout, bool disconnect, TimeUnit unit)
+	: timeout(std::move(timeout)),
 	  disconnect(disconnect),
 	  unit(unit)
 {

@@ -141,7 +141,6 @@
     <ClCompile Include="Ds4Output.cpp" />
     <ClCompile Include="Ds4TouchRegion.cpp" />
     <ClCompile Include="enums.cpp" />
-    <ClCompile Include="EventHandler.cpp" />
     <ClCompile Include="filesystem.cpp" />
     <ClCompile Include="InputMap.cpp" />
     <ClCompile Include="Logger.cpp" />

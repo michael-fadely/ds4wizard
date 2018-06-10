@@ -3,9 +3,13 @@
 #include <deque>
 #include <functional>
 
-class EventHandlerArgs {};
+class EventArgs
+{
+public:
+	static inline EventArgs const* Empty = nullptr;
+};
 
-template <typename args_t>
+template <typename args_t = EventArgs>
 class EventHandler
 {
 public:

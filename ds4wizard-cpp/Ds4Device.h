@@ -13,6 +13,7 @@
 #include "ScpDevice.h"
 #include "Ds4Input.h"
 #include "Ds4Output.h"
+#include "EventHandler.h"
 
 class Ds4Device
 {
@@ -63,8 +64,8 @@ private:
 	bool isIdle() const;
 
 public:
-	//event EventHandler DeviceClosed; // TODO
-	//event EventHandler BatteryLevelChanged; // TODO
+	EventHandler<EventArgs> deviceClosed;
+	EventHandler<EventArgs> batteryLevelChanged;
 
 	DeviceSettings settings;
 	DeviceProfile profile;
@@ -110,7 +111,7 @@ private:
 	void releaseAutoColor();
 
 public:
-	void OnProfileChanged(const std::string& newName);
+	void onProfileChanged(const std::string& newName);
 	void close();
 
 private:
@@ -130,13 +131,13 @@ private:
 	void writeBluetooth();
 	void run();
 	void controllerThread();
-	void OnDeviceClosed();
+	void onDeviceClosed();
 
 public:
 	void start();
 
 private:
-	void OnBatteryLevelChanged();
+	void onBatteryLevelChanged();
 
 #pragma region shit
 	static constexpr Ds4Buttons_t touchMask = Ds4Buttons::touch1 | Ds4Buttons::touch2;

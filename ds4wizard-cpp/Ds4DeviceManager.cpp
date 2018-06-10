@@ -101,11 +101,15 @@ void Ds4DeviceManager::findControllers()
 
 			if (it == devices.end())
 			{
+				// TODO: don't toggle the device unless opening exclusively fails!
 				queueDeviceToggle(hid.instanceId);
-				device = std::make_shared<Ds4Device>(hid);
-				// TODO: device->DeviceClosed += OnDs4DeviceClosed
 
-				// TODO: OnDeviceOpened(new DeviceOpenedEventArgs(device, true));
+				device = std::make_shared<Ds4Device>(hid);
+				device->deviceClosed += std::bind(&Ds4DeviceManager::onDs4DeviceClosed, this,
+				                                  std::placeholders::_1, std::placeholders::_2);
+
+				DeviceOpenedEventArgs args(device, true);
+				onDeviceOpened(args);
 				device->start();
 
 				auto& safe = device->safeMacAddress;
@@ -114,10 +118,13 @@ void Ds4DeviceManager::findControllers()
 			}
 			else
 			{
+				device = it->second;
+
 				if (isBluetooth)
 				{
 					if (!device->bluetoothConnected())
 					{
+						// TODO: don't toggle the device unless opening exclusively fails!
 						queueDeviceToggle(hid.instanceId);
 						device->openBluetoothDevice(hid);
 					}
@@ -126,12 +133,14 @@ void Ds4DeviceManager::findControllers()
 				{
 					if (!device->usbConnected())
 					{
+						// TODO: don't toggle the device unless opening exclusively fails!
 						queueDeviceToggle(hid.instanceId);
 						device->openUsbDevice(hid);
 					}
 				}
 
-				// TODO: OnDeviceOpened(new DeviceOpenedEventArgs(device, false));
+				DeviceOpenedEventArgs args(device, false);
+				onDeviceOpened(args);
 			}
 		}
 		catch (const std::exception& ex)
@@ -144,14 +153,31 @@ void Ds4DeviceManager::findControllers()
 	});
 }
 
-void Ds4DeviceManager::close()
+void Ds4DeviceManager::onDs4DeviceClosed(void* sender, EventArgs*)
 {
 	lock(devices);
 
-	/*for (auto& pair : devices)
+	auto raw_ptr = reinterpret_cast<Ds4Device*>(sender);
+
+	const auto macaddr = std::wstring(raw_ptr->safeMacAddress.begin(), raw_ptr->safeMacAddress.end());
+	auto it = devices.find(macaddr);
+
+	if (it == devices.end())
 	{
-		pair.second->Close();
-	}*/
+		return;
+	}
+
+	std::shared_ptr<Ds4Device> ptr = it->second;
+
+	DeviceClosedEventArgs args(ptr);
+	onDeviceClosed(args);
+
+	it = devices.erase(it);
+}
+
+void Ds4DeviceManager::close()
+{
+	lock(devices);
 
 	// shared_ptr will run the destructors and cause all the devices to close
 	devices.clear();
@@ -159,6 +185,7 @@ void Ds4DeviceManager::close()
 
 void Ds4DeviceManager::queueDeviceToggle(const std::wstring& instanceId)
 {
+	return; // HACK !!!!!!!!
 	toggleDeviceElevated(instanceId);
 }
 
@@ -273,4 +300,14 @@ void Ds4DeviceManager::toggleDevice(const std::wstring& instanceId)
 	}
 
 	SetupDiDestroyDeviceInfoList(devInfoSet);
+}
+
+void Ds4DeviceManager::onDeviceOpened(DeviceOpenedEventArgs& e)
+{
+	DeviceOpened.invoke(this, &e);
+}
+
+void Ds4DeviceManager::onDeviceClosed(DeviceClosedEventArgs& e)
+{
+	DeviceClosed.invoke(this, &e);
 }

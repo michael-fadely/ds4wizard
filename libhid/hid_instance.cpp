@@ -100,7 +100,7 @@ void HidInstance::readMetadata()
 	{
 		readCaps();
 		readAttributes();
-		//readSerial();
+		readSerial();
 		return;
 	}
 
@@ -120,7 +120,7 @@ void HidInstance::readMetadata()
 
 	readCaps(h.nativeHandle);
 	readAttributes(h.nativeHandle);
-	//readSerial(h.handle);
+	readSerial(h.nativeHandle);
 }
 
 void HidInstance::readCaps()

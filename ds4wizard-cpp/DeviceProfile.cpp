@@ -582,7 +582,7 @@ const char* defaultProfileJson = "{" \
 "  \"idle\": {" \
 "    \"disconnect\": true," \
 "    \"unit\": \"minutes\"," \
-"    \"timeSpan\": 300000" \
+"    \"timeout\": 300000" \
 "  }," \
 "  \"notifyFullyCharged\": true," \
 "  \"notifyBatteryLow\": 2," \
