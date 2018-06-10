@@ -88,7 +88,7 @@ namespace hid
 		bool isExclusive() const;
 		bool isAsync() const;
 		bool readPending() const;
-		bool writePending();
+		bool writePending() const;
 		const HidCaps& caps() const;
 		const HidAttributes& attributes() const;
 

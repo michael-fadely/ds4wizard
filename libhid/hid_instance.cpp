@@ -79,15 +79,8 @@ bool HidInstance::readPending() const
 	return pending_read_;
 }
 
-bool HidInstance::writePending()
+bool HidInstance::writePending() const
 {
-	if (!isAsync() || !pending_write_)
-	{
-		return false;
-	}
-
-	DWORD bytes_written;
-	pending_write_ = !GetOverlappedResult(handle.nativeHandle, &overlap_out, &bytes_written, FALSE);
 	return pending_write_;
 }
 
@@ -295,12 +288,7 @@ bool HidInstance::write() const
 
 bool HidInstance::writeAsync(const void* buffer, size_t size)
 {
-	if (writePending())
-	{
-		return false;
-	}
-
-	if (WriteFile(handle.nativeHandle, buffer, static_cast<DWORD>(size), nullptr, &overlap_out))
+	if (!pending_write_ && WriteFile(handle.nativeHandle, buffer, static_cast<DWORD>(size), nullptr, &overlap_out))
 	{
 		return false;
 	}
@@ -316,8 +304,9 @@ bool HidInstance::writeAsync(const void* buffer, size_t size)
 		case ERROR_IO_INCOMPLETE:
 		case ERROR_IO_PENDING:
 		{
-			writePending();
-			return false;
+			DWORD bytes_written;
+			pending_write_ = !GetOverlappedResult(handle.nativeHandle, &overlap_out, &bytes_written, FALSE);
+			break;
 		}
 
 		default:
