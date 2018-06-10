@@ -1,7 +1,8 @@
 #pragma once
 
-#include <string>
 #include <chrono>
+#include <mutex>
+#include <string>
 #include <enum.h>
 
 BETTER_ENUM(LogLevel, int, info, warning, error);
@@ -15,25 +16,25 @@ public:
 	/// <summary>
 	/// The time that this line was submitted.
 	/// </summary>
-	const std::chrono::system_clock::time_point Time;
+	const std::chrono::system_clock::time_point time;
 
 	/// <summary>
 	/// Error level.
 	/// </summary>
 	/// <seealso cref="LogLevel"/>
-	const LogLevel Level;
+	const LogLevel level;
 
 	/// <summary>
 	/// The line of text submitted.
 	/// </summary>
-	const std::string Line;
+	const std::string line;
 
 	LineLoggedEventArgs(LogLevel level, std::string line);
 };
 
 class Logger
 {
-	static std::recursive_mutex sync_lock;
+	inline static std::recursive_mutex sync_lock;
 
 public:
 	// TODO: public static event EventHandler<LineLoggedEventArgs> LineLogged;
@@ -43,7 +44,7 @@ public:
 	/// </summary>
 	/// <param name="level">Error level.</param>
 	/// <param name="line">Line of text to be submitted.</param>
-	static void WriteLine(LogLevel level, const std::string& line);
+	static void writeLine(LogLevel level, const std::string& line);
 
 	/// <summary>
 	/// Submits a line (with context) to the logger and notifies all registered events.
@@ -52,8 +53,8 @@ public:
 	/// <param name="level">Error level.</param>
 	/// <param name="context">Context of this line.</param>
 	/// <param name="line">Line of text to be submitted.</param>
-	static void WriteLine(LogLevel level, const std::string& context, const std::string& line);
+	static void writeLine(LogLevel level, const std::string& context, const std::string& line);
 
 private:
-	static void OnLineLogged(const LineLoggedEventArgs& e);
+	static void onLineLogged(const LineLoggedEventArgs& e);
 };

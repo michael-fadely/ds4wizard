@@ -7,6 +7,7 @@
 #include <shellapi.h>
 #include "Ds4Device.h"
 #include <iomanip>
+#include "Logger.h"
 
 bool Ds4DeviceManager::isDs4(const hid::HidInstance& hid)
 {
@@ -83,10 +84,10 @@ void Ds4DeviceManager::findControllers()
 				throw /* TODO std::runtime_error(std::wstring.Format(Resources.DeviceReturnedEmptyMAC, hid.Path)) */;
 			}
 		}
-		catch (const std::exception&)
+		catch (const std::exception& ex)
 		{
 			// TODO: proper HID exceptions
-			// TODO: Logger.WriteLine(LogLevel.Warning, $"Failed to read device metadata: {ex.Message}");
+			Logger::writeLine(LogLevel::warning, "Failed to read device metadata: " + std::string(ex.what()));
 			hid.close();
 			return false;
 		}
@@ -135,9 +136,8 @@ void Ds4DeviceManager::findControllers()
 		}
 		catch (const std::exception& ex)
 		{
-			qDebug() << ex.what();
 			// TODO: proper HID exceptions
-			// TODO: Logger.WriteLine(LogLevel.Error, $"Error while opening device: {ex.Message}");
+			Logger::writeLine(LogLevel::error, "Error while opening device: " + std::string(ex.what()));
 		}
 
 		return false;

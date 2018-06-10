@@ -15,6 +15,7 @@
 #include "Bluetooth.h"
 #include "Ds4AutoLightColor.h"
 #include "ScpDevice.h"
+#include "Logger.h"
 
 using namespace std::chrono;
 
@@ -200,7 +201,7 @@ bool Ds4Device::scpDeviceOpen()
 
 	if (info == nullptr)
 	{
-		// TODO: Logger.WriteLine(LogLevel.Warning, Resources.ScpVBusMissing);
+		Logger::writeLine(LogLevel::warning, "ScpVBus device not found. XInput emulation will not be available.");
 		return false;
 	}
 
@@ -209,7 +210,7 @@ bool Ds4Device::scpDeviceOpen()
 
 	if (!handle.isValid())
 	{
-		// TODO: Logger.WriteLine(LogLevel.Warning, Resources.ScpVBusOpenFailed);
+		Logger::writeLine(LogLevel::warning, "Failed to acquire ScpVBus device handle. XInput emulation will not be available.");
 		return false;
 	}
 
@@ -244,7 +245,7 @@ bool Ds4Device::scpDeviceOpen()
 
 	if (!ok)
 	{
-		// TODO: Logger.WriteLine(LogLevel.Warning, Resources.XInputCreateFailed);
+		Logger::writeLine(LogLevel::warning, "Failed to obtain ScpVBus XInput handle. XInput emulation will not be available.");
 		return false;
 	}
 
@@ -388,11 +389,11 @@ void Ds4Device::openBluetoothDevice(hid::HidInstance& device)
 
 		if (profile.exclusiveMode && !device.isExclusive())
 		{
-			// TODO: Logger.WriteLine(LogLevel.Warning, Name, Resources.BluetoothExclusiveOpenFailed);
+			Logger::writeLine(LogLevel::warning, name(), "Failed to open Bluetooth device exclusively.");
 		}
 		else
 		{
-			// TODO: Logger.WriteLine(LogLevel.Info, Name, Resources.BluetoothConnected);
+			Logger::writeLine(LogLevel::info, name(), "Bluetooth connected.");
 		}
 
 		bluetoothDevice = std::make_unique<hid::HidInstance>(std::move(device));
@@ -429,11 +430,11 @@ void Ds4Device::openUsbDevice(hid::HidInstance& device)
 
 		if (profile.exclusiveMode && !device.isExclusive())
 		{
-			// TODO: Logger.WriteLine(LogLevel.Warning, Name, Resources.UsbExclusiveOpenFailed);
+			Logger::writeLine(LogLevel::warning, name(), "Failed to open USB device exclusively.");
 		}
 		else
 		{
-			// TODO: Logger.WriteLine(LogLevel.Info, Name, Resources.UsbConnected);
+			Logger::writeLine(LogLevel::info, name(), "USB connected.");
 		}
 
 		usbDevice = std::make_unique<hid::HidInstance>(std::move(device));
@@ -570,7 +571,7 @@ void Ds4Device::run()
 	else if (disconnectOnIdle() && useBluetooth && isIdle())
 	{
 		disconnectBluetooth();
-		// TODO: Logger.WriteLine(LogLevel.Info, Name, std::string.Format(Resources.IdleDisconnect, IdleTimeout));
+		Logger::writeLine(LogLevel::info, name(), "Bluetooth idle disconnect." /* TODO: std::string.Format(Resources.IdleDisconnect, idleTimeout)*/);
 	}
 
 	if (dataReceived)
@@ -1161,7 +1162,7 @@ void Ds4Device::runAction(ActionType action)
 			if (bluetoothConnected())
 			{
 				disconnectBluetooth();
-				// TODO: Logger.WriteLine(LogLevel.Info, Name, Resources.BluetoothDisconnected);
+				Logger::writeLine(LogLevel::info, name(), "Bluetooth disconnected.");
 			}
 
 			break;

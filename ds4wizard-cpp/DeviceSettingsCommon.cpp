@@ -38,7 +38,7 @@ void DeviceSettingsCommon::displayNotifications(Ds4Device* device)
 			std::stringstream message;
 			message << "Battery running low! (" << device->battery() * 10 << ")";
 
-			Logger::WriteLine(LogLevel::warning, device->name(), message.str());
+			Logger::writeLine(LogLevel::warning, device->name(), message.str());
 		}
 	}
 
@@ -52,7 +52,7 @@ void DeviceSettingsCommon::displayNotifications(Ds4Device* device)
 		{
 			notifiedCharged = true;
 			// TODO: translatable
-			Logger::WriteLine(LogLevel::info, device->name(), "Fully charged.");
+			Logger::writeLine(LogLevel::info, device->name(), "Fully charged.");
 		}
 	}
 }
