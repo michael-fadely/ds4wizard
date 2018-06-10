@@ -143,6 +143,7 @@
     <ClCompile Include="enums.cpp" />
     <ClCompile Include="filesystem.cpp" />
     <ClCompile Include="InputMap.cpp" />
+    <ClCompile Include="Logger.cpp" />
     <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Pressable.cpp" />
@@ -178,6 +179,7 @@
     <ClInclude Include="filesystem.h" />
     <ClInclude Include="InputMap.h" />
     <ClInclude Include="JsonData.h" />
+    <ClInclude Include="Logger.h" />
     <ClInclude Include="ScpDevice.h" />
     <ClInclude Include="Stopwatch.h" />
     <ClInclude Include="XInputGamepad.h" />

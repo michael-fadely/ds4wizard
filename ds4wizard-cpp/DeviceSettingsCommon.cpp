@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include "DeviceSettingsCommon.h"
+#include "Logger.h"
+#include <sstream>
 
 DeviceSettingsCommon::DeviceSettingsCommon()
 	: notifiedLow(false),
@@ -22,33 +24,37 @@ DeviceSettingsCommon::DeviceSettingsCommon(const DeviceSettingsCommon& other)
 
 void DeviceSettingsCommon::displayNotifications(Ds4Device* device)
 {
-	/* TODO
-		if (NotifyBatteryLow > 0)
+	if (notifyBatteryLow > 0)
+	{
+		if (device->usbConnected() || device->charging() || device->battery() > notifyBatteryLow)
 		{
-			if (device.UsbConnected || device.Charging || device.Battery > NotifyBatteryLow)
-			{
-				notifiedLow = false;
-			}
-			else if (!notifiedLow)
-			{
-				notifiedLow = true;
-				Logger.WriteLine(LogLevel.Warning, device.Name, string.Format(Resources.BatteryLow, device.Battery * 10));
-			}
+			notifiedLow = false;
 		}
+		else if (!notifiedLow)
+		{
+			notifiedLow = true;
 
-		if (NotifyFullyCharged)
-		{
-			if (!device.UsbConnected || device.Battery < 10)
-			{
-				notifiedCharged = false;
-			}
-			else if (!notifiedCharged)
-			{
-				notifiedCharged = true;
-				Logger.WriteLine(LogLevel.Info, device.Name, Resources.BatteryCharged);
-			}
+			// TODO: translatable
+			std::stringstream message;
+			message << "Battery running low! (" << device->battery() * 10 << ")";
+
+			Logger::WriteLine(LogLevel::warning, device->name(), message.str());
 		}
-	*/
+	}
+
+	if (notifyFullyCharged)
+	{
+		if (!device->usbConnected() || device->battery() < 10)
+		{
+			notifiedCharged = false;
+		}
+		else if (!notifiedCharged)
+		{
+			notifiedCharged = true;
+			// TODO: translatable
+			Logger::WriteLine(LogLevel::info, device->name(), "Fully charged.");
+		}
+	}
 }
 
 bool DeviceSettingsCommon::operator==(const DeviceSettingsCommon& other) const
