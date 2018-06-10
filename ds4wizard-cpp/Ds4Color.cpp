@@ -3,17 +3,17 @@
 #include "lerp.h"
 
 Ds4Color::Ds4Color(uint8_t r, uint8_t g, uint8_t b)
+	: red(r),
+	  green(g),
+	  blue(b)
 {
-	red   = r;
-	green = g;
-	blue  = b;
 }
 
 Ds4Color::Ds4Color(const Ds4Color& color)
+	: red(color.red),
+	  green(color.green),
+	  blue(color.blue)
 {
-	red   = color.red;
-	green = color.green;
-	blue  = color.blue;
 }
 
 bool Ds4Color::operator==(const Ds4Color& other) const
