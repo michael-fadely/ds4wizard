@@ -30,7 +30,9 @@ protected slots:
 	void closeEvent(QCloseEvent* event) override;
 	void toggleHide(QSystemTrayIcon::ActivationReason reason);
 	void devicePropertiesClicked() const;
-	void startMinimizedToggled(bool value) const;
-	void minimizeToTrayToggled(bool value) const;
-	void preferredConnectionChanged(int value) const;
+	static void startMinimizedToggled(bool value);
+	static void minimizeToTrayToggled(bool value);
+	static void preferredConnectionChanged(int value);
+	void systemTrayShowHide(bool checked);
+	void systemTrayExit(bool checked);
 };

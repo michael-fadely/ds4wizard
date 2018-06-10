@@ -13,8 +13,19 @@ MainWindow::MainWindow(QWidget* parent)
 
 	if (supportsSystemTray)
 	{
+		auto menu = new QMenu(this);
+
+		QAction* action = menu->addAction(tr("Show/Hide"));
+		connect(action, SIGNAL(triggered(bool)), this, SLOT(systemTrayShowHide(bool)));
+
+		menu->addSeparator();
+
+		action = menu->addAction(tr("&Exit"));
+		connect(action, SIGNAL(triggered(bool)), this, SLOT(systemTrayExit(bool)));
+
 		trayIcon = new QSystemTrayIcon(this);
 		trayIcon->setIcon(QIcon(":/ds4wizardcpp/Resources/race_q00.ico"));
+		trayIcon->setContextMenu(menu);
 		trayIcon->show();
 
 		connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
@@ -168,17 +179,27 @@ void MainWindow::devicePropertiesClicked() const
 	delete dialog;
 }
 
-void MainWindow::startMinimizedToggled(bool value) const
+void MainWindow::startMinimizedToggled(bool value)
 {
 	Program::settings.startMinimized = value;
 }
 
-void MainWindow::minimizeToTrayToggled(bool value) const
+void MainWindow::minimizeToTrayToggled(bool value)
 {
 	Program::settings.minimizeToTray = value;
 }
 
-void MainWindow::preferredConnectionChanged(int value) const
+void MainWindow::preferredConnectionChanged(int value)
 {
 	Program::settings.preferredConnection = ConnectionType::_from_integral(value);
+}
+
+void MainWindow::systemTrayShowHide(bool checked)
+{
+	toggleHide(QSystemTrayIcon::DoubleClick);
+}
+
+void MainWindow::systemTrayExit(bool checked)
+{
+	close();
 }
