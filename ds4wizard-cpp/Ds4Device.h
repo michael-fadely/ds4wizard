@@ -1,5 +1,6 @@
 #pragma once
 
+#include <chrono>
 #include <cstdint>
 #include <memory>
 #include <thread>
@@ -60,7 +61,7 @@ private:
 	Ds4LightOptions activeLight;
 
 	bool disconnectOnIdle() const;
-	std::chrono::nanoseconds idleTimeout() const;
+	std::chrono::milliseconds idleTimeout() const;
 	bool isIdle() const;
 
 public:

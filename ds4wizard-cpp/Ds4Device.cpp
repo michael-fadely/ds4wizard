@@ -24,7 +24,7 @@ bool Ds4Device::disconnectOnIdle() const
 	return settings.useProfileIdle ? profile.idle.disconnect : settings.idle.disconnect;
 }
 
-nanoseconds Ds4Device::idleTimeout() const
+milliseconds Ds4Device::idleTimeout() const
 {
 	return settings.useProfileIdle ? profile.idle.timeout : settings.idle.timeout;
 }
@@ -150,7 +150,7 @@ void Ds4Device::applyProfile()
 		scpDeviceClose();
 	}
 
-	Ds4LightOptions l = settings.useProfileLight ? profile.light : settings.light;
+	Ds4LightOptions& l = settings.useProfileLight ? profile.light : settings.light;
 
 	if (l.automaticColor)
 	{
@@ -518,13 +518,13 @@ void Ds4Device::run()
 	output.lightColor = activeLight.color;
 
 	// HACK: see above
-	/*if (activeLight.IdleFade)
+	if (activeLight.idleFade)
 	{
-		Ds4LightOptions l = Settings.UseProfileLight ? Profile.Light : Settings.Light;
-		double m = IsIdle() ? 1.0 : std::clamp(duration_cast<milliseconds>(idleTime.elapsed()).count() / static_cast<double>(duration_cast<milliseconds>(IdleTimeout()).count()), 0.0, 1.0);
+		const Ds4LightOptions& l = settings.useProfileLight ? profile.light : settings.light;
+		double m = isIdle() ? 1.0 : std::clamp(duration_cast<milliseconds>(idleTime.elapsed()).count() / static_cast<double>(idleTimeout().count()), 0.0, 1.0);
 
-		Output.LightColor = Ds4Color::Lerp(l.Color, fadeColor, static_cast<float>(m));
-	}*/
+		output.lightColor = Ds4Color::lerp(l.color, fadeColor, static_cast<float>(m));
+	}
 
 	const bool charging_ = charging();
 	const uint8_t battery_ = battery();

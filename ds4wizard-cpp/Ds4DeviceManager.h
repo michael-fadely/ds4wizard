@@ -65,13 +65,15 @@ public:
 	/// Fired when a device is opened.
 	/// </summary>
 	/// <seealso cref="DeviceOpenedEventArgs"/>
-	EventHandler<DeviceOpenedEventArgs> DeviceOpened; // TODO
+	EventHandler<DeviceOpenedEventArgs> deviceOpened;
 
 	/// <summary>
 	/// Fired when a device is closed.
 	/// </summary>
 	/// <seealso cref="DeviceClosedEventArgs"/>
-	EventHandler<DeviceClosedEventArgs> DeviceClosed; // TODO
+	EventHandler<DeviceClosedEventArgs> deviceClosed;
+
+	~Ds4DeviceManager();
 
 	/* TODO
 	IEnumerable<Ds4Device> Enumerate()

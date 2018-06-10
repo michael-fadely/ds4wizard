@@ -573,9 +573,9 @@ const char* defaultProfileJson = "{" \
 "  \"light\": {" \
 "    \"automaticColor\": true," \
 "    \"color\": {" \
-"      \"r\": 0," \
-"      \"g\": 0," \
-"      \"b\": 255" \
+"      \"red\": 0," \
+"      \"green\": 0," \
+"      \"blue\": 255" \
 "    }," \
 "    \"idleFade\": true" \
 "  }," \

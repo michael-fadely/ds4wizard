@@ -9,6 +9,11 @@
 #include <iomanip>
 #include "Logger.h"
 
+Ds4DeviceManager::~Ds4DeviceManager()
+{
+	close();
+}
+
 bool Ds4DeviceManager::isDs4(const hid::HidInstance& hid)
 {
 	if (hid.attributes().vendorId == vendorId)
@@ -304,10 +309,10 @@ void Ds4DeviceManager::toggleDevice(const std::wstring& instanceId)
 
 void Ds4DeviceManager::onDeviceOpened(DeviceOpenedEventArgs& e)
 {
-	DeviceOpened.invoke(this, &e);
+	deviceOpened.invoke(this, &e);
 }
 
 void Ds4DeviceManager::onDeviceClosed(DeviceClosedEventArgs& e)
 {
-	DeviceClosed.invoke(this, &e);
+	deviceClosed.invoke(this, &e);
 }

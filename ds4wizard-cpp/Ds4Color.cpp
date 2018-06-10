@@ -39,14 +39,14 @@ Ds4Color Ds4Color::lerp(const Ds4Color& a, const Ds4Color& b, float f)
 
 void Ds4Color::readJson(const QJsonObject& json)
 {
-	red   = json["r"].toInt();
-	green = json["g"].toInt();
-	blue  = json["b"].toInt();
+	red   = json["red"].toInt();
+	green = json["green"].toInt();
+	blue  = json["blue"].toInt();
 }
 
 void Ds4Color::writeJson(QJsonObject& json) const
 {
-	json["r"] = red;
-	json["g"] = green;
-	json["b"] = blue;
+	json["red"]   = red;
+	json["green"] = green;
+	json["blue"]  = blue;
 }
