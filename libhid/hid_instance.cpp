@@ -250,14 +250,11 @@ bool HidInstance::readAsync(void* buffer, size_t size)
 {
 	if (readPending())
 	{
-		checkPendingRead();
-		return false;
+		return !checkPendingRead();
 	}
 
 	if (ReadFile(handle.nativeHandle, buffer, static_cast<DWORD>(size), nullptr, &overlap_in))
 	{
-		/*pending_read_ = true;
-		checkPendingRead();*/
 		return true;
 	}
 
@@ -265,13 +262,8 @@ bool HidInstance::readAsync(void* buffer, size_t size)
 
 	switch (error)
 	{
-		case ERROR_SUCCESS:
-		case ERROR_IO_INCOMPLETE:
-			break;
-
 		case ERROR_IO_PENDING:
 			pending_read_ = true;
-			checkPendingRead();
 			break;
 
 		default:
@@ -323,14 +315,11 @@ bool HidInstance::writeAsync(const void* buffer, size_t size)
 {
 	if (writePending())
 	{
-		checkPendingWrite();
-		return false;
+		return !checkPendingWrite();
 	}
 
 	if (WriteFile(handle.nativeHandle, buffer, static_cast<DWORD>(size), nullptr, &overlap_out))
 	{
-		/*pending_write_ = true;
-		checkPendingWrite();*/
 		return true;
 	}
 
@@ -344,7 +333,6 @@ bool HidInstance::writeAsync(const void* buffer, size_t size)
 
 		case ERROR_IO_PENDING:
 			pending_write_ = true;
-			checkPendingWrite();
 			break;
 
 		default:

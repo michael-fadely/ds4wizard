@@ -595,7 +595,7 @@ void Ds4Device::run()
 		if (latency.elapsed() >= 5ms)
 		{
 			// TODO: configurable latency target & light flash (although that increases latency on send)
-			// TODO: Debug.WriteLine($"{Latency.Elapsed.TotalMilliseconds} ms");
+			qDebug() << "latency: " << duration_cast<milliseconds>(latency.elapsed()).count() << " ms";
 		}
 
 		latency.start();
