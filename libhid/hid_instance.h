@@ -104,6 +104,7 @@ namespace hid
 		bool read(void* buffer, size_t size) const;
 		bool read(const gsl::span<uint8_t>& buffer) const;
 		bool read();
+		bool checkPendingRead();
 
 		bool readAsync(void* buffer, size_t size);
 		bool readAsync(const gsl::span<uint8_t>& buffer);
@@ -112,13 +113,16 @@ namespace hid
 		bool write(const void* buffer, size_t size) const;
 		bool write(const gsl::span<const uint8_t>& buffer) const;
 		bool write() const;
+		bool checkPendingWrite();
 
 		bool writeAsync(const void* buffer, size_t size);
 		bool writeAsync(const gsl::span<const uint8_t>& buffer);
 		bool writeAsync();
 
-		bool set_output_report(const gsl::span<uint8_t>& buffer) const;
-		bool set_output_report();
+		void cancelAsync() const;
+
+		bool setOutputReport(const gsl::span<uint8_t>& buffer) const;
+		bool setOutputReport();
 
 	private:
 		void readCaps(HANDLE h);

@@ -471,7 +471,7 @@ void Ds4Device::setupUsbOutputBuffer() const
 
 void Ds4Device::writeUsbAsync()
 {
-	if (usbDevice->writePending())
+	if (usbDevice->checkPendingWrite())
 	{
 		return;
 	}
@@ -503,7 +503,7 @@ void Ds4Device::writeBluetooth()
 		return;
 	}
 
-	if (!bluetoothDevice->set_output_report())
+	if (!bluetoothDevice->setOutputReport())
 	{
 		closeBluetoothDevice();
 	}

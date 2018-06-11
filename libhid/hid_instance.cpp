@@ -4,6 +4,7 @@
 #include <utility>
 #include "hid_instance.h"
 #include "hid_handle.h"
+#include <thread>
 
 using namespace hid;
 
@@ -203,6 +204,7 @@ void HidInstance::close()
 
 	if (isAsync())
 	{
+		cancelAsync();
 		CloseHandle(overlap_in.hEvent);
 		CloseHandle(overlap_out.hEvent);
 		pending_read_  = false;
@@ -232,30 +234,49 @@ bool HidInstance::read()
 	return read(input_buffer);
 }
 
+bool HidInstance::checkPendingRead()
+{
+	if (!pending_read_)
+	{
+		return false;
+	}
+
+	DWORD bytes_read;
+	pending_read_ = !GetOverlappedResult(handle.nativeHandle, &overlap_in, &bytes_read, FALSE);
+	return pending_read_;
+}
+
 bool HidInstance::readAsync(void* buffer, size_t size)
 {
-	if (pending_read_ || !ReadFile(handle.nativeHandle, buffer, static_cast<DWORD>(size), nullptr, &overlap_in))
+	if (readPending())
 	{
-		const DWORD error = GetLastError();
+		checkPendingRead();
+		return false;
+	}
 
-		switch (error)
-		{
-			case ERROR_SUCCESS:
-				pending_read_ = false;
-				break;
+	if (ReadFile(handle.nativeHandle, buffer, static_cast<DWORD>(size), nullptr, &overlap_in))
+	{
+		/*pending_read_ = true;
+		checkPendingRead();*/
+		return true;
+	}
 
-			case ERROR_IO_INCOMPLETE:
-			case ERROR_IO_PENDING:
-			{
-				DWORD bytes_read;
-				pending_read_ = !GetOverlappedResult(handle.nativeHandle, &overlap_in, &bytes_read, FALSE);
-				break;
-			}
+	const DWORD error = GetLastError();
 
-			default:
-				close();
-				return false;
-		}
+	switch (error)
+	{
+		case ERROR_SUCCESS:
+		case ERROR_IO_INCOMPLETE:
+			break;
+
+		case ERROR_IO_PENDING:
+			pending_read_ = true;
+			checkPendingRead();
+			break;
+
+		default:
+			close();
+			return false;
 	}
 
 	return !pending_read_;
@@ -286,11 +307,31 @@ bool HidInstance::write() const
 	return write(output_buffer);
 }
 
-bool HidInstance::writeAsync(const void* buffer, size_t size)
+bool HidInstance::checkPendingWrite()
 {
-	if (!pending_write_ && WriteFile(handle.nativeHandle, buffer, static_cast<DWORD>(size), nullptr, &overlap_out))
+	if (!pending_write_)
 	{
 		return false;
+	}
+
+	DWORD bytes_written;
+	pending_write_ = !GetOverlappedResult(handle.nativeHandle, &overlap_out, &bytes_written, FALSE);
+	return pending_write_;
+}
+
+bool HidInstance::writeAsync(const void* buffer, size_t size)
+{
+	if (writePending())
+	{
+		checkPendingWrite();
+		return false;
+	}
+
+	if (WriteFile(handle.nativeHandle, buffer, static_cast<DWORD>(size), nullptr, &overlap_out))
+	{
+		/*pending_write_ = true;
+		checkPendingWrite();*/
+		return true;
 	}
 
 	const DWORD error = GetLastError();
@@ -298,16 +339,13 @@ bool HidInstance::writeAsync(const void* buffer, size_t size)
 	switch (error)
 	{
 		case ERROR_SUCCESS:
-			pending_write_ = false;
+		case ERROR_IO_INCOMPLETE:
 			break;
 
-		case ERROR_IO_INCOMPLETE:
 		case ERROR_IO_PENDING:
-		{
-			DWORD bytes_written;
-			pending_write_ = !GetOverlappedResult(handle.nativeHandle, &overlap_out, &bytes_written, FALSE);
+			pending_write_ = true;
+			checkPendingWrite();
 			break;
-		}
 
 		default:
 			close();
@@ -327,7 +365,15 @@ bool HidInstance::writeAsync()
 	return writeAsync(output_buffer);
 }
 
-bool HidInstance::set_output_report(const gsl::span<uint8_t>& buffer) const
+void HidInstance::cancelAsync() const
+{
+	if (isOpen() && isAsync())
+	{
+		CancelIo(handle.nativeHandle);
+	}
+}
+
+bool HidInstance::setOutputReport(const gsl::span<uint8_t>& buffer) const
 {
 	if (!isOpen())
 	{
@@ -337,9 +383,9 @@ bool HidInstance::set_output_report(const gsl::span<uint8_t>& buffer) const
 	return HidD_SetOutputReport(handle.nativeHandle, reinterpret_cast<PVOID>(buffer.data()), static_cast<ULONG>(buffer.size_bytes()));
 }
 
-bool HidInstance::set_output_report()
+bool HidInstance::setOutputReport()
 {
-	return set_output_report(output_buffer);
+	return setOutputReport(output_buffer);
 }
 
 void HidInstance::readCaps(HANDLE h)
