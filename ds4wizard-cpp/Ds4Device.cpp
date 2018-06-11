@@ -303,18 +303,11 @@ void Ds4Device::closeImpl()
 	lock(sync);
 	running = false;
 
-	bool was_connected = connected();
-
 	closeUsbDevice();
 	closeBluetoothDevice();
 
 	scpDeviceClose();
 	releaseAutoColor();
-
-	if (was_connected)
-	{
-		onDeviceClosed();
-	}
 }
 
 void Ds4Device::close()
@@ -674,6 +667,7 @@ void Ds4Device::controllerThread()
 	onDeviceClosed();
 }
 
+// TODO: DO THIS FUCKING CORRECTLY PLEASE
 void Ds4Device::onDeviceClosed()
 {
 	deviceClosed.invoke(this, nullptr);
