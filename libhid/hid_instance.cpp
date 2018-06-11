@@ -313,9 +313,9 @@ bool HidInstance::checkPendingWrite()
 
 bool HidInstance::writeAsync(const void* buffer, size_t size)
 {
-	if (writePending())
+	if (writePending() && checkPendingWrite())
 	{
-		return !checkPendingWrite();
+		return false;
 	}
 
 	if (WriteFile(handle.nativeHandle, buffer, static_cast<DWORD>(size), nullptr, &overlap_out))
