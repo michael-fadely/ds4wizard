@@ -185,10 +185,20 @@ void Ds4DeviceManager::onDs4DeviceClosed(void* sender, EventArgs*)
 
 void Ds4DeviceManager::close()
 {
-	lock(devices);
+	decltype(devices) devices_;
+	{
+		lock(devices);
+		devices_ = std::move(devices);
+	}
 
-	// shared_ptr will run the destructors and cause all the devices to close
-	devices.clear();
+	for (auto& it : devices_)
+	{
+		const std::shared_ptr<Ds4Device> ptr = std::move(it.second);
+		ptr->close();
+
+		DeviceClosedEventArgs args(ptr);
+		onDeviceClosed(args);
+	}
 }
 
 void Ds4DeviceManager::queueDeviceToggle(const std::wstring& instanceId)
@@ -208,6 +218,7 @@ void Ds4DeviceManager::toggleDeviceElevated(const std::wstring& instanceId)
 	params.append(instanceId);
 	params.append(L"\"");
 
+	// TODO: debug
 	HINSTANCE hinst = ShellExecuteW(nullptr, L"runas",
 	                                L"ds4wizard-device-toggle.exe", params.c_str(), nullptr, SW_SHOWDEFAULT);
 
