@@ -176,8 +176,7 @@ void Ds4DeviceManager::onDs4DeviceClosed(void* sender, EventArgs*)
 
 	DeviceClosedEventArgs args(ptr);
 	onDeviceClosed(args);
-
-	it = devices.erase(it);
+	devices.erase(it);
 }
 
 void Ds4DeviceManager::close()
