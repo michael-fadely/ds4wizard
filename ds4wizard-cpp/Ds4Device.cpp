@@ -630,13 +630,11 @@ void Ds4Device::run()
 				usbDevice->Write(volume);
 			}
 #endif
-		//std::this_thread::yield();
 	}
 	else
 	{
 		input.updateChangedState();
 		runPersistent();
-		//std::this_thread::sleep_for(1ms);
 	}
 }
 

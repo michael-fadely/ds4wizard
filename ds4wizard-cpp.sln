@@ -7,28 +7,32 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ds4wizard-cpp", "ds4wizard-
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libhid", "libhid\libhid.vcxproj", "{03F69A1B-6D18-43F5-B71F-B3A3018F12F0}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ds4wizard-device-toggle", "ds4wizard-device-toggle\ds4wizard-device-toggle.vcxproj", "{7FFC69CC-E15A-4470-9EC4-7477FD662C89}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libdevicetoggle", "libdevicetoggle\libdevicetoggle.vcxproj", "{3292BD3C-C649-46B0-9C60-545B31F2B169}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
-		Debug|x86 = Debug|x86
 		Release|x64 = Release|x64
-		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{B12702AD-ABFB-343A-A199-8E24837244A3}.Debug|x64.ActiveCfg = Debug|x64
 		{B12702AD-ABFB-343A-A199-8E24837244A3}.Debug|x64.Build.0 = Debug|x64
-		{B12702AD-ABFB-343A-A199-8E24837244A3}.Debug|x86.ActiveCfg = Debug|x64
 		{B12702AD-ABFB-343A-A199-8E24837244A3}.Release|x64.ActiveCfg = Release|x64
 		{B12702AD-ABFB-343A-A199-8E24837244A3}.Release|x64.Build.0 = Release|x64
-		{B12702AD-ABFB-343A-A199-8E24837244A3}.Release|x86.ActiveCfg = Release|x64
 		{03F69A1B-6D18-43F5-B71F-B3A3018F12F0}.Debug|x64.ActiveCfg = Debug|x64
 		{03F69A1B-6D18-43F5-B71F-B3A3018F12F0}.Debug|x64.Build.0 = Debug|x64
-		{03F69A1B-6D18-43F5-B71F-B3A3018F12F0}.Debug|x86.ActiveCfg = Debug|Win32
-		{03F69A1B-6D18-43F5-B71F-B3A3018F12F0}.Debug|x86.Build.0 = Debug|Win32
 		{03F69A1B-6D18-43F5-B71F-B3A3018F12F0}.Release|x64.ActiveCfg = Release|x64
 		{03F69A1B-6D18-43F5-B71F-B3A3018F12F0}.Release|x64.Build.0 = Release|x64
-		{03F69A1B-6D18-43F5-B71F-B3A3018F12F0}.Release|x86.ActiveCfg = Release|Win32
-		{03F69A1B-6D18-43F5-B71F-B3A3018F12F0}.Release|x86.Build.0 = Release|Win32
+		{7FFC69CC-E15A-4470-9EC4-7477FD662C89}.Debug|x64.ActiveCfg = Debug|x64
+		{7FFC69CC-E15A-4470-9EC4-7477FD662C89}.Debug|x64.Build.0 = Debug|x64
+		{7FFC69CC-E15A-4470-9EC4-7477FD662C89}.Release|x64.ActiveCfg = Release|x64
+		{7FFC69CC-E15A-4470-9EC4-7477FD662C89}.Release|x64.Build.0 = Release|x64
+		{3292BD3C-C649-46B0-9C60-545B31F2B169}.Debug|x64.ActiveCfg = Debug|x64
+		{3292BD3C-C649-46B0-9C60-545B31F2B169}.Debug|x64.Build.0 = Debug|x64
+		{3292BD3C-C649-46B0-9C60-545B31F2B169}.Release|x64.ActiveCfg = Release|x64
+		{3292BD3C-C649-46B0-9C60-545B31F2B169}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

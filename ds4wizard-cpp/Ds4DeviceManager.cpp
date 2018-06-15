@@ -1,13 +1,17 @@
 #include "stdafx.h"
-#include "Ds4DeviceManager.h"
-#include "lock.h"
-#include <hid_util.h>
-#include <sstream>
-#include "program.h"
-#include <shellapi.h>
-#include "Ds4Device.h"
 #include <iomanip>
+#include <sstream>
+
+#include <shellapi.h>
+#include <hid_util.h>
+#include <devicetoggle.h>
+
+#include "Ds4Device.h"
+#include "lock.h"
 #include "Logger.h"
+#include "program.h"
+
+#include "Ds4DeviceManager.h"
 
 Ds4DeviceManager::~Ds4DeviceManager()
 {
@@ -189,7 +193,6 @@ void Ds4DeviceManager::close()
 
 void Ds4DeviceManager::queueDeviceToggle(const std::wstring& instanceId)
 {
-	return; // HACK !!!!!!!!
 	toggleDeviceElevated(instanceId);
 }
 
@@ -201,109 +204,19 @@ void Ds4DeviceManager::toggleDeviceElevated(const std::wstring& instanceId)
 		return;
 	}
 
-	std::wstring currentProcess = QCoreApplication::applicationFilePath().toStdWString();
-
 	std::wstring params = L"--toggle-device \"";
 	params.append(instanceId);
 	params.append(L"\"");
 
 	HINSTANCE hinst = ShellExecuteW(nullptr, L"runas",
-	                                currentProcess.c_str(), params.c_str(), nullptr, SW_SHOWDEFAULT);
+	                                L"ds4wizard-device-toggle.exe", params.c_str(), nullptr, SW_SHOWDEFAULT);
 
 	WaitForSingleObject(hinst, INFINITE);
 }
 
 void Ds4DeviceManager::toggleDevice(const std::wstring& instanceId)
 {
-	GUID guid;
-	HidD_GetHidGuid(&guid);
-	HDEVINFO devInfoSet = SetupDiGetClassDevs(&guid, instanceId.c_str(), nullptr, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
-
-	SP_DEVINFO_DATA devInfoData;
-	devInfoData.cbSize = sizeof(SP_DEVINFO_DATA);
-
-	if (!SetupDiEnumDeviceInfo(devInfoSet, 0, &devInfoData))
-	{
-		DWORD error = GetLastError();
-
-		std::stringstream message;
-		message << "Retrieving device info for instance ID "
-			<< std::string(instanceId.begin(), instanceId.end()) << " failed while attempting to toggle device with error code " << std::hex << std::setw(8) << std::setfill('0') << error;
-
-		throw std::runtime_error(message.str());
-	}
-
-	SP_PROPCHANGE_PARAMS propChangeParams;
-
-	propChangeParams.ClassInstallHeader.cbSize          = sizeof(SP_CLASSINSTALL_HEADER);
-	propChangeParams.ClassInstallHeader.InstallFunction = DIF_PROPERTYCHANGE;
-
-	propChangeParams.StateChange = DICS_DISABLE;
-	propChangeParams.HwProfile   = 0;
-	propChangeParams.Scope       = DICS_FLAG_GLOBAL;
-
-	// Prepare the device by setting the class install parameters.
-	bool success = SetupDiSetClassInstallParams(devInfoSet, &devInfoData,
-	                                            reinterpret_cast<PSP_CLASSINSTALL_HEADER>(&propChangeParams), sizeof(propChangeParams));
-
-	if (!success)
-	{
-		DWORD error = GetLastError();
-
-		std::stringstream message;
-		message << "Failed to set class install parameters for device "
-			<< std::string(instanceId.begin(), instanceId.end()) << " with error code " << std::hex << std::setw(8) << std::setfill('0') << error;
-
-		throw std::runtime_error(message.str());
-	}
-
-	// Apply the changes, disabling the device.
-	success = SetupDiCallClassInstaller(DIF_PROPERTYCHANGE, devInfoSet, &devInfoData);
-
-	if (!success)
-	{
-		DWORD error = GetLastError();
-
-		std::stringstream message;
-		message << "Failed to disable device "
-			<< std::string(instanceId.begin(), instanceId.end()) << " with error code " << std::hex << std::setw(8) << std::setfill('0') << error;
-
-		throw std::runtime_error(message.str());
-	}
-
-	// Change state back to enabled.
-	propChangeParams.StateChange = DICS_ENABLE;
-
-	// Prepare the class install parameters again.
-	success = SetupDiSetClassInstallParams(devInfoSet, &devInfoData,
-	                                       reinterpret_cast<PSP_CLASSINSTALL_HEADER>(&propChangeParams), sizeof(propChangeParams));
-
-	if (!success)
-	{
-		DWORD error = GetLastError();
-
-		std::stringstream message;
-		message << "Failed to set class install parameters for device "
-			<< std::string(instanceId.begin(), instanceId.end()) << " with error code " << std::hex << std::setw(8) << std::setfill('0') << error;
-
-		throw std::runtime_error(message.str());
-	}
-
-	// Apply the changes, enabling the device.
-	success = SetupDiCallClassInstaller(DIF_PROPERTYCHANGE, devInfoSet, &devInfoData);
-
-	if (!success)
-	{
-		DWORD error = GetLastError();
-
-		std::stringstream message;
-		message << "Failed to enable device "
-			<< std::string(instanceId.begin(), instanceId.end()) << " with error code " << std::hex << std::setw(8) << std::setfill('0') << error;
-
-		throw std::runtime_error(message.str());
-	}
-
-	SetupDiDestroyDeviceInfoList(devInfoSet);
+	::toggleDevice(instanceId);
 }
 
 void Ds4DeviceManager::onDeviceOpened(DeviceOpenedEventArgs& e)
