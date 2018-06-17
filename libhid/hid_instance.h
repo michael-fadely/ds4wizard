@@ -76,6 +76,8 @@ namespace hid
 		HidInstance(const HidInstance&) = delete;
 		HidInstance& operator=(const HidInstance&) = delete;
 
+		HidInstance() = default;
+
 		HidInstance(std::wstring path, std::wstring instanceId, bool readInfo);
 		HidInstance(std::wstring path, bool readInfo);
 		HidInstance(HidInstance&& other) noexcept;

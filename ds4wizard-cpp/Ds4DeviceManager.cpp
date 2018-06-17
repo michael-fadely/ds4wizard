@@ -44,7 +44,7 @@ void Ds4DeviceManager::findControllers()
 {
 	lock(sync);
 
-	hid::enumerateHID([&](hid::HidInstance& hid) -> bool
+	hid::enumerateHid([&](hid::HidInstance& hid) -> bool
 	{
 		if (hid.attributes().vendorId != vendorId)
 		{
@@ -101,12 +101,14 @@ void Ds4DeviceManager::findControllers()
 			return false;
 		}
 
+		hid.close(); // HACK: this should not be required; why is it open???
+
 		try
 		{
 			lock(devices);
 
 			const auto it = devices.find(hid.serialString);
-			std::shared_ptr<Ds4Device> device = nullptr;
+			std::shared_ptr<Ds4Device> device;
 
 			if (it == devices.end())
 			{
@@ -122,7 +124,7 @@ void Ds4DeviceManager::findControllers()
 				device->start();
 
 				auto& safe = device->safeMacAddress;
-				auto wstr = std::wstring(safe.begin(), safe.end());
+				const std::wstring wstr(safe.begin(), safe.end());
 				devices[wstr] = device;
 			}
 			else
@@ -218,11 +220,22 @@ void Ds4DeviceManager::toggleDeviceElevated(const std::wstring& instanceId)
 	params.append(instanceId);
 	params.append(L"\"");
 
-	// TODO: debug
-	HINSTANCE hinst = ShellExecuteW(nullptr, L"runas",
-	                                L"ds4wizard-device-toggle.exe", params.c_str(), nullptr, SW_SHOWDEFAULT);
+	SHELLEXECUTEINFO info {};
+	info.cbSize       = sizeof(info);
+	info.fMask        = SEE_MASK_NOCLOSEPROCESS;
+	info.lpFile       = L"ds4wizard-device-toggle.exe";
+	info.lpParameters = params.c_str();
+	info.lpVerb       = L"runas";
+	info.nShow        = SW_SHOW;
 
-	WaitForSingleObject(hinst, INFINITE);
+	if (!ShellExecuteExW(&info))
+	{
+		throw;
+	}
+
+	Handle handle(info.hProcess, true);
+
+	WaitForSingleObject(handle.nativeHandle, INFINITE);
 }
 
 void Ds4DeviceManager::toggleDevice(const std::wstring& instanceId)

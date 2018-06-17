@@ -193,7 +193,7 @@ bool Ds4Device::scpDeviceOpen()
 
 	std::unique_ptr<hid::HidInstance> info;
 
-	hid::enumerateGUID([&](const std::wstring& path, const std::wstring& instanceId) -> bool
+	hid::enumerateGuid([&](const std::wstring& path, const std::wstring& instanceId) -> bool
 	{
 		info = std::make_unique<hid::HidInstance>(path, instanceId, true);
 		return true;
@@ -314,7 +314,7 @@ void Ds4Device::close()
 {
 	running = false;
 
-	if (deviceThread->get_id() == std::this_thread::get_id())
+	if (deviceThread && deviceThread->get_id() == std::this_thread::get_id())
 	{
 		deviceThread->detach();
 		deviceThread = nullptr;

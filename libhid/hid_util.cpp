@@ -60,7 +60,7 @@ std::wstring hid::getInstanceId(const HDEVINFO devInfoSet, SP_DEVINFO_DATA* devI
 	return result;
 }
 
-bool hid::enumerateGUID(const std::function<bool(const std::wstring& path, const std::wstring& instanceId)>& fn, const GUID& guid) noexcept
+bool hid::enumerateGuid(const std::function<bool(const std::wstring& path, const std::wstring& instanceId)>& fn, const GUID& guid) noexcept
 {
 	const HDEVINFO dev_info = SetupDiGetClassDevs(&guid, nullptr, nullptr, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
 
@@ -78,8 +78,8 @@ bool hid::enumerateGUID(const std::function<bool(const std::wstring& path, const
 
 		for (size_t j = 0; SetupDiEnumDeviceInterfaces(dev_info, &dev_info_data, &guid, static_cast<DWORD>(j), &interface_data); j++)
 		{
-			std::wstring path(getDevicePath(dev_info, &interface_data));
-			std::wstring instance_id(getInstanceId(dev_info, &dev_info_data));
+			const std::wstring path(getDevicePath(dev_info, &interface_data));
+			const std::wstring instance_id(getInstanceId(dev_info, &dev_info_data));
 
 			if (fn(path, instance_id))
 			{
@@ -98,16 +98,19 @@ bool hid::enumerateGUID(const std::function<bool(const std::wstring& path, const
 	return false;
 }
 
-void hid::enumerateHID(const std::function<bool(HidInstance& instance)>& fn) noexcept
+void hid::enumerateHid(const std::function<bool(HidInstance& instance)>& fn) noexcept
 {
 	GUID guid = {};
 	HidD_GetHidGuid(&guid);
 
 	auto callback = [fn](const std::wstring& path, const std::wstring& instanceId) -> bool
 	{
+		HidInstance hid;
+
 		try
 		{
-			HidInstance hid(path, instanceId, true);
+			HidInstance temp(path, instanceId, true);
+			hid = std::move(temp);
 			return fn(hid);
 		}
 		catch (std::exception& ex)
@@ -115,13 +118,14 @@ void hid::enumerateHID(const std::function<bool(HidInstance& instance)>& fn) noe
 			std::cout << ex.what() << std::endl;
 		}
 
+		hid.close();
 		return false;
 	};
 
-	enumerateGUID(callback, guid);
+	enumerateGuid(callback, guid);
 }
 
-void hid::enumerateUSB(const std::function<bool(const std::wstring& path, const std::wstring& instanceId)>& fn) noexcept
+void hid::enumerateUsb(const std::function<bool(const std::wstring& path, const std::wstring& instanceId)>& fn) noexcept
 {
-	enumerateGUID(fn, GUID_DEVINTERFACE_USB_HUB);
+	enumerateGuid(fn, GUID_DEVINTERFACE_USB_HUB);
 }

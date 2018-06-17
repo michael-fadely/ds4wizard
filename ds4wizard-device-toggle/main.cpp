@@ -11,20 +11,20 @@ int main(int argc, char** argv)
 
 	if (strcmp(argv[1], "--toggle-device") != 0)
 	{
-		return -1;
+		return -2;
 	}
 
 	const std::string instanceIdA = argv[2];
-	const std::wstring instanceId(instanceIdA.begin(), instanceIdA.end());
+	const std::wstring instanceIdW(instanceIdA.begin(), instanceIdA.end());
 
 	try
 	{
-		toggleDevice(instanceId);
+		toggleDevice(instanceIdW);
 	}
 	catch (const std::exception& ex)
 	{
 		std::cout << ex.what() << std::endl;
-		return -1;
+		return -3;
 	}
 
 	return 0;

@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 15.0.27703.2018
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ds4wizard-cpp", "ds4wizard-cpp\ds4wizard-cpp.vcxproj", "{B12702AD-ABFB-343A-A199-8E24837244A3}"
+	ProjectSection(ProjectDependencies) = postProject
+		{7FFC69CC-E15A-4470-9EC4-7477FD662C89} = {7FFC69CC-E15A-4470-9EC4-7477FD662C89}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libhid", "libhid\libhid.vcxproj", "{03F69A1B-6D18-43F5-B71F-B3A3018F12F0}"
 EndProject
