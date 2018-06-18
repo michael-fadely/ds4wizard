@@ -75,14 +75,6 @@ public:
 
 	~Ds4DeviceManager();
 
-	/* TODO
-	IEnumerable<Ds4Device> Enumerate()
-	{
-		lock(devices)
-		return devices ? .Select(x = > x.Value);
-	}
-	*/
-
 	/// <summary>
 	/// Checks if a device is a DualShock 4.
 	/// </summary>

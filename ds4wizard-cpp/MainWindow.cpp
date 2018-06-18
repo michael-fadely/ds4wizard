@@ -9,7 +9,24 @@
 MainWindow::MainWindow(QWidget* parent)
 	: QMainWindow(parent)
 {
+	// TODO: async this whole thing
+
 	ui.setupUi(this);
+
+	Logger::lineLogged += std::bind(&MainWindow::something, this, std::placeholders::_1, std::placeholders::_2);
+
+	ui.checkMinimizeToTray->setChecked(Program::settings.minimizeToTray);
+	ui.checkStartMinimized->setChecked(Program::settings.startMinimized);
+	ui.comboConnectionType->setCurrentIndex(static_cast<int>(Program::settings.preferredConnection));
+
+	registerDeviceNotification();
+
+	deviceManager = std::make_shared<Ds4DeviceManager>();
+	Program::profileCache.setDevices(deviceManager);
+
+	Program::profileCache.load();
+	deviceManager->findControllers();
+
 	this->supportsSystemTray = QSystemTrayIcon::isSystemTrayAvailable();
 
 	if (supportsSystemTray)
@@ -37,20 +54,10 @@ MainWindow::MainWindow(QWidget* parent)
 			show();
 		}
 	}
-
-	Logger::lineLogged += std::bind(&MainWindow::something, this, std::placeholders::_1, std::placeholders::_2);
-
-	ui.checkMinimizeToTray->setChecked(Program::settings.minimizeToTray);
-	ui.checkStartMinimized->setChecked(Program::settings.startMinimized);
-	ui.comboConnectionType->setCurrentIndex(static_cast<int>(Program::settings.preferredConnection));
-
-	registerDeviceNotification();
-
-	deviceManager = std::make_shared<Ds4DeviceManager>();
-	Program::profileCache.setDevices(deviceManager);
-
-	Program::profileCache.load();
-	deviceManager->findControllers();
+	else
+	{
+		show();
+	}
 }
 
 MainWindow::~MainWindow()
@@ -100,17 +107,17 @@ void MainWindow::something(void* sender, LineLoggedEventArgs* args) const
 		default:
 		case LogLevel::info:
 			icon = QSystemTrayIcon::MessageIcon::Information;
-			title = "Info";
+			title = tr("Info");
 			break;
 
 		case LogLevel::warning:
 			icon = QSystemTrayIcon::MessageIcon::Warning;
-			title = "Warning";
+			title = tr("Warning");
 			break;
 
 		case LogLevel::error:
 			icon = QSystemTrayIcon::MessageIcon::Critical;
-			title = "Error";
+			title = tr("Error");
 			break;
 	}
 
@@ -162,11 +169,11 @@ bool MainWindow::nativeEvent(const QByteArray& eventType, void* message, long* r
 			return false;
 		}
 
-		auto devinterface = reinterpret_cast<DEV_BROADCAST_DEVICEINTERFACE*>(msg->lParam);
+		auto devInterface = reinterpret_cast<DEV_BROADCAST_DEVICEINTERFACE*>(msg->lParam);
 
 		try
 		{
-			if (Ds4DeviceManager::isDs4(devinterface->dbcc_name))
+			if (Ds4DeviceManager::isDs4(devInterface->dbcc_name))
 			{
 				// TODO: pull required metadata (instance id) from device and open directly instead of re-scanning everything
 				deviceManager->findControllers();
