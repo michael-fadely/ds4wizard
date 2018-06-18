@@ -103,7 +103,7 @@ void hid::enumerateHid(const std::function<bool(HidInstance& instance)>& fn) noe
 	GUID guid = {};
 	HidD_GetHidGuid(&guid);
 
-	auto callback = [fn](const std::wstring& path, const std::wstring& instanceId) -> bool
+	const auto callback = [fn](const std::wstring& path, const std::wstring& instanceId) -> bool
 	{
 		HidInstance hid;
 

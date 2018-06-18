@@ -173,11 +173,7 @@ bool MainWindow::nativeEvent(const QByteArray& eventType, void* message, long* r
 
 		try
 		{
-			if (Ds4DeviceManager::isDs4(devInterface->dbcc_name))
-			{
-				// TODO: pull required metadata (instance id) from device and open directly instead of re-scanning everything
-				deviceManager->findControllers();
-			}
+			deviceManager->findController(devInterface->dbcc_name);
 		}
 		catch (const std::exception&)
 		{

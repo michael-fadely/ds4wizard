@@ -49,6 +49,8 @@
 #include <hid_instance.h>
 #include <hid_util.h>
 
+#include "stringutil.h"
+
 #include "AxisOptions.h"
 #include "Bluetooth.h"
 #include "busenum.h"

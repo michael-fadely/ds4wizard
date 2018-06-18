@@ -188,6 +188,7 @@
     <ClInclude Include="Logger.h" />
     <ClInclude Include="ScpDevice.h" />
     <ClInclude Include="Stopwatch.h" />
+    <ClInclude Include="stringutil.h" />
     <ClInclude Include="XInputGamepad.h" />
     <QtMoc Include="MainWindow.h">
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtUiTools</IncludePath>

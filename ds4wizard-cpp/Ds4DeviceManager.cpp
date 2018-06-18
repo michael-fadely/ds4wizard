@@ -10,6 +10,7 @@
 #include "lock.h"
 #include "Logger.h"
 #include "program.h"
+#include "stringutil.h"
 
 #include "Ds4DeviceManager.h"
 
@@ -20,18 +21,8 @@ Ds4DeviceManager::~Ds4DeviceManager()
 
 bool Ds4DeviceManager::isDs4(const hid::HidInstance& hid)
 {
-	if (hid.attributes().vendorId == vendorId)
-	{
-		for (auto id : productIds)
-		{
-			if (id == hid.attributes().productId)
-			{
-				return true;
-			}
-		}
-	}
-
-	return false;
+	return hid.attributes().vendorId == vendorId &&
+		std::find(productIds.begin(), productIds.end(), hid.attributes().productId) != productIds.end();
 }
 
 bool Ds4DeviceManager::isDs4(const std::wstring& devicePath)
@@ -46,122 +37,148 @@ void Ds4DeviceManager::findControllers()
 
 	hid::enumerateHid([&](hid::HidInstance& hid) -> bool
 	{
-		if (hid.attributes().vendorId != vendorId)
+		return handleDevice(hid);
+	});
+}
+
+void Ds4DeviceManager::findController(const std::wstring& devicePath)
+{
+	if (!isDs4(devicePath))
+	{
+		return;
+	}
+
+	GUID guid = {};
+	HidD_GetHidGuid(&guid);
+
+	lock(sync);
+
+	hid::enumerateGuid([&](const std::wstring& path, const std::wstring& instanceId) -> bool
+	{
+		if (!iequals(path, devicePath))
 		{
 			return false;
 		}
 
-		if (std::find(productIds.begin(), productIds.end(), hid.attributes().productId) == productIds.end())
+		hid::HidInstance hid(path, instanceId, true);
+		return handleDevice(hid);
+	}, guid);
+}
+
+bool Ds4DeviceManager::handleDevice(hid::HidInstance& hid)
+{
+	if (!isDs4(hid))
+	{
+		return false;
+	}
+
+	lock(sync);
+
+	bool isBluetooth;
+
+	try
+	{
+		isBluetooth = hid.caps().inputReportSize != 64;
+
+		// USB connection type
+		if (!isBluetooth)
 		{
-			return false;
-		}
+			// From DS4Windows
+			std::array<uint8_t, 16> buffer {};
+			buffer[0] = 18;
 
-		bool isBluetooth;
-
-		try
-		{
-			isBluetooth = hid.caps().inputReportSize != 64;
-
-			// USB connection type
-			if (!isBluetooth)
+			if (!hid.getFeature(buffer))
 			{
-				// From DS4Windows
-				std::array<uint8_t, 16> buffer {};
-				buffer[0] = 18;
+				throw /* TODO std::runtime_error(std::wstring.Format(Resources.DeviceReadMACFailed, hid.path)) */;
+			}
 
-				if (!hid.getFeature(buffer))
+			hid.serial =
+			{
+				buffer[6], buffer[5], buffer[4],
+				buffer[3], buffer[2], buffer[1]
+			};
+
+			std::wstringstream serialString;
+
+			serialString << std::setw(2) << std::setfill(L'0') << std::hex
+				<< buffer[6] << buffer[5] << buffer[4] << buffer[3] << buffer[2] << buffer[1];
+
+			hid.serialString = serialString.str();
+		}
+
+		if (hid.serialString.empty())
+		{
+			throw /* TODO std::runtime_error(std::wstring.Format(Resources.DeviceReturnedEmptyMAC, hid.Path)) */;
+		}
+	}
+	catch (const std::exception& ex)
+	{
+		// TODO: proper HID exceptions
+		Logger::writeLine(LogLevel::warning, "Failed to read device metadata: " + std::string(ex.what()));
+		hid.close();
+		return false;
+	}
+
+	hid.close(); // HACK: this should not be required; why is it open???
+
+	try
+	{
+		lock(devices);
+
+		const auto it = devices.find(hid.serialString);
+		std::shared_ptr<Ds4Device> device;
+
+		if (it == devices.end())
+		{
+			// TODO: don't toggle the device unless opening exclusively fails!
+			queueDeviceToggle(hid.instanceId);
+
+			device = std::make_shared<Ds4Device>(hid);
+			device->deviceClosed += std::bind(&Ds4DeviceManager::onDs4DeviceClosed, this,
+				std::placeholders::_1, std::placeholders::_2);
+
+			DeviceOpenedEventArgs args(device, true);
+			onDeviceOpened(args);
+			device->start();
+
+			auto& safe = device->safeMacAddress;
+			const std::wstring wstr(safe.begin(), safe.end());
+			devices[wstr] = device;
+		}
+		else
+		{
+			device = it->second;
+
+			if (isBluetooth)
+			{
+				if (!device->bluetoothConnected())
 				{
-					throw /* TODO std::runtime_error(std::wstring.Format(Resources.DeviceReadMACFailed, hid.path)) */;
+					// TODO: don't toggle the device unless opening exclusively fails!
+					queueDeviceToggle(hid.instanceId);
+					device->openBluetoothDevice(hid);
 				}
-
-				hid.serial =
-				{
-					buffer[6], buffer[5], buffer[4],
-					buffer[3], buffer[2], buffer[1]
-				};
-
-				std::wstringstream serialString;
-
-				serialString << std::setw(2) << std::setfill(L'0') << std::hex
-					<< buffer[6] << buffer[5] << buffer[4] << buffer[3] << buffer[2] << buffer[1];
-
-				hid.serialString = serialString.str();
-			}
-
-			if (hid.serialString.empty())
-			{
-				throw /* TODO std::runtime_error(std::wstring.Format(Resources.DeviceReturnedEmptyMAC, hid.Path)) */;
-			}
-		}
-		catch (const std::exception& ex)
-		{
-			// TODO: proper HID exceptions
-			Logger::writeLine(LogLevel::warning, "Failed to read device metadata: " + std::string(ex.what()));
-			hid.close();
-			return false;
-		}
-
-		hid.close(); // HACK: this should not be required; why is it open???
-
-		try
-		{
-			lock(devices);
-
-			const auto it = devices.find(hid.serialString);
-			std::shared_ptr<Ds4Device> device;
-
-			if (it == devices.end())
-			{
-				// TODO: don't toggle the device unless opening exclusively fails!
-				queueDeviceToggle(hid.instanceId);
-
-				device = std::make_shared<Ds4Device>(hid);
-				device->deviceClosed += std::bind(&Ds4DeviceManager::onDs4DeviceClosed, this,
-				                                  std::placeholders::_1, std::placeholders::_2);
-
-				DeviceOpenedEventArgs args(device, true);
-				onDeviceOpened(args);
-				device->start();
-
-				auto& safe = device->safeMacAddress;
-				const std::wstring wstr(safe.begin(), safe.end());
-				devices[wstr] = device;
 			}
 			else
 			{
-				device = it->second;
-
-				if (isBluetooth)
+				if (!device->usbConnected())
 				{
-					if (!device->bluetoothConnected())
-					{
-						// TODO: don't toggle the device unless opening exclusively fails!
-						queueDeviceToggle(hid.instanceId);
-						device->openBluetoothDevice(hid);
-					}
+					// TODO: don't toggle the device unless opening exclusively fails!
+					queueDeviceToggle(hid.instanceId);
+					device->openUsbDevice(hid);
 				}
-				else
-				{
-					if (!device->usbConnected())
-					{
-						// TODO: don't toggle the device unless opening exclusively fails!
-						queueDeviceToggle(hid.instanceId);
-						device->openUsbDevice(hid);
-					}
-				}
-
-				DeviceOpenedEventArgs args(device, false);
-				onDeviceOpened(args);
 			}
-		}
-		catch (const std::exception& ex)
-		{
-			// TODO: proper HID exceptions
-			Logger::writeLine(LogLevel::error, "Error while opening device: " + std::string(ex.what()));
-		}
 
-		return false;
-	});
+			DeviceOpenedEventArgs args(device, false);
+			onDeviceOpened(args);
+		}
+	}
+	catch (const std::exception& ex)
+	{
+		// TODO: proper HID exceptions
+		Logger::writeLine(LogLevel::error, "Error while opening device: " + std::string(ex.what()));
+	}
+
+	return false;
 }
 
 void Ds4DeviceManager::onDs4DeviceClosed(void* sender, EventArgs*)

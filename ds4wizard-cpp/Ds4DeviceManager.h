@@ -94,7 +94,10 @@ public:
 	/// </summary>
 	void findControllers();
 
+	void findController(const std::wstring& devicePath);
+
 private:
+	bool handleDevice(hid::HidInstance& hid);
 	void onDs4DeviceClosed(void* sender, EventArgs* eventArgs);
 
 public:
