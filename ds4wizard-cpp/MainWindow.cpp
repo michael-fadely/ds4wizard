@@ -9,23 +9,11 @@
 MainWindow::MainWindow(QWidget* parent)
 	: QMainWindow(parent)
 {
-	// TODO: async this whole thing
-
 	ui.setupUi(this);
-
-	Logger::lineLogged += std::bind(&MainWindow::something, this, std::placeholders::_1, std::placeholders::_2);
 
 	ui.checkMinimizeToTray->setChecked(Program::settings.minimizeToTray);
 	ui.checkStartMinimized->setChecked(Program::settings.startMinimized);
 	ui.comboConnectionType->setCurrentIndex(static_cast<int>(Program::settings.preferredConnection));
-
-	registerDeviceNotification();
-
-	deviceManager = std::make_shared<Ds4DeviceManager>();
-	Program::profileCache.setDevices(deviceManager);
-
-	Program::profileCache.load();
-	deviceManager->findControllers();
 
 	this->supportsSystemTray = QSystemTrayIcon::isSystemTrayAvailable();
 
@@ -58,6 +46,25 @@ MainWindow::MainWindow(QWidget* parent)
 	{
 		show();
 	}
+
+	Logger::lineLogged += [this](auto a, auto b) -> void { onLineLogged(a, b); };
+
+	deviceManager = std::make_shared<Ds4DeviceManager>();
+	Program::profileCache.setDevices(deviceManager);
+
+	connect(this, SIGNAL(s_onDeviceOpened(DeviceOpenedEventArgs*)), this, SLOT(onDeviceOpened(DeviceOpenedEventArgs*)));
+	connect(this, SIGNAL(s_onDeviceClosed(DeviceClosedEventArgs*)), this, SLOT(onDeviceClosed(DeviceClosedEventArgs*)));
+	connect(this, SIGNAL(s_onProfilesLoaded()), this, SLOT(onProfilesLoaded()));
+
+	deviceManager->deviceOpened += [this](void* s, DeviceOpenedEventArgs* a) -> void { emit s_onDeviceOpened(a); };
+	deviceManager->deviceClosed += [this](void* s, DeviceClosedEventArgs* a) -> void { emit s_onDeviceClosed(a); };
+
+	startupTask = std::async(std::launch::async, [this]()-> void
+	{
+		Program::profileCache.load();
+		emit s_onProfilesLoaded();
+		deviceManager->findControllers();
+	});
 }
 
 MainWindow::~MainWindow()
@@ -92,7 +99,7 @@ void MainWindow::changeEvent(QEvent* e)
 	QMainWindow::changeEvent(e);
 }
 
-void MainWindow::something(void* sender, LineLoggedEventArgs* args) const
+void MainWindow::onLineLogged(void* sender, LineLoggedEventArgs* args) const
 {
 	if (!supportsSystemTray)
 	{
@@ -240,4 +247,22 @@ void MainWindow::systemTrayShowHide(bool checked)
 void MainWindow::systemTrayExit(bool checked)
 {
 	close();
+}
+
+void MainWindow::onDeviceOpened(DeviceOpenedEventArgs* a)
+{
+	qDebug() << __FUNCTION__;
+}
+
+void MainWindow::onDeviceClosed(DeviceClosedEventArgs* a)
+{
+	qDebug() << __FUNCTION__;
+}
+
+void MainWindow::onProfilesLoaded()
+{
+	qDebug() << __FUNCTION__;
+	registerDeviceNotification();
+
+	// TODO: populate profile list
 }

@@ -3,6 +3,7 @@
 #include <sstream>
 
 #include <shellapi.h>
+
 #include <hid_util.h>
 #include <devicetoggle.h>
 
@@ -135,7 +136,7 @@ bool Ds4DeviceManager::handleDevice(hid::HidInstance& hid)
 
 			device = std::make_shared<Ds4Device>(hid);
 			device->deviceClosed += std::bind(&Ds4DeviceManager::onDs4DeviceClosed, this,
-				std::placeholders::_1, std::placeholders::_2);
+			                                  std::placeholders::_1, std::placeholders::_2);
 
 			DeviceOpenedEventArgs args(device, true);
 			onDeviceOpened(args);
@@ -188,7 +189,7 @@ void Ds4DeviceManager::onDs4DeviceClosed(void* sender, EventArgs*)
 	auto raw_ptr = reinterpret_cast<Ds4Device*>(sender);
 
 	const auto macaddr = std::wstring(raw_ptr->safeMacAddress.begin(), raw_ptr->safeMacAddress.end());
-	auto it = devices.find(macaddr);
+	const auto it = devices.find(macaddr);
 
 	if (it == devices.end())
 	{
@@ -205,6 +206,7 @@ void Ds4DeviceManager::onDs4DeviceClosed(void* sender, EventArgs*)
 void Ds4DeviceManager::close()
 {
 	decltype(devices) devices_;
+
 	{
 		lock(devices);
 		devices_ = std::move(devices);
@@ -250,7 +252,7 @@ void Ds4DeviceManager::toggleDeviceElevated(const std::wstring& instanceId)
 		throw;
 	}
 
-	Handle handle(info.hProcess, true);
+	const Handle handle(info.hProcess, true);
 
 	WaitForSingleObject(handle.nativeHandle, INFINITE);
 }
