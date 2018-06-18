@@ -28,6 +28,7 @@ private:
 	void registerDeviceNotification();
 	void unregisterDeviceNotification();
 	bool nativeEvent(const QByteArray& eventType, void* message, long* result) override;
+	void populateProfileList() const;
 
 protected slots:
 	void closeEvent(QCloseEvent* event) override;

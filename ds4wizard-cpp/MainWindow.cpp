@@ -191,6 +191,22 @@ bool MainWindow::nativeEvent(const QByteArray& eventType, void* message, long* r
 	return false;
 }
 
+void MainWindow::populateProfileList() const
+{
+	ui.profileList->clear();
+
+	auto& profiles_lock = Program::profileCache.profiles_lock;
+
+	{
+		lock(profiles);
+
+		for (const DeviceProfile& profile : Program::profileCache.profiles)
+		{
+			ui.profileList->addItem(QString::fromStdString(profile.name));
+		}
+	}
+}
+
 void MainWindow::closeEvent(QCloseEvent* event)
 {
 	unregisterDeviceNotification();
@@ -263,6 +279,5 @@ void MainWindow::onProfilesLoaded()
 {
 	qDebug() << __FUNCTION__;
 	registerDeviceNotification();
-
-	// TODO: populate profile list
+	populateProfileList();
 }

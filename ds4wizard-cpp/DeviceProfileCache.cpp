@@ -21,7 +21,7 @@ std::optional<DeviceProfile> DeviceProfileCache::getProfile(const std::string& p
 		return std::nullopt;
 	}
 
-	lock(profile);
+	lock(profiles);
 
 	return findProfile(profileName);
 }
@@ -74,7 +74,7 @@ void DeviceProfileCache::saveSettings(const std::string& id, const DeviceSetting
 void DeviceProfileCache::removeProfile(const DeviceProfile& profile)
 {
 	{
-		lock(profile);
+		lock(profiles);
 		profiles.remove(profile);
 	}
 
@@ -96,7 +96,7 @@ void DeviceProfileCache::removeProfile(const DeviceProfile& profile)
 void DeviceProfileCache::updateProfile(const DeviceProfile& last, const DeviceProfile& current)
 {
 	{
-		lock(profile);
+		lock(profiles);
 		profiles.remove(last);
 		profiles.push_back(current);
 	}
@@ -104,7 +104,7 @@ void DeviceProfileCache::updateProfile(const DeviceProfile& last, const DevicePr
 	OnProfileChanged(last.name, current.name);
 
 	{
-		lock(profile);
+		lock(profiles);
 		if (!filesystem::directory_exists(Program::profilesPath().toStdString()))
 		{
 			filesystem::create_directory(Program::profilesPath().toStdString());
@@ -134,6 +134,8 @@ std::optional<DeviceProfile> DeviceProfileCache::findProfile(const std::string& 
 	/*return Profiles.FirstOrDefault(x => x.FileName.Equals(profileName, StringComparison.InvariantCultureIgnoreCase)
 	                                   || x.Name.Equals(profileName, StringComparison.InvariantCultureIgnoreCase));*/
 
+	lock(profiles);
+
 	for (auto& profile : profiles)
 	{
 		// TODO: case insensitive
@@ -149,7 +151,7 @@ std::optional<DeviceProfile> DeviceProfileCache::findProfile(const std::string& 
 void DeviceProfileCache::loadImpl()
 {
 	{
-		lock(profile);
+		lock(profiles);
 		profiles.clear();
 
 		QDir dir(Program::profilesPath());

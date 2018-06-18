@@ -61,8 +61,17 @@ void Ds4DeviceManager::findController(const std::wstring& devicePath)
 			return false;
 		}
 
-		hid::HidInstance hid(path, instanceId, true);
-		return handleDevice(hid);
+		try
+		{
+			hid::HidInstance hid(path, instanceId, true);
+			return handleDevice(hid);
+		}
+		catch (const std::exception& ex)
+		{
+			// ignored
+		}
+
+		return false;
 	}, guid);
 }
 

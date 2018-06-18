@@ -17,7 +17,7 @@ class DeviceProfileCache
 	std::unordered_map<std::string, DeviceSettings> deviceSettings;
 
 public:
-	std::recursive_mutex profile_lock;
+	std::recursive_mutex profiles_lock;
 	std::recursive_mutex deviceSettings_lock;
 	std::recursive_mutex devices_lock;
 	std::list<DeviceProfile> profiles;
@@ -27,7 +27,7 @@ public:
 
 	DeviceProfileCache() = default;
 
-	void setDevices(const std::shared_ptr<Ds4DeviceManager>& devices);
+	void setDevices(const std::shared_ptr<Ds4DeviceManager>& deviceManager);
 
 	void load();
 
