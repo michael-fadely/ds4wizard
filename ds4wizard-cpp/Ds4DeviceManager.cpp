@@ -226,7 +226,7 @@ void Ds4DeviceManager::toggleDeviceElevated(const std::wstring& instanceId)
 	info.lpFile       = L"ds4wizard-device-toggle.exe";
 	info.lpParameters = params.c_str();
 	info.lpVerb       = L"runas";
-	info.nShow        = SW_SHOW;
+	//info.nShow        = SW_SHOW;
 
 	if (!ShellExecuteExW(&info))
 	{
