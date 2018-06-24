@@ -9,7 +9,16 @@
 MainWindow::MainWindow(QWidget* parent)
 	: QMainWindow(parent)
 {
+	constexpr auto now = []() -> auto { return std::chrono::high_resolution_clock::now(); };
+	const auto start = now();
+
 	ui.setupUi(this);
+
+	const auto elapsed = now() - start;
+
+	qDebug() << __FUNCTION__ " setupUi: "
+		<< std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count()
+		<< " ms";
 
 	ui.checkMinimizeToTray->setChecked(Program::settings.minimizeToTray);
 	ui.checkStartMinimized->setChecked(Program::settings.startMinimized);
