@@ -669,7 +669,6 @@ void Ds4Device::controllerThread()
 	onDeviceClosed();
 }
 
-// TODO: DO THIS FUCKING CORRECTLY PLEASE
 void Ds4Device::onDeviceClosed()
 {
 	deviceClosed.invoke(this, nullptr);
