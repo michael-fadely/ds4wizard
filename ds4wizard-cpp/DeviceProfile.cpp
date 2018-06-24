@@ -70,7 +70,7 @@ void DeviceProfile::readJson(const QJsonObject& json)
 	name            = json["name"].toString().toStdString();
 	exclusiveMode   = json["exclusiveMode"].toBool();
 	useXInput       = json["useXInput"].toBool();
-	autoXInputIndex = json["autoXInput"].toBool();
+	autoXInputIndex = json["autoXInputIndex"].toBool(true);
 	xinputIndex     = json["xinputIndex"].toInt();
 
 	auto touchRegions_ = json["touchRegions"].toObject();
@@ -100,11 +100,11 @@ void DeviceProfile::writeJson(QJsonObject& json) const
 {
 	DeviceSettingsCommon::writeJson(json);
 
-	json["name"]          = name.c_str();
-	json["exclusiveMode"] = exclusiveMode;
-	json["useXInput"]     = useXInput;
-	json["autoXInput"]    = autoXInputIndex;
-	json["xinputIndex"]   = xinputIndex;
+	json["name"]            = name.c_str();
+	json["exclusiveMode"]   = exclusiveMode;
+	json["useXInput"]       = useXInput;
+	json["autoXInputIndex"] = autoXInputIndex;
+	json["xinputIndex"]     = xinputIndex;
 
 	QJsonObject touchRegions_;
 
