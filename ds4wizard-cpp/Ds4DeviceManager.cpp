@@ -129,8 +129,6 @@ bool Ds4DeviceManager::handleDevice(hid::HidInstance& hid)
 		return false;
 	}
 
-	hid.close(); // HACK: this should not be required; why is it open???
-
 	try
 	{
 		lock(devices);
