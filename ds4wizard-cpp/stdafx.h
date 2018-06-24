@@ -1,6 +1,6 @@
 #pragma once
 
-//#define QT_IS_FUCKING_BROKEN
+#define QT_IS_FUCKING_BROKEN
 
 // Windows
 #include <Windows.h>
