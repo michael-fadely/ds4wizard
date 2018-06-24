@@ -14,6 +14,7 @@ public:
 	~MainWindow();
 
 	void changeEvent(QEvent* e) override;
+	bool wndProc(tagMSG* msg) const;
 
 private:
 	std::shared_ptr<Ds4DeviceManager> deviceManager;
@@ -27,8 +28,14 @@ private:
 
 	void registerDeviceNotification();
 	void unregisterDeviceNotification();
-	bool nativeEvent(const QByteArray& eventType, void* message, long* result) override;
+	void doFindControllerThing(const std::wstring& name) const;
 	void populateProfileList() const;
+
+protected:
+
+#if !defined(QT_IS_FUCKING_BROKEN)
+	bool nativeEvent(const QByteArray& eventType, void* message, long* result) override;
+#endif
 
 protected slots:
 	void closeEvent(QCloseEvent* event) override;

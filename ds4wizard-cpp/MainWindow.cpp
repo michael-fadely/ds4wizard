@@ -163,10 +163,20 @@ void MainWindow::unregisterDeviceNotification()
 	notificationHandle = nullptr;
 }
 
-bool MainWindow::nativeEvent(const QByteArray& eventType, void* message, long* result)
+void MainWindow::doFindControllerThing(const std::wstring& name) const
 {
-	auto msg = static_cast<MSG*>(message);
+	try
+	{
+		deviceManager->findController(name);
+	}
+	catch (const std::exception&)
+	{
+		// HACK: ignored
+	}
+}
 
+bool MainWindow::wndProc(tagMSG* msg) const
+{
 	if (msg->message == WM_DEVICECHANGE && msg->wParam == DBT_DEVICEARRIVAL)
 	{
 		auto hdr = reinterpret_cast<DEV_BROADCAST_HDR*>(msg->lParam);
@@ -177,19 +187,19 @@ bool MainWindow::nativeEvent(const QByteArray& eventType, void* message, long* r
 		}
 
 		auto devInterface = reinterpret_cast<DEV_BROADCAST_DEVICEINTERFACE*>(msg->lParam);
-
-		try
-		{
-			deviceManager->findController(devInterface->dbcc_name);
-		}
-		catch (const std::exception&)
-		{
-			// HACK: ignored
-		}
+		doFindControllerThing(devInterface->dbcc_name);
 	}
 
 	return false;
 }
+
+#if !defined(QT_IS_FUCKING_BROKEN)
+bool MainWindow::nativeEvent(const QByteArray& eventType, void* message, long* result)
+{
+	auto msg = static_cast<MSG*>(message);
+	return wndProc(msg);
+}
+#endif
 
 void MainWindow::populateProfileList() const
 {
@@ -267,17 +277,14 @@ void MainWindow::systemTrayExit(bool checked)
 
 void MainWindow::onDeviceOpened(DeviceOpenedEventArgs* a)
 {
-	qDebug() << __FUNCTION__;
 }
 
 void MainWindow::onDeviceClosed(DeviceClosedEventArgs* a)
 {
-	qDebug() << __FUNCTION__;
 }
 
 void MainWindow::onProfilesLoaded()
 {
-	qDebug() << __FUNCTION__;
 	registerDeviceNotification();
 	populateProfileList();
 }

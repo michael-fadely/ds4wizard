@@ -1,5 +1,7 @@
 #pragma once
 
+#define QT_IS_FUCKING_BROKEN
+
 // Windows
 #include <Windows.h>
 #include <SetupAPI.h>
