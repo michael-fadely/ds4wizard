@@ -2,6 +2,8 @@
 
 #include <QJsonObject>
 
+// TODO: RapidJson (because QJson doesn't support 64-bit int!)
+
 struct JsonData
 {
 	virtual ~JsonData() = default;
