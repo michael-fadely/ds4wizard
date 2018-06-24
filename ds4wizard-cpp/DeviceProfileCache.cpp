@@ -11,7 +11,6 @@ void DeviceProfileCache::setDevices(const std::shared_ptr<Ds4DeviceManager>& dev
 void DeviceProfileCache::load()
 {
 	loadImpl();
-	OnLoaded();
 }
 
 std::optional<DeviceProfile> DeviceProfileCache::getProfile(const std::string& profileName)
@@ -78,7 +77,7 @@ void DeviceProfileCache::removeProfile(const DeviceProfile& profile)
 		profiles.remove(profile);
 	}
 
-	OnProfileChanged(profile.name, nullptr);
+	onProfileChanged(profile.name, nullptr);
 
 	if (filesystem::directory_exists(Program::profilesPath().toStdString()))
 	{
@@ -101,7 +100,7 @@ void DeviceProfileCache::updateProfile(const DeviceProfile& last, const DevicePr
 		profiles.push_back(current);
 	}
 
-	OnProfileChanged(last.name, current.name);
+	onProfileChanged(last.name, current.name);
 
 	{
 		lock(profiles);
@@ -121,8 +120,7 @@ void DeviceProfileCache::updateProfile(const DeviceProfile& last, const DevicePr
 
 		f.write(QJsonDocument(current.toJson()).toJson(QJsonDocument::Indented));
 
-		// TODO: case insensitive
-		if (last.fileName() != current.fileName())
+		if (!iequals(last.fileName(), current.fileName()))
 		{
 			filesystem::remove(filesystem::combine_path(Program::profilesPath().toStdString(), last.fileName()));
 		}
@@ -138,8 +136,7 @@ std::optional<DeviceProfile> DeviceProfileCache::findProfile(const std::string& 
 
 	for (auto& profile : profiles)
 	{
-		// TODO: case insensitive
-		if (profile.fileName() == profileName || profile.name == profileName)
+		if (iequals(profile.fileName(), profileName) || iequals(profile.name, profileName))
 		{
 			return profile;
 		}
@@ -201,25 +198,22 @@ void DeviceProfileCache::loadImpl()
 	}
 }
 
-void DeviceProfileCache::OnLoaded() const
+void DeviceProfileCache::onProfileChanged(const std::string& oldName, const std::string& newName)
 {
-	// TODO
-	//Loaded?.Invoke(this, EventArgs.Empty);
-}
-
-void DeviceProfileCache::OnProfileChanged(const std::string& oldName, const std::string& newName) const
-{
-	// TODO: deviceManager
-#if 0
 	{
 		lock(deviceManager);
 
-		foreach(Ds4Device device in deviceManager.Enumerate().Where(device = > device.Settings.Profile == oldName))
+		auto& devices_lock = deviceManager->devices_lock;
+		lock(devices);
+
+		for (auto& pair : deviceManager->devices)
 		{
-			device.OnProfileChanged(newName);
+			if (pair.second->settings.profile == oldName)
+			{
+				pair.second->onProfileChanged(newName);
+			}
 		}
 	}
 
-	ProfileChanged?.Invoke(this, EventArgs.Empty);
-#endif
+	//ProfileChanged?.Invoke(this, EventArgs.Empty);
 }

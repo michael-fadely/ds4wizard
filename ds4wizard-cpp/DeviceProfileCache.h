@@ -17,6 +17,7 @@ class DeviceProfileCache
 	std::unordered_map<std::string, DeviceSettings> deviceSettings;
 
 public:
+	std::recursive_mutex deviceManager_lock;
 	std::recursive_mutex profiles_lock;
 	std::recursive_mutex deviceSettings_lock;
 	std::recursive_mutex devices_lock;
@@ -68,6 +69,5 @@ public:
 private:
 	std::optional<DeviceProfile> findProfile(const std::string& profileName);
 	void loadImpl();
-	void OnLoaded() const;
-	void OnProfileChanged(const std::string& oldName, const std::string& newName) const;
+	void onProfileChanged(const std::string& oldName, const std::string& newName);
 };

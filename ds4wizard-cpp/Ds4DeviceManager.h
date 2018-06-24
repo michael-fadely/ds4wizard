@@ -47,10 +47,10 @@ public:
 
 class Ds4DeviceManager
 {
+public:
 	std::recursive_mutex sync_lock, devices_lock;
 	std::map<std::wstring, std::shared_ptr<Ds4Device>> devices;
 
-public:
 	/// <summary>
 	/// Defines the DualShock 4 Vendor ID.
 	/// </summary>
