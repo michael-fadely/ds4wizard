@@ -1,4 +1,5 @@
 #include "hid_handle.h"
+#include <utility>
 
 Handle::Handle(const Handle& other)
 {
@@ -7,7 +8,7 @@ Handle::Handle(const Handle& other)
 
 Handle::Handle(Handle&& rhs) noexcept
 {
-	*this = rhs;
+	*this = std::move(rhs);
 }
 
 Handle::Handle(HANDLE h, bool owner)
