@@ -32,7 +32,7 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
-         <widget class="QTreeWidget" name="deviceTable">
+         <widget class="QTreeWidget" name="deviceList">
           <property name="rootIsDecorated">
            <bool>false</bool>
           </property>

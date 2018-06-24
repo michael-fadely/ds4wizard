@@ -307,9 +307,9 @@ void MainWindow::onDeviceOpened(std::shared_ptr<DeviceOpenedEventArgs> a) const
 		return;
 	}
 
-	auto deviceTable = ui.deviceTable;
+	auto deviceList = ui.deviceList;
 
-	deviceTable->setUpdatesEnabled(false);
+	deviceList->setUpdatesEnabled(false);
 
 	QStringList strings;
 
@@ -317,28 +317,28 @@ void MainWindow::onDeviceOpened(std::shared_ptr<DeviceOpenedEventArgs> a) const
 	strings.append(QString::fromStdString(device->name()));
 	strings.append(QString::number(static_cast<int>(device->battery())));
 
-	deviceTable->addTopLevelItem(new QTreeWidgetItem(strings));
+	deviceList->addTopLevelItem(new QTreeWidgetItem(strings));
 
-	deviceTable->setUpdatesEnabled(true);
+	deviceList->setUpdatesEnabled(true);
 }
 
 void MainWindow::onDeviceClosed(std::shared_ptr<DeviceClosedEventArgs> a) const
 {
-	auto deviceTable = ui.deviceTable;
+	auto deviceList = ui.deviceList;
 
-	deviceTable->setUpdatesEnabled(false);
+	deviceList->setUpdatesEnabled(false);
 
 	const auto& device = a->device;
 	const QString name = QString::fromStdString(device->name());
 
-	auto items = deviceTable->findItems(name, Qt::MatchExactly, 0);
+	auto items = deviceList->findItems(name, Qt::MatchExactly, 0);
 
 	for (auto& item : items)
 	{
 		delete item;
 	}
 
-	deviceTable->setUpdatesEnabled(true);
+	deviceList->setUpdatesEnabled(true);
 }
 
 void MainWindow::onProfilesLoaded()
