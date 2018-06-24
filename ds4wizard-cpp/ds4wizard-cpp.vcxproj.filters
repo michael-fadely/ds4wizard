@@ -4,16 +4,10 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="devicepropertiesdialog.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Settings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="program.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MainWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DeviceProfileCache.cpp">
@@ -25,22 +19,10 @@
     <ClCompile Include="DeviceSettings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Ds4LightOptions.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Ds4Color.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="DeviceProfile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DeviceIdleOptions.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Ds4TouchRegion.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Ds4InputData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Pressable.cpp">
@@ -49,31 +31,10 @@
     <ClCompile Include="AxisOptions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="filesystem.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Ds4DeviceManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Ds4Device.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Stopwatch.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Ds4Input.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ScpDevice.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Ds4Output.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Bluetooth.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Ds4AutoLightColor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="XInputGamepad.cpp">
@@ -82,14 +43,53 @@
     <ClCompile Include="InputMap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="enums.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Logger.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Ds4AutoLightColor.cpp">
+      <Filter>Source Files\DualShock 4</Filter>
+    </ClCompile>
+    <ClCompile Include="Ds4Color.cpp">
+      <Filter>Source Files\DualShock 4</Filter>
+    </ClCompile>
+    <ClCompile Include="Ds4Device.cpp">
+      <Filter>Source Files\DualShock 4</Filter>
+    </ClCompile>
+    <ClCompile Include="Ds4DeviceManager.cpp">
+      <Filter>Source Files\DualShock 4</Filter>
+    </ClCompile>
+    <ClCompile Include="Ds4Input.cpp">
+      <Filter>Source Files\DualShock 4</Filter>
+    </ClCompile>
+    <ClCompile Include="Ds4InputData.cpp">
+      <Filter>Source Files\DualShock 4</Filter>
+    </ClCompile>
+    <ClCompile Include="Ds4LightOptions.cpp">
+      <Filter>Source Files\DualShock 4</Filter>
+    </ClCompile>
+    <ClCompile Include="Ds4Output.cpp">
+      <Filter>Source Files\DualShock 4</Filter>
+    </ClCompile>
+    <ClCompile Include="Ds4TouchRegion.cpp">
+      <Filter>Source Files\DualShock 4</Filter>
+    </ClCompile>
+    <ClCompile Include="enums.cpp">
+      <Filter>Source Files\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="Stopwatch.cpp">
+      <Filter>Source Files\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="filesystem.cpp">
+      <Filter>Source Files\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="MainWindow.cpp">
+      <Filter>Source Files\User Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="devicepropertiesdialog.cpp">
+      <Filter>Source Files\User Interface</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -112,6 +112,24 @@
       <UniqueIdentifier>{99349809-55BA-4b9d-BF79-8FDBB0286EB3}</UniqueIdentifier>
       <Extensions>ui</Extensions>
       <ParseFiles>true</ParseFiles>
+    </Filter>
+    <Filter Include="Header Files\DualShock 4">
+      <UniqueIdentifier>{e6aceb0c-009e-465c-a96f-c03163384b70}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\DualShock 4">
+      <UniqueIdentifier>{8ddc7dd3-b08b-4941-9ac9-5adf10be4bb5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Utility">
+      <UniqueIdentifier>{ef08df88-a194-4408-8806-5133df6e50a1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Utility">
+      <UniqueIdentifier>{e7b1ce75-2f23-4f6c-939a-6dd6bd309d04}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\User Interface">
+      <UniqueIdentifier>{abe4e93f-947e-4a82-9164-d00c735b041f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\User Interface">
+      <UniqueIdentifier>{5cd2bbef-383a-41e3-8920-1b74c967e075}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -139,52 +157,16 @@
     <ClInclude Include="DeviceSettings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Ds4LightOptions.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Ds4Color.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="DeviceProfile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DeviceIdleOptions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Ds4TouchRegion.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="enums.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Ds4InputData.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Pressable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="lerp.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="AxisOptions.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="filesystem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Ds4DeviceManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Ds4Device.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="lock.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Stopwatch.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Ds4Input.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ScpDevice.h">
@@ -193,16 +175,7 @@
     <ClInclude Include="XInputGamepad.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="busenum.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Ds4Output.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Bluetooth.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Ds4AutoLightColor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="InputMap.h">
@@ -214,16 +187,61 @@
     <ClInclude Include="EventHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Ds4AutoLightColor.h">
+      <Filter>Header Files\DualShock 4</Filter>
+    </ClInclude>
+    <ClInclude Include="Ds4Color.h">
+      <Filter>Header Files\DualShock 4</Filter>
+    </ClInclude>
+    <ClInclude Include="Ds4Device.h">
+      <Filter>Header Files\DualShock 4</Filter>
+    </ClInclude>
+    <ClInclude Include="Ds4DeviceManager.h">
+      <Filter>Header Files\DualShock 4</Filter>
+    </ClInclude>
+    <ClInclude Include="Ds4Input.h">
+      <Filter>Header Files\DualShock 4</Filter>
+    </ClInclude>
+    <ClInclude Include="Ds4InputData.h">
+      <Filter>Header Files\DualShock 4</Filter>
+    </ClInclude>
+    <ClInclude Include="Ds4LightOptions.h">
+      <Filter>Header Files\DualShock 4</Filter>
+    </ClInclude>
+    <ClInclude Include="Ds4Output.h">
+      <Filter>Header Files\DualShock 4</Filter>
+    </ClInclude>
+    <ClInclude Include="Ds4TouchRegion.h">
+      <Filter>Header Files\DualShock 4</Filter>
+    </ClInclude>
+    <ClInclude Include="busenum.h">
+      <Filter>Header Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="enums.h">
+      <Filter>Header Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="filesystem.h">
+      <Filter>Header Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="lerp.h">
+      <Filter>Header Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="lock.h">
+      <Filter>Header Files\Utility</Filter>
+    </ClInclude>
     <ClInclude Include="stringutil.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Stopwatch.h">
+      <Filter>Header Files\Utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="devicepropertiesdialog.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\User Interface</Filter>
     </QtMoc>
     <QtMoc Include="MainWindow.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\User Interface</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
