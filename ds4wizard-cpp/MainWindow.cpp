@@ -56,8 +56,8 @@ MainWindow::MainWindow(QWidget* parent)
 	connect(this, SIGNAL(s_onDeviceClosed(DeviceClosedEventArgs*)), this, SLOT(onDeviceClosed(DeviceClosedEventArgs*)));
 	connect(this, SIGNAL(s_onProfilesLoaded()), this, SLOT(onProfilesLoaded()));
 
-	deviceManager->deviceOpened += [this](void* s, DeviceOpenedEventArgs* a) -> void { emit s_onDeviceOpened(a); };
-	deviceManager->deviceClosed += [this](void* s, DeviceClosedEventArgs* a) -> void { emit s_onDeviceClosed(a); };
+	deviceManager->deviceOpened += [this](void*, DeviceOpenedEventArgs* a) -> void { emit s_onDeviceOpened(a); };
+	deviceManager->deviceClosed += [this](void*, DeviceClosedEventArgs* a) -> void { emit s_onDeviceClosed(a); };
 
 	startupTask = std::async(std::launch::async, [this]()-> void
 	{
@@ -99,7 +99,7 @@ void MainWindow::changeEvent(QEvent* e)
 	QMainWindow::changeEvent(e);
 }
 
-void MainWindow::onLineLogged(void* sender, LineLoggedEventArgs* args) const
+void MainWindow::onLineLogged(void* /*sender*/, LineLoggedEventArgs* args) const
 {
 	if (!supportsSystemTray)
 	{
@@ -217,7 +217,7 @@ void MainWindow::populateProfileList() const
 	}
 }
 
-void MainWindow::closeEvent(QCloseEvent* event)
+void MainWindow::closeEvent(QCloseEvent* /*event*/)
 {
 	unregisterDeviceNotification();
 }
@@ -265,12 +265,12 @@ void MainWindow::preferredConnectionChanged(int value)
 	Program::settings.preferredConnection = ConnectionType::_from_integral(value);
 }
 
-void MainWindow::systemTrayShowHide(bool checked)
+void MainWindow::systemTrayShowHide(bool /*checked*/)
 {
 	toggleHide(QSystemTrayIcon::DoubleClick);
 }
 
-void MainWindow::systemTrayExit(bool checked)
+void MainWindow::systemTrayExit(bool /*checked*/)
 {
 	close();
 }
