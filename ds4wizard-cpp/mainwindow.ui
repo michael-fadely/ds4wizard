@@ -26,33 +26,39 @@
       <property name="currentIndex">
        <number>0</number>
       </property>
-      <widget class="QWidget" name="tab_1">
+      <widget class="QWidget" name="tabDevices">
        <attribute name="title">
         <string>Devices</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
-         <widget class="QTableWidget" name="deviceTable">
+         <widget class="QTreeWidget" name="deviceTable">
+          <property name="rootIsDecorated">
+           <bool>false</bool>
+          </property>
+          <property name="sortingEnabled">
+           <bool>true</bool>
+          </property>
+          <property name="animated">
+           <bool>true</bool>
+          </property>
+          <property name="allColumnsShowFocus">
+           <bool>false</bool>
+          </property>
+          <property name="headerHidden">
+           <bool>false</bool>
+          </property>
           <property name="columnCount">
            <number>2</number>
           </property>
-          <attribute name="horizontalHeaderVisible">
-           <bool>true</bool>
-          </attribute>
           <column>
            <property name="text">
             <string>Device</string>
-           </property>
-           <property name="textAlignment">
-            <set>AlignLeading|AlignVCenter</set>
            </property>
           </column>
           <column>
            <property name="text">
             <string>Battery</string>
-           </property>
-           <property name="textAlignment">
-            <set>AlignLeading|AlignVCenter</set>
            </property>
           </column>
          </widget>
@@ -66,7 +72,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_3">
+      <widget class="QWidget" name="tabProfiles">
        <attribute name="title">
         <string>Profiles</string>
        </attribute>
@@ -75,7 +81,7 @@
          <widget class="QListWidget" name="profileList"/>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <layout class="QHBoxLayout" name="profileButtonLayout">
           <item alignment="Qt::AlignLeft|Qt::AlignBottom">
            <widget class="QPushButton" name="profileEdit">
             <property name="text">
@@ -114,7 +120,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_4">
+      <widget class="QWidget" name="tabSettings">
        <attribute name="title">
         <string>Settings</string>
        </attribute>
@@ -134,9 +140,9 @@
          </widget>
         </item>
         <item>
-         <layout class="QVBoxLayout" name="verticalLayout_5">
+         <layout class="QVBoxLayout" name="settingsLayout">
           <item>
-           <widget class="QLabel" name="label">
+           <widget class="QLabel" name="connectionLabel">
             <property name="font">
              <font>
               <weight>50</weight>

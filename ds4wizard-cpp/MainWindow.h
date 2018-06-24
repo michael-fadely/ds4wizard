@@ -24,7 +24,7 @@ private:
 	QSystemTrayIcon* trayIcon = nullptr;
 	PVOID notificationHandle = nullptr;
 	std::future<void> startupTask;
-	void onLineLogged(void* sender, LineLoggedEventArgs* args) const;
+	void onLineLogged(void* sender, std::shared_ptr<LineLoggedEventArgs> args) const;
 
 	void registerDeviceNotification();
 	void unregisterDeviceNotification();
@@ -47,12 +47,12 @@ protected slots:
 	void systemTrayShowHide(bool checked);
 	void systemTrayExit(bool checked);
 
-	static void onDeviceOpened(DeviceOpenedEventArgs* a);
-	static void onDeviceClosed(DeviceClosedEventArgs* a);
+	void onDeviceOpened(std::shared_ptr<DeviceOpenedEventArgs> a) const;
+	void onDeviceClosed(std::shared_ptr<DeviceClosedEventArgs> a) const;
 	void onProfilesLoaded();
 
 signals:
-	void s_onDeviceOpened(DeviceOpenedEventArgs* a);
-	void s_onDeviceClosed(DeviceClosedEventArgs* a);
+	void s_onDeviceOpened(std::shared_ptr<DeviceOpenedEventArgs> a);
+	void s_onDeviceClosed(std::shared_ptr<DeviceClosedEventArgs> a);
 	void s_onProfilesLoaded();
 };

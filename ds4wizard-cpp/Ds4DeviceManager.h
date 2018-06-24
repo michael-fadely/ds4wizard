@@ -15,18 +15,18 @@ public:
 	/// <summary>
 	/// The device that triggered the event.
 	/// </summary>
-	const std::shared_ptr<Ds4Device> Device;
+	const std::shared_ptr<Ds4Device> device;
 
 		/// <summary>
 		/// <value>true</value> if this is the first connection for this
 		/// device, <value>false</value> if an additional connection has
 		/// been added to this device.
 		/// </summary>
-	const bool Unique;
+	const bool unique;
 
 	DeviceOpenedEventArgs(std::shared_ptr<Ds4Device> device, bool unique)
-		: Device(std::move(device)),
-		  Unique(unique)
+		: device(std::move(device)),
+		  unique(unique)
 	{
 	}
 };
@@ -37,10 +37,10 @@ public:
 	/// <summary>
 	/// The device that triggered the event.
 	/// </summary>
-	const std::shared_ptr<Ds4Device> Device;
+	const std::shared_ptr<Ds4Device> device;
 
 	explicit DeviceClosedEventArgs(std::shared_ptr<Ds4Device> device)
-		: Device(std::move(device))
+		: device(std::move(device))
 	{
 	}
 };
@@ -98,7 +98,7 @@ public:
 
 private:
 	bool handleDevice(hid::HidInstance& hid);
-	void onDs4DeviceClosed(void* sender, EventArgs* eventArgs);
+	void onDs4DeviceClosed(void* sender, std::shared_ptr<EventArgs> eventArgs);
 
 public:
 	/// <summary>
@@ -114,7 +114,4 @@ public:
 
 private:
 	static void toggleDevice(const std::wstring& instanceId);
-
-	void onDeviceOpened(DeviceOpenedEventArgs& e);
-	void onDeviceClosed(DeviceClosedEventArgs& e);
 };

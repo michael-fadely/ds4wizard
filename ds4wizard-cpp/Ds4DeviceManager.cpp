@@ -147,8 +147,8 @@ bool Ds4DeviceManager::handleDevice(hid::HidInstance& hid)
 			device->deviceClosed += std::bind(&Ds4DeviceManager::onDs4DeviceClosed, this,
 			                                  std::placeholders::_1, std::placeholders::_2);
 
-			DeviceOpenedEventArgs args(device, true);
-			onDeviceOpened(args);
+			auto args = std::make_shared<DeviceOpenedEventArgs>(device, true);
+			deviceOpened.invoke(this, args);
 			device->start();
 
 			auto& safe = device->safeMacAddress;
@@ -178,8 +178,8 @@ bool Ds4DeviceManager::handleDevice(hid::HidInstance& hid)
 				}
 			}
 
-			DeviceOpenedEventArgs args(device, false);
-			onDeviceOpened(args);
+			auto args = std::make_shared<DeviceOpenedEventArgs>(device, false);
+			deviceOpened.invoke(this, args);
 		}
 	}
 	catch (const std::exception& ex)
@@ -191,7 +191,7 @@ bool Ds4DeviceManager::handleDevice(hid::HidInstance& hid)
 	return false;
 }
 
-void Ds4DeviceManager::onDs4DeviceClosed(void* sender, EventArgs*)
+void Ds4DeviceManager::onDs4DeviceClosed(void* sender, std::shared_ptr<EventArgs>)
 {
 	lock(devices);
 
@@ -207,8 +207,8 @@ void Ds4DeviceManager::onDs4DeviceClosed(void* sender, EventArgs*)
 
 	std::shared_ptr<Ds4Device> ptr = it->second;
 
-	DeviceClosedEventArgs args(ptr);
-	onDeviceClosed(args);
+	auto args = std::make_shared<DeviceClosedEventArgs>(ptr);
+	deviceClosed.invoke(this, args);
 	devices.erase(it);
 }
 
@@ -226,8 +226,8 @@ void Ds4DeviceManager::close()
 		const std::shared_ptr<Ds4Device> ptr = std::move(it.second);
 		ptr->close();
 
-		DeviceClosedEventArgs args(ptr);
-		onDeviceClosed(args);
+		auto args = std::make_shared<DeviceClosedEventArgs>(ptr);
+		deviceClosed.invoke(this, args);
 	}
 }
 
@@ -269,14 +269,4 @@ void Ds4DeviceManager::toggleDeviceElevated(const std::wstring& instanceId)
 void Ds4DeviceManager::toggleDevice(const std::wstring& instanceId)
 {
 	::toggleDevice(instanceId);
-}
-
-void Ds4DeviceManager::onDeviceOpened(DeviceOpenedEventArgs& e)
-{
-	deviceOpened.invoke(this, &e);
-}
-
-void Ds4DeviceManager::onDeviceClosed(DeviceClosedEventArgs& e)
-{
-	deviceClosed.invoke(this, &e);
 }

@@ -30,9 +30,9 @@ MainWindow::MainWindow(QWidget* parent)
 	{
 		auto loadIconTask = std::async(std::launch::async, [now]() -> auto
 		{
-			auto start = now();
+			const auto start = now();
 			QIcon icon(":/ds4wizardcpp/Resources/race_q00.ico");
-			auto elapsed = now() - start;
+			const auto elapsed = now() - start;
 			qInfo() << "icon load time: " << std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
 			return icon;
 		});
@@ -67,12 +67,18 @@ MainWindow::MainWindow(QWidget* parent)
 	deviceManager = std::make_shared<Ds4DeviceManager>();
 	Program::profileCache.setDevices(deviceManager);
 
-	connect(this, SIGNAL(s_onDeviceOpened(DeviceOpenedEventArgs*)), this, SLOT(onDeviceOpened(DeviceOpenedEventArgs*)));
-	connect(this, SIGNAL(s_onDeviceClosed(DeviceClosedEventArgs*)), this, SLOT(onDeviceClosed(DeviceClosedEventArgs*)));
+	// TODO: SHIT'S BROKEN (qRegisterMetaType())
+	connect(this, SIGNAL(s_onDeviceOpened(std::shared_ptr<DeviceOpenedEventArgs>)),
+	        this, SLOT(onDeviceOpened(std::shared_ptr<DeviceOpenedEventArgs>)));
+
+	// TODO: SHIT'S BROKEN (qRegisterMetaType())
+	connect(this, SIGNAL(s_onDeviceClosed(std::shared_ptr<DeviceClosedEventArgs>)),
+	        this, SLOT(onDeviceClosed(std::shared_ptr<DeviceClosedEventArgs>)));
+
 	connect(this, SIGNAL(s_onProfilesLoaded()), this, SLOT(onProfilesLoaded()));
 
-	deviceManager->deviceOpened += [this](void*, DeviceOpenedEventArgs* a) -> void { emit s_onDeviceOpened(a); };
-	deviceManager->deviceClosed += [this](void*, DeviceClosedEventArgs* a) -> void { emit s_onDeviceClosed(a); };
+	deviceManager->deviceOpened += [this](void*, std::shared_ptr<DeviceOpenedEventArgs> args) -> void { emit s_onDeviceOpened(args); };
+	deviceManager->deviceClosed += [this](void*, std::shared_ptr<DeviceClosedEventArgs> args) -> void { emit s_onDeviceClosed(args); };
 
 	startupTask = std::async(std::launch::async, [this]() -> void
 	{
@@ -114,7 +120,7 @@ void MainWindow::changeEvent(QEvent* e)
 	QMainWindow::changeEvent(e);
 }
 
-void MainWindow::onLineLogged(void* /*sender*/, LineLoggedEventArgs* args) const
+void MainWindow::onLineLogged(void* /*sender*/, std::shared_ptr<LineLoggedEventArgs> args) const
 {
 	if (!supportsSystemTray)
 	{
@@ -290,12 +296,45 @@ void MainWindow::systemTrayExit(bool /*checked*/)
 	close();
 }
 
-void MainWindow::onDeviceOpened(DeviceOpenedEventArgs* /*a*/)
+void MainWindow::onDeviceOpened(std::shared_ptr<DeviceOpenedEventArgs> a) const
 {
+	if (!a->unique)
+	{
+		return;
+	}
+
+	auto deviceTable = ui.deviceTable;
+
+	deviceTable->setUpdatesEnabled(false);
+
+	QStringList strings;
+
+	const auto& device = a->device;
+	strings.append(QString::fromStdString(device->name()));
+	strings.append(QString::number(static_cast<int>(device->battery())));
+
+	deviceTable->addTopLevelItem(new QTreeWidgetItem(strings));
+
+	deviceTable->setUpdatesEnabled(true);
 }
 
-void MainWindow::onDeviceClosed(DeviceClosedEventArgs* /*a*/)
+void MainWindow::onDeviceClosed(std::shared_ptr<DeviceClosedEventArgs> a) const
 {
+	auto deviceTable = ui.deviceTable;
+
+	deviceTable->setUpdatesEnabled(false);
+
+	const auto& device = a->device;
+	const QString name = QString::fromStdString(device->name());
+
+	auto items = deviceTable->findItems(name, Qt::MatchExactly, 0);
+
+	for (auto& item : items)
+	{
+		deviceTable->removeItemWidget(item, 0);
+	}
+
+	deviceTable->setUpdatesEnabled(true);
 }
 
 void MainWindow::onProfilesLoaded()

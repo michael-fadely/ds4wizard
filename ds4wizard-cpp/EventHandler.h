@@ -13,7 +13,7 @@ template <typename args_t = EventArgs>
 class EventHandler
 {
 public:
-	using callback_t = std::function<void(void* sender, args_t* args)>;
+	using callback_t = std::function<void(void* sender, std::shared_ptr<args_t> args)>;
 
 private:
 	std::deque<callback_t> callbacks;
@@ -22,7 +22,7 @@ public:
 	EventHandler& operator+=(callback_t callback);
 	EventHandler& operator-=(callback_t callback);
 
-	void invoke(void* sender, args_t* args);
+	void invoke(void* sender, std::shared_ptr<args_t> args);
 };
 
 template <typename args_t>
@@ -46,7 +46,7 @@ EventHandler<args_t>& EventHandler<args_t>::operator-=(callback_t callback)
 }
 
 template <typename args_t>
-void EventHandler<args_t>::invoke(void* sender, args_t* args)
+void EventHandler<args_t>::invoke(void* sender, std::shared_ptr<args_t> args)
 {
 	for (auto& callback : callbacks)
 	{
