@@ -139,7 +139,7 @@ bool Ds4DeviceManager::handleDevice(hid::HidInstance& hid)
 		if (it == devices.end())
 		{
 			// TODO: don't toggle the device unless opening exclusively fails!
-			queueDeviceToggle(hid.instanceId);
+			toggleDevice(hid.instanceId);
 
 			device = std::make_shared<Ds4Device>(hid);
 			device->deviceClosed += std::bind(&Ds4DeviceManager::onDs4DeviceClosed, this,
@@ -162,7 +162,7 @@ bool Ds4DeviceManager::handleDevice(hid::HidInstance& hid)
 				if (!device->bluetoothConnected())
 				{
 					// TODO: don't toggle the device unless opening exclusively fails!
-					queueDeviceToggle(hid.instanceId);
+					toggleDevice(hid.instanceId);
 					device->openBluetoothDevice(hid);
 				}
 			}
@@ -171,7 +171,7 @@ bool Ds4DeviceManager::handleDevice(hid::HidInstance& hid)
 				if (!device->usbConnected())
 				{
 					// TODO: don't toggle the device unless opening exclusively fails!
-					queueDeviceToggle(hid.instanceId);
+					toggleDevice(hid.instanceId);
 					device->openUsbDevice(hid);
 				}
 			}
@@ -229,16 +229,13 @@ void Ds4DeviceManager::close()
 	}
 }
 
-void Ds4DeviceManager::queueDeviceToggle(const std::wstring& instanceId)
+void Ds4DeviceManager::toggleDevice(const std::wstring& instanceId)
 {
-	toggleDeviceElevated(instanceId);
-}
+	// TODO: check if windows 8 or newer, otherwise don't bother
 
-void Ds4DeviceManager::toggleDeviceElevated(const std::wstring& instanceId)
-{
 	if (Program::isElevated())
 	{
-		toggleDevice(instanceId);
+		::toggleDevice(instanceId);
 		return;
 	}
 
@@ -262,9 +259,4 @@ void Ds4DeviceManager::toggleDeviceElevated(const std::wstring& instanceId)
 	const Handle handle(info.hProcess, true);
 
 	WaitForSingleObject(handle.nativeHandle, INFINITE);
-}
-
-void Ds4DeviceManager::toggleDevice(const std::wstring& instanceId)
-{
-	::toggleDevice(instanceId);
 }

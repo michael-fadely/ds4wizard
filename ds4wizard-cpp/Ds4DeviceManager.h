@@ -106,12 +106,9 @@ public:
 	/// </summary>
 	void close();
 
-private:
-	static void queueDeviceToggle(const std::wstring& instanceId);
-
-public:
-	static void toggleDeviceElevated(const std::wstring& instanceId);
-
-private:
+	/**
+	 * \brief Automatically prompts for elevation and toggles a device.
+	 * \param instanceId The instance ID of the device to toggle.
+	 */
 	static void toggleDevice(const std::wstring& instanceId);
 };
