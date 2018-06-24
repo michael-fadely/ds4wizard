@@ -243,7 +243,35 @@ bool HidInstance::checkPendingRead()
 
 	DWORD bytes_read;
 	pending_read_ = !GetOverlappedResult(handle.nativeHandle, &overlap_in, &bytes_read, FALSE);
+
+	if (pending_read_)
+	{
+		return checkAsyncReadError();
+	}
+
 	return pending_read_;
+}
+
+bool HidInstance::checkAsyncReadError()
+{
+	const DWORD error = GetLastError();
+
+	switch (error)
+	{
+		case ERROR_SUCCESS:
+		case ERROR_IO_INCOMPLETE:
+			break;
+
+		case ERROR_IO_PENDING:
+			pending_read_ = true;
+			break;
+
+		default:
+			close();
+			return false;
+	}
+
+	return !pending_read_;
 }
 
 bool HidInstance::readAsync(void* buffer, size_t size)
@@ -258,20 +286,7 @@ bool HidInstance::readAsync(void* buffer, size_t size)
 		return true;
 	}
 
-	const DWORD error = GetLastError();
-
-	switch (error)
-	{
-		case ERROR_IO_PENDING:
-			pending_read_ = true;
-			break;
-
-		default:
-			close();
-			return false;
-	}
-
-	return !pending_read_;
+	return checkAsyncReadError();
 }
 
 bool HidInstance::readAsync(const gsl::span<uint8_t>& buffer)
@@ -308,21 +323,17 @@ bool HidInstance::checkPendingWrite()
 
 	DWORD bytes_written;
 	pending_write_ = !GetOverlappedResult(handle.nativeHandle, &overlap_out, &bytes_written, FALSE);
+
+	if (pending_write_)
+	{
+		return checkAsyncWriteError();
+	}
+
 	return pending_write_;
 }
 
-bool HidInstance::writeAsync(const void* buffer, size_t size)
+bool HidInstance::checkAsyncWriteError()
 {
-	if (writePending() && checkPendingWrite())
-	{
-		return false;
-	}
-
-	if (WriteFile(handle.nativeHandle, buffer, static_cast<DWORD>(size), nullptr, &overlap_out))
-	{
-		return true;
-	}
-
 	const DWORD error = GetLastError();
 
 	switch (error)
@@ -341,6 +352,21 @@ bool HidInstance::writeAsync(const void* buffer, size_t size)
 	}
 
 	return !pending_write_;
+}
+
+bool HidInstance::writeAsync(const void* buffer, size_t size)
+{
+	if (writePending() && checkPendingWrite())
+	{
+		return false;
+	}
+
+	if (WriteFile(handle.nativeHandle, buffer, static_cast<DWORD>(size), nullptr, &overlap_out))
+	{
+		return true;
+	}
+
+	return checkAsyncWriteError();
 }
 
 bool HidInstance::writeAsync(const gsl::span<const uint8_t>& buffer)

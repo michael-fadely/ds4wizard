@@ -107,6 +107,7 @@ namespace hid
 		bool read(const gsl::span<uint8_t>& buffer) const;
 		bool read();
 		bool checkPendingRead();
+		bool checkAsyncReadError();
 
 		bool readAsync(void* buffer, size_t size);
 		bool readAsync(const gsl::span<uint8_t>& buffer);
@@ -116,6 +117,7 @@ namespace hid
 		bool write(const gsl::span<const uint8_t>& buffer) const;
 		bool write() const;
 		bool checkPendingWrite();
+		bool checkAsyncWriteError();
 
 		bool writeAsync(const void* buffer, size_t size);
 		bool writeAsync(const gsl::span<const uint8_t>& buffer);
