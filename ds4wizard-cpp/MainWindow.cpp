@@ -9,14 +9,14 @@
 MainWindow::MainWindow(QWidget* parent)
 	: QMainWindow(parent)
 {
-	constexpr auto now = []() -> auto { return std::chrono::high_resolution_clock::now(); };
+	const auto now = []() -> auto { return std::chrono::high_resolution_clock::now(); };
 	const auto start = now();
 
 	ui.setupUi(this);
 
 	const auto elapsed = now() - start;
 
-	qDebug() << __FUNCTION__ " setupUi: "
+	qInfo() << __FUNCTION__ " setupUi: "
 		<< std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count()
 		<< " ms";
 
@@ -28,6 +28,15 @@ MainWindow::MainWindow(QWidget* parent)
 
 	if (supportsSystemTray)
 	{
+		auto loadIconTask = std::async(std::launch::async, [now]() -> auto
+		{
+			auto start = now();
+			QIcon icon(":/ds4wizardcpp/Resources/race_q00.ico");
+			auto elapsed = now() - start;
+			qInfo() << "icon load time: " << std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
+			return icon;
+		});
+
 		auto menu = new QMenu(this);
 
 		QAction* action = menu->addAction(tr("Show/Hide"));
@@ -39,19 +48,16 @@ MainWindow::MainWindow(QWidget* parent)
 		connect(action, SIGNAL(triggered(bool)), this, SLOT(systemTrayExit(bool)));
 
 		trayIcon = new QSystemTrayIcon(this);
-		trayIcon->setIcon(QIcon(":/ds4wizardcpp/Resources/race_q00.ico"));
 		trayIcon->setContextMenu(menu);
-		trayIcon->show();
 
 		connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
 		        this, SLOT(toggleHide(QSystemTrayIcon::ActivationReason)));
 
-		if (!Program::settings.startMinimized)
-		{
-			show();
-		}
+		trayIcon->setIcon(loadIconTask.get());
+		trayIcon->show();
 	}
-	else
+
+	if (!supportsSystemTray || !Program::settings.startMinimized)
 	{
 		show();
 	}
@@ -68,7 +74,7 @@ MainWindow::MainWindow(QWidget* parent)
 	deviceManager->deviceOpened += [this](void*, DeviceOpenedEventArgs* a) -> void { emit s_onDeviceOpened(a); };
 	deviceManager->deviceClosed += [this](void*, DeviceClosedEventArgs* a) -> void { emit s_onDeviceClosed(a); };
 
-	startupTask = std::async(std::launch::async, [this]()-> void
+	startupTask = std::async(std::launch::async, [this]() -> void
 	{
 		Program::profileCache.load();
 		emit s_onProfilesLoaded();
@@ -203,7 +209,7 @@ bool MainWindow::wndProc(tagMSG* msg) const
 }
 
 #if !defined(QT_IS_FUCKING_BROKEN)
-bool MainWindow::nativeEvent(const QByteArray& eventType, void* message, long* result)
+bool MainWindow::nativeEvent(const QByteArray& /*eventType*/, void* message, long* /*result*/)
 {
 	auto msg = static_cast<MSG*>(message);
 	return wndProc(msg);
@@ -284,11 +290,11 @@ void MainWindow::systemTrayExit(bool /*checked*/)
 	close();
 }
 
-void MainWindow::onDeviceOpened(DeviceOpenedEventArgs* a)
+void MainWindow::onDeviceOpened(DeviceOpenedEventArgs* /*a*/)
 {
 }
 
-void MainWindow::onDeviceClosed(DeviceClosedEventArgs* a)
+void MainWindow::onDeviceClosed(DeviceClosedEventArgs* /*a*/)
 {
 }
 

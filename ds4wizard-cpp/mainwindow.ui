@@ -33,9 +33,6 @@
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
          <widget class="QTableWidget" name="deviceTable">
-          <property name="sortingEnabled">
-           <bool>true</bool>
-          </property>
           <property name="columnCount">
            <number>2</number>
           </property>

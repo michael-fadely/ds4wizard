@@ -47,8 +47,8 @@ protected slots:
 	void systemTrayShowHide(bool checked);
 	void systemTrayExit(bool checked);
 
-	void onDeviceOpened(DeviceOpenedEventArgs* a);
-	void onDeviceClosed(DeviceClosedEventArgs* a);
+	static void onDeviceOpened(DeviceOpenedEventArgs* a);
+	static void onDeviceClosed(DeviceClosedEventArgs* a);
 	void onProfilesLoaded();
 
 signals:
