@@ -85,10 +85,10 @@
     <ClCompile Include="filesystem.cpp">
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
-    <ClCompile Include="MainWindow.cpp">
+    <ClCompile Include="devicepropertiesdialog.cpp">
       <Filter>Source Files\User Interface</Filter>
     </ClCompile>
-    <ClCompile Include="devicepropertiesdialog.cpp">
+    <ClCompile Include="MainWindow.cpp">
       <Filter>Source Files\User Interface</Filter>
     </ClCompile>
   </ItemGroup>

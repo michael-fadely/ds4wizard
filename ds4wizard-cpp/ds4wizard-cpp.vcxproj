@@ -149,7 +149,16 @@
     <ClCompile Include="filesystem.cpp" />
     <ClCompile Include="InputMap.cpp" />
     <ClCompile Include="Logger.cpp" />
-    <ClCompile Include="MainWindow.cpp" />
+    <ClCompile Include="MainWindow.cpp">
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\$(ConfigurationName)\%(Filename).moc</OutputFile>
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">input</DynamicSource>
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\..\GSL\include;.\..\libhid;.\..\libdevicetoggle;.\..\better-enums;.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtUiTools</IncludePath>
+      <Define Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NOMINMAX;WIN32_LEAN_AND_MEAN;UNICODE;_UNICODE;WIN32;WIN64;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;QT_UITOOLS_LIB</Define>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\%(Filename).moc</OutputFile>
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|x64'">input</DynamicSource>
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\..\GSL\include;.\..\libhid;.\..\libdevicetoggle;.\..\better-enums;.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtUiTools</IncludePath>
+      <Define Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NOMINMAX;WIN32_LEAN_AND_MEAN;UNICODE;_UNICODE;WIN32;WIN64;QT_NO_DEBUG;NDEBUG;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;QT_UITOOLS_LIB</Define>
+    </ClCompile>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Pressable.cpp" />
     <ClCompile Include="program.cpp" />

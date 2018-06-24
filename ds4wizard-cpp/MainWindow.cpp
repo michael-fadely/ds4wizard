@@ -1,10 +1,13 @@
 #include "stdafx.h"
+#include <QMetaType>
 #include "MainWindow.h"
 #include "devicepropertiesdialog.h"
 #include "DeviceProfileCache.h"
 #include "program.h"
 #include "Ds4DeviceManager.h"
 #include "Logger.h"
+
+// TODO: use treeview instead of the other thing
 
 MainWindow::MainWindow(QWidget* parent)
 	: QMainWindow(parent)
@@ -67,11 +70,12 @@ MainWindow::MainWindow(QWidget* parent)
 	deviceManager = std::make_shared<Ds4DeviceManager>();
 	Program::profileCache.setDevices(deviceManager);
 
-	// TODO: SHIT'S BROKEN (qRegisterMetaType())
+	qRegisterMetaType<std::shared_ptr<DeviceOpenedEventArgs>>("std::shared_ptr<DeviceOpenedEventArgs>");
+	qRegisterMetaType<std::shared_ptr<DeviceClosedEventArgs>>("std::shared_ptr<DeviceClosedEventArgs>");
+
 	connect(this, SIGNAL(s_onDeviceOpened(std::shared_ptr<DeviceOpenedEventArgs>)),
 	        this, SLOT(onDeviceOpened(std::shared_ptr<DeviceOpenedEventArgs>)));
 
-	// TODO: SHIT'S BROKEN (qRegisterMetaType())
 	connect(this, SIGNAL(s_onDeviceClosed(std::shared_ptr<DeviceClosedEventArgs>)),
 	        this, SLOT(onDeviceClosed(std::shared_ptr<DeviceClosedEventArgs>)));
 
@@ -331,7 +335,7 @@ void MainWindow::onDeviceClosed(std::shared_ptr<DeviceClosedEventArgs> a) const
 
 	for (auto& item : items)
 	{
-		deviceTable->removeItemWidget(item, 0);
+		delete item;
 	}
 
 	deviceTable->setUpdatesEnabled(true);
