@@ -19,6 +19,8 @@
 
 using namespace std::chrono;
 
+// TODO: decouple the logger and use events instead
+
 bool Ds4Device::disconnectOnIdle() const
 {
 	return settings.useProfileIdle ? profile.idle.disconnect : settings.idle.disconnect;
@@ -178,6 +180,8 @@ void Ds4Device::applyProfile()
 
 bool Ds4Device::scpDeviceOpen()
 {
+	// TODO: !!! when another handle is opened to the scp device, it fucks everything
+
 	if (scpDevice != nullptr)
 	{
 		return true;
@@ -195,7 +199,7 @@ bool Ds4Device::scpDeviceOpen()
 
 	hid::enumerateGuid([&](const std::wstring& path, const std::wstring& instanceId) -> bool
 	{
-		info = std::make_unique<hid::HidInstance>(path, instanceId, true);
+		info = std::make_unique<hid::HidInstance>(path, instanceId, false);
 		return true;
 	}, GUID_DEVINTERFACE_SCPVBUS);
 
@@ -206,7 +210,7 @@ bool Ds4Device::scpDeviceOpen()
 	}
 
 	auto handle = Handle(CreateFile(info->path.c_str(), GENERIC_READ | GENERIC_WRITE,
-	                                     FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, 0, nullptr), true);
+	                                FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, 0, nullptr), true);
 
 	if (!handle.isValid())
 	{
@@ -528,7 +532,7 @@ void Ds4Device::run()
 
 	const ConnectionType preferredConnection = Program::settings.preferredConnection;
 	const bool useUsb = usb && (preferredConnection == +ConnectionType::usb || !bluetooth);
-	const bool useBluetooth = bluetooth && (preferredConnection == +ConnectionType::bluetooth|| !usb);
+	const bool useBluetooth = bluetooth && (preferredConnection == +ConnectionType::bluetooth || !usb);
 
 	dataReceived = false;
 
@@ -583,7 +587,7 @@ void Ds4Device::run()
 
 	if (dataReceived)
 	{
-		 runMaps();
+		runMaps();
 
 		if (latency.elapsed() >= 5ms)
 		{
@@ -726,8 +730,8 @@ void Ds4Device::simulateXInputAxis(XInputAxes& axes, float m)
 		const auto axis = static_cast<short>(std::numeric_limits<short>::max() * m);
 
 		const short workAxis = options.polarity == +AxisPolarity::negative
-			                 ? static_cast<short>(-axis)
-			                 : axis;
+			                       ? static_cast<short>(-axis)
+			                       : axis;
 
 		const bool isFirst = !(simulatedXInputAxis & bit);
 		simulatedXInputAxis |= bit;
@@ -1321,7 +1325,7 @@ void Ds4Device::updatePressedStateImpl(InputMapBase& instance, const std::functi
 				const gsl::span<const Ds4Axis_t> s(Ds4Axis_values);
 
 				const size_t target = std::count_if(s.begin(), s.end(), [&](Ds4Axis_t x) -> bool { return (x & instance.inputAxis.value_or(0)) != 0; });
-				size_t count  = 0;
+				size_t count = 0;
 
 				for (Ds4Axis_t bit : Ds4Axis_values)
 				{
