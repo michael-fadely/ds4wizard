@@ -4,11 +4,12 @@
 class Bluetooth
 {
 public:
-	/// <summary>
-	/// Disconnects a device with matching MAC address from
-	/// the first Bluetooth radio it is connected to.
-	/// </summary>
-	/// <param name="macAddress">The MAC address to search for.</param>
-	/// <returns><value>true</value> on success.</returns>
+	/**
+	 * \brief 
+	 * Disconnects a device with matching MAC address from
+	 * the first Bluetooth radio it is connected to.
+	 * \param macAddress The MAC address to search for.
+	 * \return \c true on success.
+	 */
 	static bool disconnectDevice(const gsl::span<uint8_t>& macAddress);
 };

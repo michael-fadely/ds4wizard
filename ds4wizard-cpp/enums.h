@@ -126,26 +126,31 @@ enum class Hat
 	none
 };
 
-/// <summary>
-/// Indicates a digital button's pressed state.
-/// </summary>
+/**
+ * \brief 
+ * Indicates a digital button's pressed state.
+ */
 enum class PressedState
 {
-	/// <summary>
-	/// The button has been off for more than one poll.
-	/// </summary>
+	/**
+	 * \brief 
+	 * The button has been off for more than one poll.
+	 */
 	off,
-	/// <summary>
-	/// The button was off last poll, but has now been pressed.
-	/// </summary>
+	/**
+	 * \brief 
+	 * The button was off last poll, but has now been pressed.
+	 */
 	pressed,
-	/// <summary>
-	/// The button has been on (held) for more than one poll.
-	/// </summary>
+	/**
+	 * \brief 
+	 * The button has been on (held) for more than one poll.
+	 */
 	on,
-	/// <summary>
-	/// The button was on (held), but has now been released.
-	/// </summary>
+	/**
+	 * \brief 
+	 * The button was on (held), but has now been released.
+	 */
 	released
 };
 

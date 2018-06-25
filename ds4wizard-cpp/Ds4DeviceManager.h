@@ -12,16 +12,18 @@
 class DeviceOpenedEventArgs
 {
 public:
-	/// <summary>
-	/// The device that triggered the event.
-	/// </summary>
+	/**
+	 * \brief 
+	 * The device that triggered the event.
+	 */
 	const std::shared_ptr<Ds4Device> device;
 
-		/// <summary>
-		/// <value>true</value> if this is the first connection for this
-		/// device, <value>false</value> if an additional connection has
-		/// been added to this device.
-		/// </summary>
+		/**
+		 * \brief 
+		 * \c true if this is the first connection for this
+		 * device, \c false if an additional connection has
+		 * been added to this device.
+		 */
 	const bool unique;
 
 	DeviceOpenedEventArgs(std::shared_ptr<Ds4Device> device, bool unique)
@@ -34,9 +36,10 @@ public:
 class DeviceClosedEventArgs
 {
 public:
-	/// <summary>
-	/// The device that triggered the event.
-	/// </summary>
+	/**
+	 * \brief 
+	 * The device that triggered the event.
+	 */
 	const std::shared_ptr<Ds4Device> device;
 
 	explicit DeviceClosedEventArgs(std::shared_ptr<Ds4Device> device)
@@ -51,47 +54,54 @@ public:
 	std::recursive_mutex sync_lock, devices_lock;
 	std::map<std::wstring, std::shared_ptr<Ds4Device>> devices;
 
-	/// <summary>
-	/// Defines the DualShock 4 Vendor ID.
-	/// </summary>
+	/**
+	 * \brief 
+	 * Defines the DualShock 4 Vendor ID.
+	 */
 	static const short vendorId = 0x54c;
 
-	/// <summary>
-	/// Defines validated DualShock 4 Product IDs.
-	/// </summary>
+	/**
+	 * \brief 
+	 * Defines validated DualShock 4 Product IDs.
+	 */
 	inline static const std::array<short, 3> productIds = { 0xba0, 0x5c4, 0x9cc };
 
-	/// <summary>
-	/// Fired when a device is opened.
-	/// </summary>
-	/// <seealso cref="DeviceOpenedEventArgs"/>
+	/**
+	 * \brief 
+	 * Fired when a device is opened.
+	 * \sa DeviceOpenedEventArgs
+	 */
 	EventHandler<DeviceOpenedEventArgs> deviceOpened;
 
-	/// <summary>
-	/// Fired when a device is closed.
-	/// </summary>
-	/// <seealso cref="DeviceClosedEventArgs"/>
+	/**
+	 * \brief 
+	 * Fired when a device is closed.
+	 * \sa DeviceClosedEventArgs
+	 */
 	EventHandler<DeviceClosedEventArgs> deviceClosed;
 
 	~Ds4DeviceManager();
 
-	/// <summary>
-	/// Checks if a device is a DualShock 4.
-	/// </summary>
-	/// <param name="hid">The HID instance to be checked.</param>
-	/// <returns><value>true</value> if this device is a DualShock 4.</returns>
+	/**
+	 * \brief 
+	 * Checks if a device is a DualShock 4.
+	 * \param hid The HID instance to be checked.
+	 * \return \c true if this device is a DualShock 4.
+	 */
 	static bool isDs4(const hid::HidInstance& hid);
 
-	/// <summary>
-	/// Checks if a device is a DualShock 4.
-	/// </summary>
-	/// <param name="devicePath">The path to the device to be checked.</param>
-	/// <returns><value>true</value> if this device is a DualShock 4.</returns>
+	/**
+	 * \brief 
+	 * Checks if a device is a DualShock 4.
+	 * \param devicePath The path to the device to be checked.
+	 * \return \c true if this device is a DualShock 4.
+	 */
 	static bool isDs4(const std::wstring& devicePath);
 
-	/// <summary>
-	/// Discovers and connects to all DualShock 4 devices.
-	/// </summary>
+	/**
+	 * \brief 
+	 * Discovers and connects to all DualShock 4 devices.
+	 */
 	void findControllers();
 
 	void findController(const std::wstring& devicePath);
@@ -101,9 +111,10 @@ private:
 	void onDs4DeviceClosed(void* sender, std::shared_ptr<EventArgs> eventArgs);
 
 public:
-	/// <summary>
-	/// Closes and removes all managed devices.
-	/// </summary>
+	/**
+	 * \brief 
+	 * Closes and removes all managed devices.
+	 */
 	void close();
 
 	/**

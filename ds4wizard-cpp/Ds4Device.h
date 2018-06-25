@@ -80,14 +80,16 @@ public:
 	bool bluetoothConnected();
 	bool usbConnected();
 	bool connected();
-	/// <summary>
-	/// Gets the battery charge level in the range 1 to 10.
-	/// </summary>
+	/**
+	 * \brief 
+	 * Gets the battery charge level in the range 1 to 10.
+	 */
 	uint8_t battery() const;
 
-	/// <summary>
-	/// Indicates if the controller is charging.
-	/// </summary>
+	/**
+	 * \brief 
+	 * Indicates if the controller is charging.
+	 */
 	bool charging() const;
 
 	const std::string& name() const;
@@ -101,9 +103,10 @@ private:
 public:
 	void saveSettings();
 
-	/// <summary>
-	/// Applies changes made to the device profile and opens device handles.
-	/// </summary>
+	/**
+	 * \brief 
+	 * Applies changes made to the device profile and opens device handles.
+	 */
 	void applyProfile();
 
 private:

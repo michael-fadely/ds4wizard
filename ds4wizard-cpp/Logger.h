@@ -8,26 +8,30 @@
 
 BETTER_ENUM(LogLevel, int, info, warning, error);
 
-/// <summary>
-/// Event arguments for <see cref="Logger.LineLogged"/>.
-/// </summary>
+/**
+ * \brief 
+ * Event arguments for \sa Logger.LineLogged.
+ */
 class LineLoggedEventArgs
 {
 public:
-	/// <summary>
-	/// The time that this line was submitted.
-	/// </summary>
+	/**
+	 * \brief 
+	 * The time that this line was submitted.
+	 */
 	const std::chrono::system_clock::time_point time;
 
-	/// <summary>
-	/// Error level.
-	/// </summary>
-	/// <seealso cref="LogLevel"/>
+	/**
+	 * \brief 
+	 * Error level.
+	 * \sa LogLevel
+	 */
 	const LogLevel level;
 
-	/// <summary>
-	/// The line of text submitted.
-	/// </summary>
+	/**
+	 * \brief 
+	 * The line of text submitted.
+	 */
 	const std::string line;
 
 	LineLoggedEventArgs(LogLevel level, std::string line);
@@ -40,20 +44,22 @@ class Logger
 public:
 	static inline EventHandler<LineLoggedEventArgs> lineLogged;
 
-	/// <summary>
-	/// Submits a line to the logger and notifies all registered events.
-	/// </summary>
-	/// <param name="level">Error level.</param>
-	/// <param name="line">Line of text to be submitted.</param>
+	/**
+	 * \brief 
+	 * Submits a line to the logger and notifies all registered events.
+	 * \param level Error level.
+	 * \param line Line of text to be submitted.
+	 */
 	static void writeLine(LogLevel level, const std::string& line);
 
-	/// <summary>
-	/// Submits a line (with context) to the logger and notifies all registered events.
-	/// The submitted line will be in the format "[context] line".
-	/// </summary>
-	/// <param name="level">Error level.</param>
-	/// <param name="context">Context of this line.</param>
-	/// <param name="line">Line of text to be submitted.</param>
+	/**
+	 * \brief 
+	 * Submits a line (with context) to the logger and notifies all registered events.
+	 * The submitted line will be in the format "[context] line".
+	 * \param level Error level.
+	 * \param context Context of this line.
+	 * \param line Line of text to be submitted.
+	 */
 	static void writeLine(LogLevel level, const std::string& context, const std::string& line);
 
 private:

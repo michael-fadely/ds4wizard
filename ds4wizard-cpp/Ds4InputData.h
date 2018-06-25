@@ -4,21 +4,24 @@
 
 #include "enums.h"
 
-/// <summary>
-/// A structure defining a DualShock 4 analog stick.
-/// </summary>
+/**
+ * \brief 
+ * A structure defining a DualShock 4 analog stick.
+ */
 struct Ds4Stick
 {
-	/// <summary>
-	/// X axis of the DualShock 4 analog stick.
-	/// Note that the center of the axis rests at 127, not 0.
-	/// </summary>
+	/**
+	 * \brief 
+	 * X axis of the DualShock 4 analog stick.
+	 * Note that the center of the axis rests at 127, not 0.
+	 */
 	uint8_t x;
 
-	/// <summary>
-	/// Y axis of the DualShock 4 analog stick.
-	/// Note that the center of the axis rests at 127, not 0.
-	/// </summary>
+	/**
+	 * \brief 
+	 * Y axis of the DualShock 4 analog stick.
+	 * Note that the center of the axis rests at 127, not 0.
+	 */
 	uint8_t y;
 
 	bool operator==(const Ds4Stick& other) const;
@@ -30,22 +33,25 @@ struct Ds4Stick
 	double length() const;
 };
 
-/// <summary>
-/// A structure defining a DualShock 4 vector with 2 signed short components.
-/// Used for points on the touch pad.
-/// </summary>
+/**
+ * \brief 
+ * A structure defining a DualShock 4 vector with 2 signed short components.
+ * Used for points on the touch pad.
+ */
 struct Ds4Vector2
 {
-	/// <summary>
-	/// The X component of the point.
-	/// Left is 0, center is 959, right is 1919.
-	/// </summary>
+	/**
+	 * \brief 
+	 * The X component of the point.
+	 * Left is \c 0, center is \c 959, right is \c 1919.
+	 */
 	short x;
 
-	/// <summary>
-	/// The Y component of the point.
-	/// Top is 0, center is 470, bottom is 942.
-	/// </summary>
+	/**
+	 * \brief 
+	 * The Y component of the point.
+	 * Top is \c 0, center is \c 470, bottom is \c 942.
+	 */
 	short y;
 
 	bool operator==(const Ds4Vector2& other) const;
@@ -55,10 +61,11 @@ struct Ds4Vector2
 	double length() const;
 };
 
-/// <summary>
-/// A structure defining a DualShock 4 vector with 3 signed short components.
-/// Used for the gyroscope and accelerometer.
-/// </summary>
+/**
+ * \brief 
+ * A structure defining a DualShock 4 vector with 3 signed \c short components.
+ * Used for the gyroscope and accelerometer.
+ */
 struct Ds4Vector3
 {
 	short x, y, z;

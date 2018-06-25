@@ -32,9 +32,10 @@ class ScpDevice
 	inline static std::recursive_mutex portLock_lock;
 
 	// HACK: This is prone to failure. Probably better to use integers.
-	/// <summary>
-	/// Emualted ports currently in use.
-	/// </summary>
+	/**
+	 * \brief 
+	 * Emualted ports currently in use.
+	 */
 	inline static std::array<bool, 4> portsUsed =
 	{
 		false, false, false, false
@@ -57,10 +58,11 @@ private:
 public:
 	std::array<short, 4> driverVersion {};
 
-	/// <summary>
-	/// Initializes the ScpVBus device using the given handle.
-	/// </summary>
-	/// <param name="handle">A valid handle to the ScpVBus device.</param>
+	/**
+	 * \brief 
+	 * Initializes the ScpVBus device using the given handle.
+	 * \param handle A valid handle to the ScpVBus device.
+	 */
 	explicit ScpDevice(Handle&& handle);
 
 	~ScpDevice();
@@ -69,63 +71,71 @@ private:
 	static int getDriverVersion(uint64_t& version);
 
 public:
-	/// <summary>
-	/// Closes the handle to the ScpVBus device.
-	/// </summary>
+	/**
+	 * \brief 
+	 * Closes the handle to the ScpVBus device.
+	 */
 	void close();
 
-	/// <summary>
-	/// Connects the specified emulated XInput device.
-	/// </summary>
-	/// <param name="userIndex">The index to connect.</param>
-	/// <returns><value>true</value> on success.</returns>
+	/**
+	 * \brief 
+	 * Connects the specified emulated XInput device.
+	 * \param userIndex The index to connect.
+	 * \return \c true on success.
+	 */
 	bool connect(int userIndex);
 
-	/// <summary>
-	/// Disconnect the specified emulated XInput device.
-	/// </summary>
-	/// <param name="userIndex">The index to disconnect. -1 disconnects all devices.</param>
-	/// <param name="force">Force disconnect.</param>
-	/// <returns><value>true</value> on success.</returns>
+	/**
+	 * \brief 
+	 * Disconnect the specified emulated XInput device.
+	 * \param userIndex The index to disconnect. -1 disconnects all devices.
+	 * \param force Force disconnect.
+	 * \return \c true on success.
+	 */
 	bool disconnect(int userIndex, bool force = true);
 
-	/// <summary>
-	/// Sets the current emulated XInput state and reads any pending data.
-	/// </summary>
-	/// <param name="userIndex">The index of the emualted device.</param>
-	/// <param name="gamepad">A gamepad structure containing the data to set.</param>
-	/// <returns><value>VBusStatus::Success</value> on success.</returns>
-	/// <seealso cref="VBusStatus"/>
+	/**
+	 * \brief 
+	 * Sets the current emulated XInput state and reads any pending data.
+	 * \param userIndex The index of the emualted device.
+	 * \param gamepad A gamepad structure containing the data to set.
+	 * \return \c VBusStatus::Success on success.
+	 * \sa VBusStatus
+	 */
 	VBusStatus syncState(int userIndex, const XInputGamepad& gamepad);
 
-	/// <summary>
-	/// Sets the emulated XInput state and reads any pending data.
-	/// </summary>
-	/// <param name="userIndex">The index of the emualted device.</param>
-	/// <returns><value>VBusStatus::Success</value> on success.</returns>
-	/// <seealso cref="VBusStatus"/>
+	/**
+	 * \brief 
+	 * Sets the emulated XInput state and reads any pending data.
+	 * \param userIndex The index of the emualted device.
+	 * \return \c VBusStatus::Success on success.
+	 * \sa VBusStatus
+	 */
 	VBusStatus syncState(int userIndex);
 
-	/// <summary>
-	/// Gets the last stored emulated XInput device state.
-	/// </summary>
-	/// <param name="userIndex">The emulated device index.</param>
-	/// <returns>The last stored emulated XInput device state.</returns>
-	/// <seealso cref="XInputGamepad"/>
+	/**
+	 * \brief 
+	 * Gets the last stored emulated XInput device state.
+	 * \param userIndex The emulated device index.
+	 * \return The last stored emulated XInput device state.
+	 * \sa XInputGamepad
+	 */
 	XInputGamepad getGamepad(int userIndex);
 
-	/// <summary>
-	/// Gets the last stored emulated XInput vibration state.
-	/// </summary>
-	/// <param name="userIndex">The emulated device index.</param>
-	/// <param name="leftMotor">The variable to receive the left (large) motor rumble state.</param>
-	/// <param name="rightMotor">The variable to receive the right (small) motor rumble state.</param>
+	/**
+	 * \brief 
+	 * Gets the last stored emulated XInput vibration state.
+	 * \param userIndex The emulated device index.
+	 * \param leftMotor The variable to receive the left (large) motor rumble state.
+	 * \param rightMotor The variable to receive the right (small) motor rumble state.
+	 */
 	void getVibration(int userIndex, uint8_t& leftMotor, uint8_t& rightMotor);
 
-	/// <summary>
-	/// Gets the last stored emulated LED ID.
-	/// </summary>
-	/// <param name="userIndex">The emulated device index.</param>
-	/// <returns>The last stored emulated LED ID.</returns>
+	/**
+	 * \brief 
+	 * Gets the last stored emulated LED ID.
+	 * \param userIndex The emulated device index.
+	 * \return The last stored emulated LED ID.
+	 */
 	uint8_t getLed(int userIndex);
 };

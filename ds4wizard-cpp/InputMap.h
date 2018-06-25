@@ -23,9 +23,10 @@ public:
 	/*[JsonIgnore]*/
 	virtual bool isActive() const override;
 
-	/// <summary>
-	/// Indicates if this instance has a persistent state.
-	/// </summary>
+	/**
+	 * \brief 
+	 * Indicates if this instance has a persistent state.
+	 */
 	/*[JsonIgnore]*/
 	bool isPersistent() const;
 
@@ -129,9 +130,10 @@ class InputMap;
 class InputModifier : public InputMapBase
 {
 public:
-	/// <summary>
-	/// The bindings associated with this modifier set.
-	/// </summary>
+	/**
+	 * \brief 
+	 * The bindings associated with this modifier set.
+	 */
 	std::list<InputMap> bindings;
 
 	InputModifier() = default;
@@ -187,10 +189,11 @@ public:
 
 	InputMap() = default;
 
-	/// <summary>
-	/// Copy constructor.
-	/// </summary>
-	/// <param name="other">The instance to copy from.</param>
+	/**
+	 * \brief 
+	 * Copy constructor.
+	 * \param other The instance to copy from.
+	 */
 	InputMap(const InputMap& other);
 
 	InputMap(SimulatorType simulatorType, InputType_t inputType, OutputType::T outputType);

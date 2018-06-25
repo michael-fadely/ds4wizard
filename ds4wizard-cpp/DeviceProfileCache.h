@@ -32,38 +32,43 @@ public:
 
 	void load();
 
-	/// <summary>
-	/// Get a profile copy by name.
-	/// </summary>
-	/// <param name="profileName">The name of the profile to get.</param>
-	/// <returns>A copy of the profile if found, else nullptr.</returns>
+	/**
+	 * \brief 
+	 * Get a profile copy by name.
+	 * \param profileName The name of the profile to get.
+	 * \return A copy of the profile if found, else \c nullptr
+	 */
 	std::optional<DeviceProfile> getProfile(const std::string& profileName);
 
-	/// <summary>
-	/// Returns a copy of the cached settings for the specified MAC address.
-	/// </summary>
-	/// <param name="id">The MAC address of the device whose settings are to be copied.</param>
-	/// <returns>The settings associated with the MAC address, or nullptr if none.</returns>
+	/**
+	 * \brief 
+	 * Returns a copy of the cached settings for the specified MAC address.
+	 * \param id The MAC address of the device whose settings are to be copied.
+	 * \return The settings associated with the MAC address, or \c nullptr if none.
+	 */
 	std::optional<DeviceSettings> getSettings(const std::string& id);
 
-	/// <summary>
-	/// Adds (or replaces) settings for the specified MAC address, then saves changes to disk.
-	/// </summary>
-	/// <param name="id">The MAC address of the device whose settings are being stored.</param>
-	/// <param name="settings">The settings to be stored.</param>
+	/**
+	 * \brief 
+	 * Adds (or replaces) settings for the specified MAC address, then saves changes to disk.
+	 * \param id The MAC address of the device whose settings are being stored.
+	 * \param settings The settings to be stored.
+	 */
 	void saveSettings(const std::string& id, const DeviceSettings& settings);
 
-	/// <summary>
-	/// Removes a profile from the profile cache.
-	/// </summary>
-	/// <param name="profile">The profile to be removed.</param>
+	/**
+	 * \brief 
+	 * Removes a profile from the profile cache.
+	 * \param profile The profile to be removed.
+	 */
 	void removeProfile(const DeviceProfile& profile);
 
-	/// <summary>
-	/// Updates a profile and notifies all devices of the change.
-	/// </summary>
-	/// <param name="last">The profile to be replaced.</param>
-	/// <param name="current">The new profile.</param>
+	/**
+	 * \brief 
+	 * Updates a profile and notifies all devices of the change.
+	 * \param last The profile to be replaced.
+	 * \param current The new profile.
+	 */
 	void updateProfile(const DeviceProfile& last, const DeviceProfile& current);
 
 private:
