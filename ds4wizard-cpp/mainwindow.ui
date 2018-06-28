@@ -65,6 +65,9 @@
         </item>
         <item alignment="Qt::AlignRight">
          <widget class="QPushButton" name="pushButton_DeviceProperties">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="text">
            <string>&amp;Properties</string>
           </property>
@@ -206,8 +209,8 @@
    <slot>devicePropertiesClicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>341</x>
-     <y>364</y>
+     <x>333</x>
+     <y>337</y>
     </hint>
     <hint type="destinationlabel">
      <x>318</x>
@@ -222,8 +225,8 @@
    <slot>minimizeToTrayToggled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>88</x>
-     <y>74</y>
+     <x>99</x>
+     <y>67</y>
     </hint>
     <hint type="destinationlabel">
      <x>309</x>
@@ -238,8 +241,8 @@
    <slot>startMinimizedToggled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>64</x>
-     <y>53</y>
+     <x>75</x>
+     <y>42</y>
     </hint>
     <hint type="destinationlabel">
      <x>98</x>
@@ -254,12 +257,28 @@
    <slot>preferredConnectionChanged(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>178</x>
-     <y>121</y>
+     <x>120</x>
+     <y>134</y>
     </hint>
     <hint type="destinationlabel">
      <x>85</x>
      <y>393</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>deviceList</sender>
+   <signal>itemSelectionChanged()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>deviceSelectionChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>107</x>
+     <y>95</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>67</x>
+     <y>355</y>
     </hint>
    </hints>
   </connection>
@@ -269,5 +288,6 @@
   <slot>startMinimizedToggled(bool)</slot>
   <slot>minimizeToTrayToggled(bool)</slot>
   <slot>preferredConnectionChanged(int)</slot>
+  <slot>deviceSelectionChanged()</slot>
  </slots>
 </ui>

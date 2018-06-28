@@ -40,7 +40,7 @@ protected:
 protected slots:
 	void closeEvent(QCloseEvent* event) override;
 	void toggleHide(QSystemTrayIcon::ActivationReason reason);
-	void devicePropertiesClicked() const;
+	void devicePropertiesClicked();
 	static void startMinimizedToggled(bool value);
 	static void minimizeToTrayToggled(bool value);
 	static void preferredConnectionChanged(int value);
@@ -50,6 +50,7 @@ protected slots:
 	void onDeviceOpened(std::shared_ptr<DeviceOpenedEventArgs> a) const;
 	void onDeviceClosed(std::shared_ptr<DeviceClosedEventArgs> a) const;
 	void onProfilesLoaded();
+	void deviceSelectionChanged() const;
 
 signals:
 	void s_onDeviceOpened(std::shared_ptr<DeviceOpenedEventArgs> a);

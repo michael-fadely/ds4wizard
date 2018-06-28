@@ -267,10 +267,30 @@ void MainWindow::toggleHide(QSystemTrayIcon::ActivationReason reason)
 	}
 }
 
-void MainWindow::devicePropertiesClicked() const
+void MainWindow::devicePropertiesClicked()
 {
-	trayIcon->showMessage("hi", "this is a test");
-	auto dialog = new DevicePropertiesDialog();
+	// TODO: use treeview and "model" instead of the other thing
+
+	const auto item = ui.deviceList->selectedItems().front();
+	const auto text = item->text(0).toStdString();
+
+	std::wstring key;
+
+	{
+		auto& devices_lock = deviceManager->devices_lock;
+		auto& devices = deviceManager->devices;
+		lock(devices);
+
+		for (auto& pair : devices)
+		{
+			if (pair.second->name() == text)
+			{
+				key = pair.first;
+			}
+		}
+	}
+
+	auto dialog = new DevicePropertiesDialog(this, key, deviceManager);
 	dialog->exec();
 	delete dialog;
 }
@@ -345,4 +365,10 @@ void MainWindow::onProfilesLoaded()
 {
 	registerDeviceNotification();
 	populateProfileList();
+}
+
+void MainWindow::deviceSelectionChanged() const
+{
+	auto selected = ui.deviceList->selectedItems();
+	ui.pushButton_DeviceProperties->setEnabled(!selected.isEmpty());
 }
