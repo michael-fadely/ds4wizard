@@ -35,7 +35,7 @@ class Ds4Device
 	Stopwatch deltaStopwatch {};
 	float deltaTime = 1.0f;
 
-	int colorIndex = -1;
+	ptrdiff_t colorIndex = -1;
 
 	// TODO
 	/*readonly InputSimulator InputSimulator = new InputSimulator();

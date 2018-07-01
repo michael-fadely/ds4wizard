@@ -5,7 +5,7 @@
 #include "busenum.h"
 #include "lock.h"
 
-int ScpDevice::getFreePort()
+ptrdiff_t ScpDevice::getFreePort()
 {
 	lock(portLock);
 	{
@@ -191,7 +191,9 @@ VBusStatus ScpDevice::syncState(int userIndex)
 	DWORD bytesReturned = 0;
 
 	bool result = DeviceIoControl(handle.nativeHandle, flags,
-	                              writeBuffer.data(), writeBuffer.size(), readBuffer.data(), readBuffer.size(), &bytesReturned, nullptr);
+	                              writeBuffer.data(), static_cast<DWORD>(writeBuffer.size()),
+	                              readBuffer.data(), static_cast<DWORD>(readBuffer.size()),
+	                              &bytesReturned, nullptr);
 
 	if (!result || bytesReturned == 0)
 	{

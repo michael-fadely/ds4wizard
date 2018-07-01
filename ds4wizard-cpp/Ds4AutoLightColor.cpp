@@ -28,11 +28,11 @@ Ds4AutoLightColor::Pair::Pair(const Ds4Color& color)
 {
 }
 
-Ds4Color Ds4AutoLightColor::getColor(int& index)
+Ds4Color Ds4AutoLightColor::getColor(ptrdiff_t& index)
 {
 	lock(sync);
-	int minIndex = 0;
-	int refCount = std::numeric_limits<int>::max();
+	ptrdiff_t minIndex = 0;
+	ptrdiff_t refCount = std::numeric_limits<ptrdiff_t>::max();
 
 	for (size_t i = 0; i < colors.size(); i++)
 	{
@@ -57,7 +57,7 @@ Ds4Color Ds4AutoLightColor::getColor(int& index)
 	return Ds4Color(pair.color);
 }
 
-void Ds4AutoLightColor::releaseColor(int index)
+void Ds4AutoLightColor::releaseColor(ptrdiff_t index)
 {
 	if (index < 0)
 	{

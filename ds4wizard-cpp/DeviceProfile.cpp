@@ -83,14 +83,14 @@ void DeviceProfile::readJson(const QJsonObject& json)
 
 	auto bindings_ = json["bindings"].toArray();
 
-	for (auto& value : bindings_)
+	for (auto value : bindings_)
 	{
 		bindings.push_back(fromJson<InputMap>(value.toObject()));
 	}
 
 	auto modifiers_ = json["modifiers"].toArray();
 
-	for (auto& value : modifiers_)
+	for (auto value : modifiers_)
 	{
 		modifiers.push_back(fromJson<InputModifier>(value.toObject()));
 	}

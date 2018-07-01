@@ -27,7 +27,7 @@ bool Bluetooth::disconnectDevice(const gsl::span<uint8_t>& macAddress)
 	while (phRadio.nativeHandle != nullptr)
 	{
 		bool success = DeviceIoControl(phRadio.nativeHandle, IOCTL_BTH_DISCONNECT_DEVICE,
-		                               buffer.data(), buffer.size(), nullptr, 0, &_, nullptr);
+		                               buffer.data(), static_cast<DWORD>(buffer.size()), nullptr, 0, &_, nullptr);
 
 		phRadio.close();
 

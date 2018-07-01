@@ -10,7 +10,7 @@ class Ds4AutoLightColor
 	struct Pair
 	{
 		const Ds4Color color;
-		int references = 0;
+		ptrdiff_t references = 0;
 
 		explicit Pair(const Ds4Color& color);
 	};
@@ -20,6 +20,6 @@ class Ds4AutoLightColor
 	static std::array<Pair, 17> colors;
 
 public:
-	static Ds4Color getColor(int& index);
-	static void releaseColor(int index);
+	static Ds4Color getColor(ptrdiff_t& index);
+	static void releaseColor(ptrdiff_t index);
 };

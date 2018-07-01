@@ -42,7 +42,7 @@ class ScpDevice
 	};
 
 public:
-	static int getFreePort();
+	static ptrdiff_t getFreePort();
 
 private:
 	std::array<uint8_t, 4> leds {};
