@@ -15,6 +15,6 @@ struct Settings : JsonData
 	bool operator==(const Settings& rhs) const;
 	bool operator!=(const Settings& rhs) const;
 
-	void readJson(const QJsonObject& json) override;
-	void writeJson(QJsonObject& json) const override;
+	void readJson(const nlohmann::json& json) override;
+	void writeJson(nlohmann::json& json) const override;
 };

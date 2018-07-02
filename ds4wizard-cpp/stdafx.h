@@ -35,7 +35,6 @@
 
 // Qt
 #include <QDialog>
-#include <QJsonObject>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets>

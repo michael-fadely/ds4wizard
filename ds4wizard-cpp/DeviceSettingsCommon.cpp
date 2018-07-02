@@ -69,15 +69,15 @@ bool DeviceSettingsCommon::operator!=(const DeviceSettingsCommon& other) const
 	return !(*this == other);
 }
 
-void DeviceSettingsCommon::readJson(const QJsonObject& json)
+void DeviceSettingsCommon::readJson(const nlohmann::json& json)
 {
-	light              = fromJson<Ds4LightOptions>(json["light"].toObject());
-	idle               = fromJson<DeviceIdleOptions>(json["idle"].toObject());
-	notifyFullyCharged = json["notifyFullyCharged"].toBool(true);
-	notifyBatteryLow   = static_cast<uint8_t>(json["notifyBatteryLow"].toInt(2));
+	light              = fromJson<Ds4LightOptions>(json["light"]);
+	idle               = fromJson<DeviceIdleOptions>(json["idle"]);
+	notifyFullyCharged = json.value("notifyFullyCharged", true);
+	notifyBatteryLow   = static_cast<uint8_t>(json.value("notifyBatteryLow", 2));
 }
 
-void DeviceSettingsCommon::writeJson(QJsonObject& json) const
+void DeviceSettingsCommon::writeJson(nlohmann::json& json) const
 {
 	json["light"]              = light.toJson();
 	json["idle"]               = idle.toJson();

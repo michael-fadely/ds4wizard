@@ -27,14 +27,14 @@ bool DeviceIdleOptions::operator!=(const DeviceIdleOptions& other) const
 	return !(*this == other);
 }
 
-void DeviceIdleOptions::readJson(const QJsonObject& json)
+void DeviceIdleOptions::readJson(const nlohmann::json& json)
 {
-	this->timeout    = std::chrono::milliseconds(json["timeout"].toInt());
-	this->disconnect = json["disconnect"].toBool();
-	this->unit       = TimeUnit::_from_string(json["unit"].toString().toStdString().c_str()); // this is disgusting
+	this->timeout    = std::chrono::milliseconds(json["timeout"].get<int64_t>());
+	this->disconnect = json["disconnect"];
+	this->unit       = TimeUnit::_from_string(json["unit"].get<std::string>().c_str());;
 }
 
-void DeviceIdleOptions::writeJson(QJsonObject& json) const
+void DeviceIdleOptions::writeJson(nlohmann::json& json) const
 {
 	json["timeout"]    = this->timeout.count();
 	json["disconnect"] = this->disconnect;

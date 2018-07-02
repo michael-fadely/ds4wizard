@@ -17,8 +17,8 @@ public:
 
 	bool operator==(const AxisOptions& other) const;
 	bool operator!=(const AxisOptions& other) const;
-	virtual void readJson(const QJsonObject& json) override;
-	virtual void writeJson(QJsonObject& json) const override;
+	virtual void readJson(const nlohmann::json& json) override;
+	virtual void writeJson(nlohmann::json& json) const override;
 };
 
 class InputAxisOptions : public AxisOptions
@@ -37,8 +37,8 @@ public:
 	bool operator==(const InputAxisOptions& other) const;
 	bool operator!=(const InputAxisOptions& other) const;
 
-	void readJson(const QJsonObject& json) override;
-	void writeJson(QJsonObject& json) const override;
+	void readJson(const nlohmann::json& json) override;
+	void writeJson(nlohmann::json& json) const override;
 };
 
 class XInputAxes : public JsonData
@@ -54,8 +54,8 @@ public:
 
 	bool operator==(const XInputAxes& other) const;
 	bool operator!=(const XInputAxes& other) const;
-	void readJson(const QJsonObject& json) override;
-	void writeJson(QJsonObject& json) const override;
+	void readJson(const nlohmann::json& json) override;
+	void writeJson(nlohmann::json& json) const override;
 };
 
 class MouseAxes : public JsonData
@@ -70,6 +70,6 @@ public:
 	AxisOptions getAxisOptions(Direction_t axis);
 
 	bool operator==(const MouseAxes& other) const;
-	void readJson(const QJsonObject& json) override;
-	void writeJson(QJsonObject& json) const override;
+	void readJson(const nlohmann::json& json) override;
+	void writeJson(nlohmann::json& json) const override;
 };

@@ -189,57 +189,63 @@ bool InputMapBase::operator!=(const InputMapBase& other) const
 	return !(*this == other);
 }
 
-void InputMapBase::readJson(const QJsonObject& json)
+void InputMapBase::readJson(const nlohmann::json& json)
 {
-	if (json.contains("inputType"))
+	if (json.find("inputType") != json.end())
 	{
 		InputType_t inputType_;
-		ENUM_DESERIALIZE_FLAGS(InputType)(json["inputType"].toString().toStdString(), inputType_);
+		ENUM_DESERIALIZE_FLAGS(InputType)(json["inputType"].get<std::string>(), inputType_);
 		inputType = inputType_;
 	}
 
-	if (json.contains("inputButtons"))
+	if (json.find("inputButtons") != json.end())
 	{
 		Ds4Buttons_t inputButtons_;
-		ENUM_DESERIALIZE_FLAGS(Ds4Buttons)(json["inputButtons"].toString().toStdString(), inputButtons_);
+		ENUM_DESERIALIZE_FLAGS(Ds4Buttons)(json["inputButtons"].get<std::string>(), inputButtons_);
 		inputButtons = inputButtons_;
 	}
 
-	if (json.contains("inputAxis"))
+	if (json.find("inputAxis") != json.end())
 	{
 		Ds4Axis_t inputAxis_;
-		ENUM_DESERIALIZE_FLAGS(Ds4Axis)(json["inputAxis"].toString().toStdString(), inputAxis_);
+		ENUM_DESERIALIZE_FLAGS(Ds4Axis)(json["inputAxis"].get<std::string>(), inputAxis_);
 		inputAxis = inputAxis_;
 	}
 
-	inputRegion = json["inputRegion"].toString().toStdString();
-
-	if (json.contains("toggle"))
+	if (json.find("inputRegion") != json.end())
 	{
-		toggle = json["toggle"].toBool();
+		inputRegion = json["inputRegion"];
 	}
 
-	if (json.contains("rapidFire"))
+	if (json.find("toggle") != json.end())
 	{
-		rapidFire = json["rapidFire"].toBool();
+		toggle = json["toggle"];
 	}
 
-	if (json.contains("rapidFireInterval"))
+	if (json.find("rapidFire") != json.end())
 	{
-		rapidFireInterval = std::chrono::nanoseconds(json["rapidFireInterval"].toInt());
+		rapidFire = json["rapidFire"];
 	}
 
-	QJsonObject inputAxisOptions_ = json["inputAxisOptions"].toObject();
-
-	for (const auto& key : inputAxisOptions_.keys())
+	if (json.find("rapidFireInterval") != json.end())
 	{
-		Ds4Axis_t flags;
-		ENUM_DESERIALIZE_FLAGS(Ds4Axis)(key.toStdString(), flags);
-		inputAxisOptions[flags] = fromJson<InputAxisOptions>(inputAxisOptions_[key].toObject());
+		rapidFireInterval = std::chrono::nanoseconds(json["rapidFireInterval"].get<int64_t>());
+	}
+
+	if (json.find("inputAxisOptions") != json.end())
+	{
+		auto inputAxisOptions_ = json["inputAxisOptions"].items();
+
+		for (const auto& pair : inputAxisOptions_)
+		{
+			Ds4Axis_t flags;
+			ENUM_DESERIALIZE_FLAGS(Ds4Axis)(pair.key(), flags);
+			inputAxisOptions[flags] = fromJson<InputAxisOptions>(pair.value());
+		}
 	}
 }
 
-void InputMapBase::writeJson(QJsonObject& json) const
+void InputMapBase::writeJson(nlohmann::json& json) const
 {
 	json["inputType"] = ENUM_SERIALIZE_FLAGS(InputType)(inputType).c_str();
 
@@ -270,12 +276,12 @@ void InputMapBase::writeJson(QJsonObject& json) const
 		json["rapidFireInterval"] = rapidFireInterval.value().count();
 	}
 
-	QJsonObject inputAxisOptions_;
+	nlohmann::json inputAxisOptions_;
 
 	for (const auto& pair : inputAxisOptions)
 	{
 		auto key = ENUM_SERIALIZE_FLAGS(Ds4Axis)(pair.first);
-		inputAxisOptions_[key.c_str()] = pair.second.toJson();
+		inputAxisOptions_[key] = pair.second.toJson();
 	}
 
 	json["inputAxisOptions"] = inputAxisOptions_;
@@ -315,45 +321,28 @@ bool InputModifier::operator!=(const InputModifier& other) const
 	return !(*this == other);
 }
 
-void InputModifier::readJson(const QJsonObject& json)
+void InputModifier::readJson(const nlohmann::json& json)
 {
 	InputMapBase::readJson(json);
 
-	auto bindings_ = json["bindings"].toArray();
-
-	for (const auto& value : bindings_)
+	for (const auto& value : json["bindings"])
 	{
-		bindings.push_back(fromJson<InputMap>(value.toObject()));
+		bindings.push_back(fromJson<InputMap>(value));
 	}
 }
 
-void InputModifier::writeJson(QJsonObject& json) const
+void InputModifier::writeJson(nlohmann::json& json) const
 {
 	InputMapBase::writeJson(json);
 	
-	QJsonArray bindings_;
+	nlohmann::json bindings_;
 
 	for (const auto& binding : bindings)
 	{
-		bindings_.append(binding.toJson());
+		bindings_.push_back(binding.toJson());
 	}
 
 	json["bindings"] = bindings_;
-}
-
-InputMap::InputMap(const InputMap& other)
-	: InputMapBase(other),
-	  simulatorType(other.simulatorType),
-	  outputType(other.outputType),
-	  action(other.action),
-	  touchDirection(other.touchDirection),
-	  //KeyCode(other.KeyCode),
-	  mouseAxes(other.mouseAxes),
-	  //MouseButton(other.MouseButton),
-	  xinputButtons(other.xinputButtons),
-	  xinputAxes(other.xinputAxes)
-	  //KeyCodeModifiers (other.KeyCodeModifiers),
-{
 }
 
 InputMap::InputMap(SimulatorType simulatorType, InputType_t inputType, OutputType::T outputType)
@@ -394,48 +383,48 @@ bool InputMap::operator!=(const InputMap& other) const
 	return !(*this == other);
 }
 
-void InputMap::readJson(const QJsonObject& json)
+void InputMap::readJson(const nlohmann::json& json)
 {
 	InputMapBase::readJson(json);
 	
-	ENUM_DESERIALIZE_FLAGS(OutputType)(json["outputType"].toString().toStdString(), outputType);
+	ENUM_DESERIALIZE_FLAGS(OutputType)(json["outputType"].get<std::string>(), outputType);
 
-	if (json.contains("xinputButtons"))
+	if (json.find("xinputButtons") != json.end())
 	{
 		XInputButtons_t xinputButtons_;
-		ENUM_DESERIALIZE_FLAGS(XInputButtons)(json["xinputButtons"].toString().toStdString(), xinputButtons_);
+		ENUM_DESERIALIZE_FLAGS(XInputButtons)(json["xinputButtons"].get<std::string>(), xinputButtons_);
 		xinputButtons = xinputButtons_;
 	}
 
-	if (json.contains("touchDirection"))
+	if (json.find("touchDirection") != json.end())
 	{
 		Direction_t touchDirection_;
-		ENUM_DESERIALIZE_FLAGS(Direction)(json["touchDirection"].toString().toStdString(), touchDirection_);
+		ENUM_DESERIALIZE_FLAGS(Direction)(json["touchDirection"].get<std::string>(), touchDirection_);
 		touchDirection = touchDirection_;
 	}
 
-	if (json.contains("simulatorType"))
+	if (json.find("simulatorType") != json.end())
 	{
-		simulatorType = SimulatorType::_from_string(json["simulatorType"].toString("none").toStdString().c_str());
+		simulatorType = SimulatorType::_from_string(json.value("simulatorType", "none").c_str());
 	}
 
-	if (json.contains("action"))
+	if (json.find("action") != json.end())
 	{
-		action = ActionType::_from_string(json["action"].toString("none").toStdString().c_str());
+		action = ActionType::_from_string(json.value("action", "none").c_str());
 	}
 
-	if (json.contains("mouseAxes"))
+	if (json.find("mouseAxes") != json.end())
 	{
-		mouseAxes = fromJson<MouseAxes>(json["mouseAxes"].toObject());
+		mouseAxes = fromJson<MouseAxes>(json["mouseAxes"]);
 	}
 
-	if (json.contains("xinputAxes"))
+	if (json.find("xinputAxes") != json.end())
 	{
-		xinputAxes = fromJson<XInputAxes>(json["xinputAxes"].toObject());
+		xinputAxes = fromJson<XInputAxes>(json["xinputAxes"]);
 	}
 }
 
-void InputMap::writeJson(QJsonObject& json) const
+void InputMap::writeJson(nlohmann::json& json) const
 {
 	InputMapBase::writeJson(json);
 

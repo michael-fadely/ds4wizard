@@ -200,29 +200,29 @@ bool Ds4TouchRegion::operator!=(const Ds4TouchRegion& other) const
 	return !(*this == other);
 }
 
-void Ds4TouchRegion::readJson(const QJsonObject& json)
+void Ds4TouchRegion::readJson(const nlohmann::json& json)
 {
-	type           = Ds4TouchRegionType::_from_string(json["type"].toString().toStdString().c_str());
-	allowCrossOver = json["allowCrossOver"].toBool();
-	left           = json["left"].toInt();
-	top            = json["top"].toInt();
-	right          = json["right"].toInt();
-	bottom         = json["bottom"].toInt();
+	type           = Ds4TouchRegionType::_from_string(json["type"].get<std::string>().c_str());
+	allowCrossOver = json["allowCrossOver"];
+	left           = json["left"];
+	top            = json["top"];
+	right          = json["right"];
+	bottom         = json["bottom"];
 
-	auto touchAxisOptions_ = json["touchAxisOptions"].toObject();
-
-	for (const auto& key : touchAxisOptions_.keys())
+	if (json.find("touchAxisOptions") != json.end())
 	{
-		const std::string stdstr = key.toStdString();
+		auto touchAxisOptions_ = json["touchAxisOptions"].items();
 
-		Direction_t value;
-		ENUM_DESERIALIZE_FLAGS(Direction)(stdstr, value);
-
-		touchAxisOptions[value] = fromJson<InputAxisOptions>(touchAxisOptions_[key].toObject());
+		for (const auto& pair : touchAxisOptions_)
+		{
+			Direction_t value;
+			ENUM_DESERIALIZE_FLAGS(Direction)(pair.key(), value);
+			touchAxisOptions[value] = fromJson<InputAxisOptions>(pair.value());
+		}
 	}
 }
 
-void Ds4TouchRegion::writeJson(QJsonObject& json) const
+void Ds4TouchRegion::writeJson(nlohmann::json& json) const
 {
 	json["type"]           = type._to_string();
 	json["allowCrossOver"] = allowCrossOver;
@@ -231,11 +231,11 @@ void Ds4TouchRegion::writeJson(QJsonObject& json) const
 	json["right"]          = right;
 	json["bottom"]         = bottom;
 
-	QJsonObject touchAxisOptions_;
+	nlohmann::json touchAxisOptions_;
 
 	for (const auto& pair : touchAxisOptions)
 	{
-		touchAxisOptions_[ENUM_SERIALIZE_FLAGS(Direction)(pair.first).c_str()] = pair.second.toJson();
+		touchAxisOptions_[ENUM_SERIALIZE_FLAGS(Direction)(pair.first)] = pair.second.toJson();
 	}
 
 	json["touchAxisOptions"] = touchAxisOptions_;

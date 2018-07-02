@@ -17,6 +17,6 @@ struct Ds4Color : JsonData
 	bool operator!=(const Ds4Color& other) const;
 
 	static Ds4Color lerp(const Ds4Color& a, const Ds4Color& b, float f);
-	void readJson(const QJsonObject& json) override;
-	void writeJson(QJsonObject& json) const override;
+	void readJson(const nlohmann::json& json) override;
+	void writeJson(nlohmann::json& json) const override;
 };

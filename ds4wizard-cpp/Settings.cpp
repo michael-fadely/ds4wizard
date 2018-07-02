@@ -13,25 +13,25 @@ bool Settings::operator!=(const Settings& rhs) const
 	return !(*this == rhs);
 }
 
-void Settings::readJson(const QJsonObject& json)
+void Settings::readJson(const nlohmann::json& json)
 {
-	if (json.contains("preferredConnection"))
+	if (json.find("preferredConnection") != json.end())
 	{
-		preferredConnection = ConnectionType::_from_string(json["preferredConnection"].toString().toStdString().c_str());
+		preferredConnection = ConnectionType::_from_string(json["preferredConnection"].get<std::string>().c_str());
 	}
 
-	if (json.contains("startMinimized"))
+	if (json.find("startMinimized") != json.end())
 	{
-		startMinimized = json["startMinimized"].toBool();
+		startMinimized = json["startMinimized"];
 	}
 
-	if (json.contains("minimizeToTray"))
+	if (json.find("minimizeToTray") != json.end())
 	{
-		minimizeToTray = json["minimizeToTray"].toBool();
+		minimizeToTray = json["minimizeToTray"];
 	}
 }
 
-void Settings::writeJson(QJsonObject& json) const
+void Settings::writeJson(nlohmann::json& json) const
 {
 	json["preferredConnection"] = preferredConnection._to_string();
 	json["startMinimized"]      = startMinimized;

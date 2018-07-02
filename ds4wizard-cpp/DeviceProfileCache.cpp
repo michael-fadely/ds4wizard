@@ -56,16 +56,14 @@ void DeviceProfileCache::saveSettings(const std::string& id, const DeviceSetting
 		throw std::runtime_error("failed to open devices.json for writing");
 	}
 
-	QJsonObject obj;
+	nlohmann::json json;
 
 	for (auto& pair : deviceSettings)
 	{
-		obj[pair.first.c_str()] = pair.second.toJson();
+		json[pair.first] = pair.second.toJson();
 	}
-
-	auto doc = QJsonDocument(obj);
-
-	f.write(doc.toJson(QJsonDocument::Indented));
+	
+	f.write(QByteArray::fromStdString(json.dump(4)));
 	f.close();
 	deviceSettings[id] = settings;
 }
@@ -109,7 +107,7 @@ void DeviceProfileCache::updateProfile(const DeviceProfile& last, const DevicePr
 			filesystem::create_directory(Program::profilesPath().toStdString());
 		}
 
-		std::string newPath = filesystem::combine_path(Program::profilesPath().toStdString(), current.fileName());
+		const std::string newPath = filesystem::combine_path(Program::profilesPath().toStdString(), current.fileName());
 
 		QFile f(QString::fromStdString(newPath));
 
@@ -118,7 +116,7 @@ void DeviceProfileCache::updateProfile(const DeviceProfile& last, const DevicePr
 			throw std::runtime_error(std::string("failed to open \"") + newPath + "\" for writing");
 		}
 
-		f.write(QJsonDocument(current.toJson()).toJson(QJsonDocument::Indented));
+		f.write(QByteArray::fromStdString(current.toJson().dump(4)));
 
 		if (!iequals(last.fileName(), current.fileName()))
 		{
@@ -168,7 +166,7 @@ void DeviceProfileCache::loadImpl()
 				}
 
 				const QByteArray data = file.readAll();
-				auto profile = JsonData::fromJson<DeviceProfile>(QJsonDocument::fromJson(data).object());
+				auto profile = JsonData::fromJson<DeviceProfile>(nlohmann::json::parse(data.toStdString()));
 
 				profiles.push_back(std::move(profile));
 			}
@@ -186,12 +184,11 @@ void DeviceProfileCache::loadImpl()
 			{
 				QString str = devicesFile.readAll();
 
-				auto doc = QJsonDocument::fromJson(str.toUtf8());
-				QJsonObject object = doc.object();
+				auto doc = nlohmann::json::parse(str.toStdString());
 				
-				for (auto& key : object.keys())
+				for (auto& pair : doc.items())
 				{
-					deviceSettings[key.toStdString()] = JsonData::fromJson<DeviceSettings>(object[key].toObject());
+					deviceSettings[pair.key()] = JsonData::fromJson<DeviceSettings>(pair.value());
 				}
 			}
 		}

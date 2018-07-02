@@ -1,24 +1,22 @@
 #pragma once
 
-#include <QJsonObject>
-
-// TODO: RapidJson (because QJson doesn't support 64-bit int!)
+#include <nlohmann/json.hpp>
 
 struct JsonData
 {
 	virtual ~JsonData() = default;
-	virtual void readJson(const QJsonObject& json) = 0;
-	virtual void writeJson(QJsonObject& json) const = 0;
+	virtual void readJson(const nlohmann::json& json) = 0;
+	virtual void writeJson(nlohmann::json& json) const = 0;
 
-	QJsonObject toJson() const
+	nlohmann::json toJson() const
 	{
-		QJsonObject object;
+		nlohmann::json object;
 		writeJson(object);
 		return object;
 	}
 
 	template <typename T>
-	static T fromJson(const QJsonObject& json)
+	static T fromJson(const nlohmann::json& json)
 	{
 		T result {};
 		result.readJson(json);

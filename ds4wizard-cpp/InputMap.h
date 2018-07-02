@@ -6,35 +6,30 @@
 class InputMapBase : public Pressable, public JsonData
 {
 public:
-	/*[JsonIgnore]*/ bool isToggled = false;
-
-	/*[JsonIgnore]*/
+	bool isToggled = false;
 	bool performRapidFire() const;
 
 private:
-	/*[JsonIgnore]*/ bool rapidFiring = false;
-	/*[JsonIgnore]*/ PressedState rapidState = PressedState::off;
-	/*[JsonIgnore]*/ Stopwatch rapidStopwatch;
+	bool rapidFiring = false;
+	PressedState rapidState = PressedState::off;
+	Stopwatch rapidStopwatch;
 
 public:
-	/*[JsonIgnore]*/
 	PressedState simulatedState() const;
 
-	/*[JsonIgnore]*/
 	virtual bool isActive() const override;
 
 	/**
 	 * \brief 
 	 * Indicates if this instance has a persistent state.
 	 */
-	/*[JsonIgnore]*/
 	bool isPersistent() const;
 
 	InputType_t inputType = 0;
 
 	std::optional<Ds4Buttons_t> inputButtons;
 	std::optional<Ds4Axis_t> inputAxis;
-	std::string  inputRegion;
+	std::string inputRegion;
 
 	std::optional<bool> toggle;
 	std::optional<bool> rapidFire;
@@ -63,8 +58,8 @@ public:
 	bool operator==(const InputMapBase& other) const;
 	bool operator!=(const InputMapBase& other) const;
 
-	virtual void readJson(const QJsonObject& json) override;
-	virtual void writeJson(QJsonObject& json) const override;
+	virtual void readJson(const nlohmann::json& json) override;
+	virtual void writeJson(nlohmann::json& json) const override;
 
 	// TODO
 #if 0
@@ -147,15 +142,15 @@ public:
 
 	bool operator==(const InputModifier& other) const;
 	bool operator!=(const InputModifier& other) const;
-	void readJson(const QJsonObject& json) override;
-	void writeJson(QJsonObject& json) const override;
+	void readJson(const nlohmann::json& json) override;
+	void writeJson(nlohmann::json& json) const override;
 };
 
 class InputMap : public InputMapBase
 {
 public:
 	SimulatorType simulatorType = SimulatorType::none;
-	OutputType_t  outputType = 0;
+	OutputType_t outputType     = 0;
 
 	std::optional<ActionType> action;
 
@@ -183,18 +178,13 @@ public:
 	#pragma region XInput
 
 	std::optional<XInputButtons_t> xinputButtons = 0;
-	std::optional<XInputAxes     > xinputAxes;
+	std::optional<XInputAxes> xinputAxes;
 
 	#pragma endregion
 
 	InputMap() = default;
 
-	/**
-	 * \brief 
-	 * Copy constructor.
-	 * \param other The instance to copy from.
-	 */
-	InputMap(const InputMap& other);
+	InputMap(const InputMap& other) = default;
 
 	InputMap(SimulatorType simulatorType, InputType_t inputType, OutputType::T outputType);
 
@@ -203,8 +193,8 @@ public:
 	bool operator==(const InputMap& other) const;
 	bool operator!=(const InputMap& other) const;
 
-	void readJson(const QJsonObject& json) override;
-	void writeJson(QJsonObject& json) const override;
+	void readJson(const nlohmann::json& json) override;
+	void writeJson(nlohmann::json& json) const override;
 
 	// TODO
 #if 0

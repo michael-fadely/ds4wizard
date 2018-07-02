@@ -86,8 +86,8 @@ void Program::loadSettings()
 	}
 
 	QString val = file.readAll();
-	QJsonDocument configJson = QJsonDocument::fromJson(val.toUtf8());
-	settings = JsonData::fromJson<Settings>(configJson.object());
+	auto json = nlohmann::json::parse(val.toStdString());
+	settings = JsonData::fromJson<Settings>(json);
 	lastSettings = settings;
 
 	file.close();
@@ -108,13 +108,10 @@ void Program::saveSettings()
 		return;
 	}
 
-	QJsonObject obj;
+	nlohmann::json obj;
 	settings.writeJson(obj);
 
-	QJsonDocument doc;
-	doc.setObject(obj);
-
-	file.write(doc.toJson(QJsonDocument::Indented));
+	file.write(QByteArray::fromStdString(obj.dump(4)));
 	file.close();
 
 	lastSettings = settings;

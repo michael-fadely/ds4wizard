@@ -18,6 +18,6 @@ public:
 	bool operator!=(const Ds4LightOptions& other) const;
 	Ds4LightOptions& operator=(const Ds4LightOptions& other) = default;
 
-	void readJson(const QJsonObject& json) override;
-	void writeJson(QJsonObject& json) const override;
+	void readJson(const nlohmann::json& json) override;
+	void writeJson(nlohmann::json& json) const override;
 };
