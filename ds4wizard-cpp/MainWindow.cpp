@@ -8,11 +8,14 @@
 #include "Logger.h"
 
 // TODO: use treeview instead of the other thing
+// TODO: batteryLevelChanged which requires ^
+
+using namespace std::chrono;
 
 MainWindow::MainWindow(QWidget* parent)
 	: QMainWindow(parent)
 {
-	const auto now = []() -> auto { return std::chrono::high_resolution_clock::now(); };
+	const auto now = []() -> auto { return high_resolution_clock::now(); };
 	const auto start = now();
 
 	ui.setupUi(this);
@@ -20,7 +23,7 @@ MainWindow::MainWindow(QWidget* parent)
 	const auto elapsed = now() - start;
 
 	qInfo() << __FUNCTION__ " setupUi: "
-		<< std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count()
+		<< duration_cast<milliseconds>(elapsed).count()
 		<< " ms";
 
 	ui.checkMinimizeToTray->setChecked(Program::settings.minimizeToTray);
@@ -36,7 +39,7 @@ MainWindow::MainWindow(QWidget* parent)
 			const auto start = now();
 			QIcon icon(":/ds4wizardcpp/Resources/race_q00.ico");
 			const auto elapsed = now() - start;
-			qInfo() << "icon load time: " << std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
+			qInfo() << "icon load time: " << duration_cast<milliseconds>(elapsed).count();
 			return icon;
 		});
 

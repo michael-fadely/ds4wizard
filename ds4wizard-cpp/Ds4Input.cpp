@@ -9,7 +9,8 @@ void Ds4Input::addButton(bool pressed, Ds4Buttons_t buttons)
 	}
 }
 
-void Ds4Input::update(const gsl::span<uint8_t>& buffer, int i)
+// TODO: just offset the buffer
+void Ds4Input::update(const gsl::span<uint8_t>& buffer, size_t i)
 {
 	const Ds4Buttons_t lastDpad = heldButtons & (Ds4Buttons::up | Ds4Buttons::down | Ds4Buttons::left | Ds4Buttons::right);
 	heldButtons = 0;

@@ -2,9 +2,10 @@
 #include "ScpDevice.h"
 #include "Ds4Output.h"
 
-bool Ds4Output::update(const gsl::span<uint8_t>& buffer, int n) const
+// TODO: just offset buffer by n
+bool Ds4Output::update(const gsl::span<uint8_t>& buffer, size_t n) const
 {
-	int i = n;
+	size_t i = n;
 
 	bool result = buffer[i] != rightMotor;
 	buffer[i++] = rightMotor;

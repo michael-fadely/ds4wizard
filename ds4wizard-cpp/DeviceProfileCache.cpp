@@ -75,7 +75,7 @@ void DeviceProfileCache::removeProfile(const DeviceProfile& profile)
 		profiles.remove(profile);
 	}
 
-	onProfileChanged(profile.name, nullptr);
+	onProfileChanged(profile.name, std::string());
 
 	if (filesystem::directory_exists(Program::profilesPath().toStdString()))
 	{

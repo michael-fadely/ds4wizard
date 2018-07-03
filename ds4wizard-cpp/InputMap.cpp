@@ -313,7 +313,7 @@ InputModifier::InputModifier(const InputModifier& other)
 
 bool InputModifier::operator==(const InputModifier& other) const
 {
-	return bindings == other.bindings;
+	return InputMapBase::operator==(other) && bindings == other.bindings;
 }
 
 bool InputModifier::operator!=(const InputModifier& other) const
@@ -366,7 +366,8 @@ void InputMap::pressModifier(const InputModifier* modifier)
 
 bool InputMap::operator==(const InputMap& other) const
 {
-	return simulatorType == other.simulatorType
+	return InputMapBase::operator==(other)
+	       && simulatorType == other.simulatorType
 	       && outputType == other.outputType
 	       && action == other.action
 	       // TODO: && KeyCode == other.KeyCode

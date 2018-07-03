@@ -28,9 +28,8 @@ struct Ds4Stick
 
 	bool operator!=(const Ds4Stick& right) const;
 
-	double lengthSquared() const;
-
-	double length() const;
+	float lengthSquared() const;
+	float length() const;
 };
 
 /**
@@ -56,9 +55,8 @@ struct Ds4Vector2
 
 	bool operator==(const Ds4Vector2& other) const;
 
-	double lengthSquared() const;
-
-	double length() const;
+	float lengthSquared() const;
+	float length() const;
 };
 
 /**
@@ -72,9 +70,8 @@ struct Ds4Vector3
 
 	bool operator==(const Ds4Vector3& other) const;
 
-	double lengthSquared() const;
-
-	double length() const;
+	float lengthSquared() const;
+	float length() const;
 };
 
 struct Ds4InputData

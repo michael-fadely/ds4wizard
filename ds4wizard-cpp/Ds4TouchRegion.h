@@ -37,11 +37,11 @@ public:
 
 	Ds4TouchRegionType type = Ds4TouchRegionType::none;
 
-	bool allowCrossOver = false;
-	short left          = 0;
-	short top           = 0;
-	short right         = 0;
-	short bottom        = 0;
+	bool  allowCrossOver = false;
+	short left           = 0;
+	short top            = 0;
+	short right          = 0;
+	short bottom         = 0;
 
 	std::unordered_map<Direction_t, InputAxisOptions> touchAxisOptions;
 
