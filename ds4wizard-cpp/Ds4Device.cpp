@@ -409,7 +409,7 @@ void Ds4Device::openBluetoothDevice(hid::HidInstance& device)
 
 		bluetoothDevice = std::make_unique<hid::HidInstance>(std::move(device));
 
-		// Enables Bluetooth operational mode which makes
+		// Enables bluetooth operational mode which makes
 		// the controller send report id 17 (0x11)
 		std::array<uint8_t, 37> temp {};
 		temp[0] = 0x02;
@@ -479,7 +479,12 @@ void Ds4Device::writeUsbAsync()
 		output.fromXInput(realXInputIndex, scpDevice);
 	}
 
-	if (!output.update(usbDevice->output_buffer, 4))
+	constexpr auto usb_output_offset = 4;
+
+	const auto span = gsl::make_span(&usbDevice->output_buffer[usb_output_offset],
+	                                 usbDevice->output_buffer.size() - usb_output_offset);
+
+	if (!output.update(span))
 	{
 		return;
 	}
@@ -495,7 +500,12 @@ void Ds4Device::writeBluetooth()
 		output.fromXInput(realXInputIndex, scpDevice);
 	}
 
-	if (!output.update(bluetoothDevice->output_buffer, 6))
+	constexpr auto bt_output_offset = 6;
+
+	const auto span = gsl::make_span(&bluetoothDevice->output_buffer[bt_output_offset],
+	                                 bluetoothDevice->output_buffer.size() - bt_output_offset);
+
+	if (!output.update(span))
 	{
 		return;
 	}
@@ -543,7 +553,12 @@ void Ds4Device::run()
 		if (usbDevice->readAsync())
 		{
 			dataReceived = true;
-			input.update(usbDevice->input_buffer, 1);
+
+			constexpr auto usb_input_offset = 1;
+			const auto span = gsl::make_span(&usbDevice->input_buffer[usb_input_offset],
+			                                 usbDevice->input_buffer.size() - usb_input_offset);
+
+			input.update(span);
 		}
 
 		// If the controller gets disconnected from USB while idle,
@@ -561,7 +576,12 @@ void Ds4Device::run()
 		if (bluetoothDevice->readAsync() && bluetoothDevice->input_buffer[0] == 0x11)
 		{
 			dataReceived = true;
-			input.update(bluetoothDevice->input_buffer, 3);
+
+			constexpr auto bt_input_offset = 3;
+			const auto span = gsl::make_span(&bluetoothDevice->input_buffer[bt_input_offset],
+			                                 bluetoothDevice->input_buffer.size() - bt_input_offset);
+
+			input.update(span);
 		}
 	}
 

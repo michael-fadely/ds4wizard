@@ -16,6 +16,6 @@ struct Ds4Output
 	uint8_t  volumeMic     = 50;
 	uint8_t  volumeSpeaker = 50;
 
-	bool update(const gsl::span<uint8_t>& buffer, size_t n) const;
+	bool update(const gsl::span<uint8_t>& buffer) const;
 	void fromXInput(int index, std::unique_ptr<ScpDevice>& device);
 };

@@ -9,57 +9,56 @@ void Ds4Input::addButton(bool pressed, Ds4Buttons_t buttons)
 	}
 }
 
-// TODO: just offset the buffer
-void Ds4Input::update(const gsl::span<uint8_t>& buffer, size_t i)
+void Ds4Input::update(const gsl::span<uint8_t>& buffer)
 {
 	const Ds4Buttons_t lastDpad = heldButtons & (Ds4Buttons::up | Ds4Buttons::down | Ds4Buttons::left | Ds4Buttons::right);
 	heldButtons = 0;
 
-	data.leftStick.x       = buffer[i + 0];
-	data.leftStick.y       = buffer[i + 1];
-	data.rightStick.x      = buffer[i + 2];
-	data.rightStick.y      = buffer[i + 3];
-	data.dPad              = static_cast<Hat>(buffer[i + 4] & 0xF);
-	data.square            = !!((buffer[i + 4] >> 4) & 1); // TODO: bitfield
-	data.cross             = !!((buffer[i + 4] >> 5) & 1); // TODO: bitfield
-	data.circle            = !!((buffer[i + 4] >> 6) & 1); // TODO: bitfield
-	data.triangle          = !!((buffer[i + 4] >> 7) & 1); // TODO: bitfield
-	data.l1                = !!((buffer[i + 5] >> 0) & 1); // TODO: bitfield
-	data.r1                = !!((buffer[i + 5] >> 1) & 1); // TODO: bitfield
-	data.l2                = !!((buffer[i + 5] >> 2) & 1); // TODO: bitfield
-	data.r2                = !!((buffer[i + 5] >> 3) & 1); // TODO: bitfield
-	data.share             = !!((buffer[i + 5] >> 4) & 1); // TODO: bitfield
-	data.options           = !!((buffer[i + 5] >> 5) & 1); // TODO: bitfield
-	data.l3                = !!((buffer[i + 5] >> 6) & 1); // TODO: bitfield
-	data.r3                = !!((buffer[i + 5] >> 7) & 1); // TODO: bitfield
-	data.ps                = !!((buffer[i + 6] >> 0) & 1); // TODO: bitfield
-	data.touchButton       = !!((buffer[i + 6] >> 1) & 1); // TODO: bitfield
-	data.frameCount        = static_cast<uint8_t>((buffer[i + 6] >> 2) & 0x3F);
-	data.leftTrigger       = buffer[i + 7];
-	data.rightTrigger      = buffer[i + 8];
-	data.accel.x           = *reinterpret_cast<int16_t*>(&buffer[i + 12]);
-	data.accel.y           = *reinterpret_cast<int16_t*>(&buffer[i + 14]);
-	data.accel.z           = *reinterpret_cast<int16_t*>(&buffer[i + 16]);
-	data.gyro.x            = *reinterpret_cast<int16_t*>(&buffer[i + 18]);
-	data.gyro.y            = *reinterpret_cast<int16_t*>(&buffer[i + 20]);
-	data.gyro.z            = *reinterpret_cast<int16_t*>(&buffer[i + 22]);
-	data.extensions        = static_cast<uint8_t>(buffer[i + 29] >> 4);
-	data.battery           = static_cast<uint8_t>(buffer[i + 29] & 0x0F);
+	data.leftStick.x       = buffer[0];
+	data.leftStick.y       = buffer[1];
+	data.rightStick.x      = buffer[2];
+	data.rightStick.y      = buffer[3];
+	data.dPad              = static_cast<Hat>(buffer[4] & 0xF);
+	data.square            = !!((buffer[4] >> 4) & 1); // TODO: bitfield
+	data.cross             = !!((buffer[4] >> 5) & 1); // TODO: bitfield
+	data.circle            = !!((buffer[4] >> 6) & 1); // TODO: bitfield
+	data.triangle          = !!((buffer[4] >> 7) & 1); // TODO: bitfield
+	data.l1                = !!((buffer[5] >> 0) & 1); // TODO: bitfield
+	data.r1                = !!((buffer[5] >> 1) & 1); // TODO: bitfield
+	data.l2                = !!((buffer[5] >> 2) & 1); // TODO: bitfield
+	data.r2                = !!((buffer[5] >> 3) & 1); // TODO: bitfield
+	data.share             = !!((buffer[5] >> 4) & 1); // TODO: bitfield
+	data.options           = !!((buffer[5] >> 5) & 1); // TODO: bitfield
+	data.l3                = !!((buffer[5] >> 6) & 1); // TODO: bitfield
+	data.r3                = !!((buffer[5] >> 7) & 1); // TODO: bitfield
+	data.ps                = !!((buffer[6] >> 0) & 1); // TODO: bitfield
+	data.touchButton       = !!((buffer[6] >> 1) & 1); // TODO: bitfield
+	data.frameCount        = static_cast<uint8_t>((buffer[6] >> 2) & 0x3F);
+	data.leftTrigger       = buffer[7];
+	data.rightTrigger      = buffer[8];
+	data.accel.x           = *reinterpret_cast<int16_t*>(&buffer[12]);
+	data.accel.y           = *reinterpret_cast<int16_t*>(&buffer[14]);
+	data.accel.z           = *reinterpret_cast<int16_t*>(&buffer[16]);
+	data.gyro.x            = *reinterpret_cast<int16_t*>(&buffer[18]);
+	data.gyro.y            = *reinterpret_cast<int16_t*>(&buffer[20]);
+	data.gyro.z            = *reinterpret_cast<int16_t*>(&buffer[22]);
+	data.extensions        = static_cast<uint8_t>(buffer[29] >> 4);
+	data.battery           = static_cast<uint8_t>(buffer[29] & 0x0F);
 	data.charging          = (data.extensions & Ds4Extensions::Cable) != 0 && data.battery <= 10;
-	data.touchEvent        = static_cast<uint8_t>(buffer[i + 32] & 0x3F);
-	data.touchFrame        = static_cast<uint8_t>(buffer[i + 33] & 0x3F);
-	data.touch1            = !(buffer[i + 34] & 0x80);
-	data.touch1Id          = static_cast<uint8_t>(buffer[i + 34] & 0x7F);
-	data.touchPoint1.x     = static_cast<short>(*reinterpret_cast<int16_t*>(&buffer[i + 35]) & 0xFFF);
-	data.touchPoint1.y     = static_cast<short>((*reinterpret_cast<int16_t*>(&buffer[i + 36]) >> 4) & 0xFFF);
-	data.touch2            = !(buffer[i + 38] & 0x80);
-	data.touch2Id          = static_cast<uint8_t>(buffer[i + 38] & 0x7F);
-	data.touchPoint2.x     = static_cast<short>(*reinterpret_cast<int16_t*>(&buffer[i + 39]) & 0xFFF);
-	data.touchPoint2.y     = static_cast<short>((*reinterpret_cast<int16_t*>(&buffer[i + 40]) >> 4) & 0xFFF);
-	data.lastTouchPoint1.x = static_cast<short>(*reinterpret_cast<int16_t*>(&buffer[i + 43]) & 0xFFF);
-	data.lastTouchPoint1.y = static_cast<short>((*reinterpret_cast<int16_t*>(&buffer[i + 44]) >> 4) & 0xFFF);
-	data.lastTouchPoint2.x = static_cast<short>(*reinterpret_cast<int16_t*>(&buffer[i + 47]) & 0xFFF);
-	data.lastTouchPoint2.y = static_cast<short>((*reinterpret_cast<int16_t*>(&buffer[i + 48]) >> 4) & 0xFFF);
+	data.touchEvent        = static_cast<uint8_t>(buffer[32] & 0x3F);
+	data.touchFrame        = static_cast<uint8_t>(buffer[33] & 0x3F);
+	data.touch1            = !(buffer[34] & 0x80);
+	data.touch1Id          = static_cast<uint8_t>(buffer[34] & 0x7F);
+	data.touchPoint1.x     = static_cast<short>(*reinterpret_cast<int16_t*>(&buffer[35]) & 0xFFF);
+	data.touchPoint1.y     = static_cast<short>((*reinterpret_cast<int16_t*>(&buffer[36]) >> 4) & 0xFFF);
+	data.touch2            = !(buffer[38] & 0x80);
+	data.touch2Id          = static_cast<uint8_t>(buffer[38] & 0x7F);
+	data.touchPoint2.x     = static_cast<short>(*reinterpret_cast<int16_t*>(&buffer[39]) & 0xFFF);
+	data.touchPoint2.y     = static_cast<short>((*reinterpret_cast<int16_t*>(&buffer[40]) >> 4) & 0xFFF);
+	data.lastTouchPoint1.x = static_cast<short>(*reinterpret_cast<int16_t*>(&buffer[43]) & 0xFFF);
+	data.lastTouchPoint1.y = static_cast<short>((*reinterpret_cast<int16_t*>(&buffer[44]) >> 4) & 0xFFF);
+	data.lastTouchPoint2.x = static_cast<short>(*reinterpret_cast<int16_t*>(&buffer[47]) & 0xFFF);
+	data.lastTouchPoint2.y = static_cast<short>((*reinterpret_cast<int16_t*>(&buffer[48]) >> 4) & 0xFFF);
 
 	if ((data.extensions & Ds4Extensions::Cable) == 0)
 	{
