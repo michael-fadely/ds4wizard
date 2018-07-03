@@ -811,22 +811,13 @@ void Ds4Device::simulateXInputAxis(XInputAxes& axes, float m)
 	}
 }
 
-bool Ds4Device::isOverriddenByModifierSet(InputMapBase& map)
+// TODO: OPTIMIZE !!!
+void Ds4Device::getActive(InputMapBase& map)
 {
-	if (profile.modifiers.empty())
+	if (!__maps.empty())
 	{
-		return false;
+		return;
 	}
-
-	/*std::list<InputMap> maps = Profile.Modifiers
-		.Where(x = > x.IsActive)
-		.Select(y = > y.Bindings)
-		.Where(x = > x != nullptr)
-		.SelectMany(x = > x)
-		.Where(x = > !ReferenceEquals(x, map))
-		.ToList();*/
-
-	std::list<InputMap*> maps;
 
 	for (InputModifier& mod : profile.modifiers)
 	{
@@ -839,15 +830,34 @@ bool Ds4Device::isOverriddenByModifierSet(InputMapBase& map)
 		{
 			if (&binding != &map)
 			{
-				maps.push_back(&binding);
+				__maps.push_back(&binding);
 			}
 		}
 	}
+}
+
+bool Ds4Device::isOverriddenByModifierSet(InputMapBase& map)
+{
+	if (profile.modifiers.empty())
+	{
+		return false;
+	}
+
+	__maps.clear();
+
+	/*std::list<InputMap> maps = Profile.Modifiers
+		.Where(x = > x.IsActive)
+		.Select(y = > y.Bindings)
+		.Where(x = > x != nullptr)
+		.SelectMany(x = > x)
+		.Where(x = > !ReferenceEquals(x, map))
+		.ToList();*/
 
 	if ((map.inputType & InputType::button) != 0)
 	{
-		//if (maps.Any(x =  > (x.inputType & InputType::button) != 0 && (x.InputButtons & map.InputButtons) != 0))
-		if (std::any_of(maps.begin(), maps.end(), [&](InputMap* x) -> bool
+		getActive(map);
+
+		if (std::any_of(__maps.begin(), __maps.end(), [&](InputMap* x) -> bool
 		{
 			return (x->inputType & InputType::button) != 0 && (x->inputButtons.value_or(0) & map.inputButtons.value_or(0)) != 0;
 		}))
@@ -858,8 +868,9 @@ bool Ds4Device::isOverriddenByModifierSet(InputMapBase& map)
 
 	if ((map.inputType & InputType::axis) != 0)
 	{
-		//if (maps.Any(x =  > (x.inputType & InputType::axis) != 0 && (x.InputAxis & map.InputAxis) != 0))
-		if (std::any_of(maps.begin(), maps.end(), [&](InputMap* x) -> bool
+		getActive(map);
+
+		if (std::any_of(__maps.begin(), __maps.end(), [&](InputMap* x) -> bool
 		{
 			return (x->inputType & InputType::axis) != 0 && (x->inputAxis.value_or(0) & map.inputAxis.value_or(0)) != 0;
 		}))
@@ -870,8 +881,9 @@ bool Ds4Device::isOverriddenByModifierSet(InputMapBase& map)
 
 	if ((map.inputType & InputType::touchRegion) != 0)
 	{
-		//if (maps.Any(x =  > (x.inputType & InputType::touchRegion) != 0 && x.InputRegion == map.InputRegion))
-		if (std::any_of(maps.begin(), maps.end(), [&](InputMap* x) -> bool
+		getActive(map);
+
+		if (std::any_of(__maps.begin(), __maps.end(), [&](InputMap* x) -> bool
 		{
 			return (x->inputType & InputType::touchRegion) != 0 && x->inputRegion == map.inputRegion;
 		}))

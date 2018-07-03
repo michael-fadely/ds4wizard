@@ -151,6 +151,11 @@ private:
 	XInputAxis_t simulatedXInputAxis = 0;
 
 	void simulateXInputAxis(XInputAxes& axes, float m);
+
+	// TODO: OPTIMIZE !!!
+	std::deque<InputMap*> __maps;
+	void getActive(InputMapBase& map);
+
 	bool isOverriddenByModifierSet(InputMapBase& map);
 	void runMap(InputMap& m, InputModifier* modifier);
 	static PressedState handleTouchToggle(InputMap& m, InputModifier* modifier, const Pressable& pressable);
