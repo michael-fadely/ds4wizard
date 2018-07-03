@@ -11,7 +11,7 @@ bool Bluetooth::disconnectDevice(const gsl::span<uint8_t>& macAddress)
 
 	std::array<uint8_t, 8> buffer {};
 
-	for (size_t i = 0; i < macAddress.size(); i++)
+	for (ptrdiff_t i = 0; i < macAddress.size(); i++)
 	{
 		buffer[5 - i] = macAddress[i];
 	}
