@@ -675,14 +675,12 @@ void Ds4Device::controllerThread()
 			run();
 		}
 
-		if (dataReceived)
+		if (!dataReceived)
 		{
 			std::this_thread::yield();
 		}
-		else
-		{
-			std::this_thread::sleep_for(1ms);
-		}
+
+		std::this_thread::sleep_for(1ms);
 	}
 
 	closeImpl();
