@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include <list>
+#include <deque>
 #include <unordered_map>
 #include <mutex>
 #include <optional>
@@ -21,7 +21,7 @@ public:
 	std::recursive_mutex profiles_lock;
 	std::recursive_mutex deviceSettings_lock;
 	std::recursive_mutex devices_lock;
-	std::list<DeviceProfile> profiles;
+	std::deque<DeviceProfile> profiles;
 
 	// TODO: event EventHandler Loaded;
 	// TODO: event EventHandler ProfileChanged;

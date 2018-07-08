@@ -72,7 +72,13 @@ void DeviceProfileCache::removeProfile(const DeviceProfile& profile)
 {
 	{
 		lock(profiles);
-		profiles.remove(profile);
+
+		const auto it = std::find(profiles.begin(), profiles.end(), profile);
+
+		if (it != profiles.end())
+		{
+			profiles.erase(it);
+		}
 	}
 
 	onProfileChanged(profile.name, std::string());
@@ -94,7 +100,14 @@ void DeviceProfileCache::updateProfile(const DeviceProfile& last, const DevicePr
 {
 	{
 		lock(profiles);
-		profiles.remove(last);
+
+		const auto it = std::find(profiles.begin(), profiles.end(), last);
+
+		if (it != profiles.end())
+		{
+			profiles.erase(it);
+		}
+
 		profiles.push_back(current);
 	}
 

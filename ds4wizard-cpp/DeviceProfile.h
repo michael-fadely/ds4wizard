@@ -2,7 +2,7 @@
 
 #include <string>
 #include <unordered_map>
-#include <list>
+#include <deque>
 
 #include "DeviceSettingsCommon.h"
 #include "Ds4TouchRegion.h"
@@ -20,8 +20,8 @@ public:
 
 	std::unordered_map<std::string, Ds4TouchRegion> touchRegions;
 
-	std::list<InputMap>      bindings;
-	std::list<InputModifier> modifiers;
+	std::deque<InputMap>      bindings;
+	std::deque<InputModifier> modifiers;
 
 	DeviceProfile() = default;
 

@@ -120,31 +120,7 @@ public:
 #endif
 };
 
-class InputMap;
-
-class InputModifier : public InputMapBase
-{
-public:
-	/**
-	 * \brief 
-	 * The bindings associated with this modifier set.
-	 */
-	std::list<InputMap> bindings;
-
-	InputModifier() = default;
-
-	InputModifier(InputType_t type, Ds4Buttons::T buttons);
-	InputModifier(InputType_t type, Ds4Axis::T axis);
-	InputModifier(InputType_t type, const std::string& region);
-
-	// Copy constructor
-	InputModifier(const InputModifier& other);
-
-	bool operator==(const InputModifier& other) const;
-	bool operator!=(const InputModifier& other) const;
-	void readJson(const nlohmann::json& json) override;
-	void writeJson(nlohmann::json& json) const override;
-};
+class InputModifier;
 
 class InputMap : public InputMapBase
 {
@@ -163,7 +139,7 @@ public:
 	#pragma region Keyboard
 
 	// TODO: VirtualKeyCode?      KeyCode;
-	// TODO: std::list<VirtualKeyCode> KeyCodeModifiers;
+	// TODO: std::deque<VirtualKeyCode> KeyCodeModifiers;
 
 	#pragma endregion
 
@@ -305,4 +281,28 @@ public:
 		return builder.ToString();
 	}
 #endif
+};
+
+class InputModifier : public InputMapBase
+{
+public:
+	/**
+	* \brief
+	* The bindings associated with this modifier set.
+	*/
+	std::deque<InputMap> bindings;
+
+	InputModifier() = default;
+
+	InputModifier(InputType_t type, Ds4Buttons::T buttons);
+	InputModifier(InputType_t type, Ds4Axis::T axis);
+	InputModifier(InputType_t type, const std::string& region);
+
+	// Copy constructor
+	InputModifier(const InputModifier& other);
+
+	bool operator==(const InputModifier& other) const;
+	bool operator!=(const InputModifier& other) const;
+	void readJson(const nlohmann::json& json) override;
+	void writeJson(nlohmann::json& json) const override;
 };
