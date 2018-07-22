@@ -32,7 +32,7 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
-         <widget class="QTreeWidget" name="deviceList">
+         <widget class="QTreeView" name="deviceList">
           <property name="rootIsDecorated">
            <bool>false</bool>
           </property>
@@ -48,19 +48,6 @@
           <property name="headerHidden">
            <bool>false</bool>
           </property>
-          <property name="columnCount">
-           <number>2</number>
-          </property>
-          <column>
-           <property name="text">
-            <string>Device</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Battery</string>
-           </property>
-          </column>
          </widget>
         </item>
         <item alignment="Qt::AlignRight">
@@ -263,22 +250,6 @@
     <hint type="destinationlabel">
      <x>85</x>
      <y>393</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>deviceList</sender>
-   <signal>itemSelectionChanged()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>deviceSelectionChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>107</x>
-     <y>95</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>67</x>
-     <y>355</y>
     </hint>
    </hints>
   </connection>

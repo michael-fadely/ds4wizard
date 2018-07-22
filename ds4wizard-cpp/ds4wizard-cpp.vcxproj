@@ -151,6 +151,7 @@
     <ClCompile Include="Ds4DeviceManager.cpp" />
     <ClCompile Include="Ds4Input.cpp" />
     <ClCompile Include="Ds4InputData.cpp" />
+    <ClCompile Include="Ds4ItemModel.cpp" />
     <ClCompile Include="Ds4LightOptions.cpp" />
     <ClCompile Include="Ds4Output.cpp" />
     <ClCompile Include="Ds4TouchRegion.cpp" />
@@ -195,6 +196,7 @@
     <ClInclude Include="Ds4DeviceManager.h" />
     <ClInclude Include="Ds4Input.h" />
     <ClInclude Include="Ds4InputData.h" />
+    <ClInclude Include="Ds4ItemModel.h" />
     <ClInclude Include="Ds4LightOptions.h" />
     <ClInclude Include="Ds4Output.h" />
     <ClInclude Include="Ds4TouchRegion.h" />

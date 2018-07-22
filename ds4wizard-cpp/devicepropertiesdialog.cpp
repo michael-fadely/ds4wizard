@@ -11,10 +11,8 @@ DevicePropertiesDialog::DevicePropertiesDialog(QWidget* parent, std::wstring dev
 	ui.setupUi(this);
 
 	{
-		auto& devices_lock = manager->devices_lock;
+		auto devices_lock = manager->lockDevices();
 		auto& devices = manager->devices;
-
-		lock(devices);
 
 		const auto it = devices.find(deviceKey);
 

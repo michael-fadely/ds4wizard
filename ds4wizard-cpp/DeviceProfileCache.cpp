@@ -213,8 +213,7 @@ void DeviceProfileCache::onProfileChanged(const std::string& oldName, const std:
 	{
 		lock(deviceManager);
 
-		auto& devices_lock = deviceManager->devices_lock;
-		lock(devices);
+		auto devices_lock = deviceManager->lockDevices();
 
 		for (auto& pair : deviceManager->devices)
 		{

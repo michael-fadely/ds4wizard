@@ -75,6 +75,18 @@ void Ds4DeviceManager::findController(const std::wstring& devicePath)
 	}, guid);
 }
 
+size_t Ds4DeviceManager::deviceCount()
+{
+	lock(devices);
+	return devices.size();
+}
+
+std::unique_lock<std::recursive_mutex> Ds4DeviceManager::lockDevices()
+{
+	std::unique_lock<std::recursive_mutex> devices_guard(devices_lock);
+	return devices_guard;
+}
+
 bool Ds4DeviceManager::handleDevice(hid::HidInstance& hid)
 {
 	if (!isDs4(hid))

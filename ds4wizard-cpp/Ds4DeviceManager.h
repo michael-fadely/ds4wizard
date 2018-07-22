@@ -50,8 +50,9 @@ public:
 
 class Ds4DeviceManager
 {
-public:
 	std::recursive_mutex sync_lock, devices_lock;
+
+public:
 	std::map<std::wstring, std::shared_ptr<Ds4Device>> devices;
 
 	/**
@@ -105,6 +106,10 @@ public:
 	void findControllers();
 
 	void findController(const std::wstring& devicePath);
+
+	size_t deviceCount();
+
+	std::unique_lock<std::recursive_mutex> lockDevices();
 
 private:
 	bool handleDevice(hid::HidInstance& hid);

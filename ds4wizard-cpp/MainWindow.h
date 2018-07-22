@@ -4,6 +4,7 @@
 #include "ui_mainwindow.h"
 #include "Ds4DeviceManager.h"
 #include "Logger.h"
+#include "Ds4ItemModel.h"
 
 class MainWindow : public QMainWindow
 {
@@ -18,6 +19,7 @@ public:
 
 private:
 	std::shared_ptr<Ds4DeviceManager> deviceManager;
+	Ds4ItemModel* ds4Items;
 
 	Ui::MainWindow ui;
 	bool supportsSystemTray = false;

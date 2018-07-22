@@ -7,8 +7,7 @@
 #include "Ds4DeviceManager.h"
 #include "Logger.h"
 
-// TODO: use treeview instead of the other thing
-// TODO: batteryLevelChanged which requires ^
+// TODO: batteryLevelChanged
 
 using namespace std::chrono;
 
@@ -93,12 +92,15 @@ MainWindow::MainWindow(QWidget* parent)
 		emit s_onProfilesLoaded();
 		deviceManager->findControllers();
 	});
+
+	ds4Items = new Ds4ItemModel(deviceManager);	ui.deviceList->setModel(ds4Items);
 }
 
 MainWindow::~MainWindow()
 {
 	deviceManager->close();
 	delete trayIcon;
+	delete ds4Items;
 }
 
 void MainWindow::changeEvent(QEvent* e)
@@ -274,15 +276,15 @@ void MainWindow::devicePropertiesClicked()
 {
 	// TODO: use treeview and "model" instead of the other thing
 
+#if 0
 	const auto item = ui.deviceList->selectedItems().front();
 	const auto text = item->text(0).toStdString();
 
 	std::wstring key;
 
 	{
-		auto& devices_lock = deviceManager->devices_lock;
+		auto devices_lock = deviceManager->lockDevices();
 		auto& devices = deviceManager->devices;
-		lock(devices);
 
 		for (auto& pair : devices)
 		{
@@ -296,6 +298,7 @@ void MainWindow::devicePropertiesClicked()
 	auto dialog = new DevicePropertiesDialog(this, key, deviceManager);
 	dialog->exec();
 	delete dialog;
+#endif
 }
 
 void MainWindow::startMinimizedToggled(bool value)
@@ -325,6 +328,7 @@ void MainWindow::systemTrayExit(bool /*checked*/)
 
 void MainWindow::onDeviceOpened(std::shared_ptr<DeviceOpenedEventArgs> a) const
 {
+#if 0
 	if (!a->unique)
 	{
 		return;
@@ -343,10 +347,12 @@ void MainWindow::onDeviceOpened(std::shared_ptr<DeviceOpenedEventArgs> a) const
 	deviceList->addTopLevelItem(new QTreeWidgetItem(strings));
 
 	deviceList->setUpdatesEnabled(true);
+#endif
 }
 
 void MainWindow::onDeviceClosed(std::shared_ptr<DeviceClosedEventArgs> a) const
 {
+#if 0
 	auto deviceList = ui.deviceList;
 
 	deviceList->setUpdatesEnabled(false);
@@ -362,6 +368,7 @@ void MainWindow::onDeviceClosed(std::shared_ptr<DeviceClosedEventArgs> a) const
 	}
 
 	deviceList->setUpdatesEnabled(true);
+#endif
 }
 
 void MainWindow::onProfilesLoaded()
@@ -372,6 +379,8 @@ void MainWindow::onProfilesLoaded()
 
 void MainWindow::deviceSelectionChanged() const
 {
+#if 0
 	auto selected = ui.deviceList->selectedItems();
 	ui.pushButton_DeviceProperties->setEnabled(!selected.isEmpty());
+#endif
 }
