@@ -14,7 +14,8 @@ Ds4ItemModel::Ds4ItemModel(std::shared_ptr<Ds4DeviceManager> deviceManager)
 	connect(this, SIGNAL(s_onDeviceClosed(std::shared_ptr<DeviceClosedEventArgs>)),
 	        this, SLOT(onDeviceClosed(std::shared_ptr<DeviceClosedEventArgs>)));
 
-	connect(this, SIGNAL(s_onDeviceBatteryChanged(const Ds4Device*)), this, SLOT(onDeviceBatteryChanged(const Ds4Device*)));
+	connect(this, SIGNAL(s_onDeviceBatteryChanged(const Ds4Device*)),
+	        this, SLOT(onDeviceBatteryChanged(const Ds4Device*)));
 
 	this->deviceManager->deviceOpened += [this](void*, std::shared_ptr<DeviceOpenedEventArgs> args) -> void { emit s_onDeviceOpened(args); };
 	this->deviceManager->deviceClosed += [this](void*, std::shared_ptr<DeviceClosedEventArgs> args) -> void { emit s_onDeviceClosed(args); };
@@ -44,13 +45,16 @@ QVariant Ds4ItemModel::data(const QModelIndex& index, int role) const
 
 	std::tuple<std::wstring, std::shared_ptr<Ds4Device>> pair = getDevice(index.row());
 
-	if (!index.column())
+	switch (index.column())
 	{
-		return QString::fromStdString(std::get<1>(pair)->name());
-	}
-	else
-	{
-		return QString("%1 %").arg(std::get<1>(pair)->battery() * 10);
+		case 0:
+			return QString::fromStdString(std::get<1>(pair)->name());
+
+		case 1:
+			return QString("%1 %").arg(std::get<1>(pair)->battery() * 10);
+
+		default:
+			return QVariant();
 	}
 }
 
@@ -61,7 +65,7 @@ QVariant Ds4ItemModel::headerData(int section, Qt::Orientation orientation, int 
 		return QVariant();
 	}
 
-	if (orientation != Qt::Horizontal && role != Qt::SizeHintRole)
+	if (orientation != Qt::Horizontal)
 	{
 		return QVariant();
 	}
@@ -87,19 +91,19 @@ void Ds4ItemModel::onDeviceOpened(std::shared_ptr<DeviceOpenedEventArgs> a)
 		};
 	}
 
-	auto index = createIndex(getRow(a->device), 0);
+	const auto index = createIndex(getRow(a->device), 0);
 	emit dataChanged(index, index, { Qt::ItemDataRole::DisplayRole });
 }
 
 void Ds4ItemModel::onDeviceClosed(std::shared_ptr<DeviceClosedEventArgs> a)
 {
-	auto index = createIndex(getRow(a->device), 0);
+	const auto index = createIndex(getRow(a->device), 0);
 	emit dataChanged(index, index, { Qt::ItemDataRole::DisplayRole });
 }
 
 void Ds4ItemModel::onDeviceBatteryChanged(const Ds4Device* sender)
 {
-	auto index = createIndex(getRow(sender), 1);
+	const auto index = createIndex(getRow(sender), 1);
 	emit dataChanged(index, index, { Qt::ItemDataRole::DisplayRole });
 }
 

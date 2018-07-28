@@ -6,8 +6,6 @@
 #include "Ds4DeviceManager.h"
 #include "Logger.h"
 
-// TODO: batteryLevelChanged
-
 using namespace std::chrono;
 
 MainWindow::MainWindow(QWidget* parent)
