@@ -6,7 +6,7 @@
 class EventArgs
 {
 public:
-	static inline EventArgs const* Empty = nullptr;
+	static inline EventArgs const* empty = nullptr;
 };
 
 template <typename args_t = EventArgs>

@@ -92,7 +92,7 @@
       <Filter>Source Files\User Interface</Filter>
     </ClCompile>
     <ClCompile Include="Ds4ItemModel.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\User Interface</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -238,15 +238,15 @@
     <ClInclude Include="Stopwatch.h">
       <Filter>Header Files\Utility</Filter>
     </ClInclude>
-    <ClInclude Include="Ds4ItemModel.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="devicepropertiesdialog.h">
       <Filter>Header Files\User Interface</Filter>
     </QtMoc>
     <QtMoc Include="MainWindow.h">
+      <Filter>Header Files\User Interface</Filter>
+    </QtMoc>
+    <QtMoc Include="Ds4ItemModel.h">
       <Filter>Header Files\User Interface</Filter>
     </QtMoc>
   </ItemGroup>

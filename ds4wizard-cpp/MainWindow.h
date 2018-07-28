@@ -49,13 +49,9 @@ protected slots:
 	void systemTrayShowHide(bool checked);
 	void systemTrayExit(bool checked);
 
-	void onDeviceOpened(std::shared_ptr<DeviceOpenedEventArgs> a) const;
-	void onDeviceClosed(std::shared_ptr<DeviceClosedEventArgs> a) const;
 	void onProfilesLoaded();
 	void deviceSelectionChanged() const;
 
 signals:
-	void s_onDeviceOpened(std::shared_ptr<DeviceOpenedEventArgs> a);
-	void s_onDeviceClosed(std::shared_ptr<DeviceClosedEventArgs> a);
 	void s_onProfilesLoaded();
 };

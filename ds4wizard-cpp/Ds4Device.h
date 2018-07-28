@@ -80,6 +80,7 @@ public:
 	bool bluetoothConnected();
 	bool usbConnected();
 	bool connected();
+
 	/**
 	 * \brief 
 	 * Gets the battery charge level in the range 1 to 10.

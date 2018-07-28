@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#include <QMetaType>
 #include "MainWindow.h"
 #include "devicepropertiesdialog.h"
 #include "DeviceProfileCache.h"
@@ -72,19 +71,10 @@ MainWindow::MainWindow(QWidget* parent)
 	deviceManager = std::make_shared<Ds4DeviceManager>();
 	Program::profileCache.setDevices(deviceManager);
 
-	qRegisterMetaType<std::shared_ptr<DeviceOpenedEventArgs>>("std::shared_ptr<DeviceOpenedEventArgs>");
-	qRegisterMetaType<std::shared_ptr<DeviceClosedEventArgs>>("std::shared_ptr<DeviceClosedEventArgs>");
-
-	connect(this, SIGNAL(s_onDeviceOpened(std::shared_ptr<DeviceOpenedEventArgs>)),
-	        this, SLOT(onDeviceOpened(std::shared_ptr<DeviceOpenedEventArgs>)));
-
-	connect(this, SIGNAL(s_onDeviceClosed(std::shared_ptr<DeviceClosedEventArgs>)),
-	        this, SLOT(onDeviceClosed(std::shared_ptr<DeviceClosedEventArgs>)));
-
 	connect(this, SIGNAL(s_onProfilesLoaded()), this, SLOT(onProfilesLoaded()));
 
-	deviceManager->deviceOpened += [this](void*, std::shared_ptr<DeviceOpenedEventArgs> args) -> void { emit s_onDeviceOpened(args); };
-	deviceManager->deviceClosed += [this](void*, std::shared_ptr<DeviceClosedEventArgs> args) -> void { emit s_onDeviceClosed(args); };
+	ds4Items = new Ds4ItemModel(deviceManager);
+	ui.deviceList->setModel(ds4Items);
 
 	startupTask = std::async(std::launch::async, [this]() -> void
 	{
@@ -92,8 +82,6 @@ MainWindow::MainWindow(QWidget* parent)
 		emit s_onProfilesLoaded();
 		deviceManager->findControllers();
 	});
-
-	ds4Items = new Ds4ItemModel(deviceManager);	ui.deviceList->setModel(ds4Items);
 }
 
 MainWindow::~MainWindow()
@@ -324,51 +312,6 @@ void MainWindow::systemTrayShowHide(bool /*checked*/)
 void MainWindow::systemTrayExit(bool /*checked*/)
 {
 	close();
-}
-
-void MainWindow::onDeviceOpened(std::shared_ptr<DeviceOpenedEventArgs> a) const
-{
-#if 0
-	if (!a->unique)
-	{
-		return;
-	}
-
-	auto deviceList = ui.deviceList;
-
-	deviceList->setUpdatesEnabled(false);
-
-	QStringList strings;
-
-	const auto& device = a->device;
-	strings.append(QString::fromStdString(device->name()));
-	strings.append(QString::number(static_cast<int>(device->battery())));
-
-	deviceList->addTopLevelItem(new QTreeWidgetItem(strings));
-
-	deviceList->setUpdatesEnabled(true);
-#endif
-}
-
-void MainWindow::onDeviceClosed(std::shared_ptr<DeviceClosedEventArgs> a) const
-{
-#if 0
-	auto deviceList = ui.deviceList;
-
-	deviceList->setUpdatesEnabled(false);
-
-	const auto& device = a->device;
-	const QString name = QString::fromStdString(device->name());
-
-	auto items = deviceList->findItems(name, Qt::MatchExactly, 0);
-
-	for (auto& item : items)
-	{
-		delete item;
-	}
-
-	deviceList->setUpdatesEnabled(true);
-#endif
 }
 
 void MainWindow::onProfilesLoaded()

@@ -157,13 +157,14 @@ bool Ds4DeviceManager::handleDevice(hid::HidInstance& hid)
 			device->deviceClosed += std::bind(&Ds4DeviceManager::onDs4DeviceClosed, this,
 			                                  std::placeholders::_1, std::placeholders::_2);
 
+			auto& safe = device->safeMacAddress;
+
+			const std::wstring wstr(safe.begin(), safe.end());
+			devices[wstr] = device;
+
 			auto args = std::make_shared<DeviceOpenedEventArgs>(device, true);
 			deviceOpened.invoke(this, args);
 			device->start();
-
-			auto& safe = device->safeMacAddress;
-			const std::wstring wstr(safe.begin(), safe.end());
-			devices[wstr] = device;
 		}
 		else
 		{
