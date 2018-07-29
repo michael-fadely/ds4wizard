@@ -21,12 +21,12 @@ Ds4ItemModel::Ds4ItemModel(std::shared_ptr<Ds4DeviceManager> deviceManager)
 	this->deviceManager->deviceClosed += [this](void*, std::shared_ptr<DeviceClosedEventArgs> args) -> void { emit s_onDeviceClosed(args); };
 }
 
-int Ds4ItemModel::rowCount(const QModelIndex& parent) const
+int Ds4ItemModel::rowCount(const QModelIndex& /*parent*/) const
 {
 	return static_cast<int>(deviceManager->deviceCount());
 }
 
-int Ds4ItemModel::columnCount(const QModelIndex& parent) const
+int Ds4ItemModel::columnCount(const QModelIndex& /*parent*/) const
 {
 	return 2; // device name, battery
 }
@@ -51,7 +51,7 @@ QVariant Ds4ItemModel::data(const QModelIndex& index, int role) const
 			return QString::fromStdString(device->name());
 
 		case 1:
-			return QString("%1 %").arg(device->battery() * 10);
+			return QString("%1%").arg(device->battery() * 10);
 
 		default:
 			return QVariant();

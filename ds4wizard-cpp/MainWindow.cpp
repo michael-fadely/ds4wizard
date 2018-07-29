@@ -272,22 +272,6 @@ void MainWindow::devicePropertiesClicked()
 	}
 
 	auto device = ds4Items->getDevice(rows[0].row());
-
-	/*std::wstring key;
-
-	{
-		auto devices_lock = deviceManager->lockDevices();
-		auto& devices = deviceManager->devices;
-
-		for (auto& pair : devices)
-		{
-			if (pair.second->name() == text)
-			{
-				key = pair.first;
-			}
-		}
-	}*/
-
 	auto dialog = new DevicePropertiesDialog(this, device);
 	dialog->exec();
 	delete dialog;
@@ -324,7 +308,7 @@ void MainWindow::onProfilesLoaded()
 	populateProfileList();
 }
 
-void MainWindow::deviceSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected) const
+void MainWindow::deviceSelectionChanged(const QItemSelection& selected, const QItemSelection& /*deselected*/) const
 {
 	ui.pushButton_DeviceProperties->setEnabled(!selected.isEmpty());
 }

@@ -18,12 +18,12 @@ public:
 	 */
 	const std::shared_ptr<Ds4Device> device;
 
-		/**
-		 * \brief 
-		 * \c true if this is the first connection for this
-		 * device, \c false if an additional connection has
-		 * been added to this device.
-		 */
+	/**
+	 * \brief 
+	 * \c true if this is the first connection for this
+	 * device, \c false if an additional connection has
+	 * been added to this device.
+	 */
 	const bool unique;
 
 	DeviceOpenedEventArgs(std::shared_ptr<Ds4Device> device, bool unique)
