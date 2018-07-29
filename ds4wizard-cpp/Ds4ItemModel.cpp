@@ -43,15 +43,15 @@ QVariant Ds4ItemModel::data(const QModelIndex& index, int role) const
 		return QVariant();
 	}
 
-	std::tuple<std::wstring, std::shared_ptr<Ds4Device>> pair = getDevice(index.row());
+	std::shared_ptr<Ds4Device> device = getDevice(index.row());
 
 	switch (index.column())
 	{
 		case 0:
-			return QString::fromStdString(std::get<1>(pair)->name());
+			return QString::fromStdString(device->name());
 
 		case 1:
-			return QString("%1 %").arg(std::get<1>(pair)->battery() * 10);
+			return QString("%1 %").arg(device->battery() * 10);
 
 		default:
 			return QVariant();
@@ -107,7 +107,7 @@ void Ds4ItemModel::onDeviceBatteryChanged(const Ds4Device* sender)
 	emit dataChanged(index, index, { Qt::ItemDataRole::DisplayRole });
 }
 
-std::tuple<std::wstring, std::shared_ptr<Ds4Device>> Ds4ItemModel::getDevice(int row) const
+std::shared_ptr<Ds4Device> Ds4ItemModel::getDevice(int row) const
 {
 	auto lock = deviceManager->lockDevices();
 	auto it = deviceManager->devices.cbegin();
@@ -117,7 +117,12 @@ std::tuple<std::wstring, std::shared_ptr<Ds4Device>> Ds4ItemModel::getDevice(int
 		++it;
 	}
 
-	return *it;
+	if (it == deviceManager->devices.end())
+	{
+		return nullptr;
+	}
+
+	return it->second;
 }
 
 int Ds4ItemModel::getRow(const std::shared_ptr<Ds4Device>& device) const

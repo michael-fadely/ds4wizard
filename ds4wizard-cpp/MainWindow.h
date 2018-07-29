@@ -50,7 +50,7 @@ protected slots:
 	void systemTrayExit(bool checked);
 
 	void onProfilesLoaded();
-	void deviceSelectionChanged() const;
+	void deviceSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected) const;
 
 signals:
 	void s_onProfilesLoaded();

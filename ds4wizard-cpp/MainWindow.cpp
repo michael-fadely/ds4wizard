@@ -73,6 +73,10 @@ MainWindow::MainWindow(QWidget* parent)
 
 	ds4Items = new Ds4ItemModel(deviceManager);
 	ui.deviceList->setModel(ds4Items);
+	auto deviceSelectionModel = ui.deviceList->selectionModel();
+
+	connect(deviceSelectionModel, SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
+	        this, SLOT(deviceSelectionChanged(const QItemSelection&, const QItemSelection&)));
 
 	startupTask = std::async(std::launch::async, [this]() -> void
 	{
@@ -260,13 +264,16 @@ void MainWindow::toggleHide(QSystemTrayIcon::ActivationReason reason)
 
 void MainWindow::devicePropertiesClicked()
 {
-	// TODO: use treeview and "model" instead of the other thing
+	const auto rows = ui.deviceList->selectionModel()->selectedRows();
 
-#if 0
-	const auto item = ui.deviceList->selectedItems().front();
-	const auto text = item->text(0).toStdString();
+	if (rows.empty())
+	{
+		return;
+	}
 
-	std::wstring key;
+	auto device = ds4Items->getDevice(rows[0].row());
+
+	/*std::wstring key;
 
 	{
 		auto devices_lock = deviceManager->lockDevices();
@@ -279,12 +286,11 @@ void MainWindow::devicePropertiesClicked()
 				key = pair.first;
 			}
 		}
-	}
+	}*/
 
-	auto dialog = new DevicePropertiesDialog(this, key, deviceManager);
+	auto dialog = new DevicePropertiesDialog(this, device);
 	dialog->exec();
 	delete dialog;
-#endif
 }
 
 void MainWindow::startMinimizedToggled(bool value)
@@ -318,10 +324,7 @@ void MainWindow::onProfilesLoaded()
 	populateProfileList();
 }
 
-void MainWindow::deviceSelectionChanged() const
+void MainWindow::deviceSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected) const
 {
-#if 0
-	auto selected = ui.deviceList->selectedItems();
 	ui.pushButton_DeviceProperties->setEnabled(!selected.isEmpty());
-#endif
 }

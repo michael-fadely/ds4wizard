@@ -19,8 +19,9 @@ public:
 	QVariant data(const QModelIndex& index, int role) const override;
 	QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 
+	std::shared_ptr<Ds4Device> getDevice(int row) const;
+
 private:
-	std::tuple<std::wstring, std::shared_ptr<Ds4Device>> getDevice(int row) const;
 	int getRow(const std::shared_ptr<Ds4Device>& device) const;
 	int getRow(const Ds4Device* device) const;
 

@@ -7,11 +7,10 @@ class DevicePropertiesDialog : public QDialog
 {
 	Q_OBJECT
 	std::wstring deviceKey;
-	std::shared_ptr<Ds4DeviceManager> manager;
 	std::shared_ptr<Ds4Device> device;
 
 public:
-	DevicePropertiesDialog(QWidget* parent, std::wstring deviceKey, std::shared_ptr<Ds4DeviceManager> manager);
+	DevicePropertiesDialog(QWidget* parent, std::shared_ptr<Ds4Device> device_);
 	~DevicePropertiesDialog();
 	void populateForm(const DeviceSettings& settings);
 

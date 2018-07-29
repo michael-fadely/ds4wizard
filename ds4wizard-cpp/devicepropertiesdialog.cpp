@@ -2,34 +2,21 @@
 #include "devicepropertiesdialog.h"
 
 // TODO: readout tab
+// TODO: eventually allow configuring disconnected devices
 
-DevicePropertiesDialog::DevicePropertiesDialog(QWidget* parent, std::wstring deviceKey_, std::shared_ptr<Ds4DeviceManager> manager_)
+DevicePropertiesDialog::DevicePropertiesDialog(QWidget* parent, std::shared_ptr<Ds4Device> device_)
 	: QDialog(parent),
-	  deviceKey(std::move(deviceKey_)),
-	  manager(std::move(manager_))
+	  device(std::move(device_))
 {
 	ui.setupUi(this);
-
+	if (device != nullptr)
 	{
-		auto devices_lock = manager->lockDevices();
-		auto& devices = manager->devices;
-
-		const auto it = devices.find(deviceKey);
-
-		if (it != devices.end())
-		{
-			this->device = it->second;
-
-			ui.lineEdit_DeviceName->setText(QString::fromStdString(this->device->name()));
-
-			auto settings = this->device->settings;
-			populateForm(settings);
-		}
-		else
-		{
-			ui.tabReadout->setEnabled(false);
-			//populateForm(settings);
-		}
+		populateForm(this->device->settings);
+		ui.tabReadout->setEnabled(true);
+	}
+	else
+	{
+		ui.tabReadout->setEnabled(false);
 	}
 }
 
@@ -40,6 +27,8 @@ DevicePropertiesDialog::~DevicePropertiesDialog()
 void DevicePropertiesDialog::populateForm(const DeviceSettings& settings)
 {
 	// TODO: Profile (get profile list!)
+
+	ui.lineEdit_DeviceName->setText(QString::fromStdString(settings.name));
 
 	ui.checkBox_UseProfileLight->setChecked(settings.useProfileLight);
 	ui.checkBox_AutoLightColor->setChecked(settings.light.automaticColor);
