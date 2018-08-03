@@ -168,7 +168,7 @@ void MainWindow::registerDeviceNotification()
 
 	if (notificationHandle == nullptr || notificationHandle == INVALID_HANDLE_VALUE)
 	{
-		QMessageBox::warning(this, tr("Warning"), tr("Failed to register device notification event."));
+		QMessageBox::warning(this, tr("Warning"), tr("Failed to register device notification event. The program will be unable to detect newly connected controllers."));
 	}
 }
 
