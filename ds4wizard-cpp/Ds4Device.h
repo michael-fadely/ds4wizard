@@ -42,11 +42,9 @@ class Ds4Device
 	IKeyboardSimulator      KeyboardSimulator => InputSimulator.Keyboard;
 	IMouseSimulator         MouseSimulator    => InputSimulator.Mouse;*/
 
-public:
 	Stopwatch latency;
 	bool dataReceived = false;
 
-private:
 	std::unique_ptr<std::thread> deviceThread = nullptr;
 
 	// Devices
@@ -80,6 +78,8 @@ public:
 	bool bluetoothConnected();
 	bool usbConnected();
 	bool connected();
+
+	Stopwatch::clock::duration getLatency();
 
 	/**
 	 * \brief 

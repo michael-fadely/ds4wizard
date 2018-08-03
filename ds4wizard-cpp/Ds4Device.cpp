@@ -53,6 +53,12 @@ bool Ds4Device::connected()
 	return bluetoothConnected() || usbConnected();
 }
 
+Stopwatch::clock::duration Ds4Device::getLatency()
+{
+	lock(sync);
+	return latency.elapsed();
+}
+
 uint8_t Ds4Device::battery() const
 {
 	return input.data.battery;

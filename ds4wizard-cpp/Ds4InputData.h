@@ -25,7 +25,6 @@ struct Ds4Stick
 	uint8_t y;
 
 	bool operator==(const Ds4Stick& other) const;
-
 	bool operator!=(const Ds4Stick& right) const;
 
 	float lengthSquared() const;
@@ -54,6 +53,7 @@ struct Ds4Vector2
 	short y;
 
 	bool operator==(const Ds4Vector2& other) const;
+	bool operator!=(const Ds4Vector2& other) const;
 
 	float lengthSquared() const;
 	float length() const;
@@ -69,6 +69,7 @@ struct Ds4Vector3
 	short x, y, z;
 
 	bool operator==(const Ds4Vector3& other) const;
+	bool operator!=(const Ds4Vector3& other) const;
 
 	float lengthSquared() const;
 	float length() const;
@@ -111,4 +112,7 @@ struct Ds4InputData
 	Ds4Vector2 touchPoint2;
 	Ds4Vector2 lastTouchPoint1;
 	Ds4Vector2 lastTouchPoint2;
+
+	bool operator==(const Ds4InputData& other) const;
+	bool operator!=(const Ds4InputData& other) const;
 };
