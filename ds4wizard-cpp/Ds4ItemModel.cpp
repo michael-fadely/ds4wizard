@@ -74,6 +74,7 @@ QVariant Ds4ItemModel::headerData(int section, Qt::Orientation orientation, int 
 	{
 		case Qt::DisplayRole:
 			return tr(!section ? "Device" : "Battery");
+
 		default:
 			return QVariant();
 	}
