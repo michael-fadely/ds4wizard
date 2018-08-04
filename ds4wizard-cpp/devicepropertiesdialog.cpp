@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "devicepropertiesdialog.h"
 
-// TODO: finish readout tab
 // TODO: eventually allow configuring disconnected devices
 
 DevicePropertiesDialog::DevicePropertiesDialog(QWidget* parent, std::shared_ptr<Ds4Device> device_)
@@ -88,8 +87,36 @@ void DevicePropertiesDialog::tabChanged(int index)
 
 void DevicePropertiesDialog::updateReadout(Ds4InputData data)
 {
+	// Left stick
 	ui.labelLX->setNum(data.leftStick.x);
 	ui.labelLY->setNum(data.leftStick.y);
+
+	// Right stick
 	ui.labelRX->setNum(data.rightStick.x);
 	ui.labelRY->setNum(data.rightStick.y);
+
+	// Touch A
+	ui.labelTouchAX->setNum(data.touchPoint1.x);
+	ui.labelTouchAY->setNum(data.touchPoint1.y);
+
+	// Touch B
+	ui.labelTouchBX->setNum(data.touchPoint2.x);
+	ui.labelTouchBY->setNum(data.touchPoint2.y);
+
+	// Gyroscope
+	ui.labelGyroX->setNum(data.gyro.x);
+	ui.labelGyroY->setNum(data.gyro.y);
+	ui.labelGyroZ->setNum(data.gyro.z);
+
+	// Accelerometer
+	ui.labelAccelX->setNum(data.accel.x);
+	ui.labelAccelY->setNum(data.accel.y);
+	ui.labelAccelZ->setNum(data.accel.z);
+
+	// Triggers
+	// TODO: sliders
+	ui.labelTriggerL->setNum(data.leftTrigger);
+	ui.labelTriggerR->setNum(data.rightTrigger);
+
+	// TODO: Latency
 }
