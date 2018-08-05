@@ -82,6 +82,12 @@ Stopwatch::clock::duration Ds4Device::getLatencyPeak()
 	return peakLatency;
 }
 
+void Ds4Device::resetLatencyPeak()
+{
+	LOCK(sync);
+	peakLatency = 0ms;
+}
+
 uint8_t Ds4Device::battery() const
 {
 	return input.data.battery;

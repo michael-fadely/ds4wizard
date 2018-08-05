@@ -20,8 +20,9 @@ DevicePropertiesDialog::DevicePropertiesDialog(QWidget* parent, std::shared_ptr<
 				this, SLOT(tabChanged(int)));
 
 		qRegisterMetaType<Ds4InputData>("Ds4InputData");
-
 		connect(this, SIGNAL(readoutChanged(Ds4InputData)), this, SLOT(updateReadout(Ds4InputData)));
+
+		connect(ui.buttonResetPeak, SIGNAL(clicked()), this, SLOT(resetPeakLatency()));
 	}
 	else
 	{
@@ -148,9 +149,9 @@ void DevicePropertiesDialog::updateReadout(Ds4InputData data)
 	ui.labelTriggerR->setNum(data.rightTrigger);
 	ui.sliderTriggerR->setValue(data.rightTrigger);
 
-	duration<double, std::milli> latencyNow {};
-	duration<double, std::milli> latencyAvg {};
-	duration<double, std::milli> latencyMax {};
+	duration<double, std::milli> latencyNow;
+	duration<double, std::milli> latencyAvg;
+	duration<double, std::milli> latencyMax;
 
 	{
 		auto lock = device->lock();
@@ -162,4 +163,9 @@ void DevicePropertiesDialog::updateReadout(Ds4InputData data)
 	ui.labelLatencyNow->setText(QString("%1 ms").arg(latencyNow.count()));
 	ui.labelLatencyAverage->setText(QString("%1 ms").arg(latencyAvg.count()));
 	ui.labelLatencyPeak->setText(QString("%1 ms").arg(latencyMax.count()));
+}
+
+void DevicePropertiesDialog::resetPeakLatency()
+{
+	device->resetLatencyPeak();
 }

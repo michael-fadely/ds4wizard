@@ -34,4 +34,5 @@ signals:
 private slots:
 	void tabChanged(int index);
 	void updateReadout(Ds4InputData data);
+	void resetPeakLatency();
 };

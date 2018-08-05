@@ -90,6 +90,7 @@ public:
 	Stopwatch::clock::duration getLatency();
 	Stopwatch::clock::duration getLatencyAverage();
 	Stopwatch::clock::duration getLatencyPeak();
+	void resetLatencyPeak();
 
 	/**
 	 * \brief 
