@@ -7,7 +7,7 @@
 
 ptrdiff_t ScpDevice::getFreePort()
 {
-	lock(portLock);
+	LOCK(portLock);
 	{
 		for (size_t i = 0; i < portsUsed.size(); i++)
 		{
@@ -115,7 +115,7 @@ bool ScpDevice::connect(int userIndex)
 
 	if (result)
 	{
-		lock(portLock);
+		LOCK(portLock);
 		{
 			portsUsed[userIndex] = true;
 		}
@@ -133,14 +133,14 @@ bool ScpDevice::disconnect(int userIndex, bool force)
 
 	if (userIndex >= 0)
 	{
-		lock(portLock);
+		LOCK(portLock);
 		{
 			portsUsed[userIndex] = false;
 		}
 	}
 	else
 	{
-		lock(portLock);
+		LOCK(portLock);
 		{
 			for (bool& i : portsUsed)
 			{

@@ -228,7 +228,7 @@ void MainWindow::populateProfileList() const
 	auto& profiles_lock = Program::profileCache.profiles_lock;
 
 	{
-		lock(profiles);
+		LOCK(profiles);
 
 		for (const DeviceProfile& profile : Program::profileCache.profiles)
 		{

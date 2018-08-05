@@ -38,13 +38,13 @@ bool Ds4Device::isIdle() const
 
 bool Ds4Device::bluetoothConnected()
 {
-	lock(sync);
+	LOCK(sync);
 	return bluetoothDevice != nullptr && bluetoothDevice->isOpen();
 }
 
 bool Ds4Device::usbConnected()
 {
-	lock(sync);
+	LOCK(sync);
 	return usbDevice != nullptr && usbDevice->isOpen();
 }
 
@@ -55,13 +55,13 @@ bool Ds4Device::connected()
 
 Stopwatch::clock::duration Ds4Device::getLatency()
 {
-	lock(sync);
+	LOCK(sync);
 	return storedLatency;
 }
 
 Stopwatch::clock::duration Ds4Device::getLatencyAverage()
 {
-	lock(sync);
+	LOCK(sync);
 	
 	if (!latencyPoints)
 	{
@@ -78,7 +78,7 @@ Stopwatch::clock::duration Ds4Device::getLatencyAverage()
 
 Stopwatch::clock::duration Ds4Device::getLatencyPeak()
 {
-	lock(sync);
+	LOCK(sync);
 	return peakLatency;
 }
 
@@ -142,13 +142,13 @@ Ds4Device::Ds4Device(hid::HidInstance& device)
 
 void Ds4Device::saveSettings()
 {
-	lock(sync);
+	LOCK(sync);
 	Program::profileCache.saveSettings(macAddress, settings);
 }
 
 void Ds4Device::applyProfile()
 {
-	lock(sync);
+	LOCK(sync);
 	releaseAutoColor();
 
 	auto cachedProfile = Program::profileCache.getProfile(settings.profile);
@@ -288,7 +288,7 @@ bool Ds4Device::scpDeviceOpen()
 
 void Ds4Device::scpDeviceClose()
 {
-	lock(sync);
+	LOCK(sync);
 
 	if (scpDevice == nullptr)
 	{
@@ -306,14 +306,14 @@ void Ds4Device::scpDeviceClose()
 
 void Ds4Device::releaseAutoColor()
 {
-	lock(sync);
+	LOCK(sync);
 	Ds4AutoLightColor::releaseColor(colorIndex);
 	colorIndex = -1;
 }
 
 void Ds4Device::onProfileChanged(const std::string& newName)
 {
-	lock(sync);
+	LOCK(sync);
 	settings.profile = newName.empty() ? std::string() : newName;
 	saveSettings();
 	applyProfile();
@@ -331,9 +331,14 @@ Ds4Device::~Ds4Device()
 	}
 }
 
+std::unique_lock<std::recursive_mutex> Ds4Device::lock()
+{
+	return std::unique_lock<std::recursive_mutex>(sync_lock);
+}
+
 void Ds4Device::closeImpl()
 {
-	lock(sync);
+	LOCK(sync);
 	running = false;
 
 	closeUsbDevice();
@@ -365,7 +370,7 @@ void Ds4Device::close()
 
 void Ds4Device::closeBluetoothDevice()
 {
-	lock(sync);
+	LOCK(sync);
 
 	if (bluetoothDevice != nullptr && bluetoothDevice->isOpen())
 	{
@@ -392,7 +397,7 @@ void Ds4Device::disconnectBluetooth()
 
 void Ds4Device::closeUsbDevice()
 {
-	lock(sync);
+	LOCK(sync);
 
 	if (usbDevice != nullptr && usbDevice->isOpen())
 	{
@@ -414,7 +419,7 @@ bool Ds4Device::openDevice(hid::HidInstance& device, bool exclusive)
 
 void Ds4Device::openBluetoothDevice(hid::HidInstance& device)
 {
-	lock(sync);
+	LOCK(sync);
 	{
 		if (bluetoothConnected())
 		{
@@ -455,7 +460,7 @@ void Ds4Device::openBluetoothDevice(hid::HidInstance& device)
 
 void Ds4Device::openUsbDevice(hid::HidInstance& device)
 {
-	lock(sync);
+	LOCK(sync);
 	{
 		if (usbConnected())
 		{
@@ -713,7 +718,7 @@ void Ds4Device::controllerThread()
 	while (connected() && running)
 	{
 		{
-			lock(sync);
+			LOCK(sync);
 			run();
 		}
 

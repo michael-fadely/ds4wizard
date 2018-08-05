@@ -35,7 +35,7 @@ void Logger::writeLine(LogLevel level, const std::string& context, const std::st
 
 void Logger::onLineLogged(LogLevel level, const std::string& line)
 {
-	lock(sync);
+	LOCK(sync);
 
 	auto args = std::make_shared<LineLoggedEventArgs>(level, line);
 	lineLogged.invoke(nullptr, args);

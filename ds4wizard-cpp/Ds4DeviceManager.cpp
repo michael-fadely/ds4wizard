@@ -34,7 +34,7 @@ bool Ds4DeviceManager::isDs4(const std::wstring& devicePath)
 
 void Ds4DeviceManager::findControllers()
 {
-	lock(sync);
+	LOCK(sync);
 
 	hid::enumerateHid([&](hid::HidInstance& hid) -> bool
 	{
@@ -52,7 +52,7 @@ void Ds4DeviceManager::findController(const std::wstring& devicePath)
 	GUID guid = {};
 	HidD_GetHidGuid(&guid);
 
-	lock(sync);
+	LOCK(sync);
 
 	hid::enumerateGuid([&](const std::wstring& path, const std::wstring& instanceId) -> bool
 	{
@@ -77,7 +77,7 @@ void Ds4DeviceManager::findController(const std::wstring& devicePath)
 
 size_t Ds4DeviceManager::deviceCount()
 {
-	lock(devices);
+	LOCK(devices);
 	return devices.size();
 }
 
@@ -94,7 +94,7 @@ bool Ds4DeviceManager::handleDevice(hid::HidInstance& hid)
 		return false;
 	}
 
-	lock(sync);
+	LOCK(sync);
 
 	bool isBluetooth;
 
@@ -143,7 +143,7 @@ bool Ds4DeviceManager::handleDevice(hid::HidInstance& hid)
 
 	try
 	{
-		lock(devices);
+		LOCK(devices);
 
 		const auto it = devices.find(hid.serialString);
 		std::shared_ptr<Ds4Device> device;
@@ -204,7 +204,7 @@ bool Ds4DeviceManager::handleDevice(hid::HidInstance& hid)
 
 void Ds4DeviceManager::onDs4DeviceClosed(void* sender, std::shared_ptr<EventArgs>)
 {
-	lock(devices);
+	LOCK(devices);
 
 	auto raw_ptr = reinterpret_cast<Ds4Device*>(sender);
 
@@ -228,7 +228,7 @@ void Ds4DeviceManager::close()
 	decltype(devices) devices_;
 
 	{
-		lock(devices);
+		LOCK(devices);
 		devices_ = std::move(devices);
 	}
 

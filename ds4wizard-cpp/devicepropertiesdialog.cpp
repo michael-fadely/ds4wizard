@@ -70,7 +70,7 @@ void DevicePropertiesDialog::readoutMethod()
 			emit readoutChanged(data);
 		}
 
-		std::this_thread::sleep_for(device->getLatency());
+		std::this_thread::sleep_for(device->getLatencyAverage());
 	}
 }
 
@@ -148,10 +148,16 @@ void DevicePropertiesDialog::updateReadout(Ds4InputData data)
 	ui.labelTriggerR->setNum(data.rightTrigger);
 	ui.sliderTriggerR->setValue(data.rightTrigger);
 
-	// TODO: provide method to acquire lock
-	auto latencyNow = duration_cast<duration<double, std::milli>>(device->getLatency());
-	auto latencyAvg = duration_cast<duration<double, std::milli>>(device->getLatencyAverage());
-	auto latencyMax = duration_cast<duration<double, std::milli>>(device->getLatencyPeak());
+	duration<double, std::milli> latencyNow {};
+	duration<double, std::milli> latencyAvg {};
+	duration<double, std::milli> latencyMax {};
+
+	{
+		auto lock = device->lock();
+		latencyNow = duration_cast<duration<double, std::milli>>(device->getLatency());
+		latencyAvg = duration_cast<duration<double, std::milli>>(device->getLatencyAverage());
+		latencyMax = duration_cast<duration<double, std::milli>>(device->getLatencyPeak());
+	}
 
 	ui.labelLatencyNow->setText(QString("%1 ms").arg(latencyNow.count()));
 	ui.labelLatencyAverage->setText(QString("%1 ms").arg(latencyAvg.count()));

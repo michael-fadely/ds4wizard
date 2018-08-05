@@ -46,10 +46,10 @@ class Ds4Device
 	Stopwatch latency;
 
 	size_t latencyPoints = 0;
-	Stopwatch::clock::duration latencySum;
+	Stopwatch::clock::duration latencySum = std::chrono::milliseconds(0);
 	// used for external reading
-	Stopwatch::clock::duration storedLatency;
-	Stopwatch::clock::duration peakLatency;
+	Stopwatch::clock::duration storedLatency = std::chrono::milliseconds(0);
+	Stopwatch::clock::duration peakLatency = std::chrono::milliseconds(0);
 
 	bool dataReceived = false;
 
@@ -107,6 +107,8 @@ public:
 
 	explicit Ds4Device(hid::HidInstance& device);
 	~Ds4Device();
+
+	std::unique_lock<std::recursive_mutex> lock();
 
 private:
 	void closeImpl();
