@@ -20,7 +20,7 @@ private:
 public:
 	DevicePropertiesDialog(QWidget* parent, std::shared_ptr<Ds4Device> device_);
 	~DevicePropertiesDialog();
-	void populateForm(const DeviceSettings& settings);
+	void populateForm(const DeviceSettings& settings) const;
 
 private:
 	Ui::DevicePropertiesDialog ui;
@@ -33,6 +33,6 @@ signals:
 
 private slots:
 	void tabChanged(int index);
-	void updateReadout(Ds4InputData data);
-	void resetPeakLatency();
+	void updateReadout(Ds4InputData data) const;
+	void resetPeakLatency() const;
 };

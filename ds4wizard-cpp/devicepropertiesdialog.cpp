@@ -41,7 +41,7 @@ DevicePropertiesDialog::~DevicePropertiesDialog()
 	stopReadout();
 }
 
-void DevicePropertiesDialog::populateForm(const DeviceSettings& settings)
+void DevicePropertiesDialog::populateForm(const DeviceSettings& settings) const
 {
 	// TODO: Profile (get profile list!)
 
@@ -114,7 +114,7 @@ void DevicePropertiesDialog::tabChanged(int index)
 	}
 }
 
-void DevicePropertiesDialog::updateReadout(Ds4InputData data)
+void DevicePropertiesDialog::updateReadout(Ds4InputData data) const
 {
 	// Left stick
 	ui.labelLX->setNum(data.leftStick.x);
@@ -165,7 +165,7 @@ void DevicePropertiesDialog::updateReadout(Ds4InputData data)
 	ui.labelLatencyPeak->setText(QString("%1 ms").arg(latencyMax.count()));
 }
 
-void DevicePropertiesDialog::resetPeakLatency()
+void DevicePropertiesDialog::resetPeakLatency() const
 {
 	device->resetLatencyPeak();
 }
