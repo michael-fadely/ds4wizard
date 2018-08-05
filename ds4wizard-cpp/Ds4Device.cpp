@@ -56,7 +56,30 @@ bool Ds4Device::connected()
 Stopwatch::clock::duration Ds4Device::getLatency()
 {
 	lock(sync);
-	return latency.elapsed();
+	return storedLatency;
+}
+
+Stopwatch::clock::duration Ds4Device::getLatencyAverage()
+{
+	lock(sync);
+	
+	if (!latencyPoints)
+	{
+		return 0ms;
+	}
+
+	if (latencyPoints == 1)
+	{
+		return latencySum;
+	}
+
+	return latencySum / latencyPoints;
+}
+
+Stopwatch::clock::duration Ds4Device::getLatencyPeak()
+{
+	lock(sync);
+	return peakLatency;
 }
 
 uint8_t Ds4Device::battery() const
@@ -615,6 +638,11 @@ void Ds4Device::run()
 	{
 		runMaps();
 
+		latency.stop();
+		storedLatency = latency.elapsed();
+
+		addLatencySum();
+
 		if (latency.elapsed() >= 5ms)
 		{
 			// TODO: configurable latency target & light flash (although that increases latency on send)
@@ -665,6 +693,14 @@ void Ds4Device::run()
 	{
 		input.updateChangedState();
 		runPersistent();
+
+		storedLatency = latency.elapsed();
+		addLatencySum();
+	}
+
+	if (storedLatency > peakLatency)
+	{
+		peakLatency = storedLatency;
 	}
 }
 
@@ -696,6 +732,26 @@ void Ds4Device::controllerThread()
 void Ds4Device::onDeviceClosed()
 {
 	deviceClosed.invoke(this, nullptr);
+}
+
+void Ds4Device::addLatencySum()
+{
+	if (!latencyPoints)
+	{
+		latencySum = latency.elapsed();
+	}
+	else
+	{
+		latencySum += latency.elapsed();
+	}
+
+	++latencyPoints;
+
+	if (latencySum >= 1s)
+	{
+		latencySum /= latencyPoints;
+		latencyPoints = 1;
+	}
 }
 
 void Ds4Device::start()

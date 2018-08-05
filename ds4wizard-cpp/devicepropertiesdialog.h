@@ -25,6 +25,8 @@ public:
 private:
 	Ui::DevicePropertiesDialog ui;
 	void readoutMethod();
+	void stopReadout();
+	void startReadout();
 
 signals:
 	void readoutChanged(Ds4InputData data);

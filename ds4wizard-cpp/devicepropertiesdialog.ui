@@ -502,9 +502,9 @@
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QLabel" name="label_26">
+           <widget class="QLabel" name="labelLatencyNow">
             <property name="text">
-             <string>100 ms</string>
+             <string>0 ms</string>
             </property>
            </widget>
           </item>
@@ -516,9 +516,23 @@
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QLabel" name="label_28">
+           <widget class="QLabel" name="labelLatencyAverage">
             <property name="text">
-             <string>100 ms</string>
+             <string>0 ms</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_14">
+            <property name="text">
+             <string>Peak:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLabel" name="labelLatencyPeak">
+            <property name="text">
+             <string>0 ms</string>
             </property>
            </widget>
           </item>
@@ -553,6 +567,12 @@
           </item>
           <item row="1" column="0">
            <widget class="QSlider" name="sliderTriggerL">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="maximum">
+             <number>255</number>
+            </property>
             <property name="orientation">
              <enum>Qt::Vertical</enum>
             </property>
@@ -560,6 +580,12 @@
           </item>
           <item row="1" column="1">
            <widget class="QSlider" name="sliderTriggerR">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="maximum">
+             <number>255</number>
+            </property>
             <property name="orientation">
              <enum>Qt::Vertical</enum>
             </property>

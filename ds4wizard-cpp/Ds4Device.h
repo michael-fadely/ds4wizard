@@ -28,6 +28,7 @@ class Ds4Device
 
 	// Read-Only
 	Stopwatch idleTime {};
+
 	inline static Ds4Color fadeColor {};
 
 	// Delta time (for things like mouse movement).
@@ -43,6 +44,13 @@ class Ds4Device
 	IMouseSimulator         MouseSimulator    => InputSimulator.Mouse;*/
 
 	Stopwatch latency;
+
+	size_t latencyPoints = 0;
+	Stopwatch::clock::duration latencySum;
+	// used for external reading
+	Stopwatch::clock::duration storedLatency;
+	Stopwatch::clock::duration peakLatency;
+
 	bool dataReceived = false;
 
 	std::unique_ptr<std::thread> deviceThread = nullptr;
@@ -80,6 +88,8 @@ public:
 	bool connected();
 
 	Stopwatch::clock::duration getLatency();
+	Stopwatch::clock::duration getLatencyAverage();
+	Stopwatch::clock::duration getLatencyPeak();
 
 	/**
 	 * \brief 
@@ -137,6 +147,7 @@ private:
 	void run();
 	void controllerThread();
 	void onDeviceClosed();
+	void addLatencySum();
 
 public:
 	void start();

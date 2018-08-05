@@ -3,11 +3,14 @@
 
 // TODO: eventually allow configuring disconnected devices
 
+using namespace std::chrono;
+
 DevicePropertiesDialog::DevicePropertiesDialog(QWidget* parent, std::shared_ptr<Ds4Device> device_)
 	: QDialog(parent),
 	  device(std::move(device_))
 {
 	ui.setupUi(this);
+
 	if (device != nullptr)
 	{
 		populateForm(this->device->settings);
@@ -24,16 +27,17 @@ DevicePropertiesDialog::DevicePropertiesDialog(QWidget* parent, std::shared_ptr<
 	{
 		ui.tabReadout->setEnabled(false);
 	}
+
+	// useful for quick debugging of the readout tab
+	if (ui.tabWidget->currentIndex() == 1)
+	{
+		startReadout();
+	}
 }
 
 DevicePropertiesDialog::~DevicePropertiesDialog()
 {
-	if (readoutThread)
-	{
-		doReadout = false;
-		readoutThread->join();
-		readoutThread = nullptr;
-	}
+	stopReadout();
 }
 
 void DevicePropertiesDialog::populateForm(const DeviceSettings& settings)
@@ -70,18 +74,42 @@ void DevicePropertiesDialog::readoutMethod()
 	}
 }
 
+void DevicePropertiesDialog::stopReadout()
+{
+	doReadout = false;
+
+	if (readoutThread)
+	{
+		readoutThread->join();
+		readoutThread = nullptr;
+	}
+}
+
+void DevicePropertiesDialog::startReadout()
+{
+	if (doReadout)
+	{
+		return;
+	}
+
+	if (readoutThread)
+	{
+		stopReadout();
+	}
+
+	doReadout = true;
+	readoutThread = std::make_unique<std::thread>(&DevicePropertiesDialog::readoutMethod, this);
+}
+
 void DevicePropertiesDialog::tabChanged(int index)
 {
 	if (!index)
 	{
-		doReadout = false;
-		readoutThread->join();
-		readoutThread = nullptr;
+		stopReadout();
 	}
 	else
 	{
-		doReadout = true;
-		readoutThread = std::make_unique<std::thread>(&DevicePropertiesDialog::readoutMethod, this);
+		startReadout();
 	}
 }
 
@@ -114,9 +142,18 @@ void DevicePropertiesDialog::updateReadout(Ds4InputData data)
 	ui.labelAccelZ->setNum(data.accel.z);
 
 	// Triggers
-	// TODO: sliders
 	ui.labelTriggerL->setNum(data.leftTrigger);
-	ui.labelTriggerR->setNum(data.rightTrigger);
+	ui.sliderTriggerL->setValue(data.leftTrigger);
 
-	// TODO: Latency
+	ui.labelTriggerR->setNum(data.rightTrigger);
+	ui.sliderTriggerR->setValue(data.rightTrigger);
+
+	// TODO: provide method to acquire lock
+	auto latencyNow = duration_cast<duration<double, std::milli>>(device->getLatency());
+	auto latencyAvg = duration_cast<duration<double, std::milli>>(device->getLatencyAverage());
+	auto latencyMax = duration_cast<duration<double, std::milli>>(device->getLatencyPeak());
+
+	ui.labelLatencyNow->setText(QString("%1 ms").arg(latencyNow.count()));
+	ui.labelLatencyAverage->setText(QString("%1 ms").arg(latencyAvg.count()));
+	ui.labelLatencyPeak->setText(QString("%1 ms").arg(latencyMax.count()));
 }
