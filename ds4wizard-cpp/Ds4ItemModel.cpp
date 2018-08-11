@@ -8,17 +8,19 @@ Ds4ItemModel::Ds4ItemModel(std::shared_ptr<Ds4DeviceManager> deviceManager)
 	qRegisterMetaType<std::shared_ptr<DeviceOpenedEventArgs>>("std::shared_ptr<DeviceOpenedEventArgs>");
 	qRegisterMetaType<std::shared_ptr<DeviceClosedEventArgs>>("std::shared_ptr<DeviceClosedEventArgs>");
 
-	connect(this, SIGNAL(s_onDeviceOpened(std::shared_ptr<DeviceOpenedEventArgs>)),
-	        this, SLOT(onDeviceOpened(std::shared_ptr<DeviceOpenedEventArgs>)));
+	connect(this, &Ds4ItemModel::s_onDeviceOpened, this, &Ds4ItemModel::onDeviceOpened);
+	connect(this, &Ds4ItemModel::s_onDeviceClosed, this, &Ds4ItemModel::onDeviceClosed);
+	connect(this, &Ds4ItemModel::s_onDeviceBatteryChanged, this, &Ds4ItemModel::onDeviceBatteryChanged);
 
-	connect(this, SIGNAL(s_onDeviceClosed(std::shared_ptr<DeviceClosedEventArgs>)),
-	        this, SLOT(onDeviceClosed(std::shared_ptr<DeviceClosedEventArgs>)));
+	this->deviceManager->deviceOpened += [this](void*, std::shared_ptr<DeviceOpenedEventArgs> args) -> void
+	{
+		emit s_onDeviceOpened(args);
+	};
 
-	connect(this, SIGNAL(s_onDeviceBatteryChanged(const Ds4Device*)),
-	        this, SLOT(onDeviceBatteryChanged(const Ds4Device*)));
-
-	this->deviceManager->deviceOpened += [this](void*, std::shared_ptr<DeviceOpenedEventArgs> args) -> void { emit s_onDeviceOpened(args); };
-	this->deviceManager->deviceClosed += [this](void*, std::shared_ptr<DeviceClosedEventArgs> args) -> void { emit s_onDeviceClosed(args); };
+	this->deviceManager->deviceClosed += [this](void*, std::shared_ptr<DeviceClosedEventArgs> args) -> void
+	{
+		emit s_onDeviceClosed(args);
+	};
 }
 
 int Ds4ItemModel::rowCount(const QModelIndex& /*parent*/) const

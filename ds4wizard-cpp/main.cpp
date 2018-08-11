@@ -57,7 +57,7 @@ int main(int argc, char** argv)
 	SetWindowLongPtr(hWnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(&windowProc));
 #endif
 
-	auto result = application.exec();
+	int result = application.exec();
 
 	Program::saveSettings();
 	delete window;

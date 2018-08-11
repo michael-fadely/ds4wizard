@@ -42,26 +42,20 @@ MainWindow::MainWindow(QWidget* parent)
 		auto menu = new QMenu(this);
 
 		QAction* action = menu->addAction(tr("Show/Hide"));
-		connect(action, SIGNAL(triggered(bool)), this, SLOT(systemTrayShowHide(bool)));
+		connect(action, &QAction::triggered, this, &MainWindow::systemTrayShowHide);
 
 		menu->addSeparator();
 
 		action = menu->addAction(tr("&Exit"));
-		connect(action, SIGNAL(triggered(bool)), this, SLOT(systemTrayExit(bool)));
+		connect(action, &QAction::triggered, this, &MainWindow::systemTrayExit);
 
 		trayIcon = new QSystemTrayIcon(this);
 		trayIcon->setContextMenu(menu);
 
-		connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
-		        this, SLOT(toggleHide(QSystemTrayIcon::ActivationReason)));
+		connect(trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::toggleHide);
 
 		trayIcon->setIcon(loadIconTask.get());
 		trayIcon->show();
-	}
-
-	if (!supportsSystemTray || !Program::settings.startMinimized)
-	{
-		show();
 	}
 
 	Logger::lineLogged += [this](auto a, auto b) -> void { onLineLogged(a, b); };
@@ -69,15 +63,20 @@ MainWindow::MainWindow(QWidget* parent)
 	deviceManager = std::make_shared<Ds4DeviceManager>();
 	Program::profileCache.setDevices(deviceManager);
 
-	connect(this, SIGNAL(s_onProfilesLoaded()), this, SLOT(onProfilesLoaded()));
+	connect(this, &MainWindow::s_onProfilesLoaded, this, &MainWindow::onProfilesLoaded);
 
 	ds4Items = new Ds4ItemModel(deviceManager);
 	ui.deviceList->setModel(ds4Items);
-	auto deviceSelectionModel = ui.deviceList->selectionModel();
 
-	connect(deviceSelectionModel, SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
-	        this, SLOT(deviceSelectionChanged(const QItemSelection&, const QItemSelection&)));
+	const auto deviceSelectionModel = ui.deviceList->selectionModel();
+	connect(deviceSelectionModel, &QItemSelectionModel::selectionChanged, this, &MainWindow::deviceSelectionChanged);
 
+	if (!supportsSystemTray || !Program::settings.startMinimized)
+	{
+		show();
+	}
+
+	// TODO: only start this once the window is shown (or whatever else, since it can start minimized!)
 	startupTask = std::async(std::launch::async, [this]() -> void
 	{
 		Program::profileCache.load();
@@ -107,7 +106,7 @@ void MainWindow::changeEvent(QEvent* e)
 			{
 				if (supportsSystemTray && ui.checkMinimizeToTray->isChecked())
 				{
-					QTimer::singleShot(0, this, SLOT(hide()));
+					QTimer::singleShot(0, this, &MainWindow::hide);
 				}
 			}
 			break;

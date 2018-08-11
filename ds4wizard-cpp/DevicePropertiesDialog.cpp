@@ -16,13 +16,11 @@ DevicePropertiesDialog::DevicePropertiesDialog(QWidget* parent, std::shared_ptr<
 		populateForm(this->device->settings);
 		ui.tabReadout->setEnabled(true);
 
-		connect(ui.tabWidget, SIGNAL(currentChanged(int)),
-				this, SLOT(tabChanged(int)));
+		connect(ui.tabWidget, &QTabWidget::currentChanged, this, &DevicePropertiesDialog::tabChanged);
 
 		qRegisterMetaType<Ds4InputData>("Ds4InputData");
-		connect(this, SIGNAL(readoutChanged(Ds4InputData)), this, SLOT(updateReadout(Ds4InputData)));
-
-		connect(ui.buttonResetPeak, SIGNAL(clicked()), this, SLOT(resetPeakLatency()));
+		connect(this, &DevicePropertiesDialog::readoutChanged, this, &DevicePropertiesDialog::updateReadout);
+		connect(ui.buttonResetPeak, &QToolButton::clicked, this, &DevicePropertiesDialog::resetPeakLatency);
 	}
 	else
 	{
