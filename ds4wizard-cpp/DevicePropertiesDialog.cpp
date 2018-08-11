@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "DevicePropertiesDialog.h"
+#include "ProfileEditorDialog.h"
 
 // TODO: eventually allow configuring disconnected devices
 
@@ -27,6 +28,9 @@ DevicePropertiesDialog::DevicePropertiesDialog(QWidget* parent, std::shared_ptr<
 		ui.tabReadout->setEnabled(false);
 	}
 
+	connect(ui.pushButton_Edit, &QPushButton::clicked, this, &DevicePropertiesDialog::profileEditClicked);
+	connect(ui.buttonColor, &QPushButton::clicked, this, &DevicePropertiesDialog::colorEditClicked);
+
 	// useful for quick debugging of the readout tab
 	if (ui.tabWidget->currentIndex() == 1)
 	{
@@ -49,11 +53,16 @@ void DevicePropertiesDialog::populateForm(const DeviceSettings& settings) const
 	ui.checkBox_AutoLightColor->setChecked(settings.light.automaticColor);
 
 	// TODO: Light color
+	auto ds4color = settings.light.color;
+	QColor color = QColor(ds4color.red, ds4color.green, ds4color.blue, 255);
+	auto colorName = color.name();
+	ui.buttonColor->setStyleSheet(QString("background-color: %1; border: none").arg(colorName));
 
 	ui.checkBox_UseProfileIdle->setChecked(settings.useProfileIdle);
 	ui.checkBox_IdleDisconnect->setChecked(settings.idle.disconnect);
 
 	// TODO: Idle time
+	// TODO: Idle fade
 }
 
 void DevicePropertiesDialog::readoutMethod()
@@ -166,4 +175,20 @@ void DevicePropertiesDialog::updateReadout(Ds4InputData data) const
 void DevicePropertiesDialog::resetPeakLatency() const
 {
 	device->resetLatencyPeak();
+}
+
+void DevicePropertiesDialog::profileEditClicked(bool checked)
+{
+	// TODO
+	auto dialog = new ProfileEditorDialog(this);
+	dialog->exec();
+	delete dialog;
+}
+
+void DevicePropertiesDialog::colorEditClicked(bool checked)
+{
+	// TODO
+	auto dialog = new QColorDialog(this);
+	dialog->exec();
+	delete dialog;
 }

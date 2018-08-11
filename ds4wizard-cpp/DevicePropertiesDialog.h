@@ -35,4 +35,6 @@ private slots:
 	void tabChanged(int index);
 	void updateReadout(Ds4InputData data) const;
 	void resetPeakLatency() const;
+	void profileEditClicked(bool checked);
+	void colorEditClicked(bool checked);
 };
