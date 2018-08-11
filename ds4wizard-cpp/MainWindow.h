@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QtWidgets/QMainWindow>
-#include "ui_mainwindow.h"
+#include "ui_MainWindow.h"
 #include "Ds4DeviceManager.h"
 #include "Logger.h"
 #include "Ds4ItemModel.h"
