@@ -136,11 +136,11 @@ Ds4Device::Ds4Device(hid::HidInstance& device)
 	auto settings = Program::profileCache.getSettings(macAddress);
 	if (!settings.has_value())
 	{
-		settings = {};
+		this->settings = {};
 	}
 	else
 	{
-		settings = *settings;
+		this->settings = *settings;
 	}
 
 	applyProfile();
