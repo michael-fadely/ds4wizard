@@ -2,8 +2,7 @@
 #include "Ds4ItemModel.h"
 #include <QMetaType>
 
-Ds4ItemModel::Ds4ItemModel(std::shared_ptr<Ds4DeviceManager> deviceManager)
-	: deviceManager(std::move(deviceManager))
+Ds4ItemModel::Ds4ItemModel(const std::shared_ptr<Ds4DeviceManager>& deviceManager)
 {
 	qRegisterMetaType<std::shared_ptr<DeviceOpenedEventArgs>>("std::shared_ptr<DeviceOpenedEventArgs>");
 	qRegisterMetaType<std::shared_ptr<DeviceClosedEventArgs>>("std::shared_ptr<DeviceClosedEventArgs>");
@@ -12,12 +11,12 @@ Ds4ItemModel::Ds4ItemModel(std::shared_ptr<Ds4DeviceManager> deviceManager)
 	connect(this, &Ds4ItemModel::s_onDeviceClosed, this, &Ds4ItemModel::onDeviceClosed);
 	connect(this, &Ds4ItemModel::s_onDeviceBatteryChanged, this, &Ds4ItemModel::onDeviceBatteryChanged);
 
-	this->deviceManager->deviceOpened += [this](void*, std::shared_ptr<DeviceOpenedEventArgs> args) -> void
+	deviceManager->deviceOpened += [this](void*, std::shared_ptr<DeviceOpenedEventArgs> args) -> void
 	{
 		emit s_onDeviceOpened(args);
 	};
 
-	this->deviceManager->deviceClosed += [this](void*, std::shared_ptr<DeviceClosedEventArgs> args) -> void
+	deviceManager->deviceClosed += [this](void*, std::shared_ptr<DeviceClosedEventArgs> args) -> void
 	{
 		emit s_onDeviceClosed(args);
 	};
@@ -45,7 +44,7 @@ QVariant Ds4ItemModel::data(const QModelIndex& index, int role) const
 		return QVariant();
 	}
 
-	std::shared_ptr<Ds4Device> device = getDevice(index.row());
+	const std::shared_ptr<Ds4Device> device = getDevice(index.row());
 
 	switch (index.column())
 	{
