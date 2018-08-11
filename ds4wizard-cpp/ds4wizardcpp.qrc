@@ -1,5 +1,6 @@
 <RCC>
-    <qresource prefix="/ds4wizardcpp">
-        <file>Resources/race_q00.ico</file>
-    </qresource>
+  <qresource prefix="/ds4wizardcpp">
+    <file>Resources/Dualshock_4_Layout manually colored.svg</file>
+    <file>Resources/race_q00.ico</file>
+  </qresource>
 </RCC>

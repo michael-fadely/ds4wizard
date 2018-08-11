@@ -171,6 +171,7 @@
     </ClCompile>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Pressable.cpp" />
+    <ClCompile Include="ProfileEditorDialog.cpp" />
     <ClCompile Include="program.cpp" />
     <ClCompile Include="ScpDevice.cpp" />
     <ClCompile Include="Settings.cpp" />
@@ -211,6 +212,12 @@
     <ClInclude Include="InputMap.h" />
     <ClInclude Include="JsonData.h" />
     <ClInclude Include="Logger.h" />
+    <QtMoc Include="ProfileEditorDialog.h">
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\..\GSL\include;.\..\libhid;.\..\libdevicetoggle;.\..\better-enums;.\..\json\include;.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets</IncludePath>
+      <Define Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">_CRT_SECURE_NO_WARNINGS;NOMINMAX;WIN32_LEAN_AND_MEAN;UNICODE;_UNICODE;WIN32;WIN64;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB</Define>
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\..\GSL\include;.\..\libhid;.\..\libdevicetoggle;.\..\better-enums;.\..\json\include;.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets</IncludePath>
+      <Define Condition="'$(Configuration)|$(Platform)'=='Release|x64'">_CRT_SECURE_NO_WARNINGS;NOMINMAX;WIN32_LEAN_AND_MEAN;UNICODE;_UNICODE;WIN32;WIN64;QT_NO_DEBUG;NDEBUG;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB</Define>
+    </QtMoc>
     <ClInclude Include="ScpDevice.h" />
     <ClInclude Include="Stopwatch.h" />
     <ClInclude Include="stringutil.h" />
@@ -238,6 +245,7 @@
   <ItemGroup>
     <QtUic Include="devicepropertiesdialog.ui" />
     <QtUic Include="mainwindow.ui" />
+    <QtUic Include="ProfileEditorDialog.ui" />
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="ds4wizardcpp.qrc" />

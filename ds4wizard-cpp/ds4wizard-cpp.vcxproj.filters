@@ -94,6 +94,9 @@
     <ClCompile Include="Ds4ItemModel.cpp">
       <Filter>Source Files\User Interface</Filter>
     </ClCompile>
+    <ClCompile Include="ProfileEditorDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resource Files">
@@ -249,12 +252,18 @@
     <QtMoc Include="Ds4ItemModel.h">
       <Filter>Header Files\User Interface</Filter>
     </QtMoc>
+    <QtMoc Include="ProfileEditorDialog.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="devicepropertiesdialog.ui">
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="mainwindow.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="ProfileEditorDialog.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>
