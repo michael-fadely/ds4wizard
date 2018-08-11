@@ -1,13 +1,16 @@
 #pragma once
 
 #include <QAbstractListModel>
-#include <tuple>
+
+#include <memory>
+#include <set>
 
 class Ds4ItemModel : public QAbstractListModel
 {
 	Q_OBJECT
 
 	std::shared_ptr<Ds4DeviceManager> deviceManager;
+	std::set<std::shared_ptr<Ds4Device>> devices;
 
 public:
 	explicit Ds4ItemModel(std::shared_ptr<Ds4DeviceManager> deviceManager);

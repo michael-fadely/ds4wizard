@@ -25,7 +25,7 @@ Ds4ItemModel::Ds4ItemModel(std::shared_ptr<Ds4DeviceManager> deviceManager)
 
 int Ds4ItemModel::rowCount(const QModelIndex& /*parent*/) const
 {
-	return static_cast<int>(deviceManager->deviceCount());
+	return static_cast<int>(devices.size());
 }
 
 int Ds4ItemModel::columnCount(const QModelIndex& /*parent*/) const
@@ -35,7 +35,7 @@ int Ds4ItemModel::columnCount(const QModelIndex& /*parent*/) const
 
 QVariant Ds4ItemModel::data(const QModelIndex& index, int role) const
 {
-	if (!index.isValid() || index.row() < 0 || static_cast<size_t>(index.row()) >= deviceManager->deviceCount())
+	if (!index.isValid() || index.row() < 0 || static_cast<size_t>(index.row()) >= devices.size())
 	{
 		return QVariant();
 	}
@@ -84,6 +84,9 @@ QVariant Ds4ItemModel::headerData(int section, Qt::Orientation orientation, int 
 
 void Ds4ItemModel::onDeviceOpened(std::shared_ptr<DeviceOpenedEventArgs> a)
 {
+	devices.insert(a->device);
+	const auto row = getRow(a->device);
+
 	if (a->unique)
 	{
 		auto device = a->device;
@@ -92,40 +95,48 @@ void Ds4ItemModel::onDeviceOpened(std::shared_ptr<DeviceOpenedEventArgs> a)
 		{
 			emit s_onDeviceBatteryChanged(reinterpret_cast<Ds4Device*>(sender));
 		};
-	}
 
-	const auto index = createIndex(getRow(a->device), 0);
-	emit dataChanged(index, index, { Qt::ItemDataRole::DisplayRole });
+		beginInsertRows({}, row, row);
+		endInsertRows();
+	}
+	else
+	{
+		const auto index = createIndex(row, 0);
+		const auto index2 = createIndex(row, columnCount({}) - 1);
+		emit dataChanged(index, index2);
+	}
 }
 
 void Ds4ItemModel::onDeviceClosed(std::shared_ptr<DeviceClosedEventArgs> a)
 {
-	const auto index = createIndex(getRow(a->device), 0);
-	emit dataChanged(index, index, { Qt::ItemDataRole::DisplayRole });
+	const auto row = getRow(a->device);
+
+	beginRemoveRows({}, row, row);
+	devices.erase(a->device);
+	endRemoveRows();
 }
 
 void Ds4ItemModel::onDeviceBatteryChanged(const Ds4Device* sender)
 {
 	const auto index = createIndex(getRow(sender), 1);
-	emit dataChanged(index, index, { Qt::ItemDataRole::DisplayRole });
+	emit dataChanged(index, index);
 }
 
 std::shared_ptr<Ds4Device> Ds4ItemModel::getDevice(int row) const
 {
-	auto lock = deviceManager->lockDevices();
-	auto it = deviceManager->devices.cbegin();
+	auto it = devices.cbegin();
 
-	for (int i = 0; i < row && it != deviceManager->devices.end(); ++i)
+	for (int i = 0; i < row && it != devices.cend(); ++i)
 	{
 		++it;
 	}
 
-	if (it == deviceManager->devices.end())
+	if (it == devices.cend())
 	{
 		return nullptr;
 	}
 
-	return it->second;
+	return *it;
 }
 
 int Ds4ItemModel::getRow(const std::shared_ptr<Ds4Device>& device) const
@@ -135,16 +146,15 @@ int Ds4ItemModel::getRow(const std::shared_ptr<Ds4Device>& device) const
 
 int Ds4ItemModel::getRow(const Ds4Device* device) const
 {
-	auto lock = deviceManager->lockDevices();
-	auto it = deviceManager->devices.cbegin();
+	auto it = devices.cbegin();
 
 	int row = -1;
 
-	while (it != deviceManager->devices.cend())
+	while (it != devices.cend())
 	{
 		++row;
 
-		if (it->second.get() == device)
+		if ((*it).get() == device)
 		{
 			break;
 		}
