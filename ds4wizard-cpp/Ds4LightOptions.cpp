@@ -7,7 +7,7 @@ Ds4LightOptions::Ds4LightOptions(const Ds4Color& color)
 }
 
 Ds4LightOptions::Ds4LightOptions(const Ds4LightOptions& other)
-	: color(other.color), idleFade(other.idleFade)
+	: automaticColor(other.automaticColor), color(other.color), idleFade(other.idleFade)
 {
 }
 
