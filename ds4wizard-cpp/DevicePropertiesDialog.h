@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QDialog>
-#include "ui_devicepropertiesdialog.h"
+#include "ui_DevicePropertiesDialog.h"
 
 #include <memory>
 #include <atomic>
