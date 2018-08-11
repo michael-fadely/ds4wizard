@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "devicepropertiesdialog.h"
+#include "DevicePropertiesDialog.h"
 
 // TODO: eventually allow configuring disconnected devices
 

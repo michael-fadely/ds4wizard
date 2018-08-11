@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "MainWindow.h"
-#include "devicepropertiesdialog.h"
+#include "DevicePropertiesDialog.h"
 #include "DeviceProfileCache.h"
 #include "program.h"
 #include "Ds4DeviceManager.h"

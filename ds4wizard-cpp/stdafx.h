@@ -59,7 +59,7 @@
 #include "DeviceIdleOptions.h"
 #include "DeviceProfile.h"
 #include "DeviceProfileCache.h"
-#include "devicepropertiesdialog.h"
+#include "DevicePropertiesDialog.h"
 #include "DeviceSettings.h"
 #include "DeviceSettingsCommon.h"
 #include "Ds4AutoLightColor.h"
