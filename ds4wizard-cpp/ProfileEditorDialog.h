@@ -3,7 +3,7 @@
 #include <QWidget>
 #include "ui_ProfileEditorDialog.h"
 
-class ProfileEditorDialog : public QWidget
+class ProfileEditorDialog : public QDialog
 {
 	Q_OBJECT
 

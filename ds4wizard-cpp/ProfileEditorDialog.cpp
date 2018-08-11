@@ -2,7 +2,7 @@
 #include "ProfileEditorDialog.h"
 
 ProfileEditorDialog::ProfileEditorDialog(QWidget* parent)
-	: QWidget(parent)
+	: QDialog(parent)
 {
 	ui.setupUi(this);
 }
