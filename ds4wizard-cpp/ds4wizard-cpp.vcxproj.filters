@@ -85,17 +85,17 @@
     <ClCompile Include="filesystem.cpp">
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
-    <ClCompile Include="devicepropertiesdialog.cpp">
-      <Filter>Source Files\User Interface</Filter>
-    </ClCompile>
     <ClCompile Include="MainWindow.cpp">
       <Filter>Source Files\User Interface</Filter>
     </ClCompile>
     <ClCompile Include="Ds4ItemModel.cpp">
       <Filter>Source Files\User Interface</Filter>
     </ClCompile>
+    <ClCompile Include="DevicePropertiesDialog.cpp">
+      <Filter>Source Files\User Interface</Filter>
+    </ClCompile>
     <ClCompile Include="ProfileEditorDialog.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\User Interface</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -243,27 +243,27 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="devicepropertiesdialog.h">
-      <Filter>Header Files\User Interface</Filter>
-    </QtMoc>
     <QtMoc Include="MainWindow.h">
       <Filter>Header Files\User Interface</Filter>
     </QtMoc>
     <QtMoc Include="Ds4ItemModel.h">
       <Filter>Header Files\User Interface</Filter>
     </QtMoc>
+    <QtMoc Include="DevicePropertiesDialog.h">
+      <Filter>Header Files\User Interface</Filter>
+    </QtMoc>
     <QtMoc Include="ProfileEditorDialog.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\User Interface</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
-    <QtUic Include="devicepropertiesdialog.ui">
-      <Filter>Form Files</Filter>
-    </QtUic>
-    <QtUic Include="mainwindow.ui">
-      <Filter>Form Files</Filter>
-    </QtUic>
     <QtUic Include="ProfileEditorDialog.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="MainWindow.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="DevicePropertiesDialog.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>
