@@ -6,6 +6,11 @@
 
 using namespace std::chrono;
 
+QColor toQt(Ds4Color ds4color)
+{
+	return QColor(ds4color.red, ds4color.green, ds4color.blue, 255);
+}
+
 DevicePropertiesDialog::DevicePropertiesDialog(QWidget* parent, std::shared_ptr<Ds4Device> device_)
 	: QDialog(parent),
 	  device(std::move(device_))
@@ -14,7 +19,8 @@ DevicePropertiesDialog::DevicePropertiesDialog(QWidget* parent, std::shared_ptr<
 
 	if (device != nullptr)
 	{
-		populateForm(this->device->settings);
+		deviceSettings = this->device->settings;
+		populateForm();
 		ui.tabReadout->setEnabled(true);
 
 		connect(ui.tabWidget, &QTabWidget::currentChanged, this, &DevicePropertiesDialog::tabChanged);
@@ -43,23 +49,21 @@ DevicePropertiesDialog::~DevicePropertiesDialog()
 	stopReadout();
 }
 
-void DevicePropertiesDialog::populateForm(const DeviceSettings& settings) const
+void DevicePropertiesDialog::populateForm() const
 {
 	// TODO: Profile (get profile list!)
 
-	ui.lineEdit_DeviceName->setText(QString::fromStdString(settings.name));
+	ui.lineEdit_DeviceName->setText(QString::fromStdString(deviceSettings.name));
 
-	ui.checkBox_UseProfileLight->setChecked(settings.useProfileLight);
-	ui.checkBox_AutoLightColor->setChecked(settings.light.automaticColor);
+	ui.checkBox_UseProfileLight->setChecked(deviceSettings.useProfileLight);
+	ui.checkBox_AutoLightColor->setChecked(deviceSettings.light.automaticColor);
 
-	// TODO: Light color
-	auto ds4color = settings.light.color;
-	QColor color = QColor(ds4color.red, ds4color.green, ds4color.blue, 255);
+	QColor color = toQt(deviceSettings.light.color);
 	auto colorName = color.name();
 	ui.buttonColor->setStyleSheet(QString("background-color: %1; border: none").arg(colorName));
 
-	ui.checkBox_UseProfileIdle->setChecked(settings.useProfileIdle);
-	ui.checkBox_IdleDisconnect->setChecked(settings.idle.disconnect);
+	ui.checkBox_UseProfileIdle->setChecked(deviceSettings.useProfileIdle);
+	ui.checkBox_IdleDisconnect->setChecked(deviceSettings.idle.disconnect);
 
 	// TODO: Idle time
 	// TODO: Idle fade
@@ -189,6 +193,7 @@ void DevicePropertiesDialog::colorEditClicked(bool checked)
 {
 	// TODO
 	auto dialog = new QColorDialog(this);
+	dialog->setCurrentColor(toQt(deviceSettings.light.color));
 	dialog->exec();
 	delete dialog;
 }
