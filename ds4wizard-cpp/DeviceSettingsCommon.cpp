@@ -5,7 +5,7 @@
 
 DeviceSettingsCommon::DeviceSettingsCommon()
 	: notifiedLow(false),
-	  notifiedCharged(false),
+	  notifiedCharged(true),
 	  idle({}),
 	  notifyFullyCharged(true),
 	  notifyBatteryLow(2)
