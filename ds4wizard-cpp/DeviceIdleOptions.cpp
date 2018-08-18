@@ -4,7 +4,7 @@
 const DeviceIdleOptions DeviceIdleOptions::defaultIdleOptions(std::chrono::minutes(5), true, TimeUnit::minutes);
 
 DeviceIdleOptions::DeviceIdleOptions(std::chrono::milliseconds timeout, bool disconnect, TimeUnit unit)
-	: timeout(std::move(timeout)),
+	: timeout(timeout),
 	  disconnect(disconnect),
 	  unit(unit)
 {

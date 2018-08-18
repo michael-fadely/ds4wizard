@@ -8,8 +8,8 @@ class DeviceSettings : public DeviceSettingsCommon
 public:
 	std::string       name;
 	std::string       profile;
-	bool              useProfileLight;
-	bool              useProfileIdle;
+	bool              useProfileLight = false;
+	bool              useProfileIdle = false;
 	DeviceIdleOptions idle;
 
 	DeviceSettings();

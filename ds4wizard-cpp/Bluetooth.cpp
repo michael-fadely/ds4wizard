@@ -22,6 +22,12 @@ bool Bluetooth::disconnectDevice(const gsl::span<uint8_t>& macAddress)
 	Handle phRadio(nullptr, true);
 
 	auto hFind = BluetoothFindFirstRadio(&findParams, &phRadio.nativeHandle);
+
+	if (hFind == nullptr)
+	{
+		return false;
+	}
+
 	DWORD _;
 
 	while (phRadio.nativeHandle != nullptr)

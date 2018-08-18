@@ -5,7 +5,7 @@
 struct Settings : JsonData
 {
 	Settings() = default;
-	Settings(Settings&) = default;
+	Settings(const Settings&) = default;
 
 	ConnectionType preferredConnection = ConnectionType::usb;
 	bool startMinimized = false;

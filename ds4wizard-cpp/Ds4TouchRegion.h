@@ -26,7 +26,7 @@ class Ds4TouchRegion : public JsonData
 
 public:
 	/*[JsonIgnore]*/
-	Ds4Buttons_t activeButtons; // TODO: private set
+	Ds4Buttons_t activeButtons = 0; // TODO: private set
 
 	/*[JsonIgnore]*/
 	Pressable state1;
