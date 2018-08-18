@@ -3,14 +3,14 @@
 
 #include <sstream>
 
-#define SERIALIZE_DEF(TYPE)                                                    \
+#define SERIALIZE_DEF(TYPE)                                                     \
 std::string serializeFlags_ ## TYPE (TYPE ## _t value)                          \
 {                                                                               \
 	bool empty = true;                                                          \
 	std::stringstream ss;                                                       \
     size_t i = 0;                                                               \
                                                                                 \
-	for (auto bit : TYPE ## _values)                                              \
+	for (auto bit : TYPE ## _values)                                            \
 	{                                                                           \
 		if (value & bit)                                                        \
 		{                                                                       \
@@ -42,7 +42,7 @@ void deserializeFlags_ ## TYPE ## (const std::string& input, TYPE ## _t& value) 
 		{                                                                       \
 			if (name == l)                                                      \
 			{                                                                   \
-				value |= TYPE ## _values[i];                                      \
+				value |= TYPE ## _values[i];                                    \
 				break;                                                          \
 			}                                                                   \
 			++i;                                                                \
