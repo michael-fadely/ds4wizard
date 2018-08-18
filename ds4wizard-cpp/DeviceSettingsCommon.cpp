@@ -22,6 +22,7 @@ DeviceSettingsCommon::DeviceSettingsCommon(const DeviceSettingsCommon& other)
 {
 }
 
+// TODO: move this shit out of here wtf
 void DeviceSettingsCommon::displayNotifications(Ds4Device* device)
 {
 	if (notifyBatteryLow > 0)
