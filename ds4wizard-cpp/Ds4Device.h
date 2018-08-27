@@ -67,7 +67,7 @@ class Ds4Device
 	Ds4LightOptions activeLight;
 
 	bool disconnectOnIdle() const;
-	std::chrono::milliseconds idleTimeout() const;
+	std::chrono::microseconds idleTimeout() const;
 	bool isIdle() const;
 
 public:

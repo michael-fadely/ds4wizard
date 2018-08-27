@@ -26,7 +26,7 @@ bool Ds4Device::disconnectOnIdle() const
 	return settings.useProfileIdle ? profile.idle.disconnect : settings.idle.disconnect;
 }
 
-milliseconds Ds4Device::idleTimeout() const
+microseconds Ds4Device::idleTimeout() const
 {
 	return settings.useProfileIdle ? profile.idle.timeout : settings.idle.timeout;
 }

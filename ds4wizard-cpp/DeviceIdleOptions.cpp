@@ -1,19 +1,17 @@
 #include "stdafx.h"
 #include "DeviceIdleOptions.h"
 
-const DeviceIdleOptions DeviceIdleOptions::defaultIdleOptions(std::chrono::minutes(5), true, TimeUnit::minutes);
+const DeviceIdleOptions DeviceIdleOptions::defaultIdleOptions(std::chrono::minutes(5), true);
 
-DeviceIdleOptions::DeviceIdleOptions(std::chrono::milliseconds timeout, bool disconnect, TimeUnit unit)
+DeviceIdleOptions::DeviceIdleOptions(std::chrono::microseconds timeout, bool disconnect)
 	: timeout(timeout),
-	  disconnect(disconnect),
-	  unit(unit)
+	  disconnect(disconnect)
 {
 }
 
 DeviceIdleOptions::DeviceIdleOptions(const DeviceIdleOptions& other)
 	: timeout(other.timeout),
-	  disconnect(other.disconnect),
-	  unit(other.unit)
+	  disconnect(other.disconnect)
 {
 }
 
@@ -29,14 +27,12 @@ bool DeviceIdleOptions::operator!=(const DeviceIdleOptions& other) const
 
 void DeviceIdleOptions::readJson(const nlohmann::json& json)
 {
-	this->timeout    = std::chrono::milliseconds(json["timeout"].get<int64_t>());
+	this->timeout    = std::chrono::microseconds(json["timeout"].get<int64_t>());
 	this->disconnect = json["disconnect"];
-	this->unit       = TimeUnit::_from_string(json["unit"].get<std::string>().c_str());;
 }
 
 void DeviceIdleOptions::writeJson(nlohmann::json& json) const
 {
 	json["timeout"]    = this->timeout.count();
 	json["disconnect"] = this->disconnect;
-	json["unit"]       = this->unit._to_string();
 }
