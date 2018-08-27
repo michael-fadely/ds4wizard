@@ -147,6 +147,11 @@ void Ds4Input::toXInput(int index, std::unique_ptr<ScpDevice>& device)
 		return;
 	}
 
+	if (!device)
+	{
+		return;
+	}
+
 	device->syncState(index, gamepad);
 	lastGamepad = gamepad;
 }
