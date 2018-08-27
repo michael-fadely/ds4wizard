@@ -28,6 +28,7 @@ private:
 	void readoutMethod();
 	void stopReadout();
 	void startReadout();
+	void applySettings();
 
 signals:
 	void readoutChanged(Ds4InputData data);
@@ -38,4 +39,6 @@ private slots:
 	void resetPeakLatency() const;
 	void profileEditClicked(bool checked);
 	void colorEditClicked(bool checked);
+	void buttonBoxAccepted();
+	void applyButtonClicked(bool checked);
 };

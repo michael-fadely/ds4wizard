@@ -36,6 +36,10 @@ DevicePropertiesDialog::DevicePropertiesDialog(QWidget* parent, std::shared_ptr<
 
 	connect(ui.pushButton_Edit, &QPushButton::clicked, this, &DevicePropertiesDialog::profileEditClicked);
 	connect(ui.buttonColor, &QPushButton::clicked, this, &DevicePropertiesDialog::colorEditClicked);
+	connect(ui.buttonBox, &QDialogButtonBox::accepted, this, &DevicePropertiesDialog::buttonBoxAccepted);
+
+	auto applyButton = ui.buttonBox->button(QDialogButtonBox::Apply);
+	connect(applyButton, &QPushButton::clicked, this, &DevicePropertiesDialog::applyButtonClicked);
 
 	// useful for quick debugging of the readout tab
 	if (ui.tabWidget->currentIndex() == 1)
@@ -111,6 +115,14 @@ void DevicePropertiesDialog::startReadout()
 
 	doReadout = true;
 	readoutThread = std::make_unique<std::thread>(&DevicePropertiesDialog::readoutMethod, this);
+}
+
+void DevicePropertiesDialog::applySettings()
+{
+	// TODO
+	auto m = new QMessageBox(QMessageBox::Icon::Information, tr("hi"), tr("it worked"));
+	m->exec();
+	delete m;
 }
 
 void DevicePropertiesDialog::tabChanged(int index)
@@ -196,4 +208,15 @@ void DevicePropertiesDialog::colorEditClicked(bool checked)
 	dialog->setCurrentColor(toQt(deviceSettings.light.color));
 	dialog->exec();
 	delete dialog;
+}
+
+void DevicePropertiesDialog::buttonBoxAccepted()
+{
+	applySettings();
+	close();
+}
+
+void DevicePropertiesDialog::applyButtonClicked(bool /*checked*/)
+{
+	applySettings();
 }
