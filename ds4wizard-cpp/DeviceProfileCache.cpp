@@ -3,6 +3,8 @@
 #include "lock.h"
 #include <sstream>
 
+// TODO: this is part of the "front end" (lol), just use Qt's filesystem stuff.
+
 void DeviceProfileCache::setDevices(const std::shared_ptr<Ds4DeviceManager>& deviceManager)
 {
 	this->deviceManager = deviceManager;
@@ -44,9 +46,18 @@ void DeviceProfileCache::saveSettings(const std::string& id, const DeviceSetting
 
 	const auto it = deviceSettings.find(id);
 
+	// don't save if nothing has changed
 	if (it != deviceSettings.end() && it->second == settings)
 	{
 		return;
+	}
+
+	QDir devicesDir(Program::devicesFilePath());
+	devicesDir = devicesDir.absolutePath(); // TODO: this might be wrong
+
+	if (!devicesDir.exists())
+	{
+		devicesDir.mkpath(devicesDir.absolutePath());
 	}
 
 	QFile f(Program::devicesFilePath());
@@ -83,12 +94,14 @@ void DeviceProfileCache::removeProfile(const DeviceProfile& profile)
 
 	onProfileChanged(profile.name, std::string());
 
-	if (filesystem::directory_exists(Program::profilesPath().toStdString()))
+	auto profilesPath = Program::profilesPath().toStdString();
+
+	if (!filesystem::directory_exists(profilesPath))
 	{
 		return;
 	}
 
-	const std::string path = filesystem::combine_path(Program::profilesPath().toStdString(), profile.fileName());
+	const std::string path = filesystem::combine_path(profilesPath, profile.fileName());
 
 	if (filesystem::file_exists(path))
 	{
@@ -115,12 +128,15 @@ void DeviceProfileCache::updateProfile(const DeviceProfile& last, const DevicePr
 
 	{
 		LOCK(profiles);
-		if (!filesystem::directory_exists(Program::profilesPath().toStdString()))
+
+		auto profilesPath = Program::profilesPath().toStdString();
+
+		if (!filesystem::directory_exists(profilesPath))
 		{
-			filesystem::create_directory(Program::profilesPath().toStdString());
+			filesystem::create_directory(profilesPath);
 		}
 
-		const std::string newPath = filesystem::combine_path(Program::profilesPath().toStdString(), current.fileName());
+		const std::string newPath = filesystem::combine_path(profilesPath, current.fileName());
 
 		QFile f(QString::fromStdString(newPath));
 
@@ -133,7 +149,7 @@ void DeviceProfileCache::updateProfile(const DeviceProfile& last, const DevicePr
 
 		if (!iequals(last.fileName(), current.fileName()))
 		{
-			filesystem::remove(filesystem::combine_path(Program::profilesPath().toStdString(), last.fileName()));
+			filesystem::remove(filesystem::combine_path(profilesPath, last.fileName()));
 		}
 	}
 }

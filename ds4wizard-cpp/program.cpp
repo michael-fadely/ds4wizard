@@ -68,15 +68,23 @@ void Program::initialize()
 	const QString appDataLocation = dir.path();
 
 	settingsPath_     = appDataLocation + "/ds4wizard";
-	settingsFilePath_ = settingsPath_ + "/settings.json";
-	profilesPath_     = settingsPath_ + "/profiles";
-	devicesFilePath_  = settingsPath_ + "/devices.json";
+	settingsFilePath_ = settingsPath() + "/settings.json";
+	profilesPath_     = settingsPath() + "/profiles";
+	devicesFilePath_  = settingsPath() + "/devices.json";
 
-	isElevated_ = !!IsElevated();
+	isElevated_ = IsElevated() == TRUE;
 }
 
 void Program::loadSettings()
 {
+	QDir settingsDir(settingsPath());
+
+	if (!settingsDir.exists())
+	{
+		qDebug() << "no settings to load";
+		return;
+	}
+
 	QFile file(settingsFilePath());
 
 	if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -98,6 +106,15 @@ void Program::saveSettings()
 	if (lastSettings == settings)
 	{
 		return;
+	}
+
+	QDir settingsDir(settingsPath());
+
+	if (!settingsDir.exists())
+	{
+		// there's evidently a good reason for mkpath
+		// to be non-static, but it's still weird.
+		settingsDir.mkpath(settingsPath());
 	}
 
 	QFile file(settingsFilePath());
