@@ -72,7 +72,6 @@
 #include "Ds4Output.h"
 #include "Ds4TouchRegion.h"
 #include "enums.h"
-#include "filesystem.h"
 #include "hid_instance.h"
 #include "InputMap.h"
 #include "JsonData.h"

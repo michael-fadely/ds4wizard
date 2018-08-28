@@ -82,9 +82,6 @@
     <ClCompile Include="Stopwatch.cpp">
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
-    <ClCompile Include="filesystem.cpp">
-      <Filter>Source Files\Utility</Filter>
-    </ClCompile>
     <ClCompile Include="MainWindow.cpp">
       <Filter>Source Files\User Interface</Filter>
     </ClCompile>
@@ -224,9 +221,6 @@
       <Filter>Header Files\Utility</Filter>
     </ClInclude>
     <ClInclude Include="enums.h">
-      <Filter>Header Files\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="filesystem.h">
       <Filter>Header Files\Utility</Filter>
     </ClInclude>
     <ClInclude Include="lerp.h">

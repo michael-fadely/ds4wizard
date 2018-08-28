@@ -3,8 +3,6 @@
 #include "lock.h"
 #include <sstream>
 
-// TODO: this is part of the "front end" (lol), just use Qt's filesystem stuff.
-
 void DeviceProfileCache::setDevices(const std::shared_ptr<Ds4DeviceManager>& deviceManager)
 {
 	this->deviceManager = deviceManager;
@@ -94,18 +92,18 @@ void DeviceProfileCache::removeProfile(const DeviceProfile& profile)
 
 	onProfileChanged(profile.name, std::string());
 
-	auto profilesPath = Program::profilesPath().toStdString();
+	QDir profilesDir(Program::profilesPath());
 
-	if (!filesystem::directory_exists(profilesPath))
+	if (!profilesDir.exists())
 	{
 		return;
 	}
 
-	const std::string path = filesystem::combine_path(profilesPath, profile.fileName());
+	QFile path = profilesDir.filePath(QString::fromStdString(profile.fileName()));
 
-	if (filesystem::file_exists(path))
+	if (path.exists())
 	{
-		filesystem::remove(path);
+		path.remove();
 	}
 }
 
@@ -129,27 +127,30 @@ void DeviceProfileCache::updateProfile(const DeviceProfile& last, const DevicePr
 	{
 		LOCK(profiles);
 
-		auto profilesPath = Program::profilesPath().toStdString();
+		QDir profilesPath = Program::profilesPath();
 
-		if (!filesystem::directory_exists(profilesPath))
+		if (!profilesPath.exists())
 		{
-			filesystem::create_directory(profilesPath);
+			profilesPath.mkpath(profilesPath.absolutePath());
 		}
 
-		const std::string newPath = filesystem::combine_path(profilesPath, current.fileName());
+		QString newPath = profilesPath.filePath(QString::fromStdString(current.fileName()));
 
-		QFile f(QString::fromStdString(newPath));
+		QFile f(newPath);
 
 		if (!f.open(QIODevice::WriteOnly | QIODevice::Text))
 		{
-			throw std::runtime_error(std::string("failed to open \"") + newPath + "\" for writing");
+			throw std::runtime_error(std::string("failed to open \"")
+			                         + newPath.toStdString()
+									 + "\" for writing");
 		}
 
 		f.write(QByteArray::fromStdString(current.toJson().dump(4)));
 
 		if (!iequals(last.fileName(), current.fileName()))
 		{
-			filesystem::remove(filesystem::combine_path(profilesPath, last.fileName()));
+			QFile file = profilesPath.filePath(QString::fromStdString(last.fileName()));
+			file.remove();
 		}
 	}
 }
