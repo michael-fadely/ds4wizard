@@ -113,7 +113,7 @@ void Program::saveSettings()
 	if (!settingsDir.exists())
 	{
 		// there's evidently a good reason for mkpath
-		// to be non-static, but it's still weird.
+		// to be non-static, but it still feels weird.
 		settingsDir.mkpath(settingsPath());
 	}
 
