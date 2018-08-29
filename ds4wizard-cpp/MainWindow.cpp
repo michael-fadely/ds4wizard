@@ -280,12 +280,14 @@ void MainWindow::devicePropertiesClicked()
 			return;
 		}
 
-		auto lock = device->lock();
-		const auto id = device->macAddress;
+		{
+			// TODO: just provide a method to do this?
+			auto lock = device->lock();
+			device->settings = newSettings;
+			device->applyProfile();
+		}
 
-		device->settings = newSettings;
-		device->applyProfile();
-		device->saveSettings();
+		Program::profileCache.saveSettings(device->macAddress, newSettings);
 	};
 
 	connect(dialog, &DevicePropertiesDialog::settingsChanged, this, appliedSlot);
