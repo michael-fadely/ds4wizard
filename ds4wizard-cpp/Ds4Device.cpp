@@ -568,7 +568,9 @@ void Ds4Device::run()
 	if (activeLight.idleFade)
 	{
 		const Ds4LightOptions& l = settings.useProfileLight ? profile.light : settings.light;
-		double m = isIdle() ? 1.0 : std::clamp(duration_cast<milliseconds>(idleTime.elapsed()).count() / static_cast<double>(idleTimeout().count()), 0.0, 1.0);
+		double m = isIdle() ? 1.0 : std::clamp(duration_cast<milliseconds>(idleTime.elapsed()).count()
+		                                       / static_cast<double>(duration_cast<milliseconds>(idleTimeout()).count()),
+		                                       0.0, 1.0);
 
 		output.lightColor = Ds4Color::lerp(l.color, fadeColor, static_cast<float>(m));
 	}
