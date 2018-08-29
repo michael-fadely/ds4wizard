@@ -24,6 +24,7 @@ private:
 public:
 	DevicePropertiesDialog(QWidget* parent, std::shared_ptr<Ds4Device> device_);
 	~DevicePropertiesDialog();
+	void setColorPickerColor();
 	void populateForm();
 
 signals:

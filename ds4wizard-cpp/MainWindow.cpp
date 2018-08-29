@@ -272,6 +272,24 @@ void MainWindow::devicePropertiesClicked()
 
 	auto device = ds4Items->getDevice(rows[0].row());
 	auto dialog = new DevicePropertiesDialog(this, device);
+
+	auto appliedSlot = [&] (const DeviceSettings& oldSettings, const DeviceSettings& newSettings) -> void
+	{
+		if (!device)
+		{
+			return;
+		}
+
+		auto lock = device->lock();
+		const auto id = device->macAddress;
+
+		device->settings = newSettings;
+		device->applyProfile();
+		device->saveSettings();
+	};
+
+	connect(dialog, &DevicePropertiesDialog::settingsChanged, this, appliedSlot);
+
 	dialog->exec();
 	delete dialog;
 }

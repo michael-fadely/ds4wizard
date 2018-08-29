@@ -60,6 +60,12 @@ DevicePropertiesDialog::~DevicePropertiesDialog()
 	stopReadout();
 }
 
+void DevicePropertiesDialog::setColorPickerColor()
+{
+	auto colorName = this->lightColor.name();
+	ui.buttonColor->setStyleSheet(QString("background-color: %1; border: none").arg(colorName));
+}
+
 void DevicePropertiesDialog::populateForm()
 {
 	// TODO: Profile (get profile list!)
@@ -70,8 +76,7 @@ void DevicePropertiesDialog::populateForm()
 	ui.checkBox_AutoLightColor->setChecked(oldSettings.light.automaticColor);
 
 	this->lightColor = toQt(oldSettings.light.color);
-	auto colorName = this->lightColor.name();
-	ui.buttonColor->setStyleSheet(QString("background-color: %1; border: none").arg(colorName));
+	setColorPickerColor();
 
 	ui.checkBox_UseProfileIdle->setChecked(oldSettings.useProfileIdle);
 	ui.checkBox_IdleDisconnect->setChecked(oldSettings.idle.disconnect);
@@ -128,11 +133,14 @@ void DevicePropertiesDialog::applySettings()
 {
 	newSettings.name = ui.lineEdit_DeviceName->text().toStdString();
 
-	newSettings.useProfileLight = ui.checkBox_UseProfileLight->isChecked();
+	newSettings.useProfileLight      = ui.checkBox_UseProfileLight->isChecked();
 	newSettings.light.automaticColor = ui.checkBox_AutoLightColor->isChecked();
-	newSettings.useProfileIdle  = ui.checkBox_UseProfileIdle->isChecked();
+	newSettings.useProfileIdle       = ui.checkBox_UseProfileIdle->isChecked();
 
 	newSettings.light.color = toDs4(this->lightColor);
+
+	// TODO: Idle time
+	// TODO: Idle fade
 
 	if (newSettings == oldSettings)
 	{
@@ -140,6 +148,8 @@ void DevicePropertiesDialog::applySettings()
 	}
 
 	emit settingsChanged(oldSettings, newSettings);
+
+	oldSettings = newSettings;
 }
 
 void DevicePropertiesDialog::tabChanged(int index)
@@ -226,6 +236,7 @@ void DevicePropertiesDialog::colorEditClicked(bool /*checked*/)
 	if (dialog->exec() == QDialog::Accepted)
 	{
 		this->lightColor = dialog->currentColor();
+		setColorPickerColor();
 	}
 
 	delete dialog;
