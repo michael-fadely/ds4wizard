@@ -65,6 +65,8 @@ void DeviceProfileCache::saveSettings(const std::string& id, const DeviceSetting
 		throw std::runtime_error("failed to open devices.json for writing");
 	}
 
+	deviceSettings[id] = settings;
+
 	nlohmann::json json;
 
 	for (auto& pair : deviceSettings)
@@ -74,7 +76,6 @@ void DeviceProfileCache::saveSettings(const std::string& id, const DeviceSetting
 	
 	f.write(QByteArray::fromStdString(json.dump(4)));
 	f.close();
-	deviceSettings[id] = settings;
 }
 
 void DeviceProfileCache::removeProfile(const DeviceProfile& profile)
