@@ -6,12 +6,12 @@
 
 using namespace std::chrono;
 
-QColor toQt(Ds4Color ds4color)
+QColor toQt(const Ds4Color ds4Color)
 {
-	return QColor(ds4color.red, ds4color.green, ds4color.blue, 255);
+	return QColor(ds4Color.red, ds4Color.green, ds4Color.blue, 255);
 }
 
-Ds4Color toDs4(QColor color)
+Ds4Color toDs4(const QColor& color)
 {
 	return Ds4Color(color.red(), color.green(), color.blue());
 }
@@ -210,7 +210,7 @@ void DevicePropertiesDialog::resetPeakLatency() const
 	device->resetLatencyPeak();
 }
 
-void DevicePropertiesDialog::profileEditClicked(bool checked)
+void DevicePropertiesDialog::profileEditClicked(bool /*checked*/)
 {
 	// TODO
 	auto dialog = new ProfileEditorDialog(this);
@@ -218,12 +218,16 @@ void DevicePropertiesDialog::profileEditClicked(bool checked)
 	delete dialog;
 }
 
-void DevicePropertiesDialog::colorEditClicked(bool checked)
+void DevicePropertiesDialog::colorEditClicked(bool /*checked*/)
 {
-	// TODO
 	auto dialog = new QColorDialog(this);
 	dialog->setCurrentColor(toQt(oldSettings.light.color));
-	dialog->exec();
+
+	if (dialog->exec() == QDialog::Accepted)
+	{
+		this->lightColor = dialog->currentColor();
+	}
+
 	delete dialog;
 }
 
