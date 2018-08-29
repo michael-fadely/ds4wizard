@@ -142,7 +142,7 @@ void DeviceProfileCache::updateProfile(const DeviceProfile& last, const DevicePr
 		{
 			throw std::runtime_error(std::string("failed to open \"")
 			                         + newPath.toStdString()
-									 + "\" for writing");
+			                         + "\" for writing");
 		}
 
 		f.write(QByteArray::fromStdString(current.toJson().dump(4)));

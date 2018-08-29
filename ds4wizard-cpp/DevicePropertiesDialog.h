@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QDialog>
+#include <QColor>
 #include "ui_DevicePropertiesDialog.h"
 
 #include <memory>
@@ -12,16 +13,21 @@ class DevicePropertiesDialog : public QDialog
 	Q_OBJECT
 
 private:
-	DeviceSettings deviceSettings;
+	DeviceSettings oldSettings;
+	DeviceSettings newSettings;
 	std::wstring deviceKey;
 	std::shared_ptr<Ds4Device> device;
 	std::atomic_bool doReadout;
 	std::unique_ptr<std::thread> readoutThread;
+	QColor lightColor;
 
 public:
 	DevicePropertiesDialog(QWidget* parent, std::shared_ptr<Ds4Device> device_);
 	~DevicePropertiesDialog();
-	void populateForm() const;
+	void populateForm();
+
+signals:
+	void settingsChanged(const DeviceSettings& oldSettings, const DeviceSettings& newSettings);
 
 private:
 	Ui::DevicePropertiesDialog ui;
