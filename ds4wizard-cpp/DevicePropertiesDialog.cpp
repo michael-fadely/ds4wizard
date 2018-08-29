@@ -80,9 +80,9 @@ void DevicePropertiesDialog::populateForm()
 
 	ui.checkBox_UseProfileIdle->setChecked(oldSettings.useProfileIdle);
 	ui.checkBox_IdleDisconnect->setChecked(oldSettings.idle.disconnect);
+	ui.checkBox_IdleFade->setChecked(oldSettings.light.idleFade);
 
 	// TODO: Idle time
-	// TODO: Idle fade
 }
 
 void DevicePropertiesDialog::readoutMethod()
@@ -136,11 +136,11 @@ void DevicePropertiesDialog::applySettings()
 	newSettings.useProfileLight      = ui.checkBox_UseProfileLight->isChecked();
 	newSettings.light.automaticColor = ui.checkBox_AutoLightColor->isChecked();
 	newSettings.useProfileIdle       = ui.checkBox_UseProfileIdle->isChecked();
+	newSettings.light.idleFade       = ui.checkBox_IdleFade->isChecked();
 
 	newSettings.light.color = toDs4(this->lightColor);
 
 	// TODO: Idle time
-	// TODO: Idle fade
 
 	if (newSettings == oldSettings)
 	{

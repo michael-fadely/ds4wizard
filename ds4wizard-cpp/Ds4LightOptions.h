@@ -8,6 +8,7 @@ class Ds4LightOptions : public JsonData
 public:
 	bool automaticColor = true;
 	Ds4Color color;
+	// TODO: move to idle options?
 	bool idleFade = true;
 
 	explicit Ds4LightOptions(const Ds4Color& color);
