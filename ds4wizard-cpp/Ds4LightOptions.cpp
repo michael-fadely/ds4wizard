@@ -7,16 +7,19 @@ Ds4LightOptions::Ds4LightOptions(const Ds4Color& color)
 }
 
 Ds4LightOptions::Ds4LightOptions(const Ds4LightOptions& other)
-	: automaticColor(other.automaticColor), color(other.color), idleFade(other.idleFade)
+	: automaticColor(other.automaticColor),
+	  color(other.color),
+	  idleFade(other.idleFade)
 {
 }
 
 // TODO: replace with IComparable (if this were C#)
+// TODO: or perhaps more preferably, don't store the automatic light color in here?
 bool Ds4LightOptions::operator==(const Ds4LightOptions& other) const
 {
-	bool result = automaticColor == other.automaticColor;
+	bool result = automaticColor == other.automaticColor && idleFade == other.idleFade;
 
-	if (!automaticColor || !other.automaticColor)
+	if (result && (!automaticColor || !other.automaticColor))
 	{
 		result = result && color == other.color;
 	}
@@ -38,7 +41,7 @@ void Ds4LightOptions::readJson(const nlohmann::json& json)
 
 void Ds4LightOptions::writeJson(nlohmann::json& json) const
 {
-	json["automaticColor"]  = automaticColor;
-	json["color"]           = color.toJson();
-	json["idleFade"]        = idleFade;
+	json["automaticColor"] = automaticColor;
+	json["color"]          = color.toJson();
+	json["idleFade"]       = idleFade;
 }
