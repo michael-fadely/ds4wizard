@@ -99,6 +99,7 @@ namespace hid
 		bool readSerial();
 		bool readAttributes();
 		bool getFeature(const gsl::span<uint8_t>& buffer) const;
+		bool setFeature(const gsl::span<uint8_t>& buffer) const;
 
 		bool open(HidOpenFlags_t flags);
 		void close();

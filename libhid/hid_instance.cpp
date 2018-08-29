@@ -165,6 +165,16 @@ bool HidInstance::getFeature(const gsl::span<uint8_t>& buffer) const
 	}
 }
 
+bool hid::HidInstance::setFeature(const gsl::span<uint8_t>& buffer) const
+{
+	if (!isOpen())
+	{
+		return false;
+	}
+
+	return HidD_SetFeature(handle.nativeHandle, buffer.data(), static_cast<ULONG>(buffer.size_bytes()));
+}
+
 bool HidInstance::open(HidOpenFlags_t flags)
 {
 	bool exclusive = !!(flags & HidOpenFlags::exclusive);

@@ -677,16 +677,18 @@ void Ds4Device::run()
 
 #if false
 			// Experimental garbage
-			if ((Input.PressedButtons & Ds4Buttons.PS) != 0)
+			if ((input.pressedButtons & Ds4Buttons::ps) != 0)
 			{
 				// Set audio output to speaker only (3)
-				auto buffer = new byte[3];
-				buffer[0] = 0x0E0;
-				buffer[2] = 3;
+				std::array<uint8_t, 3> buffer = {
+					0xE0,
+					0,
+					3
+				};
 
-				usbDevice->SetFeature(buffer);
+				usbDevice->setFeature(buffer);
 
-				auto volume = new byte[0x20];
+				std::array<uint8_t, 0x20> volume {};
 				// Report ID
 				volume[0x00] = 5;
 				// Audio endpoints
@@ -698,7 +700,7 @@ void Ds4Device::run()
 				// Speaker
 				volume[0x16] = 0;
 
-				usbDevice->Write(volume);
+				usbDevice->write(volume);
 			}
 #endif
 	}
