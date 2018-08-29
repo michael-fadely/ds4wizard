@@ -51,7 +51,7 @@ void DeviceProfileCache::saveSettings(const std::string& id, const DeviceSetting
 	}
 
 	QDir devicesDir(Program::devicesFilePath());
-	devicesDir = devicesDir.absolutePath(); // TODO: this might be wrong
+	devicesDir.cdUp();
 
 	if (!devicesDir.exists())
 	{
