@@ -60,64 +60,6 @@ public:
 
 	virtual void readJson(const nlohmann::json& json) override;
 	virtual void writeJson(nlohmann::json& json) const override;
-
-	// TODO
-#if 0
-	public override string ToString()
-	{
-		var builder = new StringBuilder();
-		builder.AppendFormat("[{0}] ", InputType);
-
-		if (InputType == InputType.None)
-		{
-			builder.Append("N/A");
-			return builder.ToString();
-		}
-
-		if ((InputType & InputType.button) != 0)
-		{
-			if (InputButtons != null)
-			{
-				builder.Append(InputButtons.Value);
-			}
-		}
-
-		if ((InputType & InputType.axis) != 0 && InputAxis.HasValue)
-		{
-			foreach (Ds4Axis bit in Enum.GetValues(typeof(Ds4Axis)))
-			{
-				// ReSharper disable once PossibleInvalidOperationException
-				if ((InputAxis.Value & bit) == 0)
-				{
-					continue;
-				}
-
-				InputAxisOptions options = GetAxisOptions(bit);
-
-				if (options.Polarity == AxisPolarity.Negative)
-				{
-					builder.Append("-");
-				}
-				else
-				{
-					builder.Append("+");
-				}
-
-				if (InputAxis != null)
-				{
-					builder.Append(InputAxis.Value);
-				}
-			}
-		}
-
-		if ((InputType & InputType.touchRegion) != 0)
-		{
-			builder.Append(InputRegion);
-		}
-
-		return builder.ToString();
-	}
-#endif
 };
 
 class InputModifier;

@@ -930,7 +930,7 @@ bool Ds4Device::isOverriddenByModifierSet(InputMapBase& map)
 
 	__maps.clear();
 
-	/*std::deque<InputMap> maps = Profile.Modifiers
+	/*maps = Profile.Modifiers
 		.Where(x = > x.IsActive)
 		.Select(y = > y.Bindings)
 		.Where(x = > x != nullptr)

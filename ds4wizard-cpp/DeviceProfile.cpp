@@ -5,7 +5,7 @@ using namespace std::chrono;
 
 std::string DeviceProfile::fileName() const
 {
-	// TODO
+	// TODO !!!
 	/*
 	static const char invalidCharacters[] = {
 		'\\',
@@ -53,7 +53,7 @@ DeviceProfile::DeviceProfile(const DeviceProfile& other)
 bool DeviceProfile::operator==(const DeviceProfile& other) const
 {
 	return DeviceSettingsCommon::operator==(other) &&
-	       name == other.name // TODO: case insensitive?
+	       name == other.name
 	       && exclusiveMode == other.exclusiveMode
 	       && useXInput == other.useXInput
 	       && autoXInputIndex == other.autoXInputIndex
