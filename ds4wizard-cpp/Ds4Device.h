@@ -18,6 +18,9 @@
 
 class Ds4Device
 {
+	std::string macAddress_;
+	std::string safeMacAddress_;
+
 	// HACK: work around for what may or may not be a bug with recursive_mutex;
 	// the main thread fails to acquire a lock when the mutex is UNLOCKED,
 	// and I suspect it might be due to async file IO that is used with hid.
@@ -29,7 +32,7 @@ class Ds4Device
 	// Read-Only
 	Stopwatch idleTime {};
 
-	inline static Ds4Color fadeColor {};
+	inline static const Ds4Color fadeColor {};
 
 	// Delta time (for things like mouse movement).
 	// Assumes 1000 Hz virtual polling rate.
@@ -80,9 +83,6 @@ public:
 	Ds4Input input {};
 	Ds4Output output {};
 
-	std::string macAddress; // TODO: getter
-	std::string safeMacAddress; // TODO: getter
-
 	bool bluetoothConnected();
 	bool usbConnected();
 	bool connected();
@@ -91,6 +91,9 @@ public:
 	Stopwatch::clock::duration getLatencyAverage();
 	Stopwatch::clock::duration getLatencyPeak();
 	void resetLatencyPeak();
+
+	const std::string& macAddress() const;
+	const std::string& safeMacAddress() const;
 
 	/**
 	 * \brief 

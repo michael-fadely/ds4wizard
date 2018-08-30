@@ -88,6 +88,16 @@ void Ds4Device::resetLatencyPeak()
 	peakLatency = 0ms;
 }
 
+const std::string& Ds4Device::macAddress() const
+{
+	return macAddress_;
+}
+
+const std::string& Ds4Device::safeMacAddress() const
+{
+	return safeMacAddress_;
+}
+
 uint8_t Ds4Device::battery() const
 {
 	return input.data.battery;
@@ -100,7 +110,7 @@ bool Ds4Device::charging() const
 
 const std::string& Ds4Device::name() const
 {
-	return settings.name.empty() ? macAddress : settings.name;
+	return settings.name.empty() ? macAddress_ : settings.name;
 }
 
 Ds4Device::Ds4Device(hid::HidInstance& device)
@@ -116,11 +126,11 @@ Ds4Device::Ds4Device(hid::HidInstance& device)
 			<< static_cast<int>(device.serial[i]);
 	}
 
-	macAddress = macaddr.str();
-	safeMacAddress = macAddress;
+	macAddress_ = macaddr.str();
+	safeMacAddress_ = macAddress_;
 
-	safeMacAddress.erase(std::remove(safeMacAddress.begin(), safeMacAddress.end(), ':'), safeMacAddress.end());
-	std::transform(safeMacAddress.begin(), safeMacAddress.end(), safeMacAddress.begin(), tolower);
+	safeMacAddress_.erase(std::remove(safeMacAddress_.begin(), safeMacAddress_.end(), ':'), safeMacAddress_.end());
+	std::transform(safeMacAddress_.begin(), safeMacAddress_.end(), safeMacAddress_.begin(), tolower);
 
 	if (device.caps().inputReportSize != 64)
 	{
@@ -133,7 +143,7 @@ Ds4Device::Ds4Device(hid::HidInstance& device)
 		setupUsbOutputBuffer();
 	}
 
-	auto settings = Program::profileCache.getSettings(macAddress);
+	auto settings = Program::profileCache.getSettings(macAddress_);
 	if (!settings.has_value())
 	{
 		this->settings = {};
@@ -149,7 +159,7 @@ Ds4Device::Ds4Device(hid::HidInstance& device)
 void Ds4Device::saveSettings()
 {
 	LOCK(sync);
-	Program::profileCache.saveSettings(macAddress, settings);
+	Program::profileCache.saveSettings(macAddress_, settings);
 }
 
 void Ds4Device::applyProfile()

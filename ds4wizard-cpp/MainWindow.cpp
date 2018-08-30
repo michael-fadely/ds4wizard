@@ -287,7 +287,7 @@ void MainWindow::devicePropertiesClicked()
 			device->applyProfile();
 		}
 
-		Program::profileCache.saveSettings(device->macAddress, newSettings);
+		Program::profileCache.saveSettings(device->macAddress(), newSettings);
 	};
 
 	connect(dialog, &DevicePropertiesDialog::settingsChanged, this, appliedSlot);
