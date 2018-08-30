@@ -2,7 +2,10 @@
 #include "DevicePropertiesDialog.h"
 #include "ProfileEditorDialog.h"
 
+#include <chrono>
+
 // TODO: eventually allow configuring disconnected devices
+// TODO: only allow minutes or seconds & minutes, drop hours?
 
 using namespace std::chrono;
 
@@ -21,6 +24,15 @@ DevicePropertiesDialog::DevicePropertiesDialog(QWidget* parent, std::shared_ptr<
 	  device(std::move(device_))
 {
 	ui.setupUi(this);
+
+	connect(ui.pushButton_Edit, &QPushButton::clicked, this, &DevicePropertiesDialog::profileEditClicked);
+	connect(ui.buttonColor, &QPushButton::clicked, this, &DevicePropertiesDialog::colorEditClicked);
+	connect(ui.buttonBox, &QDialogButtonBox::accepted, this, &DevicePropertiesDialog::buttonBoxAccepted);
+
+	auto applyButton = ui.buttonBox->button(QDialogButtonBox::Apply);
+	connect(applyButton, &QPushButton::clicked, this, &DevicePropertiesDialog::applyButtonClicked);
+
+	connect(ui.comboBox_IdleUnit, SIGNAL(currentIndexChanged(int)), this, SLOT(timeUnitChanged(int)));
 
 	if (device != nullptr)
 	{
@@ -41,13 +53,6 @@ DevicePropertiesDialog::DevicePropertiesDialog(QWidget* parent, std::shared_ptr<
 		ui.tabReadout->setEnabled(false);
 	}
 
-	connect(ui.pushButton_Edit, &QPushButton::clicked, this, &DevicePropertiesDialog::profileEditClicked);
-	connect(ui.buttonColor, &QPushButton::clicked, this, &DevicePropertiesDialog::colorEditClicked);
-	connect(ui.buttonBox, &QDialogButtonBox::accepted, this, &DevicePropertiesDialog::buttonBoxAccepted);
-
-	auto applyButton = ui.buttonBox->button(QDialogButtonBox::Apply);
-	connect(applyButton, &QPushButton::clicked, this, &DevicePropertiesDialog::applyButtonClicked);
-
 	// useful for quick debugging of the readout tab
 	if (ui.tabWidget->currentIndex() == 1)
 	{
@@ -60,9 +65,9 @@ DevicePropertiesDialog::~DevicePropertiesDialog()
 	stopReadout();
 }
 
-void DevicePropertiesDialog::setColorPickerColor()
+void DevicePropertiesDialog::setColorPickerColor() const
 {
-	auto colorName = this->lightColor.name();
+	const QString colorName = this->lightColor.name();
 	ui.buttonColor->setStyleSheet(QString("background-color: %1; border: none").arg(colorName));
 }
 
@@ -82,7 +87,16 @@ void DevicePropertiesDialog::populateForm()
 	ui.checkBox_IdleDisconnect->setChecked(oldSettings.idle.disconnect);
 	ui.checkBox_IdleFade->setChecked(oldSettings.light.idleFade);
 
-	// TODO: Idle time
+	ui.spinBox_IdleTime->setValue(oldSettings.idle.timeout.count());
+
+	if (oldSettings.idle.timeout >= 1h)
+	{
+		ui.comboBox_IdleUnit->setCurrentIndex(2);
+	}
+	else if (oldSettings.idle.timeout >= 1min)
+	{
+		ui.comboBox_IdleUnit->setCurrentIndex(1);
+	}
 }
 
 void DevicePropertiesDialog::readoutMethod()
@@ -140,7 +154,7 @@ void DevicePropertiesDialog::applySettings()
 
 	newSettings.light.color = toDs4(this->lightColor);
 
-	// TODO: Idle time
+	newSettings.idle.timeout = duration_cast<seconds>(getGuiIdleTime());
 
 	if (newSettings == oldSettings)
 	{
@@ -251,4 +265,54 @@ void DevicePropertiesDialog::buttonBoxAccepted()
 void DevicePropertiesDialog::applyButtonClicked(bool /*checked*/)
 {
 	applySettings();
+}
+
+enum
+{
+	unit_seconds,
+	unit_minutes,
+	unit_hours
+};
+
+high_resolution_clock::duration DevicePropertiesDialog::getGuiIdleTime() const
+{
+	switch (lastUnit)
+	{
+		case unit_seconds:
+			return duration_cast<high_resolution_clock::duration>(duration<double>(ui.spinBox_IdleTime->value()));
+
+		case unit_minutes:
+			return duration_cast<high_resolution_clock::duration>(duration<double, std::ratio<60>>(ui.spinBox_IdleTime->value()));
+
+		case unit_hours:
+			return duration_cast<high_resolution_clock::duration>(duration<double, std::ratio<3600>>(ui.spinBox_IdleTime->value()));
+
+		default:
+			throw;
+	}
+}
+
+void DevicePropertiesDialog::timeUnitChanged(int index)
+{
+	const auto dur = getGuiIdleTime();
+
+	switch (index)
+	{
+		case unit_seconds:
+			ui.spinBox_IdleTime->setValue(duration_cast<duration<double>>(dur).count());
+			break;
+
+		case unit_minutes:
+			ui.spinBox_IdleTime->setValue(duration_cast<duration<double, std::ratio<60>>>(dur).count());
+			break;
+
+		case unit_hours:
+			ui.spinBox_IdleTime->setValue(duration_cast<duration<double, std::ratio<3600>>>(dur).count());
+			break;
+
+		default:
+			throw;
+	}
+
+	lastUnit = index;
 }

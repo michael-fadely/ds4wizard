@@ -3,7 +3,7 @@
 
 const DeviceIdleOptions DeviceIdleOptions::defaultIdleOptions(std::chrono::minutes(5), true);
 
-DeviceIdleOptions::DeviceIdleOptions(std::chrono::microseconds timeout, bool disconnect)
+DeviceIdleOptions::DeviceIdleOptions(std::chrono::seconds timeout, bool disconnect)
 	: timeout(timeout),
 	  disconnect(disconnect)
 {
@@ -27,7 +27,7 @@ bool DeviceIdleOptions::operator!=(const DeviceIdleOptions& other) const
 
 void DeviceIdleOptions::readJson(const nlohmann::json& json)
 {
-	this->timeout    = std::chrono::microseconds(json["timeout"].get<int64_t>());
+	this->timeout    = std::chrono::seconds(json["timeout"].get<int64_t>());
 	this->disconnect = json["disconnect"];
 }
 

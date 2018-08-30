@@ -2,18 +2,17 @@
 
 #include <chrono>
 #include "JsonData.h"
-#include <enum.h>
 
 struct DeviceIdleOptions : JsonData
 {
 	using clock = std::chrono::high_resolution_clock;
 	static const DeviceIdleOptions defaultIdleOptions;
 
-	std::chrono::microseconds timeout = std::chrono::minutes(5);
+	std::chrono::seconds timeout = std::chrono::minutes(5);
 	bool disconnect = true;
 
 	DeviceIdleOptions() = default;
-	DeviceIdleOptions(std::chrono::microseconds timeout, bool disconnect);
+	DeviceIdleOptions(std::chrono::seconds timeout, bool disconnect);
 	DeviceIdleOptions(const DeviceIdleOptions& other);
 
 	bool operator==(const DeviceIdleOptions& other) const;
