@@ -1,31 +1,37 @@
 #include "stdafx.h"
 #include "DeviceProfile.h"
 
+#include <algorithm>
+
 using namespace std::chrono;
+
+// TODO: move this stuff elsewhere
+static const std::string invalidChars(R"(\/:*?"<>|)");
+
+char replaceInvalidChar(char c)
+{
+	if (std::find(invalidChars.cbegin(), invalidChars.cend(), c) != invalidChars.cend())
+	{
+		return '_';
+	}
+
+	return c;
+}
+
+void makeValidFileName(std::string& str)
+{
+	std::transform(str.begin(), str.end(), str.begin(), replaceInvalidChar);
+}
+
+std::string validatedFileName(std::string str)
+{
+	makeValidFileName(str);
+	return str;
+}
 
 std::string DeviceProfile::fileName() const
 {
-	// TODO !!!
-	/*
-	static const char invalidCharacters[] = {
-		'\\',
-		'/',
-		':',
-		'*',
-		'?',
-		'"',
-		'<',
-		'>',
-		'|'
-	};
-
-	for (char c : invalidCharacters)
-	{
-		FileName = FileName.Replace(c, '_');
-	}
-	*/
-
-	return name + ".json";
+	return validatedFileName(name + ".json");
 }
 
 DeviceProfile::DeviceProfile(const DeviceProfile& other)
