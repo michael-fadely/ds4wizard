@@ -496,7 +496,7 @@ R"(
           "inputType": "button",
           "inputButtons": "cross",
           "rapidFire": true,
-          "rapidFireInterval": 16666666
+          "rapidFireInterval": 16666
         },
         {
           "simulatorType": "input",
@@ -505,7 +505,7 @@ R"(
           "inputType": "button",
           "inputButtons": "circle",
           "rapidFire": true,
-          "rapidFireInterval": 16666666
+          "rapidFireInterval": 16666
         },
         {
           "simulatorType": "input",
@@ -514,7 +514,7 @@ R"(
           "inputType": "button",
           "inputButtons": "square",
           "rapidFire": true,
-          "rapidFireInterval": 16666666
+          "rapidFireInterval": 16666
         },
         {
           "simulatorType": "input",
@@ -523,7 +523,7 @@ R"(
           "inputType": "button",
           "inputButtons": "triangle",
           "rapidFire": true,
-          "rapidFireInterval": 16666666
+          "rapidFireInterval": 16666
         },
         {
           "simulatorType": "input",
@@ -532,7 +532,7 @@ R"(
           "inputType": "button",
           "inputButtons": "options",
           "rapidFire": true,
-          "rapidFireInterval": 16666666
+          "rapidFireInterval": 16666
         },
         {
           "simulatorType": "input",
@@ -541,7 +541,7 @@ R"(
           "inputType": "button",
           "inputButtons": "share",
           "rapidFire": true,
-          "rapidFireInterval": 16666666
+          "rapidFireInterval": 16666
         }
       ],
       "inputType": "touchRegion",
@@ -585,8 +585,7 @@ R"(
   },
   "idle": {
     "disconnect": true,
-    "unit": "minutes",
-    "timeout": 300000
+    "timeout": 300
   },
   "notifyFullyCharged": true,
   "notifyBatteryLow": 2,

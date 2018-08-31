@@ -229,7 +229,7 @@ void InputMapBase::readJson(const nlohmann::json& json)
 
 	if (json.find("rapidFireInterval") != json.end())
 	{
-		rapidFireInterval = std::chrono::nanoseconds(json["rapidFireInterval"].get<int64_t>());
+		rapidFireInterval = std::chrono::microseconds(json["rapidFireInterval"].get<int64_t>());
 	}
 
 	if (json.find("inputAxisOptions") != json.end())

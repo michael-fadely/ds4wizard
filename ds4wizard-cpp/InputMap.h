@@ -34,7 +34,7 @@ public:
 	std::optional<bool> toggle;
 	std::optional<bool> rapidFire;
 
-	std::optional<std::chrono::nanoseconds> rapidFireInterval;
+	std::optional<std::chrono::microseconds> rapidFireInterval;
 
 	std::unordered_map<Ds4Axis_t, InputAxisOptions> inputAxisOptions;
 
