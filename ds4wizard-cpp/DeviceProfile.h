@@ -13,10 +13,11 @@ class DeviceProfile : public DeviceSettingsCommon
 public:
 	std::string fileName() const;
 	std::string name;
-	bool        exclusiveMode   = true;
-	bool        useXInput       = true;
-	bool        autoXInputIndex = true;
-	int         xinputIndex     = 0;
+
+	bool exclusiveMode   = true;
+	bool useXInput       = true;
+	bool autoXInputIndex = true;
+	int  xinputIndex     = 0;
 
 	std::unordered_map<std::string, Ds4TouchRegion> touchRegions;
 
