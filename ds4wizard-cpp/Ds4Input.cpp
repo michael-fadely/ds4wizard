@@ -156,7 +156,7 @@ void Ds4Input::toXInput(int index, std::unique_ptr<ScpDevice>& device)
 	lastGamepad = gamepad;
 }
 
-float Ds4Input::getAxis(Ds4Axis_t axis, std::optional<AxisPolarity> polarity) const
+float Ds4Input::getAxis(Ds4Axis_t axis, const std::optional<AxisPolarity>& polarity) const
 {
 	float result;
 

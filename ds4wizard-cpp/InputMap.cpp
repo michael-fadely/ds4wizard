@@ -57,26 +57,26 @@ InputMapBase::InputMapBase(const InputMapBase& other)
 }
 
 InputMapBase::InputMapBase(InputType_t inputType)
+	: inputType(inputType)
 {
-	this->inputType = inputType;
 }
 
 InputMapBase::InputMapBase(InputType_t inputType, Ds4Buttons::T input)
+	: inputType(inputType),
+	  inputButtons(input)
 {
-	this->inputType = inputType;
-	inputButtons = input;
 }
 
 InputMapBase::InputMapBase(InputType_t inputType, Ds4Axis::T input)
+	: inputType(inputType),
+	  inputAxis(input);
 {
-	this->inputType = inputType;
-	inputAxis = input;
 }
 
 InputMapBase::InputMapBase(InputType_t inputType, const std::string& input)
+	: inputType(inputType),
+	  inputRegion(input)
 {
-	this->inputType = inputType;
-	inputRegion = input;
 }
 
 void InputMapBase::press()
@@ -346,10 +346,10 @@ void InputModifier::writeJson(nlohmann::json& json) const
 }
 
 InputMap::InputMap(SimulatorType simulatorType, InputType_t inputType, OutputType::T outputType)
-	: InputMapBase(inputType)
+	: InputMapBase(inputType),
+	  simulatorType(simulatorType),
+	  outputType(outputType)
 {
-	this->simulatorType = simulatorType;
-	this->outputType    = outputType;
 }
 
 void InputMap::pressModifier(const InputModifier* modifier)
