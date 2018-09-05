@@ -1,76 +1,32 @@
 #pragma once
 
-#include <algorithm>
 #include <string>
-#include <cwctype>
-#include <cctype>
-#include <locale>
 
-inline bool iequalsw(const wchar_t& a, const wchar_t& b)
-{
-	return std::towupper(a) == std::towupper(b);
-}
+bool iequalsw(const wchar_t& a, const wchar_t& b);
 
-inline bool iequals(const std::wstring& a, const std::wstring& b)
-{
-	return a.size() == b.size() && std::equal(a.begin(), a.end(), b.begin(), &iequalsw);
-}
+bool iequals(const std::wstring& a, const std::wstring& b);
 
-inline bool iequalsc(const char& a, const char& b)
-{
-	return std::toupper(a) == std::toupper(b);
-}
+bool iequalsc(const char& a, const char& b);
 
-inline bool iequals(const std::string& a, const std::string& b)
-{
-	return a.size() == b.size() && std::equal(a.begin(), a.end(), b.begin(), &iequalsc);
-}
+bool iequals(const std::string& a, const std::string& b);
 
 // source: https://stackoverflow.com/a/217605
 // TODO: string_view
 
 // trim from start (in place)
-static inline void ltrim(std::string &s)
-{
-	s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](int ch)
-	{
-		return !std::isspace(ch);
-	}));
-}
+void triml(std::string& s);
 
 // trim from end (in place)
-static inline void rtrim(std::string &s)
-{
-	s.erase(std::find_if(s.rbegin(), s.rend(), [](int ch)
-	{
-		return !std::isspace(ch);
-	}).base(), s.end());
-}
+void trimr(std::string& s);
 
 // trim from both ends (in place)
-static inline void trim(std::string &s)
-{
-	ltrim(s);
-	rtrim(s);
-}
+void trim(std::string& s);
 
 // trim from start (copying)
-static inline std::string ltrim_copy(std::string s)
-{
-	ltrim(s);
-	return s;
-}
+std::string triml_copy(std::string s);
 
 // trim from end (copying)
-static inline std::string rtrim_copy(std::string s)
-{
-	rtrim(s);
-	return s;
-}
+std::string trimr_copy(std::string s);
 
 // trim from both ends (copying)
-static inline std::string trim_copy(std::string s)
-{
-	trim(s);
-	return s;
-}
+std::string trim_copy(std::string s);

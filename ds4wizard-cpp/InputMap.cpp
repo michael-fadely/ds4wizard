@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "InputMap.h"
+ #include <utility>
 
 bool InputMapBase::performRapidFire() const
 {
@@ -73,9 +74,9 @@ InputMapBase::InputMapBase(InputType_t inputType, Ds4Axis::T input)
 {
 }
 
-InputMapBase::InputMapBase(InputType_t inputType, const std::string& input)
+InputMapBase::InputMapBase(InputType_t inputType, std::string input)
 	: inputType(inputType),
-	  inputRegion(input)
+	  inputRegion(std::move(input))
 {
 }
 

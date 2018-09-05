@@ -49,7 +49,7 @@ public:
 	explicit InputMapBase(InputType_t inputType);
 	InputMapBase(InputType_t inputType, Ds4Buttons::T input);
 	InputMapBase(InputType_t inputType, Ds4Axis::T input);
-	InputMapBase(InputType_t inputType, const std::string& input);
+	InputMapBase(InputType_t inputType, std::string input);
 
 	virtual void press() override;
 

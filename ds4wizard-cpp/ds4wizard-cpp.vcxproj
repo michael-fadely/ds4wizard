@@ -169,6 +169,7 @@
       <Define Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NOMINMAX;WIN32_LEAN_AND_MEAN;UNICODE;_UNICODE;WIN32;WIN64;QT_NO_DEBUG;NDEBUG;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;QT_UITOOLS_LIB</Define>
     </ClCompile>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="pathutil.cpp" />
     <ClCompile Include="Pressable.cpp" />
     <ClCompile Include="ProfileEditorDialog.cpp" />
     <ClCompile Include="program.cpp" />
@@ -179,6 +180,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Stopwatch.cpp" />
+    <ClCompile Include="stringutil.cpp" />
     <ClCompile Include="XInputGamepad.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -222,6 +224,7 @@
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\..\GSL\include;.\..\libhid;.\..\libdevicetoggle;.\..\better-enums;.\..\json\include;.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets</IncludePath>
       <Define Condition="'$(Configuration)|$(Platform)'=='Release|x64'">_CRT_SECURE_NO_WARNINGS;NOMINMAX;WIN32_LEAN_AND_MEAN;UNICODE;_UNICODE;WIN32;WIN64;QT_NO_DEBUG;NDEBUG;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB</Define>
     </QtMoc>
+    <ClInclude Include="pathutil.h" />
     <ClInclude Include="ScpDevice.h" />
     <ClInclude Include="Stopwatch.h" />
     <ClInclude Include="stringutil.h" />
