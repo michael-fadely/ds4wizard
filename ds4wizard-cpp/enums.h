@@ -4,8 +4,8 @@
 #include <enum.h>
 
 #define ENUM_FLAGS(TYPE) \
-	std::string serializeFlags_ ## TYPE ## (TYPE ## _t value); \
-	void deserializeFlags_ ## TYPE ## (const std::string& input, TYPE ## _t& value)
+	std::string serializeFlags_ ## TYPE(TYPE ## _t value); \
+	void deserializeFlags_ ## TYPE(const std::string& input, TYPE ## _t& value)
 
 #define ENUM_SERIALIZE_FLAGS(TYPE) serializeFlags_ ## TYPE
 #define ENUM_DESERIALIZE_FLAGS(TYPE) deserializeFlags_ ## TYPE

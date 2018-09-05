@@ -34,28 +34,6 @@ std::string DeviceProfile::fileName() const
 	return validatedFileName(name + ".json");
 }
 
-DeviceProfile::DeviceProfile(const DeviceProfile& other)
-	: DeviceSettingsCommon(other)
-{
-	name            = other.name;
-	exclusiveMode   = other.exclusiveMode;
-	useXInput       = other.useXInput;
-	autoXInputIndex = other.autoXInputIndex;
-	xinputIndex     = other.xinputIndex;
-	idle            = other.idle;
-
-	bindings  = other.bindings;
-	modifiers = other.modifiers;
-
-	if (!other.touchRegions.empty())
-	{
-		for (auto& pair : other.touchRegions)
-		{
-			touchRegions[pair.first] = pair.second;
-		}
-	}
-}
-
 bool DeviceProfile::operator==(const DeviceProfile& other) const
 {
 	return DeviceSettingsCommon::operator==(other) &&
@@ -589,7 +567,7 @@ R"(
   },
   "notifyFullyCharged": true,
   "notifyBatteryLow": 2,
-  "name": "wangis"
+  "name": "Default"
 })";
 
 #pragma endregion

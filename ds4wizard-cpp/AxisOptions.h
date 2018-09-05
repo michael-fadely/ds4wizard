@@ -11,9 +11,10 @@ public:
 	std::optional<AxisPolarity> polarity;
 
 	AxisOptions() = default;
+	AxisOptions(const AxisOptions&) = default;
+	AxisOptions& operator=(const AxisOptions&) = default;
 
 	explicit AxisOptions(AxisPolarity polarity);
-	AxisOptions(const AxisOptions& other);
 
 	bool operator==(const AxisOptions& other) const;
 	bool operator!=(const AxisOptions& other) const;
@@ -29,8 +30,10 @@ public:
 	std::optional<float> deadZone;
 
 	InputAxisOptions() = default;
+	InputAxisOptions(const InputAxisOptions&) = default;
+	InputAxisOptions& operator=(const InputAxisOptions&) = default;
+
 	explicit InputAxisOptions(AxisPolarity polarity);
-	InputAxisOptions(const InputAxisOptions& other);
 
 	void applyDeadZone(float& analog) const;
 
@@ -48,7 +51,8 @@ public:
 	std::unordered_map<XInputAxis_t, AxisOptions> options;
 
 	XInputAxes() = default;
-	XInputAxes(const XInputAxes& other);
+	XInputAxes(const XInputAxes&) = default;
+	XInputAxes& operator=(const XInputAxes&) = default;
 
 	AxisOptions getAxisOptions(XInputAxis::T axis);
 
@@ -65,7 +69,8 @@ public:
 	std::unordered_map<Direction_t, AxisOptions> options;
 
 	MouseAxes() = default;
-	MouseAxes(const MouseAxes& other);
+	MouseAxes(const MouseAxes&) = default;
+	MouseAxes& operator=(const MouseAxes&) = default;
 
 	AxisOptions getAxisOptions(Direction_t axis);
 

@@ -9,12 +9,6 @@ DeviceIdleOptions::DeviceIdleOptions(std::chrono::seconds timeout, bool disconne
 {
 }
 
-DeviceIdleOptions::DeviceIdleOptions(const DeviceIdleOptions& other)
-	: timeout(other.timeout),
-	  disconnect(other.disconnect)
-{
-}
-
 bool DeviceIdleOptions::operator==(const DeviceIdleOptions& other) const
 {
 	return disconnect == other.disconnect && timeout == other.timeout;

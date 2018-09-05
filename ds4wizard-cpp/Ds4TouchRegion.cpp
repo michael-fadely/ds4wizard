@@ -14,6 +14,7 @@ Ds4TouchRegion::Ds4TouchRegion(Ds4TouchRegionType type, short left, short top, s
 
 Ds4TouchRegion::Ds4TouchRegion(const Ds4TouchRegion& other)
 	: activeButtons(0),
+	  state1(), state2(),
 	  type(other.type),
 	  allowCrossOver(other.allowCrossOver),
 	  left(other.left),

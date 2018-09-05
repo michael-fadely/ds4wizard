@@ -12,16 +12,6 @@ DeviceSettingsCommon::DeviceSettingsCommon()
 {
 }
 
-DeviceSettingsCommon::DeviceSettingsCommon(const DeviceSettingsCommon& other)
-	: notifiedLow(other.notifiedLow),
-	  notifiedCharged(other.notifiedCharged),
-	  light(other.light),
-	  idle(other.idle),
-	  notifyFullyCharged(other.notifyFullyCharged),
-	  notifyBatteryLow(other.notifyBatteryLow)
-{
-}
-
 // TODO: move this shit out of here wtf
 void DeviceSettingsCommon::displayNotifications(Ds4Device* device)
 {

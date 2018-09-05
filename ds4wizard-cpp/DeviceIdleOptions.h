@@ -13,7 +13,10 @@ struct DeviceIdleOptions : JsonData
 
 	DeviceIdleOptions() = default;
 	DeviceIdleOptions(std::chrono::seconds timeout, bool disconnect);
-	DeviceIdleOptions(const DeviceIdleOptions& other);
+	
+	DeviceIdleOptions(const DeviceIdleOptions& other) = default;
+
+	DeviceIdleOptions& operator=(const DeviceIdleOptions& rhs) = default;
 
 	bool operator==(const DeviceIdleOptions& other) const;
 	bool operator!=(const DeviceIdleOptions& other) const;

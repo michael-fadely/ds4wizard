@@ -8,7 +8,7 @@ class ProfileEditorDialog : public QDialog
 	Q_OBJECT
 
 public:
-	ProfileEditorDialog(QWidget* parent = Q_NULLPTR);
+	explicit ProfileEditorDialog(QWidget* parent = Q_NULLPTR);
 	~ProfileEditorDialog();
 
 private:

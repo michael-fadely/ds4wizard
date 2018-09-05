@@ -19,7 +19,8 @@ public:
 	uint8_t notifyBatteryLow;
 
 	DeviceSettingsCommon();
-	DeviceSettingsCommon(const DeviceSettingsCommon& other);
+	DeviceSettingsCommon(const DeviceSettingsCommon&) = default;
+	DeviceSettingsCommon& operator=(const DeviceSettingsCommon&) = default;
 
 	void displayNotifications(Ds4Device* device);
 

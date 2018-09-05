@@ -1,4 +1,9 @@
 #pragma once
+
+#include <string>
+#include <optional>
+#include <deque>
+
 #include "Pressable.h"
 #include "Stopwatch.h"
 #include "AxisOptions.h"
@@ -80,8 +85,8 @@ public:
 
 	#pragma region Keyboard
 
-	// TODO: VirtualKeyCode?      KeyCode;
-	// TODO: std::deque<VirtualKeyCode> KeyCodeModifiers;
+	// TODO: std::optional<VirtualKeyCode> KeyCode;
+	// TODO: std::deque<VirtualKeyCode>    KeyCodeModifiers;
 
 	#pragma endregion
 
@@ -89,7 +94,7 @@ public:
 
 	MouseAxes mouseAxes;
 	// TODO: use internal mouse button bitfield
-	// TODO: MouseButton? MouseButton;
+	// TODO: std::optional<MouseButton> MouseButton;
 
 	#pragma endregion
 
@@ -113,116 +118,6 @@ public:
 
 	void readJson(const nlohmann::json& json) override;
 	void writeJson(nlohmann::json& json) const override;
-
-	// TODO
-#if 0
-	public override string ToString()
-	{
-		var builder = new StringBuilder();
-
-		builder.Append(base.ToString());
-		builder.AppendFormat("; [{0}] ", SimulatorType);
-
-		if (SimulatorType == SimulatorType.Action)
-		{
-			builder.Append(Action ?? ActionType.None);
-		}
-
-		if (OutputType == OutputType.None)
-		{
-			builder.AppendFormat(" [{0}]", OutputType.None);
-			return builder.ToString();
-		}
-
-		bool appended = false;
-
-		if ((OutputType & OutputType.XInput) != 0)
-		{
-			builder.Append("[XInput] ");
-
-			if (XInputButtons != null)
-			{
-				builder.AppendFormat("Buttons: {0}", XInputButtons.Value);
-				appended = true;
-			}
-
-			if (XInputAxes != null)
-			{
-				if (appended)
-				{
-					builder.Append(", ");
-				}
-
-				builder.AppendFormat("axis: {0}", XInputAxes);
-				appended = true;
-			}
-		}
-
-		if (appended)
-		{
-			builder.Append(" ");
-		}
-
-		if ((OutputType & OutputType.Keyboard) != 0)
-		{
-			builder.Append("[Keyboard] ");
-			appended = true;
-
-			bool modifiers = false;
-			if (KeyCodeModifiers != null && KeyCodeModifiers.Count > 0)
-			{
-				modifiers = true;
-				builder.AppendFormat("{0}",
-					string.Join("+", KeyCodeModifiers.Select(x => x.ToString())));
-			}
-
-			if (KeyCode != null)
-			{
-				if (modifiers)
-				{
-					builder.Append("+");
-				}
-
-				builder.Append(KeyCode.Value);
-			}
-		}
-
-		if (appended)
-		{
-			builder.Append(" ");
-		}
-
-		if ((OutputType & OutputType.Mouse) != 0)
-		{
-			builder.Append("[Mouse] ");
-			appended = true;
-
-			bool hasButtons = false;
-			if (MouseButton != null)
-			{
-				hasButtons = true;
-				builder.AppendFormat("button: {0}", MouseButton.Value);
-			}
-
-			if (MouseAxes != null)
-			{
-				if (hasButtons)
-				{
-					builder.Append(", ");
-				}
-
-				builder.AppendFormat("Mouse Directions: {0}", MouseAxes);
-			}
-		}
-
-		if (appended)
-		{
-			builder.Append(" ");
-		}
-
-		return builder.ToString();
-	}
-#endif
 };
 
 class InputModifier : public InputMapBase

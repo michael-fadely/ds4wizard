@@ -6,12 +6,6 @@ AxisOptions::AxisOptions(AxisPolarity polarity)
 {
 }
 
-AxisOptions::AxisOptions(const AxisOptions& other)
-	: multiplier(other.multiplier),
-	  polarity(other.polarity)
-{
-}
-
 bool AxisOptions::operator==(const AxisOptions& other) const
 {
 	return multiplier == other.multiplier && polarity == other.polarity;
@@ -51,14 +45,6 @@ void AxisOptions::writeJson(nlohmann::json& json) const
 InputAxisOptions::InputAxisOptions(AxisPolarity polarity)
 	: AxisOptions(polarity)
 {
-}
-
-InputAxisOptions::InputAxisOptions(const InputAxisOptions& other)
-	: AxisOptions(other)
-{
-	invert       = other.invert;
-	deadZoneMode = other.deadZoneMode;
-	deadZone     = other.deadZone;
 }
 
 void InputAxisOptions::applyDeadZone(float& analog) const
@@ -143,19 +129,6 @@ void InputAxisOptions::writeJson(nlohmann::json& json) const
 	}
 }
 
-XInputAxes::XInputAxes(const XInputAxes& other)
-{
-	axes = other.axes;
-
-	if (!other.options.empty())
-	{
-		for (auto& pair : other.options)
-		{
-			options[pair.first] = pair.second;
-		}
-	}
-}
-
 AxisOptions XInputAxes::getAxisOptions(XInputAxis::T axis)
 {
 	if (options.empty())
@@ -218,19 +191,6 @@ void XInputAxes::writeJson(nlohmann::json& json) const
 	}
 
 	json["options"] = options_;
-}
-
-MouseAxes::MouseAxes(const MouseAxes& other)
-{
-	directions = other.directions;
-
-	if (!other.options.empty())
-	{
-		for (auto& pair : other.options)
-		{
-			options[pair.first] = pair.second;
-		}
-	}
 }
 
 AxisOptions MouseAxes::getAxisOptions(Direction_t axis)

@@ -25,8 +25,8 @@ public:
 	std::deque<InputModifier> modifiers;
 
 	DeviceProfile() = default;
-
-	DeviceProfile(const DeviceProfile& other);
+	DeviceProfile(const DeviceProfile&) = default;
+	DeviceProfile& operator=(const DeviceProfile&) = default;
 
 	bool operator==(const DeviceProfile& other) const;
 
