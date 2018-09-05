@@ -69,7 +69,7 @@ InputMapBase::InputMapBase(InputType_t inputType, Ds4Buttons::T input)
 
 InputMapBase::InputMapBase(InputType_t inputType, Ds4Axis::T input)
 	: inputType(inputType),
-	  inputAxis(input);
+	  inputAxis(input)
 {
 }
 
