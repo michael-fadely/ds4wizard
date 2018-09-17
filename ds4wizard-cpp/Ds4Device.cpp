@@ -105,7 +105,7 @@ uint8_t Ds4Device::battery() const
 
 bool Ds4Device::charging() const
 {
-	return input.data.charging;
+	return (input.data.extensions & Ds4Extensions::Cable) != 0;
 }
 
 const std::string& Ds4Device::name() const

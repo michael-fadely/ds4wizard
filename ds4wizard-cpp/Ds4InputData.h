@@ -98,7 +98,6 @@ struct Ds4InputData
 	uint8_t    leftTrigger;
 	uint8_t    rightTrigger;
 	uint8_t    battery;
-	bool       charging;
 	Ds4Vector3 accel;
 	Ds4Vector3 gyro;
 	uint8_t    extensions;

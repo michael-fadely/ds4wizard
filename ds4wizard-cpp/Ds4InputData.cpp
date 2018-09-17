@@ -85,7 +85,6 @@ bool Ds4InputData::operator==(const Ds4InputData& other) const
 	       leftTrigger     == other.leftTrigger &&
 	       rightTrigger    == other.rightTrigger &&
 	       battery         == other.battery &&
-	       charging        == other.charging &&
 	       accel           == other.accel &&
 	       gyro            == other.gyro &&
 	       extensions      == other.extensions &&

@@ -52,7 +52,14 @@ QVariant Ds4ItemModel::data(const QModelIndex& index, int role) const
 			return QString::fromStdString(device->name());
 
 		case 1:
-			return QString("%1%").arg(device->battery() * 10);
+			if (device->charging())
+			{
+				return QString("+%1%").arg(device->battery() * 10);
+			}
+			else
+			{
+				return QString("%1%").arg(device->battery() * 10);
+			}
 
 		default:
 			return QVariant();

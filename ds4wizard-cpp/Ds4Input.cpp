@@ -44,7 +44,6 @@ void Ds4Input::update(const gsl::span<uint8_t>& buffer)
 	data.gyro.z            = *reinterpret_cast<int16_t*>(&buffer[22]);
 	data.extensions        = static_cast<uint8_t>(buffer[29] >> 4);
 	data.battery           = static_cast<uint8_t>(buffer[29] & 0x0F);
-	data.charging          = (data.extensions & Ds4Extensions::Cable) != 0 && data.battery <= 10;
 	data.touchEvent        = static_cast<uint8_t>(buffer[32] & 0x3F);
 	data.touchFrame        = static_cast<uint8_t>(buffer[33] & 0x3F);
 	data.touch1            = !(buffer[34] & 0x80);
