@@ -205,17 +205,17 @@ static const char* Ds4Axis_names[] = {
 SERIALIZE_DEF(Ds4Axis)
 
 static const Ds4Extensions_t Ds4Extensions_values[] = {
-	Ds4Extensions::Cable,
-	Ds4Extensions::Headphones,
-	Ds4Extensions::Microphone,
-	Ds4Extensions::Unknown
+	Ds4Extensions::cable,
+	Ds4Extensions::headphones,
+	Ds4Extensions::microphone,
+	Ds4Extensions::unknown
 };
 
 static const char* Ds4Extensions_names[] = {
-	"Cable",
-	"Headphones",
-	"Microphone",
-	"Unknown"
+	"cable",
+	"headphones",
+	"microphone",
+	"unknown"
 };
 
 SERIALIZE_DEF(Ds4Extensions)

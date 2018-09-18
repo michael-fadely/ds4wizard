@@ -105,7 +105,7 @@ uint8_t Ds4Device::battery() const
 
 bool Ds4Device::charging() const
 {
-	return (input.data.extensions & Ds4Extensions::Cable) != 0;
+	return (input.data.extensions & Ds4Extensions::cable) != 0;
 }
 
 const std::string& Ds4Device::name() const
@@ -225,7 +225,7 @@ void Ds4Device::applyProfile()
 
 bool Ds4Device::scpDeviceOpen()
 {
-	// TODO: !!! when another handle is opened to the scp device, it fucks everything
+	// TODO: !!! when any handle to the scp device is closed, it fucks all of them
 
 	if (scpDevice != nullptr)
 	{
@@ -639,14 +639,14 @@ void Ds4Device::run()
 
 	const float lx = input.getAxis(Ds4Axis::leftStickX, std::nullopt);
 	const float ly = input.getAxis(Ds4Axis::leftStickY, std::nullopt);
-	const auto  ls = static_cast<float>(std::sqrt(lx * lx + ly * ly));
+	const float ls = std::sqrt(lx * lx + ly * ly);
 
 	const float rx = input.getAxis(Ds4Axis::rightStickX, std::nullopt);
 	const float ry = input.getAxis(Ds4Axis::rightStickY, std::nullopt);
-	const auto  rs = static_cast<float>(std::sqrt(rx * rx + ry * ry));
+	const float rs = std::sqrt(rx * rx + ry * ry);
 
 	// TODO: gyro/accel
-	if (input.buttonsChanged || input.heldButtons != 0
+	if (input.buttonsChanged || input.heldButtons
 	    || ls >= 0.25f || rs >= 0.25f)
 	{
 		idleTime.start();
@@ -687,7 +687,7 @@ void Ds4Device::run()
 
 #if false
 			// Experimental garbage
-			if ((input.pressedButtons & Ds4Buttons::ps) != 0)
+			if (input.pressedButtons & Ds4Buttons::ps)
 			{
 				// Set audio output to speaker only (3)
 				std::array<uint8_t, 3> buffer = {
@@ -938,7 +938,7 @@ bool Ds4Device::isOverriddenByModifierSet(InputMapBase& map)
 		.Where(x = > !ReferenceEquals(x, map))
 		.ToList();*/
 
-	if ((map.inputType & InputType::button) != 0)
+	if (map.inputType & InputType::button)
 	{
 		getActive(map);
 
@@ -951,7 +951,7 @@ bool Ds4Device::isOverriddenByModifierSet(InputMapBase& map)
 		}
 	}
 
-	if ((map.inputType & InputType::axis) != 0)
+	if (map.inputType & InputType::axis)
 	{
 		getActive(map);
 
@@ -964,7 +964,7 @@ bool Ds4Device::isOverriddenByModifierSet(InputMapBase& map)
 		}
 	}
 
-	if ((map.inputType & InputType::touchRegion) != 0)
+	if (map.inputType & InputType::touchRegion)
 	{
 		getActive(map);
 
@@ -1212,11 +1212,11 @@ void Ds4Device::simulateMouse(const InputMap& m, PressedState state, float analo
 
 	if ((direction & (Direction::Left | Direction::Right)) != (Direction::Left | Direction::Right))
 	{
-		if ((direction & Direction::Right) != 0)
+		if (direction & Direction::Right)
 		{
 			x = (int)analog;
 		}
-		else if ((direction & Direction::Left) != 0)
+		else if (direction & Direction::Left)
 		{
 			x = (int)-analog;
 		}
@@ -1228,11 +1228,11 @@ void Ds4Device::simulateMouse(const InputMap& m, PressedState state, float analo
 
 	if ((direction & (Direction::Up | Direction::Down)) != (Direction::Up | Direction::Down))
 	{
-		if ((direction & Direction::Up) != 0)
+		if (direction & Direction::Up)
 		{
 			y = (int)-analog;
 		}
-		else if ((direction & Direction::Down) != 0)
+		else if (direction & Direction::Down)
 		{
 			y = (int)analog;
 		}
@@ -1376,7 +1376,7 @@ void Ds4Device::updateTouchRegions()
 
 void Ds4Device::updateTouchRegion(Ds4TouchRegion& region, InputModifier* modifier, Ds4Buttons_t sender, Ds4Vector2& point, Ds4Buttons_t& disallow)
 {
-	if ((disallow & sender) == 0 && (input.heldButtons & sender) != 0)
+	if (!(disallow & sender) && (input.heldButtons & sender))
 	{
 		if (region.isInRegion(sender, point))
 		{

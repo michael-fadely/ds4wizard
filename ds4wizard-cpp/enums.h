@@ -213,10 +213,10 @@ struct Ds4Extensions
 {
 	enum T : uint8_t
 	{
-		Cable      = 1 << 0,
-		Headphones = 1 << 1,
-		Microphone = 1 << 2,
-		Unknown    = 1 << 3
+		cable      = 1 << 0,
+		headphones = 1 << 1,
+		microphone = 1 << 2,
+		unknown    = 1 << 3
 	};
 };
 

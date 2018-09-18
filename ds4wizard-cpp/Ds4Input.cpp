@@ -59,7 +59,7 @@ void Ds4Input::update(const gsl::span<uint8_t>& buffer)
 	data.lastTouchPoint2.x = static_cast<short>(*reinterpret_cast<int16_t*>(&buffer[47]) & 0xFFF);
 	data.lastTouchPoint2.y = static_cast<short>((*reinterpret_cast<int16_t*>(&buffer[48]) >> 4) & 0xFFF);
 
-	if ((data.extensions & Ds4Extensions::Cable) == 0)
+	if (!(data.extensions & Ds4Extensions::cable))
 	{
 		++data.battery;
 	}
