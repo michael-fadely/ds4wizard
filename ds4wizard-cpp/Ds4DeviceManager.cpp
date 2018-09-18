@@ -148,6 +148,7 @@ bool Ds4DeviceManager::handleDevice(hid::HidInstance& hid)
 		const auto it = devices.find(hid.serialString);
 		std::shared_ptr<Ds4Device> device;
 
+		// device isn't already being managed, so set up all the event handling/etc
 		if (it == devices.end())
 		{
 			device = std::make_shared<Ds4Device>();

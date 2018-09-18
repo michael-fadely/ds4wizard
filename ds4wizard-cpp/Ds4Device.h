@@ -170,6 +170,7 @@ public:
 	void start();
 
 private:
+	// TODO: move all this shit out into an input simulator class of some kind
 #pragma region shit
 	static constexpr Ds4Buttons_t touchMask = Ds4Buttons::touch1 | Ds4Buttons::touch2;
 
