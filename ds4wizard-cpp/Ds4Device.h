@@ -74,8 +74,17 @@ class Ds4Device
 	bool isIdle() const;
 
 public:
-	EventHandler<EventArgs> deviceClosed;
-	EventHandler<EventArgs> batteryLevelChanged;
+	EventHandler<Ds4Device, EventArgs> onDeviceClosed;
+	EventHandler<Ds4Device, EventArgs> onBatteryLevelChanged;
+	EventHandler<Ds4Device, EventArgs> onScpDeviceMissing;          // Logger::writeLine(LogLevel::warning, "ScpVBus device not found. XInput emulation will not be available.");
+	EventHandler<Ds4Device, EventArgs> onScpDeviceOpenFailed;       // Logger::writeLine(LogLevel::warning, "Failed to acquire ScpVBus device handle. XInput emulation will not be available.");
+	EventHandler<Ds4Device, EventArgs> onScpXInputHandleFailure;    // Logger::writeLine(LogLevel::warning, "Failed to obtain ScpVBus XInput handle. XInput emulation will not be available.");
+	EventHandler<Ds4Device, EventArgs> onBluetoothExclusiveFailure; // Logger::writeLine(LogLevel::warning, name(), "Failed to open Bluetooth device exclusively.");
+	EventHandler<Ds4Device, EventArgs> onBluetoothConnected;        // Logger::writeLine(LogLevel::info, name(), "Bluetooth connected.");
+	EventHandler<Ds4Device, EventArgs> onBluetoothIdleDisconnect;   // Logger::writeLine(LogLevel::info, name(), "Bluetooth idle disconnect." /* TODO: std::string.Format(Resources.IdleDisconnect, idleTimeout)*/);
+	EventHandler<Ds4Device, EventArgs> onBluetoothDisconnected;     // Logger::writeLine(LogLevel::info, name(), "Bluetooth disconnected.");
+	EventHandler<Ds4Device, EventArgs> onUsbExclusiveFailure;       // Logger::writeLine(LogLevel::warning, name(), "Failed to open USB device exclusively.");
+	EventHandler<Ds4Device, EventArgs> onUsbConnected;              // Logger::writeLine(LogLevel::info, name(), "USB connected.");
 
 	DeviceSettings settings;
 	DeviceProfile profile;
@@ -109,8 +118,11 @@ public:
 
 	const std::string& name() const;
 
+	Ds4Device() = default;
 	explicit Ds4Device(hid::HidInstance& device);
 	~Ds4Device();
+
+	void open(hid::HidInstance& device);
 
 	std::unique_lock<std::recursive_mutex> lock();
 
@@ -152,15 +164,12 @@ private:
 	void writeBluetooth();
 	void run();
 	void controllerThread();
-	void onDeviceClosed();
 	void addLatencySum();
 
 public:
 	void start();
 
 private:
-	void onBatteryLevelChanged();
-
 #pragma region shit
 	static constexpr Ds4Buttons_t touchMask = Ds4Buttons::touch1 | Ds4Buttons::touch2;
 

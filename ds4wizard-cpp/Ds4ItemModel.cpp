@@ -11,12 +11,12 @@ Ds4ItemModel::Ds4ItemModel(const std::shared_ptr<Ds4DeviceManager>& deviceManage
 	connect(this, &Ds4ItemModel::s_onDeviceClosed, this, &Ds4ItemModel::onDeviceClosed);
 	connect(this, &Ds4ItemModel::s_onDeviceBatteryChanged, this, &Ds4ItemModel::onDeviceBatteryChanged);
 
-	deviceManager->deviceOpened += [this](void*, std::shared_ptr<DeviceOpenedEventArgs> args) -> void
+	deviceManager->deviceOpened += [this](auto, auto args)
 	{
 		emit s_onDeviceOpened(args);
 	};
 
-	deviceManager->deviceClosed += [this](void*, std::shared_ptr<DeviceClosedEventArgs> args) -> void
+	deviceManager->deviceClosed += [this](auto, auto args)
 	{
 		emit s_onDeviceClosed(args);
 	};
@@ -97,9 +97,9 @@ void Ds4ItemModel::onDeviceOpened(std::shared_ptr<DeviceOpenedEventArgs> a)
 	{
 		auto device = a->device;
 
-		device->batteryLevelChanged += [this](void* sender, std::shared_ptr<EventArgs>) -> void
+		device->onBatteryLevelChanged += [this](auto sender, auto) -> void
 		{
-			emit s_onDeviceBatteryChanged(reinterpret_cast<Ds4Device*>(sender));
+			emit s_onDeviceBatteryChanged(sender);
 		};
 
 		beginInsertRows({}, row, row);

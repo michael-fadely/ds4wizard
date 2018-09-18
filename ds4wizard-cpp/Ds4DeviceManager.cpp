@@ -23,7 +23,7 @@ Ds4DeviceManager::~Ds4DeviceManager()
 bool Ds4DeviceManager::isDs4(const hid::HidInstance& hid)
 {
 	return hid.attributes().vendorId == vendorId &&
-		std::find(productIds.begin(), productIds.end(), hid.attributes().productId) != productIds.end();
+	       std::find(productIds.begin(), productIds.end(), hid.attributes().productId) != productIds.end();
 }
 
 bool Ds4DeviceManager::isDs4(const std::wstring& devicePath)
@@ -150,12 +150,23 @@ bool Ds4DeviceManager::handleDevice(hid::HidInstance& hid)
 
 		if (it == devices.end())
 		{
+			device = std::make_shared<Ds4Device>();
+
+			device->onDeviceClosed += [this](auto sender, auto args) { onDs4DeviceClosed(sender, args); };
+
+			device->onScpDeviceMissing          += [](auto sender, auto args) { Logger::writeLine(LogLevel::warning, "ScpVBus device not found. XInput emulation will not be available."); };
+			device->onScpDeviceOpenFailed       += [](auto sender, auto args) { Logger::writeLine(LogLevel::warning, "Failed to acquire ScpVBus device handle. XInput emulation will not be available."); };
+			device->onScpXInputHandleFailure    += [](auto sender, auto args) { Logger::writeLine(LogLevel::warning, "Failed to obtain ScpVBus XInput handle. XInput emulation will not be available."); };
+			device->onBluetoothExclusiveFailure += [](auto sender, auto args) { Logger::writeLine(LogLevel::warning, sender->name(), "Failed to open Bluetooth device exclusively."); };
+			device->onBluetoothConnected        += [](auto sender, auto args) { Logger::writeLine(LogLevel::info,    sender->name(), "Bluetooth connected."); };
+			device->onBluetoothIdleDisconnect   += [](auto sender, auto args) { Logger::writeLine(LogLevel::info,    sender->name(), "Bluetooth idle disconnect." /* TODO: std::string.Format(Resources.IdleDisconnect, idleTimeout)*/); };
+			device->onBluetoothDisconnected     += [](auto sender, auto args) { Logger::writeLine(LogLevel::info,    sender->name(), "Bluetooth disconnected."); };
+			device->onUsbExclusiveFailure       += [](auto sender, auto args) { Logger::writeLine(LogLevel::warning, sender->name(), "Failed to open USB device exclusively."); };
+			device->onUsbConnected              += [](auto sender, auto args) { Logger::writeLine(LogLevel::info,    sender->name(), "USB connected."); };
+
 			// TODO: don't toggle the device unless opening exclusively fails!
 			toggleDevice(hid.instanceId);
-
-			device = std::make_shared<Ds4Device>(hid);
-			device->deviceClosed += std::bind(&Ds4DeviceManager::onDs4DeviceClosed, this,
-			                                  std::placeholders::_1, std::placeholders::_2);
+			device->open(hid);
 
 			const auto& safe = device->safeMacAddress();
 
@@ -202,14 +213,12 @@ bool Ds4DeviceManager::handleDevice(hid::HidInstance& hid)
 	return false;
 }
 
-void Ds4DeviceManager::onDs4DeviceClosed(void* sender, std::shared_ptr<EventArgs>)
+void Ds4DeviceManager::onDs4DeviceClosed(Ds4Device* sender, std::shared_ptr<EventArgs>)
 {
 	LOCK(devices);
 
-	auto raw_ptr = reinterpret_cast<Ds4Device*>(sender);
-
-	const auto macaddr = std::wstring(raw_ptr->safeMacAddress().cbegin(), raw_ptr->safeMacAddress().cend());
-	const auto it = devices.find(macaddr);
+	const auto mac = std::wstring(sender->safeMacAddress().cbegin(), sender->safeMacAddress().cend());
+	const auto it = devices.find(mac);
 
 	if (it == devices.end())
 	{

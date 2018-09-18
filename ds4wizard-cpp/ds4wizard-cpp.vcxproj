@@ -185,6 +185,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AxisOptions.h" />
+    <ClInclude Include="bindutil.h" />
     <ClInclude Include="Bluetooth.h" />
     <ClInclude Include="busenum.h" />
     <ClInclude Include="DeviceIdleOptions.h" />

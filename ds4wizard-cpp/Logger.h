@@ -10,7 +10,8 @@ BETTER_ENUM(LogLevel, int, info, warning, error);
 
 /**
  * \brief 
- * Event arguments for \sa Logger.LineLogged.
+ * Event arguments for \c Logger.LineLogged.
+ * \sa Logger.LineLogged
  */
 class LineLoggedEventArgs
 {
@@ -42,7 +43,7 @@ class Logger
 	inline static std::recursive_mutex sync_lock;
 
 public:
-	static inline EventHandler<LineLoggedEventArgs> lineLogged;
+	static inline EventHandler<void, LineLoggedEventArgs> lineLogged;
 
 	/**
 	 * \brief 

@@ -244,6 +244,9 @@
     <ClInclude Include="pathutil.h">
       <Filter>Header Files\Utility</Filter>
     </ClInclude>
+    <ClInclude Include="bindutil.h">
+      <Filter>Header Files\Utility</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MainWindow.h">

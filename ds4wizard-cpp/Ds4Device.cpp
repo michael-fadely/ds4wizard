@@ -15,11 +15,8 @@
 #include "Bluetooth.h"
 #include "Ds4AutoLightColor.h"
 #include "ScpDevice.h"
-#include "Logger.h"
 
 using namespace std::chrono;
-
-// TODO: decouple the logger and use events instead
 
 bool Ds4Device::disconnectOnIdle() const
 {
@@ -114,6 +111,11 @@ const std::string& Ds4Device::name() const
 }
 
 Ds4Device::Ds4Device(hid::HidInstance& device)
+{
+	open(device);
+}
+
+void Ds4Device::open(hid::HidInstance& device)
 {
 	std::stringstream macaddr;
 
@@ -250,7 +252,7 @@ bool Ds4Device::scpDeviceOpen()
 
 	if (info == nullptr)
 	{
-		Logger::writeLine(LogLevel::warning, "ScpVBus device not found. XInput emulation will not be available.");
+		onScpDeviceMissing.invoke(this);
 		return false;
 	}
 
@@ -259,7 +261,7 @@ bool Ds4Device::scpDeviceOpen()
 
 	if (!handle.isValid())
 	{
-		Logger::writeLine(LogLevel::warning, "Failed to acquire ScpVBus device handle. XInput emulation will not be available.");
+		onScpDeviceOpenFailed.invoke(this);
 		return false;
 	}
 
@@ -294,7 +296,7 @@ bool Ds4Device::scpDeviceOpen()
 
 	if (!ok)
 	{
-		Logger::writeLine(LogLevel::warning, "Failed to obtain ScpVBus XInput handle. XInput emulation will not be available.");
+		onScpXInputHandleFailure.invoke(this);
 		return false;
 	}
 
@@ -450,11 +452,12 @@ void Ds4Device::openBluetoothDevice(hid::HidInstance& device)
 
 		if (profile.exclusiveMode && !device.isExclusive())
 		{
-			Logger::writeLine(LogLevel::warning, name(), "Failed to open Bluetooth device exclusively.");
+			onBluetoothExclusiveFailure.invoke(this);
+
 		}
 		else
 		{
-			Logger::writeLine(LogLevel::info, name(), "Bluetooth connected.");
+			onBluetoothConnected.invoke(this);
 		}
 
 		bluetoothDevice = std::make_unique<hid::HidInstance>(std::move(device));
@@ -491,11 +494,11 @@ void Ds4Device::openUsbDevice(hid::HidInstance& device)
 
 		if (profile.exclusiveMode && !device.isExclusive())
 		{
-			Logger::writeLine(LogLevel::warning, name(), "Failed to open USB device exclusively.");
+			onUsbExclusiveFailure.invoke(this);
 		}
 		else
 		{
-			Logger::writeLine(LogLevel::info, name(), "USB connected.");
+			onUsbConnected.invoke(this);
 		}
 
 		usbDevice = std::make_unique<hid::HidInstance>(std::move(device));
@@ -654,7 +657,7 @@ void Ds4Device::run()
 	else if (disconnectOnIdle() && useBluetooth && isIdle())
 	{
 		disconnectBluetooth();
-		Logger::writeLine(LogLevel::info, name(), "Bluetooth idle disconnect." /* TODO: std::string.Format(Resources.IdleDisconnect, idleTimeout)*/);
+		onBluetoothIdleDisconnect.invoke(this);
 	}
 
 	if (dataReceived)
@@ -682,7 +685,7 @@ void Ds4Device::run()
 		if (charging_ != charging() || battery_ != battery())
 		{
 			settings.displayNotifications(this);
-			onBatteryLevelChanged();
+			onBatteryLevelChanged.invoke(this);
 		}
 
 #if false
@@ -751,12 +754,7 @@ void Ds4Device::controllerThread()
 	}
 
 	closeImpl();
-	onDeviceClosed();
-}
-
-void Ds4Device::onDeviceClosed()
-{
-	deviceClosed.invoke(this, nullptr);
+	onDeviceClosed.invoke(this);
 }
 
 void Ds4Device::addLatencySum()
@@ -786,11 +784,6 @@ void Ds4Device::start()
 		running = true;
 		deviceThread = std::make_unique<std::thread>(&Ds4Device::controllerThread, this);
 	}
-}
-
-void Ds4Device::onBatteryLevelChanged()
-{
-	batteryLevelChanged.invoke(this, nullptr);
 }
 
 void Ds4Device::simulateXInputButton(XInputButtons_t buttons, PressedState state)
@@ -1299,7 +1292,7 @@ void Ds4Device::runAction(ActionType action)
 			if (bluetoothConnected())
 			{
 				disconnectBluetooth();
-				Logger::writeLine(LogLevel::info, name(), "Bluetooth disconnected.");
+				onBluetoothDisconnected.invoke(this);
 			}
 
 			break;

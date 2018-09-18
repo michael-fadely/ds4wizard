@@ -72,14 +72,14 @@ public:
 	 * Fired when a device is opened.
 	 * \sa DeviceOpenedEventArgs
 	 */
-	EventHandler<DeviceOpenedEventArgs> deviceOpened;
+	EventHandler<Ds4DeviceManager, DeviceOpenedEventArgs> deviceOpened;
 
 	/**
 	 * \brief 
 	 * Fired when a device is closed.
 	 * \sa DeviceClosedEventArgs
 	 */
-	EventHandler<DeviceClosedEventArgs> deviceClosed;
+	EventHandler<Ds4DeviceManager, DeviceClosedEventArgs> deviceClosed;
 
 	~Ds4DeviceManager();
 
@@ -113,7 +113,7 @@ public:
 
 private:
 	bool handleDevice(hid::HidInstance& hid);
-	void onDs4DeviceClosed(void* sender, std::shared_ptr<EventArgs> eventArgs);
+	void onDs4DeviceClosed(Ds4Device* sender, std::shared_ptr<EventArgs> eventArgs);
 
 public:
 	/**
