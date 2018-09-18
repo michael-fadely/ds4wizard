@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "Ds4Input.h"
 
-void Ds4Input::addButton(bool pressed, Ds4Buttons_t buttons)
+inline void Ds4Input::addButton(bool pressed, Ds4Buttons_t buttons)
 {
 	if (pressed)
 	{
@@ -90,33 +90,33 @@ void Ds4Input::update(const gsl::span<uint8_t>& buffer)
 	switch (data.dPad)
 	{
 		case Hat::north:
-			addButton(true, Ds4Buttons::up);
+			heldButtons |= Ds4Buttons::up;
 			break;
 		case Hat::northEast:
-			addButton(true, Ds4Buttons::up | Ds4Buttons::right);
+			heldButtons |= (Ds4Buttons::up | Ds4Buttons::right);
 			break;
 		case Hat::east:
-			addButton(true, Ds4Buttons::right);
+			heldButtons |= (Ds4Buttons::right);
 			break;
 		case Hat::southEast:
-			addButton(true, Ds4Buttons::right | Ds4Buttons::down);
+			heldButtons |= (Ds4Buttons::right | Ds4Buttons::down);
 			break;
 		case Hat::south:
-			addButton(true, Ds4Buttons::down);
+			heldButtons |= (Ds4Buttons::down);
 			break;
 		case Hat::southWest:
-			addButton(true, Ds4Buttons::down | Ds4Buttons::left);
+			heldButtons |= (Ds4Buttons::down | Ds4Buttons::left);
 			break;
 		case Hat::west:
-			addButton(true, Ds4Buttons::left);
+			heldButtons |= (Ds4Buttons::left);
 			break;
 		case Hat::northWest:
-			addButton(true, Ds4Buttons::left | Ds4Buttons::up);
+			heldButtons |= (Ds4Buttons::left | Ds4Buttons::up);
 			break;
 		case Hat::none:
 			break;
 		default:
-			addButton(true, lastDpad);
+			heldButtons |= (lastDpad);
 			break;
 	}
 
@@ -128,9 +128,9 @@ void Ds4Input::updateChangedState()
 	releasedButtons = lastHeldButtons & (heldButtons ^ lastHeldButtons);
 	pressedButtons  = heldButtons & (heldButtons ^ lastHeldButtons);
 	lastHeldButtons = heldButtons;
-	buttonsChanged  = releasedButtons != 0 || pressedButtons != 0;
+	buttonsChanged  = !!releasedButtons || !!pressedButtons;
 
-	const Ds4Buttons_t touchMask = Ds4Buttons::touch1 | Ds4Buttons::touch2 | Ds4Buttons::touchButton;
+	constexpr Ds4Buttons_t touchMask = Ds4Buttons::touch1 | Ds4Buttons::touch2 | Ds4Buttons::touchButton;
 
 	touchChanged = lastTouchFrame != data.touchFrame
 	               || (pressedButtons & touchMask) != 0
