@@ -105,7 +105,7 @@ bool HidInstance::readMetadata()
 {
 	if (isOpen())
 	{
-		return readCaps() || readAttributes() || readSerial();
+		return (readCaps() | readAttributes() | readSerial());
 	}
 
 #ifdef _MSC_VER
@@ -121,7 +121,7 @@ bool HidInstance::readMetadata()
 	#error __FUNCTION__ not implemented on this platform.
 #endif
 
-	return readCaps(h.nativeHandle) || readAttributes(h.nativeHandle) || readSerial(h.nativeHandle);
+	return (readCaps(h.nativeHandle) | readAttributes(h.nativeHandle) | readSerial(h.nativeHandle));
 }
 
 bool HidInstance::readCaps()
