@@ -8,28 +8,34 @@
 
 using namespace hid;
 
-HidInstance::HidInstance(std::wstring path, std::wstring instanceId, bool readInfo)
+HidInstance::HidInstance(std::wstring path, std::wstring instanceId)
 	: path(std::move(path)),
 	  instanceId(std::move(instanceId))
 {
-	if (readInfo)
-	{
-		readMetadata();
-	}
 }
 
-HidInstance::HidInstance(std::wstring path, bool readInfo)
+HidInstance::HidInstance(std::wstring path)
 	: path(std::move(path))
 {
-	if (readInfo)
-	{
-		readMetadata();
-	}
 }
 
 HidInstance::HidInstance(HidInstance&& other) noexcept
+	: handle(std::move(other.handle)),
+	  flags(other.flags),
+	  caps_(other.caps_),
+	  attributes_(other.attributes_),
+	  serialString(std::move(other.serialString)),
+	  serial(std::move(other.serial)),
+	  path(std::move(other.path)),
+	  instanceId(std::move(other.instanceId)),
+	  input_buffer(std::move(other.input_buffer)),
+	  output_buffer(std::move(other.output_buffer)),
+	  overlap_in(other.overlap_in),
+	  overlap_out(other.overlap_out),
+	  pending_read_(other.pending_read_),
+	  pending_write_(other.pending_write_)
 {
-	*this = std::move(other);
+	other.flags = 0;
 }
 
 HidInstance::~HidInstance()
@@ -95,14 +101,11 @@ const HidAttributes& HidInstance::attributes() const
 	return attributes_;
 }
 
-void HidInstance::readMetadata()
+bool HidInstance::readMetadata()
 {
 	if (isOpen())
 	{
-		readCaps();
-		readAttributes();
-		readSerial();
-		return;
+		return readCaps() || readAttributes() || readSerial();
 	}
 
 #ifdef _MSC_VER
@@ -111,22 +114,19 @@ void HidInstance::readMetadata()
 
 	if (!h.isValid())
 	{
-		const std::string path_a(path.begin(), path.end());
-		const std::string message = "Failed to open handle to device: " + path_a;
-		throw std::runtime_error(message);
+		nativeError_ = GetLastError();
+		return false;
 	}
 #else
 	#error __FUNCTION__ not implemented on this platform.
 #endif
 
-	readCaps(h.nativeHandle);
-	readAttributes(h.nativeHandle);
-	readSerial(h.nativeHandle);
+	return readCaps(h.nativeHandle) || readAttributes(h.nativeHandle) || readSerial(h.nativeHandle);
 }
 
-void HidInstance::readCaps()
+bool HidInstance::readCaps()
 {
-	readCaps(handle.nativeHandle);
+	return readCaps(handle.nativeHandle);
 }
 
 bool HidInstance::readSerial()
@@ -191,6 +191,7 @@ bool HidInstance::open(HidOpenFlags_t flags)
 
 	if (!handle.isValid())
 	{
+		nativeError_ = GetLastError();
 		return false;
 	}
 
@@ -412,15 +413,17 @@ bool HidInstance::setOutputReport()
 	return setOutputReport(output_buffer);
 }
 
-void HidInstance::readCaps(HANDLE h)
+bool HidInstance::readCaps(HANDLE h)
 {
+	bool result = false;
+
 #ifdef _MSC_VER
-	HIDP_CAPS c              = {};
+	HIDP_CAPS c = {};
 	PHIDP_PREPARSED_DATA ptr = nullptr;
 
-	if (HidD_GetPreparsedData(h, &ptr))
+	if ((result = !!HidD_GetPreparsedData(h, &ptr)))
 	{
-		if (HidP_GetCaps(ptr, &c))
+		if ((result = !!HidP_GetCaps(ptr, &c)))
 		{
 			caps_.usage               = c.Usage;
 			caps_.usagePage           = c.UsagePage;
@@ -438,15 +441,28 @@ void HidInstance::readCaps(HANDLE h)
 			caps_.featureValueCaps    = c.NumberFeatureValueCaps;
 			caps_.featureDataIndices  = c.NumberFeatureDataIndices;
 		}
+		else
+		{
+			nativeError_ = GetLastError();
+		}
 
 		HidD_FreePreparsedData(ptr);
+	}
+	else
+	{
+		nativeError_ = GetLastError();
 	}
 #else
 	#error __FUNCTION__ not implemented on this platform.
 #endif
 
-	input_buffer.resize(caps().inputReportSize);
-	output_buffer.resize(caps().outputReportSize);
+	if (result)
+	{
+		input_buffer.resize(caps().inputReportSize);
+		output_buffer.resize(caps().outputReportSize);
+	}
+
+	return result;
 }
 
 bool HidInstance::readSerial(HANDLE h)
@@ -456,7 +472,7 @@ bool HidInstance::readSerial(HANDLE h)
 #ifdef _MSC_VER
 	std::array<uint8_t, 26> buffer {};
 
-	bool result = HidD_GetSerialNumberString(h, buffer.data(), static_cast<ULONG>(buffer.size()));
+	bool result = !!HidD_GetSerialNumberString(h, buffer.data(), static_cast<ULONG>(buffer.size()));
 
 	if (result)
 	{

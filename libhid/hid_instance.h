@@ -64,6 +64,8 @@ namespace hid
 		bool pending_read_ = false;
 		bool pending_write_ = false;
 
+		size_t nativeError_ = 0;
+
 	public:
 		std::wstring path;
 		std::wstring instanceId;
@@ -78,8 +80,8 @@ namespace hid
 
 		HidInstance() = default;
 
-		HidInstance(std::wstring path, std::wstring instanceId, bool readInfo);
-		HidInstance(std::wstring path, bool readInfo);
+		HidInstance(std::wstring path, std::wstring instanceId);
+		HidInstance(std::wstring path);
 		HidInstance(HidInstance&& other) noexcept;
 
 		~HidInstance();
@@ -94,8 +96,8 @@ namespace hid
 		const HidCaps& caps() const;
 		const HidAttributes& attributes() const;
 
-		void readMetadata();
-		void readCaps();
+		bool readMetadata();
+		bool readCaps();
 		bool readSerial();
 		bool readAttributes();
 		bool getFeature(const gsl::span<uint8_t>& buffer) const;
@@ -103,6 +105,11 @@ namespace hid
 
 		bool open(HidOpenFlags_t flags);
 		void close();
+
+		inline auto nativeError() const
+		{
+			return nativeError_;
+		}
 
 		bool read(void* buffer, size_t size) const;
 		bool read(const gsl::span<uint8_t>& buffer) const;
@@ -130,7 +137,7 @@ namespace hid
 		bool setOutputReport();
 
 	private:
-		void readCaps(HANDLE h);
+		bool readCaps(HANDLE h);
 		bool readSerial(HANDLE h);
 		bool readAttributes(HANDLE h);
 	};

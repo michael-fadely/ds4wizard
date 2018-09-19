@@ -28,8 +28,8 @@ bool Ds4DeviceManager::isDs4(const hid::HidInstance& hid)
 
 bool Ds4DeviceManager::isDs4(const std::wstring& devicePath)
 {
-	const hid::HidInstance hid(devicePath, true);
-	return isDs4(hid);
+	hid::HidInstance hid(devicePath);
+	return hid.readMetadata() && isDs4(hid);
 }
 
 void Ds4DeviceManager::findControllers()
@@ -61,14 +61,11 @@ void Ds4DeviceManager::findController(const std::wstring& devicePath)
 			return false;
 		}
 
-		try
+		hid::HidInstance hid(path, instanceId);
+
+		if (hid.readMetadata())
 		{
-			hid::HidInstance hid(path, instanceId, true);
 			return handleDevice(hid);
-		}
-		catch (const std::exception&)
-		{
-			// ignored
 		}
 
 		return false;

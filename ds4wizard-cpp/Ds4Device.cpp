@@ -246,7 +246,7 @@ bool Ds4Device::scpDeviceOpen()
 
 	hid::enumerateGuid([&](const std::wstring& path, const std::wstring& instanceId) -> bool
 	{
-		info = std::make_unique<hid::HidInstance>(path, instanceId, false);
+		info = std::make_unique<hid::HidInstance>(path, instanceId);
 		return true;
 	}, GUID_DEVINTERFACE_SCPVBUS);
 

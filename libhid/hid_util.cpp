@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include <Windows.h>
 #include <initguid.h> // for GUID_DEVINTERFACE_USB_HUB
 #include <usbiodef.h>
@@ -105,20 +103,13 @@ void hid::enumerateHid(const std::function<bool(HidInstance& instance)>& fn) noe
 
 	const auto callback = [fn](const std::wstring& path, const std::wstring& instanceId) -> bool
 	{
-		HidInstance hid;
+		HidInstance hid(path, instanceId);
 
-		try
+		if (hid.readMetadata())
 		{
-			HidInstance temp(path, instanceId, true);
-			hid = std::move(temp);
 			return fn(hid);
 		}
-		catch (std::exception& ex)
-		{
-			std::cout << ex.what() << std::endl;
-		}
 
-		hid.close();
 		return false;
 	};
 
