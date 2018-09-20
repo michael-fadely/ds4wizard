@@ -3,7 +3,6 @@
 #include <deque>
 #include <functional>
 
-// TODO: senderless version
 // TODO: rename
 
 template <typename sender_t, typename... args_t>
