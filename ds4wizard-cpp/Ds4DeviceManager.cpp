@@ -150,17 +150,19 @@ bool Ds4DeviceManager::handleDevice(hid::HidInstance& hid)
 		{
 			device = std::make_shared<Ds4Device>();
 
-			device->onDeviceClosed += [this](auto sender, auto args) { onDs4DeviceClosed(sender, args); };
+			device->onDeviceClosed += [this](auto sender) { onDs4DeviceClosed(sender); };
 
-			device->onScpDeviceMissing          += [](auto sender, auto args) { Logger::writeLine(LogLevel::warning, "ScpVBus device not found. XInput emulation will not be available."); };
-			device->onScpDeviceOpenFailed       += [](auto sender, auto args) { Logger::writeLine(LogLevel::warning, "Failed to acquire ScpVBus device handle. XInput emulation will not be available."); };
-			device->onScpXInputHandleFailure    += [](auto sender, auto args) { Logger::writeLine(LogLevel::warning, "Failed to obtain ScpVBus XInput handle. XInput emulation will not be available."); };
-			device->onBluetoothExclusiveFailure += [](auto sender, auto args) { Logger::writeLine(LogLevel::warning, sender->name(), "Failed to open Bluetooth device exclusively."); };
-			device->onBluetoothConnected        += [](auto sender, auto args) { Logger::writeLine(LogLevel::info,    sender->name(), "Bluetooth connected."); };
-			device->onBluetoothIdleDisconnect   += [](auto sender, auto args) { Logger::writeLine(LogLevel::info,    sender->name(), "Bluetooth idle disconnect." /* TODO: std::string.Format(Resources.IdleDisconnect, idleTimeout)*/); };
-			device->onBluetoothDisconnected     += [](auto sender, auto args) { Logger::writeLine(LogLevel::info,    sender->name(), "Bluetooth disconnected."); };
-			device->onUsbExclusiveFailure       += [](auto sender, auto args) { Logger::writeLine(LogLevel::warning, sender->name(), "Failed to open USB device exclusively."); };
-			device->onUsbConnected              += [](auto sender, auto args) { Logger::writeLine(LogLevel::info,    sender->name(), "USB connected."); };
+			// TODO: translatable
+
+			device->onScpDeviceMissing          += [](auto sender) { Logger::writeLine(LogLevel::warning, "ScpVBus device not found. XInput emulation will not be available."); };
+			device->onScpDeviceOpenFailed       += [](auto sender) { Logger::writeLine(LogLevel::warning, "Failed to acquire ScpVBus device handle. XInput emulation will not be available."); };
+			device->onScpXInputHandleFailure    += [](auto sender) { Logger::writeLine(LogLevel::warning, "Failed to obtain ScpVBus XInput handle. XInput emulation will not be available."); };
+			device->onBluetoothExclusiveFailure += [](auto sender) { Logger::writeLine(LogLevel::warning, sender->name(), "Failed to open Bluetooth device exclusively."); };
+			device->onBluetoothConnected        += [](auto sender) { Logger::writeLine(LogLevel::info,    sender->name(), "Bluetooth connected."); };
+			device->onBluetoothIdleDisconnect   += [](auto sender) { Logger::writeLine(LogLevel::info,    sender->name(), "Bluetooth idle disconnect." /* TODO: std::string.Format(Resources.IdleDisconnect, idleTimeout)*/); };
+			device->onBluetoothDisconnected     += [](auto sender) { Logger::writeLine(LogLevel::info,    sender->name(), "Bluetooth disconnected."); };
+			device->onUsbExclusiveFailure       += [](auto sender) { Logger::writeLine(LogLevel::warning, sender->name(), "Failed to open USB device exclusively."); };
+			device->onUsbConnected              += [](auto sender) { Logger::writeLine(LogLevel::info,    sender->name(), "USB connected."); };
 
 			// TODO: don't toggle the device unless opening exclusively fails!
 			toggleDevice(hid.instanceId);
@@ -211,7 +213,7 @@ bool Ds4DeviceManager::handleDevice(hid::HidInstance& hid)
 	return false;
 }
 
-void Ds4DeviceManager::onDs4DeviceClosed(Ds4Device* sender, std::shared_ptr<EventArgs>)
+void Ds4DeviceManager::onDs4DeviceClosed(Ds4Device* sender)
 {
 	LOCK(devices);
 

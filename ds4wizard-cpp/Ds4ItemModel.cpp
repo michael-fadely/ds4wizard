@@ -97,7 +97,7 @@ void Ds4ItemModel::onDeviceOpened(std::shared_ptr<DeviceOpenedEventArgs> a)
 	{
 		auto device = a->device;
 
-		device->onBatteryLevelChanged += [this](auto sender, auto) -> void
+		device->onBatteryLevelChanged += [this](auto sender) -> void
 		{
 			emit s_onDeviceBatteryChanged(sender);
 		};

@@ -43,7 +43,7 @@ class Logger
 	inline static std::recursive_mutex sync_lock;
 
 public:
-	static inline EventHandler<void, LineLoggedEventArgs> lineLogged;
+	static inline EventHandler<void, std::shared_ptr<LineLoggedEventArgs>> lineLogged;
 
 	/**
 	 * \brief 

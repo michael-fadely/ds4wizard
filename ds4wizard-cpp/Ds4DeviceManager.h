@@ -72,14 +72,14 @@ public:
 	 * Fired when a device is opened.
 	 * \sa DeviceOpenedEventArgs
 	 */
-	EventHandler<Ds4DeviceManager, DeviceOpenedEventArgs> deviceOpened;
+	EventHandler<Ds4DeviceManager, std::shared_ptr<DeviceOpenedEventArgs>> deviceOpened;
 
 	/**
 	 * \brief 
 	 * Fired when a device is closed.
 	 * \sa DeviceClosedEventArgs
 	 */
-	EventHandler<Ds4DeviceManager, DeviceClosedEventArgs> deviceClosed;
+	EventHandler<Ds4DeviceManager, std::shared_ptr<DeviceClosedEventArgs>> deviceClosed;
 
 	~Ds4DeviceManager();
 
@@ -105,15 +105,21 @@ public:
 	 */
 	void findControllers();
 
+	/**
+	 * \brief Finds and connects the first controller matching \c devicePath
+	 */
 	void findController(const std::wstring& devicePath);
 
+	/**
+	 * \brief Number of devices currently being managed.
+	 */
 	size_t deviceCount();
 
 	std::unique_lock<std::recursive_mutex> lockDevices();
 
 private:
 	bool handleDevice(hid::HidInstance& hid);
-	void onDs4DeviceClosed(Ds4Device* sender, std::shared_ptr<EventArgs> eventArgs);
+	void onDs4DeviceClosed(Ds4Device* sender);
 
 public:
 	/**
