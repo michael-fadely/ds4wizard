@@ -193,9 +193,6 @@
     <ClInclude Include="Logger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="EventHandler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Ds4AutoLightColor.h">
       <Filter>Header Files\DualShock 4</Filter>
     </ClInclude>
@@ -246,6 +243,9 @@
     </ClInclude>
     <ClInclude Include="bindutil.h">
       <Filter>Header Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Event.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

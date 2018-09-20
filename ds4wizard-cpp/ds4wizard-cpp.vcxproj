@@ -215,7 +215,7 @@
     <ClInclude Include="Ds4Output.h" />
     <ClInclude Include="Ds4TouchRegion.h" />
     <ClInclude Include="enums.h" />
-    <ClInclude Include="EventHandler.h" />
+    <ClInclude Include="Event.h" />
     <ClInclude Include="InputMap.h" />
     <ClInclude Include="JsonData.h" />
     <ClInclude Include="Logger.h" />

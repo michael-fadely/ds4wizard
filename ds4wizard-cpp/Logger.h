@@ -4,7 +4,7 @@
 #include <mutex>
 #include <string>
 #include <enum.h>
-#include "EventHandler.h"
+#include "Event.h"
 
 BETTER_ENUM(LogLevel, int, info, warning, error);
 
@@ -43,7 +43,7 @@ class Logger
 	inline static std::recursive_mutex sync_lock;
 
 public:
-	static inline EventHandler<void, std::shared_ptr<LineLoggedEventArgs>> lineLogged;
+	static inline Event<void, std::shared_ptr<LineLoggedEventArgs>> lineLogged;
 
 	/**
 	 * \brief 

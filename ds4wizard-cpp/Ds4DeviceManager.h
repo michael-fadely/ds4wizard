@@ -7,7 +7,7 @@
 
 #include <hid_instance.h>
 #include "Ds4Device.h"
-#include "EventHandler.h"
+#include "Event.h"
 
 class DeviceOpenedEventArgs
 {
@@ -72,14 +72,14 @@ public:
 	 * Fired when a device is opened.
 	 * \sa DeviceOpenedEventArgs
 	 */
-	EventHandler<Ds4DeviceManager, std::shared_ptr<DeviceOpenedEventArgs>> deviceOpened;
+	Event<Ds4DeviceManager, std::shared_ptr<DeviceOpenedEventArgs>> deviceOpened;
 
 	/**
 	 * \brief 
 	 * Fired when a device is closed.
 	 * \sa DeviceClosedEventArgs
 	 */
-	EventHandler<Ds4DeviceManager, std::shared_ptr<DeviceClosedEventArgs>> deviceClosed;
+	Event<Ds4DeviceManager, std::shared_ptr<DeviceClosedEventArgs>> deviceClosed;
 
 	~Ds4DeviceManager();
 

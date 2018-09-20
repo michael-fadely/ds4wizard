@@ -23,8 +23,8 @@ public:
 	std::recursive_mutex devices_lock;
 	std::deque<DeviceProfile> profiles;
 
-	// TODO: event EventHandler Loaded;
-	// TODO: event EventHandler ProfileChanged;
+	// TODO: event Event Loaded;
+	// TODO: event Event ProfileChanged;
 
 	DeviceProfileCache() = default;
 

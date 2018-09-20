@@ -3,10 +3,8 @@
 #include <deque>
 #include <functional>
 
-// TODO: rename
-
 template <typename sender_t, typename... args_t>
-class EventHandler
+class Event
 {
 public:
 	using callback_t = std::function<void(sender_t* sender, args_t... args)>;
@@ -15,13 +13,13 @@ private:
 	std::deque<callback_t> callbacks;
 
 public:
-	EventHandler& operator+=(callback_t callback)
+	Event& operator+=(callback_t callback)
 	{
 		callbacks.emplace_back(std::move(callback));
 		return *this;
 	}
 
-	EventHandler& operator-=(callback_t callback)
+	Event& operator-=(callback_t callback)
 	{
 		auto it = callbacks.find(callback);
 

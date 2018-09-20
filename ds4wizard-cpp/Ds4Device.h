@@ -14,7 +14,7 @@
 #include "ScpDevice.h"
 #include "Ds4Input.h"
 #include "Ds4Output.h"
-#include "EventHandler.h"
+#include "Event.h"
 
 class Ds4Device
 {
@@ -74,17 +74,17 @@ class Ds4Device
 	bool isIdle() const;
 
 public:
-	EventHandler<Ds4Device> onDeviceClosed;
-	EventHandler<Ds4Device> onBatteryLevelChanged;
-	EventHandler<Ds4Device> onScpDeviceMissing;
-	EventHandler<Ds4Device> onScpDeviceOpenFailed;
-	EventHandler<Ds4Device> onScpXInputHandleFailure;
-	EventHandler<Ds4Device> onBluetoothExclusiveFailure;
-	EventHandler<Ds4Device> onBluetoothConnected;
-	EventHandler<Ds4Device> onBluetoothIdleDisconnect;
-	EventHandler<Ds4Device> onBluetoothDisconnected;
-	EventHandler<Ds4Device> onUsbExclusiveFailure;
-	EventHandler<Ds4Device> onUsbConnected;
+	Event<Ds4Device> onDeviceClosed;
+	Event<Ds4Device> onBatteryLevelChanged;
+	Event<Ds4Device> onScpDeviceMissing;
+	Event<Ds4Device> onScpDeviceOpenFailed;
+	Event<Ds4Device> onScpXInputHandleFailure;
+	Event<Ds4Device> onBluetoothExclusiveFailure;
+	Event<Ds4Device> onBluetoothConnected;
+	Event<Ds4Device> onBluetoothIdleDisconnect;
+	Event<Ds4Device> onBluetoothDisconnected;
+	Event<Ds4Device> onUsbExclusiveFailure;
+	Event<Ds4Device> onUsbConnected;
 
 	DeviceSettings settings;
 	DeviceProfile profile;
