@@ -3,6 +3,10 @@
 #include <QtWidgets/QApplication>
 #include "program.h"
 
+#include <windows.h>
+#include <mmdeviceapi.h>
+#include <endpointvolume.h>
+
 // TODO: single instance https://stackoverflow.com/a/26904110
 
 #ifdef QT_IS_FUCKING_BROKEN
@@ -43,6 +47,7 @@ LRESULT CALLBACK windowProc(
 
 int main(int argc, char** argv)
 {
+	CoInitialize(nullptr);
 	QApplication application(argc, argv);
 
 	Program::initialize();

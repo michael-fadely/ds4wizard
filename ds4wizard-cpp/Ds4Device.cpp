@@ -16,6 +16,10 @@
 #include "Ds4AutoLightColor.h"
 #include "ScpDevice.h"
 
+#include <windows.h>
+#include <mmdeviceapi.h>
+#include <endpointvolume.h>
+
 using namespace std::chrono;
 
 bool Ds4Device::disconnectOnIdle() const
@@ -117,6 +121,18 @@ Ds4Device::Ds4Device(hid::HidInstance& device)
 
 void Ds4Device::open(hid::HidInstance& device)
 {
+	// Get enumerator for audio endpoint devices.
+	HRESULT hr = CoCreateInstance(__uuidof(MMDeviceEnumerator),
+	                              nullptr, CLSCTX_INPROC_SERVER,
+	                              __uuidof(IMMDeviceEnumerator),
+	                              reinterpret_cast<void**>(&pEnumerator));
+
+	// Get peak meter for default audio-rendering device.
+	hr = pEnumerator->GetDefaultAudioEndpoint(eRender, eConsole, &pDevice);
+
+	hr = pDevice->Activate(__uuidof(IAudioMeterInformation),
+	                       CLSCTX_ALL, nullptr, reinterpret_cast<void**>(&pMeterInfo));
+
 	std::stringstream macaddr;
 
 	macaddr << std::hex << std::uppercase << std::setw(2) << std::setfill('0')
@@ -339,6 +355,21 @@ void Ds4Device::onProfileChanged(const std::string& newName)
 
 Ds4Device::~Ds4Device()
 {
+	if (pEnumerator)
+	{
+		pEnumerator->Release();
+	}
+
+	if (pDevice)
+	{
+		pDevice->Release();
+	}
+
+	if (pMeterInfo)
+	{
+		pMeterInfo->Release();
+	}
+
 	try
 	{
 		close();
@@ -569,8 +600,20 @@ void Ds4Device::writeBluetooth()
 	}
 }
 
+// HACK
+static bool peak_max = false;
+static size_t peak_i = 0;
+static std::array<float, 5> peak_f {};
+static float peak_last = 0.0f;
+static Stopwatch peak_sw;
+
 void Ds4Device::run()
 {
+	if (!peak_sw.running())
+	{
+		peak_sw.start();
+	}
+
 	deltaTime = static_cast<float>(duration_cast<milliseconds>(deltaStopwatch.elapsed()).count());
 	deltaStopwatch.start();
 
@@ -581,11 +624,50 @@ void Ds4Device::run()
 	if (activeLight.idleFade)
 	{
 		const Ds4LightOptions& l = settings.useProfileLight ? profile.light : settings.light;
+
+		auto color = l.color;
+		float peak_scaled = peak_last;
+
+		if (peak_sw.elapsed() >= 15ms)
+		{
+			float peak = 0.0f;
+			pMeterInfo->GetPeakValue(&peak);
+
+			peak_scaled = std::max(0.0f, peak - 0.5f) / 0.5f;
+
+			peak_f[peak_i++] = peak_scaled;
+
+			if (peak_i >= peak_f.size())
+			{
+				peak_max = true;
+			}
+
+			peak_i %= peak_f.size();
+
+			if (peak_max)
+			{
+				peak_scaled = 0.0f;
+
+				for (auto f : peak_f)
+				{
+					peak_scaled += f / static_cast<float>(peak_f.size());
+				}
+			}
+
+			peak_last = peak_scaled;
+
+			peak_sw.start();
+		}
+
+		uint8_t cl = 255 * peak_scaled;
+
+		color.red = std::clamp(color.red + cl, 0, 255);
+
 		double m = isIdle() ? 1.0 : std::clamp(duration_cast<milliseconds>(idleTime.elapsed()).count()
 		                                       / static_cast<double>(duration_cast<milliseconds>(idleTimeout()).count()),
 		                                       0.0, 1.0);
 
-		output.lightColor = Ds4Color::lerp(l.color, fadeColor, static_cast<float>(m));
+		output.lightColor = Ds4Color::lerp(color, fadeColor, static_cast<float>(m));
 	}
 
 	const bool charging_ = charging();

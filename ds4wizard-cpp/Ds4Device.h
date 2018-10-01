@@ -16,6 +16,10 @@
 #include "Ds4Output.h"
 #include "Event.h"
 
+#include <windows.h>
+#include <mmdeviceapi.h>
+#include <endpointvolume.h>
+
 class Ds4Device
 {
 	std::string macAddress_;
@@ -72,6 +76,10 @@ class Ds4Device
 	bool disconnectOnIdle() const;
 	std::chrono::microseconds idleTimeout() const;
 	bool isIdle() const;
+
+	IMMDeviceEnumerator* pEnumerator = nullptr;
+	IMMDevice* pDevice = nullptr;
+	IAudioMeterInformation* pMeterInfo = nullptr;
 
 public:
 	Event<Ds4Device> onDeviceClosed;
