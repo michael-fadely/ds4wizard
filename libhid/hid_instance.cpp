@@ -478,6 +478,12 @@ bool HidInstance::readSerial(HANDLE h)
 	{
 		serialString = std::wstring(reinterpret_cast<wchar_t*>(buffer.data()));
 
+		// HACK: this is bad and wrong; there is a device on my system returning "2.1.8"
+		if (serialString.length() < 12)
+		{
+			return false;
+		}
+
 		for (size_t i = 0; i < 6; i++)
 		{
 			const auto sub = serialString.substr(i * 2, 2);
