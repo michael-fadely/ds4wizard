@@ -58,19 +58,8 @@ Stopwatch::clock::duration Ds4Device::getLatency()
 
 Stopwatch::clock::duration Ds4Device::getLatencyAverage()
 {
-	LOCK(sync);
-	
-	if (!latencyPoints)
-	{
-		return 0ms;
-	}
-
-	if (latencyPoints == 1)
-	{
-		return latencySum;
-	}
-
-	return latencySum / latencyPoints;
+	LOCK(sync);	
+	return latencyAverage.value();
 }
 
 Stopwatch::clock::duration Ds4Device::getLatencyPeak()
@@ -110,7 +99,13 @@ const std::string& Ds4Device::name() const
 	return settings.name.empty() ? macAddress_ : settings.name;
 }
 
+Ds4Device::Ds4Device()
+	: latencyAverage(std::chrono::seconds(1))
+{
+}
+
 Ds4Device::Ds4Device(hid::HidInstance& device)
+	: latencyAverage(std::chrono::seconds(1))
 {
 	open(device);
 }
@@ -759,22 +754,8 @@ void Ds4Device::controllerThread()
 
 void Ds4Device::addLatencySum()
 {
-	if (!latencyPoints)
-	{
-		latencySum = latency.elapsed();
-	}
-	else
-	{
-		latencySum += latency.elapsed();
-	}
-
-	++latencyPoints;
-
-	if (latencySum >= 1s)
-	{
-		latencySum /= latencyPoints;
-		latencyPoints = 1;
-	}
+	LOCK(sync);
+	latencyAverage.push(latency.elapsed());
 }
 
 void Ds4Device::start()

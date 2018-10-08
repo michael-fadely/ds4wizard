@@ -16,6 +16,8 @@
 #include "Ds4Output.h"
 #include "Event.h"
 
+#include "average.h"
+
 class Ds4Device
 {
 	std::string macAddress_;
@@ -48,11 +50,9 @@ class Ds4Device
 
 	Stopwatch latency;
 
-	size_t latencyPoints = 0;
-	Stopwatch::clock::duration latencySum = std::chrono::milliseconds(0);
-	// used for external reading
-	Stopwatch::clock::duration storedLatency = std::chrono::milliseconds(0);
-	Stopwatch::clock::duration peakLatency = std::chrono::milliseconds(0);
+	Stopwatch::clock::duration storedLatency {};
+	Stopwatch::clock::duration peakLatency {};
+	timed_average<Stopwatch::clock::duration> latencyAverage;
 
 	bool dataReceived = false;
 
@@ -118,7 +118,7 @@ public:
 
 	const std::string& name() const;
 
-	Ds4Device() = default;
+	Ds4Device();
 	explicit Ds4Device(hid::HidInstance& device);
 	~Ds4Device();
 

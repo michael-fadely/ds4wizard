@@ -224,6 +224,8 @@ void DevicePropertiesDialog::updateReadout(Ds4InputData data) const
 		latencyMax = duration_cast<duration<double, std::milli>>(device->getLatencyPeak());
 	}
 
+	realtimeLatency.push(latencyNow);
+
 	ui.labelLatencyNow->setText(QString("%1 ms").arg(latencyNow.count()));
 	ui.labelLatencyAverage->setText(QString("%1 ms").arg(latencyAvg.count()));
 	ui.labelLatencyPeak->setText(QString("%1 ms").arg(latencyMax.count()));

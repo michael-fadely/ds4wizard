@@ -8,6 +8,8 @@
 #include <atomic>
 #include <thread>
 
+#include "average.h"
+
 class DevicePropertiesDialog : public QDialog
 {
 	Q_OBJECT
@@ -21,6 +23,7 @@ private:
 	std::unique_ptr<std::thread> readoutThread;
 	QColor lightColor;
 	int lastUnit = 0;
+	average<duration<double, std::milli>, 15> realtimeLatency;
 
 public:
 	DevicePropertiesDialog(QWidget* parent, std::shared_ptr<Ds4Device> device_);

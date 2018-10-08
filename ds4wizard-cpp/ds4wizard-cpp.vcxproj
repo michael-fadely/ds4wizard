@@ -184,6 +184,7 @@
     <ClCompile Include="XInputGamepad.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="average.h" />
     <ClInclude Include="AxisOptions.h" />
     <ClInclude Include="bindutil.h" />
     <ClInclude Include="Bluetooth.h" />
