@@ -98,11 +98,12 @@ public:
 			return last_average;
 		}
 
+		dirty = false;
 		T temp {};
 
 		for (const auto& p : points)
 		{
-			temp += p / static_cast<T>(points.size());
+			temp += p / points.size();
 		}
 
 		last_average = temp;
