@@ -50,9 +50,9 @@ class Ds4Device
 
 	Stopwatch latency;
 
-	Stopwatch::clock::duration storedLatency {};
-	Stopwatch::clock::duration peakLatency {};
-	timed_average<Stopwatch::clock::duration> latencyAverage;
+	Stopwatch::Duration storedLatency {};
+	Stopwatch::Duration peakLatency {};
+	timed_average<Stopwatch::Duration> latencyAverage;
 
 	bool dataReceived = false;
 
@@ -96,9 +96,9 @@ public:
 	bool usbConnected();
 	bool connected();
 
-	Stopwatch::clock::duration getLatency();
-	Stopwatch::clock::duration getLatencyAverage();
-	Stopwatch::clock::duration getLatencyPeak();
+	Stopwatch::Duration getLatency();
+	Stopwatch::Duration getLatencyAverage();
+	Stopwatch::Duration getLatencyPeak();
 	void resetLatencyPeak();
 
 	const std::string& macAddress() const;

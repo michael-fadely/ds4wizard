@@ -10,12 +10,12 @@ class timed_average
 private:
 	std::vector<T> points;
 	Stopwatch stopwatch;
-	Stopwatch::clock::duration target_duration;
+	Stopwatch::Duration target_duration;
 	T last_average {};
 	bool dirty = false;
 
 public:
-	timed_average(Stopwatch::clock::duration dur)
+	timed_average(Stopwatch::Duration dur)
 		: target_duration(dur)
 	{
 	}

@@ -50,19 +50,19 @@ bool Ds4Device::connected()
 	return bluetoothConnected() || usbConnected();
 }
 
-Stopwatch::clock::duration Ds4Device::getLatency()
+Stopwatch::Duration Ds4Device::getLatency()
 {
 	LOCK(sync);
 	return storedLatency;
 }
 
-Stopwatch::clock::duration Ds4Device::getLatencyAverage()
+Stopwatch::Duration Ds4Device::getLatencyAverage()
 {
 	LOCK(sync);	
 	return latencyAverage.value();
 }
 
-Stopwatch::clock::duration Ds4Device::getLatencyPeak()
+Stopwatch::Duration Ds4Device::getLatencyPeak()
 {
 	LOCK(sync);
 	return peakLatency;
