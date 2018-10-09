@@ -113,8 +113,7 @@ void DevicePropertiesDialog::readoutMethod()
 		}
 
 		auto averageRead = device->getReadLatency();
-		auto averageWrite = device->getWriteLatency();
-		std::this_thread::sleep_for((averageRead.average() + averageWrite.average()) / 2);
+		std::this_thread::sleep_for(averageRead.average() + 1ms);
 	}
 }
 
