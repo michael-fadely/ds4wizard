@@ -157,6 +157,7 @@
     <ClCompile Include="Ds4TouchRegion.cpp" />
     <ClCompile Include="enums.cpp" />
     <ClCompile Include="InputMap.cpp" />
+    <ClCompile Include="Latency.cpp" />
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="MainWindow.cpp">
       <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\$(ConfigurationName)\%(Filename).moc</OutputFile>
@@ -219,6 +220,7 @@
     <ClInclude Include="Event.h" />
     <ClInclude Include="InputMap.h" />
     <ClInclude Include="JsonData.h" />
+    <ClInclude Include="Latency.h" />
     <ClInclude Include="Logger.h" />
     <QtMoc Include="ProfileEditorDialog.h">
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\..\GSL\include;.\..\libhid;.\..\libdevicetoggle;.\..\better-enums;.\..\json\include;.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets</IncludePath>

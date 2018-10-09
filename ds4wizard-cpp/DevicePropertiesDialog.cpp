@@ -112,7 +112,9 @@ void DevicePropertiesDialog::readoutMethod()
 			emit readoutChanged(data);
 		}
 
-		std::this_thread::sleep_for(device->getLatencyAverage());
+		auto averageRead = device->getReadLatency();
+		auto averageWrite = device->getWriteLatency();
+		std::this_thread::sleep_for((averageRead.average() + averageWrite.average()) / 2);
 	}
 }
 
@@ -213,16 +215,12 @@ void DevicePropertiesDialog::updateReadout(Ds4InputData data) const
 	ui.labelTriggerR->setNum(data.rightTrigger);
 	ui.sliderTriggerR->setValue(data.rightTrigger);
 
-	duration<double, std::milli> latencyNow;
-	duration<double, std::milli> latencyAvg;
-	duration<double, std::milli> latencyMax;
+	// TODO: write latency
+	auto latency = device->getReadLatency();
 
-	{
-		auto lock = device->lock();
-		latencyNow = duration_cast<duration<double, std::milli>>(device->getLatency());
-		latencyAvg = duration_cast<duration<double, std::milli>>(device->getLatencyAverage());
-		latencyMax = duration_cast<duration<double, std::milli>>(device->getLatencyPeak());
-	}
+	duration<double, std::milli> latencyNow = duration_cast<duration<double, std::milli>>(latency.lastValue());
+	duration<double, std::milli> latencyAvg = duration_cast<duration<double, std::milli>>(latency.average());
+	duration<double, std::milli> latencyMax = duration_cast<duration<double, std::milli>>(latency.peak());
 
 	ui.labelLatencyNow->setText(QString("%1 ms").arg(latencyNow.count()));
 	ui.labelLatencyAverage->setText(QString("%1 ms").arg(latencyAvg.count()));
@@ -231,7 +229,8 @@ void DevicePropertiesDialog::updateReadout(Ds4InputData data) const
 
 void DevicePropertiesDialog::resetPeakLatency() const
 {
-	device->resetLatencyPeak();
+	// TODO: write latency
+	device->resetReadLatencyPeak();
 }
 
 void DevicePropertiesDialog::profileEditClicked(bool /*checked*/)

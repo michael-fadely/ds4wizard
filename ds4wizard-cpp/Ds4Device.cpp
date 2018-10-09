@@ -50,30 +50,6 @@ bool Ds4Device::connected()
 	return bluetoothConnected() || usbConnected();
 }
 
-Stopwatch::Duration Ds4Device::getLatency()
-{
-	LOCK(sync);
-	return storedLatency;
-}
-
-Stopwatch::Duration Ds4Device::getLatencyAverage()
-{
-	LOCK(sync);	
-	return latencyAverage.value();
-}
-
-Stopwatch::Duration Ds4Device::getLatencyPeak()
-{
-	LOCK(sync);
-	return peakLatency;
-}
-
-void Ds4Device::resetLatencyPeak()
-{
-	LOCK(sync);
-	peakLatency = 0ms;
-}
-
 const std::string& Ds4Device::macAddress() const
 {
 	return macAddress_;
@@ -99,13 +75,7 @@ const std::string& Ds4Device::name() const
 	return settings.name.empty() ? macAddress_ : settings.name;
 }
 
-Ds4Device::Ds4Device()
-	: latencyAverage(std::chrono::seconds(1))
-{
-}
-
 Ds4Device::Ds4Device(hid::HidInstance& device)
-	: latencyAverage(std::chrono::seconds(1))
 {
 	open(device);
 }
@@ -349,6 +319,30 @@ std::unique_lock<std::recursive_mutex> Ds4Device::lock()
 	return std::unique_lock<std::recursive_mutex>(sync_lock);
 }
 
+Latency Ds4Device::getReadLatency()
+{
+	LOCK(sync);
+	return readLatency;
+}
+
+Latency Ds4Device::getWriteLatency()
+{
+	LOCK(sync);
+	return writeLatency;
+}
+
+void Ds4Device::resetReadLatencyPeak()
+{
+	LOCK(sync);
+	readLatency.resetPeak();
+}
+
+void Ds4Device::resetWriteLatencyPeak()
+{
+	LOCK(sync);
+	writeLatency.resetPeak();
+}
+
 void Ds4Device::closeImpl()
 {
 	LOCK(sync);
@@ -521,6 +515,8 @@ void Ds4Device::writeUsbAsync()
 		return;
 	}
 
+	writeLatency.stop();
+
 	if (profile.useXInput && scpDevice != nullptr)
 	{
 		scpDevice->syncState(realXInputIndex);
@@ -538,6 +534,7 @@ void Ds4Device::writeUsbAsync()
 	}
 
 	usbDevice->writeAsync();
+	writeLatency.start();
 }
 
 void Ds4Device::writeBluetooth()
@@ -558,10 +555,14 @@ void Ds4Device::writeBluetooth()
 		return;
 	}
 
+	writeLatency.start();
+
 	if (!bluetoothDevice->setOutputReport())
 	{
 		closeBluetoothDevice();
 	}
+
+	writeLatency.stop();
 }
 
 void Ds4Device::run()
@@ -659,18 +660,15 @@ void Ds4Device::run()
 	{
 		runMaps();
 
-		latency.stop();
-		storedLatency = latency.elapsed();
+		readLatency.stop();
 
-		addLatencySum();
-
-		if (latency.elapsed() >= 5ms)
+		if (readLatency.elapsed() >= 5ms)
 		{
 			// TODO: configurable latency target & light flash (although that increases latency on send)
-			qDebug() << "latency: " << duration_cast<milliseconds>(latency.elapsed()).count() << " ms";
+			qDebug() << "latency: " << duration_cast<milliseconds>(readLatency.elapsed()).count() << " ms";
 		}
 
-		latency.start();
+		readLatency.start();
 
 		if (profile.useXInput)
 		{
@@ -716,20 +714,12 @@ void Ds4Device::run()
 	{
 		input.updateChangedState();
 		runPersistent();
-
-		storedLatency = latency.elapsed();
-		addLatencySum();
-	}
-
-	if (storedLatency > peakLatency)
-	{
-		peakLatency = storedLatency;
 	}
 }
 
 void Ds4Device::controllerThread()
 {
-	latency.start();
+	readLatency.start();
 	idleTime.start();
 	deltaStopwatch.start();
 
@@ -750,12 +740,6 @@ void Ds4Device::controllerThread()
 
 	closeImpl();
 	onDeviceClosed.invoke(this);
-}
-
-void Ds4Device::addLatencySum()
-{
-	LOCK(sync);
-	latencyAverage.push(latency.elapsed());
 }
 
 void Ds4Device::start()

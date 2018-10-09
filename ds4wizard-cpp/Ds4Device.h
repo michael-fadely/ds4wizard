@@ -17,6 +17,7 @@
 #include "Event.h"
 
 #include "average.h"
+#include "Latency.h"
 
 class Ds4Device
 {
@@ -48,11 +49,8 @@ class Ds4Device
 	IKeyboardSimulator      KeyboardSimulator => InputSimulator.Keyboard;
 	IMouseSimulator         MouseSimulator    => InputSimulator.Mouse;*/
 
-	Stopwatch latency;
-
-	Stopwatch::Duration storedLatency {};
-	Stopwatch::Duration peakLatency {};
-	timed_average<Stopwatch::Duration> latencyAverage;
+	Latency readLatency;
+	Latency writeLatency;
 
 	bool dataReceived = false;
 
@@ -96,11 +94,6 @@ public:
 	bool usbConnected();
 	bool connected();
 
-	Stopwatch::Duration getLatency();
-	Stopwatch::Duration getLatencyAverage();
-	Stopwatch::Duration getLatencyPeak();
-	void resetLatencyPeak();
-
 	const std::string& macAddress() const;
 	const std::string& safeMacAddress() const;
 
@@ -118,13 +111,19 @@ public:
 
 	const std::string& name() const;
 
-	Ds4Device();
+	Ds4Device() = default;
 	explicit Ds4Device(hid::HidInstance& device);
 	~Ds4Device();
 
 	void open(hid::HidInstance& device);
 
 	std::unique_lock<std::recursive_mutex> lock();
+
+	Latency getReadLatency();
+	Latency getWriteLatency();
+
+	void resetReadLatencyPeak();
+	void resetWriteLatencyPeak();
 
 private:
 	void closeImpl();
@@ -164,7 +163,6 @@ private:
 	void writeBluetooth();
 	void run();
 	void controllerThread();
-	void addLatencySum();
 
 public:
 	void start();

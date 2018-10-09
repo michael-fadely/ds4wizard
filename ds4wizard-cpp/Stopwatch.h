@@ -5,9 +5,9 @@
 class Stopwatch
 {
 public:
-	using Clock      = std::chrono::high_resolution_clock;
+	using Clock     = std::chrono::high_resolution_clock;
 	using TimePoint = Clock::time_point;
-	using Duration   = Clock::duration;
+	using Duration  = Clock::duration;
 
 protected:
 	bool running_ = false;
