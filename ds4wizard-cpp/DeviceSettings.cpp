@@ -1,9 +1,12 @@
 #include "stdafx.h"
 #include "DeviceSettings.h"
 
+using namespace std::chrono;
+
 DeviceSettings::DeviceSettings()
 	: useProfileLight(false),
-	  useProfileIdle(false)
+	  useProfileIdle(false),
+	  latencyThreshold(15)
 {
 }
 
@@ -25,18 +28,20 @@ void DeviceSettings::readJson(const nlohmann::json& json)
 {
 	DeviceSettingsCommon::readJson(json);
 
-	name            = json["name"];
-	profile         = json.value("profile", "");
-	useProfileLight = json["useProfileLight"];
-	useProfileIdle  = json["useProfileIdle"];
+	name             = json["name"];
+	profile          = json.value("profile", "");
+	useProfileLight  = json["useProfileLight"];
+	useProfileIdle   = json["useProfileIdle"];
+	latencyThreshold = milliseconds(json.value<uint64_t>("latencyThreshold", 15));
 }
 
 void DeviceSettings::writeJson(nlohmann::json& json) const
 {
 	DeviceSettingsCommon::writeJson(json);
 
-	json["name"]            = name;
-	json["profile"]         = profile;
-	json["useProfileLight"] = useProfileLight;
-	json["useProfileIdle"]  = useProfileIdle;
+	json["name"]             = name;
+	json["profile"]          = profile;
+	json["useProfileLight"]  = useProfileLight;
+	json["useProfileIdle"]   = useProfileIdle;
+	json["latencyThreshold"] = latencyThreshold.count();
 }

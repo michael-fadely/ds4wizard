@@ -1,5 +1,6 @@
 #pragma once
 
+#include <chrono>
 #include <string>
 #include "DeviceSettingsCommon.h"
 
@@ -8,8 +9,9 @@ class DeviceSettings : public DeviceSettingsCommon
 public:
 	std::string name;
 	std::string profile;
-	bool        useProfileLight = false;
-	bool        useProfileIdle = false;
+	bool useProfileLight;
+	bool useProfileIdle;
+	std::chrono::milliseconds latencyThreshold;
 
 	DeviceSettings();
 	DeviceSettings(const DeviceSettings& s) = default;

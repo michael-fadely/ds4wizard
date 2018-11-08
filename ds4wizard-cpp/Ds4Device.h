@@ -21,6 +21,7 @@
 
 class Ds4Device
 {
+	bool peakedLatencyThreshold = false;
 	std::string macAddress_;
 	std::string safeMacAddress_;
 
@@ -83,6 +84,7 @@ public:
 	Event<Ds4Device> onBluetoothDisconnected;
 	Event<Ds4Device> onUsbExclusiveFailure;
 	Event<Ds4Device> onUsbConnected;
+	Event<Ds4Device, std::chrono::milliseconds> onLatencyThresholdExceeded;
 
 	DeviceSettings settings;
 	DeviceProfile profile;

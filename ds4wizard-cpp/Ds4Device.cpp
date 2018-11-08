@@ -645,8 +645,8 @@ void Ds4Device::run()
 	const float rs = std::sqrt(rx * rx + ry * ry);
 
 	// TODO: gyro/accel
-	if (input.buttonsChanged || input.heldButtons
-	    || ls >= 0.25f || rs >= 0.25f)
+	if (input.buttonsChanged || input.heldButtons ||
+	    ls >= 0.25f || rs >= 0.25f)
 	{
 		idleTime.start();
 	}
@@ -662,10 +662,19 @@ void Ds4Device::run()
 
 		readLatency.stop();
 
-		if (readLatency.elapsed() >= 5ms)
+		if (readLatency.elapsed() > settings.latencyThreshold)
 		{
-			// TODO: configurable latency target & light flash (although that increases latency on send)
-			qDebug() << "latency: " << duration_cast<milliseconds>(readLatency.elapsed()).count() << " ms";
+			if (!peakedLatencyThreshold)
+			{
+				// do the thing
+				peakedLatencyThreshold = true;
+				onLatencyThresholdExceeded.invoke(this, duration_cast<milliseconds>(readLatency.elapsed()));
+				qDebug() << "latency: " << duration_cast<milliseconds>(readLatency.elapsed()).count() << " ms";
+			}
+		}
+		else
+		{
+			peakedLatencyThreshold = false;
 		}
 
 		readLatency.start();
