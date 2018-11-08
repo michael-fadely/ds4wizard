@@ -84,7 +84,9 @@ public:
 	Event<Ds4Device> onBluetoothDisconnected;
 	Event<Ds4Device> onUsbExclusiveFailure;
 	Event<Ds4Device> onUsbConnected;
-	Event<Ds4Device, std::chrono::milliseconds> onLatencyThresholdExceeded;
+
+	// value, threshold
+	Event<Ds4Device, std::chrono::milliseconds, std::chrono::milliseconds> onLatencyThresholdExceeded;
 
 	DeviceSettings settings;
 	DeviceProfile profile;

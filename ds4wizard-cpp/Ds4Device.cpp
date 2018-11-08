@@ -662,14 +662,16 @@ void Ds4Device::run()
 
 		readLatency.stop();
 
-		if (readLatency.elapsed() > settings.latencyThreshold)
+		auto elapsed = duration_cast<milliseconds>(readLatency.elapsed());
+
+		if (elapsed > settings.latencyThreshold)
 		{
 			if (!peakedLatencyThreshold)
 			{
 				// do the thing
 				peakedLatencyThreshold = true;
-				onLatencyThresholdExceeded.invoke(this, duration_cast<milliseconds>(readLatency.elapsed()));
-				qDebug() << "latency: " << duration_cast<milliseconds>(readLatency.elapsed()).count() << " ms";
+				onLatencyThresholdExceeded.invoke(this, elapsed, settings.latencyThreshold);
+				qDebug() << "latency: " << elapsed.count() << " ms";
 			}
 		}
 		else

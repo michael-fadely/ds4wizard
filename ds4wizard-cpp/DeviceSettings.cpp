@@ -6,7 +6,7 @@ using namespace std::chrono;
 DeviceSettings::DeviceSettings()
 	: useProfileLight(false),
 	  useProfileIdle(false),
-	  latencyThreshold(15)
+	  latencyThreshold(25)
 {
 }
 
@@ -32,7 +32,7 @@ void DeviceSettings::readJson(const nlohmann::json& json)
 	profile          = json.value("profile", "");
 	useProfileLight  = json["useProfileLight"];
 	useProfileIdle   = json["useProfileIdle"];
-	latencyThreshold = milliseconds(json.value<uint64_t>("latencyThreshold", 15));
+	latencyThreshold = milliseconds(json.value<uint64_t>("latencyThreshold", latencyThreshold.count()));
 }
 
 void DeviceSettings::writeJson(nlohmann::json& json) const
