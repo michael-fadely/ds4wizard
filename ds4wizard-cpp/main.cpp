@@ -43,6 +43,10 @@ LRESULT CALLBACK windowProc(
 
 int main(int argc, char** argv)
 {
+#ifdef Q_OS_WIN
+	SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
+#endif
+
 	QApplication application(argc, argv);
 
 	Program::initialize();
