@@ -1,10 +1,12 @@
 #include <Windows.h>
 #include <hidsdi.h>
 #include <hidpi.h>
-#include <utility>
-#include "hid_instance.h"
-#include "hid_handle.h"
+
 #include <thread>
+#include <utility>
+
+#include "hid_handle.h"
+#include "hid_instance.h"
 
 using namespace hid;
 
@@ -20,20 +22,20 @@ HidInstance::HidInstance(std::wstring path)
 }
 
 HidInstance::HidInstance(HidInstance&& other) noexcept
-	: handle(std::move(other.handle)),
-	  flags(other.flags),
+	: flags(other.flags),
+	  handle(std::move(other.handle)),
 	  caps_(other.caps_),
 	  attributes_(other.attributes_),
-	  serialString(std::move(other.serialString)),
-	  serial(std::move(other.serial)),
-	  path(std::move(other.path)),
-	  instanceId(std::move(other.instanceId)),
-	  input_buffer(std::move(other.input_buffer)),
-	  output_buffer(std::move(other.output_buffer)),
 	  overlap_in(other.overlap_in),
 	  overlap_out(other.overlap_out),
 	  pending_read_(other.pending_read_),
-	  pending_write_(other.pending_write_)
+	  pending_write_(other.pending_write_),
+	  path(std::move(other.path)),
+	  instanceId(std::move(other.instanceId)),
+	  serialString(std::move(other.serialString)),
+	  serial(std::move(other.serial)),
+	  input_buffer(std::move(other.input_buffer)),
+	  output_buffer(std::move(other.output_buffer))
 {
 	other.flags = 0;
 }

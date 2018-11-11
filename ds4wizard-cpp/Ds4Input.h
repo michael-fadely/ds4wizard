@@ -1,11 +1,11 @@
 #pragma once
 
-#include <memory>
-#include <gsl/span>
-#include "Ds4InputData.h"
-#include "ScpDevice.h"
-#include "XInputGamepad.h"
 #include <optional>
+
+#include <gsl/span>
+
+#include "Ds4InputData.h"
+#include "XInputGamepad.h"
 
 class Ds4Input
 {
@@ -19,11 +19,9 @@ public:
 	Ds4Buttons_t releasedButtons = 0; // TODO: private set
 
 	Ds4InputData data {};
-	XInputGamepad gamepad {};
 
 	void update(const gsl::span<uint8_t>& buffer);
 	void updateChangedState();
-	void toXInput(int index, std::unique_ptr<ScpDevice>& device);
 	float getAxis(Ds4Axis_t axis, const std::optional<AxisPolarity>& polarity) const;
 
 private:

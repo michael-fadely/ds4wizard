@@ -154,9 +154,7 @@ bool Ds4DeviceManager::handleDevice(hid::HidInstance& hid)
 
 			// TODO: translatable
 
-			device->onScpDeviceMissing          += [](auto sender) { Logger::writeLine(LogLevel::warning, "ScpVBus device not found. XInput emulation will not be available."); };
-			device->onScpDeviceOpenFailed       += [](auto sender) { Logger::writeLine(LogLevel::warning, "Failed to acquire ScpVBus device handle. XInput emulation will not be available."); };
-			device->onScpXInputHandleFailure    += [](auto sender) { Logger::writeLine(LogLevel::warning, "Failed to obtain ScpVBus XInput handle. XInput emulation will not be available."); };
+			//device->onScpXInputHandleFailure    += [](auto sender) { Logger::writeLine(LogLevel::warning, "Failed to obtain ScpVBus XInput handle. XInput emulation will not be available."); };
 			device->onBluetoothExclusiveFailure += [](auto sender) { Logger::writeLine(LogLevel::warning, sender->name(), "Failed to open Bluetooth device exclusively."); };
 			device->onBluetoothConnected        += [](auto sender) { Logger::writeLine(LogLevel::info,    sender->name(), "Bluetooth connected."); };
 			device->onBluetoothIdleDisconnect   += [](auto sender) { Logger::writeLine(LogLevel::info,    sender->name(), "Bluetooth idle disconnect." /* TODO: std::string.Format(Resources.IdleDisconnect, idleTimeout)*/); };

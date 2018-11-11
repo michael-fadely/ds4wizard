@@ -11,7 +11,6 @@ bool iequalsc(const char& a, const char& b);
 bool iequals(const std::string& a, const std::string& b);
 
 // source: https://stackoverflow.com/a/217605
-// TODO: string_view
 
 // trim from start (in place)
 void triml(std::string& s);

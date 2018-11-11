@@ -157,6 +157,7 @@
     <ClCompile Include="Ds4TouchRegion.cpp" />
     <ClCompile Include="enums.cpp" />
     <ClCompile Include="InputMap.cpp" />
+    <ClCompile Include="InputSimulator.cpp" />
     <ClCompile Include="KeyboardSimulator.cpp" />
     <ClCompile Include="Latency.cpp" />
     <ClCompile Include="Logger.cpp" />
@@ -221,6 +222,7 @@
     <ClInclude Include="enums.h" />
     <ClInclude Include="Event.h" />
     <ClInclude Include="InputMap.h" />
+    <ClInclude Include="InputSimulator.h" />
     <ClInclude Include="JsonData.h" />
     <ClInclude Include="KeyboardSimulator.h" />
     <ClInclude Include="Latency.h" />

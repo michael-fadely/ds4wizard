@@ -24,7 +24,7 @@ BETTER_ENUM(MouseButton, int, left, right, middle, ex1, ex2);
 
 struct InputType
 {
-	enum T
+	enum T : uint32_t
 	{
 		none,
 		button      = 1 << 0,
@@ -40,7 +40,7 @@ ENUM_VALUES(InputType, 3);
 
 struct OutputType // TODO: vjoy output support
 {
-	enum T
+	enum T : uint32_t
 	{
 		none,
 		xinput   = 1 << 0,

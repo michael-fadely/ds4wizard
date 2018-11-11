@@ -93,30 +93,30 @@ void Ds4Input::update(const gsl::span<uint8_t>& buffer)
 			heldButtons |= Ds4Buttons::up;
 			break;
 		case Hat::northEast:
-			heldButtons |= (Ds4Buttons::up | Ds4Buttons::right);
+			heldButtons |= Ds4Buttons::up | Ds4Buttons::right;
 			break;
 		case Hat::east:
-			heldButtons |= (Ds4Buttons::right);
+			heldButtons |= Ds4Buttons::right;
 			break;
 		case Hat::southEast:
-			heldButtons |= (Ds4Buttons::right | Ds4Buttons::down);
+			heldButtons |= Ds4Buttons::right | Ds4Buttons::down;
 			break;
 		case Hat::south:
-			heldButtons |= (Ds4Buttons::down);
+			heldButtons |= Ds4Buttons::down;
 			break;
 		case Hat::southWest:
-			heldButtons |= (Ds4Buttons::down | Ds4Buttons::left);
+			heldButtons |= Ds4Buttons::down | Ds4Buttons::left;
 			break;
 		case Hat::west:
-			heldButtons |= (Ds4Buttons::left);
+			heldButtons |= Ds4Buttons::left;
 			break;
 		case Hat::northWest:
-			heldButtons |= (Ds4Buttons::left | Ds4Buttons::up);
+			heldButtons |= Ds4Buttons::left | Ds4Buttons::up;
 			break;
 		case Hat::none:
 			break;
 		default:
-			heldButtons |= (lastDpad);
+			heldButtons |= lastDpad;
 			break;
 	}
 
@@ -137,22 +137,6 @@ void Ds4Input::updateChangedState()
 	               || (releasedButtons & touchMask) != 0;
 
 	lastTouchFrame = data.touchFrame;
-}
-
-void Ds4Input::toXInput(int index, std::unique_ptr<ScpDevice>& device)
-{
-	if (gamepad == lastGamepad)
-	{
-		return;
-	}
-
-	if (!device)
-	{
-		return;
-	}
-
-	device->syncState(index, gamepad);
-	lastGamepad = gamepad;
 }
 
 float Ds4Input::getAxis(Ds4Axis_t axis, const std::optional<AxisPolarity>& polarity) const

@@ -4,8 +4,6 @@
 #include <cstdint>
 #include <memory>
 #include <thread>
-#include <functional>
-#include <deque>
 
 #include "DeviceSettings.h"
 #include "DeviceProfile.h"
@@ -17,8 +15,7 @@
 #include "Event.h"
 
 #include "Latency.h"
-#include "KeyboardSimulator.h"
-#include "MouseSimulator.h"
+#include "InputSimulator.h"
 
 class Ds4Device
 {
@@ -32,22 +29,12 @@ class Ds4Device
 	bool running = false;
 	std::recursive_mutex sync_lock;
 
-	std::deque<Ds4TouchRegion*> touchRegions;
-
 	// Read-Only
 	Stopwatch idleTime {};
 
 	inline static const Ds4Color fadeColor {};
 
-	// Delta time (for things like mouse movement).
-	// Assumes 1000 Hz virtual polling rate.
-	Stopwatch deltaStopwatch {};
-	float deltaTime = 1.0f;
-
 	ptrdiff_t colorIndex = -1;
-
-	KeyboardSimulator keyboard;
-	MouseSimulator mouse;
 
 	Latency readLatency;
 	Latency writeLatency;
@@ -56,14 +43,8 @@ class Ds4Device
 
 	std::unique_ptr<std::thread> deviceThread = nullptr;
 
-	// Devices
-	std::unique_ptr<ScpDevice> scpDevice = nullptr;
-
 	std::unique_ptr<hid::HidInstance> usbDevice;
 	std::unique_ptr<hid::HidInstance> bluetoothDevice;
-
-	// Misc
-	int realXInputIndex = 0;
 
 	Ds4LightOptions activeLight;
 
@@ -71,12 +52,25 @@ class Ds4Device
 	std::chrono::microseconds idleTimeout() const;
 	bool isIdle() const;
 
+	InputSimulator simulator;
+
+	// Delta time (for things like mouse movement).
+	// Assumes 1000 Hz virtual polling rate.
+	Stopwatch deltaStopwatch {};
+
 public:
+	enum class BluetoothDisconnectReason
+	{
+		none,
+		idle
+	};
+
+	// Delta time (for things like mouse movement).
+	// Assumes 1000 Hz virtual polling rate.
+	float deltaTime = 1.0f;
+
 	Event<Ds4Device> onDeviceClosed;
 	Event<Ds4Device> onBatteryLevelChanged;
-	Event<Ds4Device> onScpDeviceMissing;
-	Event<Ds4Device> onScpDeviceOpenFailed;
-	Event<Ds4Device> onScpXInputHandleFailure;
 	Event<Ds4Device> onBluetoothExclusiveFailure;
 	Event<Ds4Device> onBluetoothConnected;
 	Event<Ds4Device> onBluetoothIdleDisconnect;
@@ -114,7 +108,7 @@ public:
 
 	const std::string& name() const;
 
-	Ds4Device() = default;
+	Ds4Device();
 	explicit Ds4Device(hid::HidInstance& device);
 	~Ds4Device();
 
@@ -141,8 +135,6 @@ public:
 	void applyProfile();
 
 private:
-	bool scpDeviceOpen();
-	void scpDeviceClose();
 	void releaseAutoColor();
 
 public:
@@ -151,7 +143,11 @@ public:
 
 private:
 	void closeBluetoothDevice();
-	void disconnectBluetooth();
+
+public:
+	void disconnectBluetooth(BluetoothDisconnectReason reason);
+
+private:
 	void closeUsbDevice();
 	static bool openDevice(hid::HidInstance& device, bool exclusive);
 
@@ -169,36 +165,4 @@ private:
 
 public:
 	void start();
-
-private:
-	// TODO: move all this shit out into an input simulator class of some kind
-#pragma region shit
-	static constexpr Ds4Buttons_t touchMask = Ds4Buttons::touch1 | Ds4Buttons::touch2;
-
-	void simulateXInputButton(XInputButtons_t buttons, PressedState state);
-
-	XInputAxis_t simulatedXInputAxis = 0;
-
-	void simulateXInputAxis(XInputAxes& axes, float m);
-
-	// TODO: OPTIMIZE !!!
-	std::deque<InputMap*> __maps;
-	void getActive(InputMapBase& map);
-
-	bool isOverriddenByModifierSet(InputMapBase& map);
-	void runMap(InputMap& m, InputModifier* modifier);
-	static PressedState handleTouchToggle(InputMap& m, InputModifier* modifier, const Pressable& pressable);
-	void applyMap(InputMap& m, InputModifier* modifier, PressedState state, float analog);
-	void simulateMouse(const InputMap& m, PressedState state, float analog);
-	void simulateKeyboard(const InputMap& m, PressedState state);
-	void runAction(ActionType action);
-	void runMaps();
-	void runPersistent();
-	void updateTouchRegions();
-	void updateTouchRegion(Ds4TouchRegion& region, InputModifier* modifier, Ds4Buttons_t sender, Ds4Vector2& point, Ds4Buttons_t& disallow);
-	void updatePressedStateImpl(InputMapBase& instance, const std::function<void()>& press, const std::function<void()>& release);
-	void updatePressedState(InputModifier& modifier);
-	void updatePressedState(InputMap& map, InputModifier* modifier);
-	void updateBindingState(InputMap& m, InputModifier* modifier);
-#pragma endregion
 };
