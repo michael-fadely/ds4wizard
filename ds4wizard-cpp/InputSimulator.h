@@ -34,9 +34,15 @@ class InputSimulator
 	std::shared_ptr<ScpDevice> scpDevice;
 	XInputAxis_t simulatedXInputAxis = 0;
 
-
 public:
 	Event<Ds4Device> onScpXInputHandleFailure;
+
+	InputSimulator() = delete;
+	InputSimulator(const InputSimulator&) = delete;
+	InputSimulator(InputSimulator&&) = delete;
+
+	InputSimulator& operator=(const InputSimulator&) = delete;
+	InputSimulator& operator=(InputSimulator&&) = delete;
 
 	explicit InputSimulator(Ds4Device* parent);
 	~InputSimulator();
