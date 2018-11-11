@@ -20,6 +20,8 @@ BETTER_ENUM(SimulatorType, int, none, input, action);
 
 BETTER_ENUM(ActionType, int, none, bluetoothDisconnect);
 
+BETTER_ENUM(MouseButton, int, left, right, middle, ex1, ex2);
+
 struct InputType
 {
 	enum T

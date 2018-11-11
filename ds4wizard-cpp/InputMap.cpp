@@ -415,9 +415,24 @@ void InputMap::readJson(const nlohmann::json& json)
 		action = ActionType::_from_string(json.value("action", "none").c_str());
 	}
 
+	if (json.find("keyCode") != json.end())
+	{
+		keyCode = json["keyCode"].get<VirtualKeyCode>();
+	}
+
+	if (json.find("keyCodeModifiers") != json.end())
+	{
+		keyCodeModifiers = json["keyCodeModifiers"].get<std::vector<VirtualKeyCode>>();
+	}
+
 	if (json.find("mouseAxes") != json.end())
 	{
 		mouseAxes = fromJson<MouseAxes>(json["mouseAxes"]);
+	}
+
+	if (json.find("mouseButtons") != json.end())
+	{
+		mouseButton = MouseButton::_from_string(json.value("mouseButton", "").c_str());
 	}
 
 	if (json.find("xinputAxes") != json.end())
@@ -449,7 +464,25 @@ void InputMap::writeJson(nlohmann::json& json) const
 		json["action"] = action.value()._to_string();
 	}
 
-	json["mouseAxes"] = mouseAxes.toJson();
+	if (keyCode.has_value())
+	{
+		json["keyCode"] = keyCode.value();
+	}
+
+	if (!keyCodeModifiers.empty())
+	{
+		json["keyCodeModifiers"] = keyCodeModifiers;
+	}
+
+	if (mouseAxes.has_value())
+	{
+		json["mouseAxes"] = mouseAxes.value().toJson();
+	}
+
+	if (mouseButton.has_value())
+	{
+		json["mouseButton"] = mouseButton.value()._to_string();
+	}
 
 	if (xinputAxes.has_value())
 	{

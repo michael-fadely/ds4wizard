@@ -15,6 +15,7 @@
 #include "Bluetooth.h"
 #include "Ds4AutoLightColor.h"
 #include "ScpDevice.h"
+#include "KeyboardSimulator.h"
 
 using namespace std::chrono;
 
@@ -1072,7 +1073,6 @@ PressedState Ds4Device::handleTouchToggle(InputMap& m, InputModifier* modifier, 
 
 void Ds4Device::applyMap(InputMap& m, InputModifier* modifier, PressedState state, float analog)
 {
-#if true
 	switch (m.simulatorType)
 	{
 		case SimulatorType::input:
@@ -1122,52 +1122,28 @@ void Ds4Device::applyMap(InputMap& m, InputModifier* modifier, PressedState stat
 		default:
 			throw /* TODO: new ArgumentOutOfRangeException(nameof(m.simulatorType), m.simulatorType, "Invalid map type.")*/;
 	}
-#endif
 }
 
 void Ds4Device::simulateMouse(const InputMap& m, PressedState state, float analog)
 {
-	// TODO
-#if 0
-	if (m.MouseButton.HasValue)
+	if (m.mouseButton.has_value())
 	{
 		switch (state)
 		{
-			case PressedState::Pressed:
-				switch (m.MouseButton.Value)
-				{
-					case MouseButton.LeftButton:
-						MouseSimulator.LeftButtonDown();
-						break;
-					case MouseButton.MiddleButton:
-						MouseSimulator.MiddleButtonDown();
-						break;
-					case MouseButton.RightButton:
-						MouseSimulator.RightButtonDown();
-						break;
-				}
-
+			case PressedState::pressed:
+				mouse.buttonDown(m.mouseButton.value());
 				break;
 
-			case PressedState::Released:
-				switch (m.MouseButton.Value)
-				{
-					case MouseButton.LeftButton:
-						MouseSimulator.LeftButtonUp();
-						break;
-					case MouseButton.MiddleButton:
-						MouseSimulator.MiddleButtonUp();
-						break;
-					case MouseButton.RightButton:
-						MouseSimulator.RightButtonUp();
-						break;
-				}
+			case PressedState::released:
+				mouse.buttonUp(m.mouseButton.value());
+				break;
 
+			default:
 				break;
 		}
 	}
 
-	if (m.MouseAxes == nullptr)
+	if (!m.mouseAxes.has_value())
 	{
 		return;
 	}
@@ -1175,19 +1151,20 @@ void Ds4Device::simulateMouse(const InputMap& m, PressedState state, float analo
 	analog *= deltaTime;
 
 	// TODO: /!\ actually the thing (GetAxisOptions)
-	Direction direction = m.MouseAxes.Directions;
+	Direction_t direction = m.mouseAxes.value().directions;
 
-	int x = 0, y = 0;
+	int x = 0;
+	int y = 0;
 
-	if ((direction & (Direction::Left | Direction::Right)) != (Direction::Left | Direction::Right))
+	if ((direction & (Direction::left | Direction::right)) != (Direction::left | Direction::right))
 	{
-		if (direction & Direction::Right)
+		if (direction & Direction::right)
 		{
-			x = (int)analog;
+			x = static_cast<int>(analog);
 		}
-		else if (direction & Direction::Left)
+		else if (direction & Direction::left)
 		{
-			x = (int)-analog;
+			x = static_cast<int>(-analog);
 		}
 	}
 	else
@@ -1195,15 +1172,15 @@ void Ds4Device::simulateMouse(const InputMap& m, PressedState state, float analo
 		x = 0;
 	}
 
-	if ((direction & (Direction::Up | Direction::Down)) != (Direction::Up | Direction::Down))
+	if ((direction & (Direction::up | Direction::down)) != (Direction::up | Direction::down))
 	{
-		if (direction & Direction::Up)
+		if (direction & Direction::up)
 		{
-			y = (int)-analog;
+			y = static_cast<int>(-analog);
 		}
-		else if (direction & Direction::Down)
+		else if (direction & Direction::down)
 		{
-			y = (int)analog;
+			y = static_cast<int>(analog);
 		}
 	}
 	else
@@ -1213,51 +1190,50 @@ void Ds4Device::simulateMouse(const InputMap& m, PressedState state, float analo
 
 	if (x != 0 || y != 0)
 	{
-		MouseSimulator.MoveMouseBy(x, y);
+		MouseSimulator::moveBy(x, y);
 	}
-#endif
 }
 
 void Ds4Device::simulateKeyboard(const InputMap& m, PressedState state)
 {
-	// TODO
-#if 0
-	if (m.KeyCode == nullptr)
+	if (!m.keyCode.has_value())
 	{
 		return;
 	}
 
-	VirtualKeyCode keyCode = m.KeyCode.Value;
+	VirtualKeyCode keyCode = m.keyCode.value();
 
 	switch (state)
 	{
-		case PressedState::Pressed:
-			KeyboardSimulator.KeyDown(keyCode);
+		case PressedState::pressed:
+			keyboard.keyDown(keyCode);
 
-			if (m.KeyCodeModifiers != nullptr)
+			if (!m.keyCodeModifiers.empty())
 			{
-				foreach(VirtualKeyCode k in m.KeyCodeModifiers)
+				for (VirtualKeyCode k : m.keyCodeModifiers)
 				{
-					KeyboardSimulator.KeyDown(k);
+					keyboard.keyDown(k);
 				}
 			}
 
 			break;
 
-		case PressedState::Released:
-			KeyboardSimulator.KeyUp(keyCode);
+		case PressedState::released:
+			keyboard.keyUp(keyCode);
 
-			if (m.KeyCodeModifiers != nullptr)
+			if (!m.keyCodeModifiers.empty())
 			{
-				foreach(VirtualKeyCode k in m.KeyCodeModifiers)
+				for (VirtualKeyCode k : m.keyCodeModifiers)
 				{
-					KeyboardSimulator.KeyUp(k);
+					keyboard.keyUp(k);
 				}
 			}
 
+			break;
+
+		default:
 			break;
 	}
-#endif
 }
 
 void Ds4Device::runAction(ActionType action)
@@ -1421,7 +1397,6 @@ void Ds4Device::updatePressedStateImpl(InputMapBase& instance, const std::functi
 
 					InputAxisOptions options = instance.getAxisOptions(bit);
 
-					// ReSharper disable once PossibleInvalidOperationException
 					float axis = input.getAxis(instance.inputAxis.value(), options.polarity);
 
 					if (axis >= options.deadZone.value_or(0.0f))

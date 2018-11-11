@@ -16,8 +16,9 @@
 #include "Ds4Output.h"
 #include "Event.h"
 
-#include "average.h"
 #include "Latency.h"
+#include "KeyboardSimulator.h"
+#include "MouseSimulator.h"
 
 class Ds4Device
 {
@@ -45,10 +46,8 @@ class Ds4Device
 
 	ptrdiff_t colorIndex = -1;
 
-	// TODO
-	/*readonly InputSimulator InputSimulator = new InputSimulator();
-	IKeyboardSimulator      KeyboardSimulator => InputSimulator.Keyboard;
-	IMouseSimulator         MouseSimulator    => InputSimulator.Mouse;*/
+	KeyboardSimulator keyboard;
+	MouseSimulator mouse;
 
 	Latency readLatency;
 	Latency writeLatency;
