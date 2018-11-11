@@ -1517,11 +1517,9 @@ void Ds4Device::updateBindingState(InputMap& m, InputModifier* modifier)
 				break;
 			}
 
-			auto& region = it->second;
-
 			if (m.touchDirection == Direction::none)
 			{
-				if (region.isActive(touchMask))
+				if (it->second.isActive(touchMask))
 				{
 					m.pressModifier(modifier);
 				}

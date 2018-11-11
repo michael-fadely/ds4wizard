@@ -15,7 +15,7 @@ private:
 	bool dirty = false;
 
 public:
-	timed_average(Stopwatch::Duration dur)
+	explicit timed_average(Stopwatch::Duration dur)
 		: target_duration(dur)
 	{
 	}

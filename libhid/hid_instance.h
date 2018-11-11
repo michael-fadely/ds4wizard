@@ -81,7 +81,7 @@ namespace hid
 		HidInstance() = default;
 
 		HidInstance(std::wstring path, std::wstring instanceId);
-		HidInstance(std::wstring path);
+		explicit HidInstance(std::wstring path);
 		HidInstance(HidInstance&& other) noexcept;
 
 		~HidInstance();

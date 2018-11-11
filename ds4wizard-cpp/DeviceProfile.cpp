@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "pathutil.h"
 #include "DeviceProfile.h"
+#include "JsonData.h"
 
 using namespace std::chrono;
 

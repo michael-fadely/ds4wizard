@@ -224,9 +224,8 @@ void MainWindow::populateProfileList() const
 {
 	ui.profileList->clear();
 
-	auto& profiles_lock = Program::profileCache.profiles_lock;
-
 	{
+		auto& profiles_lock = Program::profileCache.profiles_lock;
 		LOCK(profiles);
 
 		for (const DeviceProfile& profile : Program::profileCache.profiles)
