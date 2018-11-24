@@ -174,7 +174,9 @@ void MainWindow::registerDeviceNotification()
 
 	if (notificationHandle == nullptr || notificationHandle == INVALID_HANDLE_VALUE)
 	{
-		QMessageBox::warning(this, tr("Warning"), tr("Failed to register device notification event. The program will be unable to detect newly connected controllers."));
+		QMessageBox::warning(this, tr("Warning"),
+		                     tr("Failed to register device notification event. "
+		                        "The program will be unable to detect newly connected controllers."));
 	}
 }
 
@@ -279,20 +281,14 @@ void MainWindow::devicePropertiesClicked()
 	auto device = ds4Items->getDevice(rows[0].row());
 	auto dialog = new DevicePropertiesDialog(this, device);
 
-	auto appliedSlot = [&] (const DeviceSettings& oldSettings, const DeviceSettings& newSettings) -> void
+	const auto appliedSlot = [device] (const DeviceSettings& /*oldSettings*/, const DeviceSettings& newSettings)
 	{
 		if (!device)
 		{
 			return;
 		}
 
-		{
-			// TODO: just provide a method to do this?
-			auto lock = device->lock();
-			device->settings = newSettings;
-			device->applyProfile();
-		}
-
+		device->applySettings(newSettings);
 		Program::profileCache.saveSettings(device->macAddress(), newSettings);
 	};
 

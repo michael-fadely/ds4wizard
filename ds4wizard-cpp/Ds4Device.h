@@ -127,6 +127,7 @@ private:
 
 public:
 	void saveSettings();
+	void applySettings(const DeviceSettings& newSettings);
 
 	/**
 	 * \brief 

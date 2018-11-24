@@ -131,6 +131,14 @@ void Ds4Device::saveSettings()
 	Program::profileCache.saveSettings(macAddress_, settings);
 }
 
+void Ds4Device::applySettings(const DeviceSettings& newSettings)
+{
+	LOCK(sync);
+	settings = newSettings;
+	saveSettings();
+	applyProfile();
+}
+
 void Ds4Device::applyProfile()
 {
 	LOCK(sync);
@@ -148,7 +156,6 @@ void Ds4Device::applyProfile()
 	}
 
 	simulator.applyProfile(&profile);
-
 
 	Ds4LightOptions& l = settings.useProfileLight ? profile.light : settings.light;
 
