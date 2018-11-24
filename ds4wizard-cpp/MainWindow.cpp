@@ -71,6 +71,13 @@ MainWindow::MainWindow(QWidget* parent)
 	const auto deviceSelectionModel = ui.deviceList->selectionModel();
 	connect(deviceSelectionModel, &QItemSelectionModel::selectionChanged, this, &MainWindow::deviceSelectionChanged);
 
+	// HACK: for testing later
+	connect(ui.profileEdit, &QPushButton::clicked, this, [this](...)
+		{
+			auto dg = std::make_unique<ProfileEditorDialog>(this);
+			dg->exec();
+		});
+
 	if (!supportsSystemTray || !Program::settings.startMinimized)
 	{
 		show();
