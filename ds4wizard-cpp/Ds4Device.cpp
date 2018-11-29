@@ -95,7 +95,7 @@ void Ds4Device::open(hid::HidInstance& device)
 			<< static_cast<int>(device.serial[i]);
 	}
 
-	macAddress_ = macaddr.str();
+	macAddress_     = macaddr.str();
 	safeMacAddress_ = macAddress_;
 
 	safeMacAddress_.erase(std::remove(safeMacAddress_.begin(), safeMacAddress_.end(), ':'), safeMacAddress_.end());
@@ -346,7 +346,6 @@ void Ds4Device::openBluetoothDevice(hid::HidInstance& device)
 		if (profile.exclusiveMode && !device.isExclusive())
 		{
 			onBluetoothExclusiveFailure.invoke(this);
-
 		}
 		else
 		{
@@ -472,14 +471,14 @@ void Ds4Device::run()
 	if (activeLight.idleFade)
 	{
 		const Ds4LightOptions& l = settings.useProfileLight ? profile.light : settings.light;
-		double m = isIdle() ? 1.0 : std::clamp(duration_cast<milliseconds>(idleTime.elapsed()).count()
-		                                       / static_cast<double>(duration_cast<milliseconds>(idleTimeout()).count()),
-		                                       0.0, 1.0);
+		const double m = isIdle() ? 1.0 : std::clamp(duration_cast<milliseconds>(idleTime.elapsed()).count()
+		                                             / static_cast<double>(duration_cast<milliseconds>(idleTimeout()).count()),
+		                                             0.0, 1.0);
 
 		output.lightColor = Ds4Color::lerp(l.color, fadeColor, static_cast<float>(m));
 	}
 
-	const bool charging_ = charging();
+	const bool charging_   = charging();
 	const uint8_t battery_ = battery();
 
 	// cache
