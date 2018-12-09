@@ -28,7 +28,7 @@ class InputSimulator
 	std::deque<InputMap*> map_cache; // TODO: OPTIMIZE !!!
 	std::deque<Ds4TouchRegion*> touchRegions;
 
-	int realXInputIndex = 0;
+	int realXInputIndex = -1;
 	XInputGamepad xpad {};
 	XInputGamepad last_xpad {};
 	std::shared_ptr<ScpDevice> scpDevice;
@@ -70,7 +70,7 @@ public:
 
 private:
 	bool scpConnect();
-	void scpDisconnect() const;
+	void scpDisconnect();
 
 	static bool scpDeviceOpen();
 	static void scpDeviceClose();

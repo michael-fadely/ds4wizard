@@ -334,11 +334,18 @@ void InputSimulator::applyProfile(DeviceProfile* profile)
 
 void InputSimulator::readXInput() const
 {
-	if (profile->useXInput && scpDevice != nullptr)
+	if (!profile->useXInput || scpDevice == nullptr)
 	{
-		scpDevice->syncState(realXInputIndex);
-		parent->output.fromXInput(realXInputIndex, scpDevice.get());
+		return;
 	}
+
+	if (realXInputIndex < 0)
+	{
+		return;
+	}
+
+	scpDevice->syncState(realXInputIndex);
+	parent->output.fromXInput(realXInputIndex, scpDevice.get());
 }
 
 PressedState InputSimulator::handleTouchToggle(InputMap& m, InputModifier* modifier, const Pressable& pressable)
@@ -564,7 +571,7 @@ void InputSimulator::runMaps()
 		updateBindingState(m, nullptr);
 	}
 
-	if (profile->useXInput && xpad != last_xpad)
+	if (profile->useXInput && realXInputIndex >= 0 && xpad != last_xpad)
 	{
 		last_xpad = xpad;
 		scpDevice->syncState(realXInputIndex, xpad);
@@ -852,6 +859,11 @@ bool InputSimulator::scpConnect()
 		scpDevice = s_scpDevice;
 	}
 
+	if (realXInputIndex >= 0)
+	{
+		return true;
+	}
+
 	int index = profile->autoXInputIndex ? ScpDevice::getFreePort() : profile->xinputIndex;
 
 	if (index < 0)
@@ -896,7 +908,7 @@ bool InputSimulator::scpConnect()
 	return true;
 }
 
-void InputSimulator::scpDisconnect() const
+void InputSimulator::scpDisconnect()
 {
 	if (realXInputIndex < 0 || !scpDevice)
 	{
@@ -904,6 +916,7 @@ void InputSimulator::scpDisconnect() const
 	}
 
 	scpDevice->disconnect(realXInputIndex);
+	realXInputIndex = -1;
 }
 
 bool InputSimulator::scpDeviceOpen()
