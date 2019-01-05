@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "MainWindow.h"
 #include "DevicePropertiesDialog.h"
 #include "DeviceProfileCache.h"

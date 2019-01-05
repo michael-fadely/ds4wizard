@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "ScpDevice.h"
 #include "Ds4Output.h"
 

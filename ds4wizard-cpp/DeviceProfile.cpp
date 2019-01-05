@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "pathutil.h"
 #include "DeviceProfile.h"
 #include "JsonData.h"

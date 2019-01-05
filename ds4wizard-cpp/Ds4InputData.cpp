@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "Ds4InputData.h"
 #include <cmath>
 

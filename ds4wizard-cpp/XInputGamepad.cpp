@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "XInputGamepad.h"
 
 bool XInputGamepad::operator==(const XInputGamepad& r) const

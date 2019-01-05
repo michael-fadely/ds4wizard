@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include <Windows.h>
 #include "MouseSimulator.h"
 

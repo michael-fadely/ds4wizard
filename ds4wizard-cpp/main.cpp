@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "MainWindow.h"
 #include <QtWidgets/QApplication>
 #include "program.h"

@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "Ds4LightOptions.h"
 
 Ds4LightOptions::Ds4LightOptions(const Ds4Color& color)

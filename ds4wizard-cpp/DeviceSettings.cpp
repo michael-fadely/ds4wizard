@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "DeviceSettings.h"
 
 using namespace std::chrono;

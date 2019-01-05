@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "Ds4Input.h"
 
 inline void Ds4Input::addButton(bool pressed, Ds4Buttons_t buttons)

@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "DeviceProfileCache.h"
 #include "lock.h"
 #include <sstream>

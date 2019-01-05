@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "AxisOptions.h"
 
 AxisOptions::AxisOptions(AxisPolarity polarity)

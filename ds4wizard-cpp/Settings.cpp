@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "Settings.h"
 
 bool Settings::operator==(const Settings& rhs) const

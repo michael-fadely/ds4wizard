@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include <windows.h>
 #include "ScpDevice.h"
 #include <SetupAPI.h>
