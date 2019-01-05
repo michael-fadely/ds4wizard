@@ -1,9 +1,9 @@
 [submodule "better-enums"]
-	path = better-enums
+	path = dependencies/better-enums
 	url = https://github.com/aantron/better-enums.git
 [submodule "GSL"]
-	path = GSL
+	path = dependencies/GSL
 	url = https://github.com/Microsoft/GSL.git
 [submodule "json"]
-	path = json
+	path = dependencies/json
 	url = https://github.com/nlohmann/json.git
