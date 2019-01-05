@@ -45,6 +45,9 @@
 // better-enums
 #include <enum.h>
 
+// fmt
+#include <fmt/format.h>
+
 // libhid
 #include <hid_handle.h>
 #include <hid_instance.h>

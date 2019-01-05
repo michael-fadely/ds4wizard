@@ -14,6 +14,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ds4wizard-device-toggle", "
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libdevicetoggle", "libdevicetoggle\libdevicetoggle.vcxproj", "{3292BD3C-C649-46B0-9C60-545B31F2B169}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dependencies", "dependencies", "{EFC8667D-50C4-4A83-A819-B56998FFF2AA}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "fmt", "dependencies\fmt-build\fmt.vcxproj", "{A89BB5DB-DB58-36B0-8D5E-B020F3A513EB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -36,9 +40,16 @@ Global
 		{3292BD3C-C649-46B0-9C60-545B31F2B169}.Debug|x64.Build.0 = Debug|x64
 		{3292BD3C-C649-46B0-9C60-545B31F2B169}.Release|x64.ActiveCfg = Release|x64
 		{3292BD3C-C649-46B0-9C60-545B31F2B169}.Release|x64.Build.0 = Release|x64
+		{A89BB5DB-DB58-36B0-8D5E-B020F3A513EB}.Debug|x64.ActiveCfg = Debug|x64
+		{A89BB5DB-DB58-36B0-8D5E-B020F3A513EB}.Debug|x64.Build.0 = Debug|x64
+		{A89BB5DB-DB58-36B0-8D5E-B020F3A513EB}.Release|x64.ActiveCfg = Release|x64
+		{A89BB5DB-DB58-36B0-8D5E-B020F3A513EB}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A89BB5DB-DB58-36B0-8D5E-B020F3A513EB} = {EFC8667D-50C4-4A83-A819-B56998FFF2AA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7F2C3D6C-DAE3-426B-861F-DC54077524D2}

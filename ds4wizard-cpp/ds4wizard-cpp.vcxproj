@@ -56,7 +56,7 @@
     <ClCompile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NOMINMAX;WIN32_LEAN_AND_MEAN;UNICODE;_UNICODE;WIN32;WIN64;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\libhid;..\libdevicetoggle;..\dependencies\GSL\include;..\dependencies\better-enums;..\dependencies\json\include;.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\libhid;..\libdevicetoggle;..\dependencies\GSL\include;..\dependencies\better-enums;..\dependencies\json\include;..\dependencies\fmt\include;.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -80,7 +80,7 @@
     <QtMoc>
       <OutputFile>.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</OutputFile>
       <ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription>
-      <IncludePath>..\libhid;..\libdevicetoggle;..\dependencies\GSL\include;..\dependencies\better-enums;..\dependencies\json\include;.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;%(AdditionalIncludeDirectories)</IncludePath>
+      <IncludePath>..\libhid;..\libdevicetoggle;..\dependencies\GSL\include;..\dependencies\better-enums;..\dependencies\json\include;..\dependencies\fmt\include;.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;%(AdditionalIncludeDirectories)</IncludePath>
       <Define>_CRT_SECURE_NO_WARNINGS;NOMINMAX;WIN32_LEAN_AND_MEAN;UNICODE;_UNICODE;WIN32;WIN64;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;%(PreprocessorDefinitions)</Define>
       <ForceInclude>stdafx.h;../../%(Filename)%(Extension)</ForceInclude>
     </QtMoc>
@@ -97,7 +97,7 @@
     <ClCompile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NOMINMAX;WIN32_LEAN_AND_MEAN;UNICODE;_UNICODE;WIN32;WIN64;QT_NO_DEBUG;NDEBUG;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\libhid;..\libdevicetoggle;..\dependencies\GSL\include;..\dependencies\better-enums;..\dependencies\json\include;.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\libhid;..\libdevicetoggle;..\dependencies\GSL\include;..\dependencies\better-enums;..\dependencies\json\include;..\dependencies\fmt\include;.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
@@ -125,7 +125,7 @@
     <QtMoc>
       <OutputFile>.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</OutputFile>
       <ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription>
-      <IncludePath>..\libhid;..\libdevicetoggle;..\dependencies\GSL\include;..\dependencies\better-enums;..\dependencies\json\include;.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;%(AdditionalIncludeDirectories)</IncludePath>
+      <IncludePath>..\libhid;..\libdevicetoggle;..\dependencies\GSL\include;..\dependencies\better-enums;..\dependencies\json\include;..\dependencies\fmt\include;.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;%(AdditionalIncludeDirectories)</IncludePath>
       <Define>_CRT_SECURE_NO_WARNINGS;NOMINMAX;WIN32_LEAN_AND_MEAN;UNICODE;_UNICODE;WIN32;WIN64;QT_NO_DEBUG;NDEBUG;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;%(PreprocessorDefinitions)</Define>
       <ForceInclude>stdafx.h;../../%(Filename)%(Extension)</ForceInclude>
     </QtMoc>
@@ -267,6 +267,9 @@
     <ResourceCompile Include="ds4wizard-cpp.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\dependencies\fmt-build\fmt.vcxproj">
+      <Project>{a89bb5db-db58-36b0-8d5e-b020f3a513eb}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\libdevicetoggle\libdevicetoggle.vcxproj">
       <Project>{3292bd3c-c649-46b0-9c60-545b31f2b169}</Project>
     </ProjectReference>

@@ -4,6 +4,8 @@
 
 #include <shellapi.h>
 
+#include <fmt/format.h>
+
 #include <hid_util.h>
 #include <devicetoggle.h>
 
@@ -164,9 +166,8 @@ bool Ds4DeviceManager::handleDevice(hid::HidInstance& hid)
 
 			device->onLatencyThresholdExceeded += [](auto sender, std::chrono::milliseconds value, std::chrono::milliseconds threshold)
 			{
-				// HACK: this is really gross
-				auto str = QString("Input latency has exceeded the threshold. (%1 ms > %2 ms)").arg(value.count()).arg(threshold.count());
-				Logger::writeLine(LogLevel::warning, sender->name(), str.toStdString());
+				const std::string str = fmt::format("Input latency has exceeded the threshold. ({0} ms > {1} ms)", value.count(), threshold.count());
+				Logger::writeLine(LogLevel::warning, sender->name(), str);
 			};
 
 			// TODO: don't toggle the device unless opening exclusively fails!
