@@ -5,7 +5,6 @@
 #include <gsl/span>
 
 #include "Ds4InputData.h"
-#include "XInputGamepad.h"
 
 class Ds4Input
 {
@@ -26,7 +25,6 @@ public:
 
 private:
 	Ds4Buttons_t lastHeldButtons = 0;
-	XInputGamepad lastGamepad {};
 	uint8_t lastTouchFrame {};
 
 	void addButton(bool pressed, Ds4Buttons_t buttons);
