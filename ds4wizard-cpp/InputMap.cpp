@@ -371,13 +371,13 @@ bool InputMap::operator==(const InputMap& other) const
 	       && simulatorType == other.simulatorType
 	       && outputType == other.outputType
 	       && action == other.action
-	       // TODO: && KeyCode == other.KeyCode
-	       // TODO: && KeyCodeModifiers == other.KeyCodeModifiers
+	       && keyCode == other.keyCode
+	       && keyCodeModifiers == other.keyCodeModifiers
 	       && xinputButtons == other.xinputButtons
 	       && xinputAxes == other.xinputAxes
 	       && mouseAxes == other.mouseAxes
 	       && touchDirection == other.touchDirection
-	       /* TODO: && MouseButton == other.MouseButton*/;
+	       && mouseButton == other.mouseButton;
 }
 
 bool InputMap::operator!=(const InputMap& other) const
