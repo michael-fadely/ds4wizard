@@ -110,7 +110,8 @@ bool Ds4DeviceManager::handleDevice(hid::HidInstance& hid)
 
 			if (!hid.getFeature(buffer))
 			{
-				throw /* TODO std::runtime_error(std::wstring.Format(Resources.DeviceReadMACFailed, hid.path)) */;
+				const std::string hidPath(hid.path.begin(), hid.path.end());
+				throw std::runtime_error(fmt::format("Failed to read MAC address from USB device {0}", hidPath));
 			}
 
 			hid.serial =
@@ -129,7 +130,8 @@ bool Ds4DeviceManager::handleDevice(hid::HidInstance& hid)
 
 		if (hid.serialString.empty())
 		{
-			throw /* TODO std::runtime_error(std::wstring.Format(Resources.DeviceReturnedEmptyMAC, hid.Path)) */;
+			const std::string hidPath(hid.path.begin(), hid.path.end());
+			throw std::runtime_error(fmt::format("Device {0} returned empty MAC address.", hidPath));
 		}
 	}
 	catch (const std::exception& ex)
@@ -159,7 +161,7 @@ bool Ds4DeviceManager::handleDevice(hid::HidInstance& hid)
 			//device->onScpXInputHandleFailure    += [](auto sender) { Logger::writeLine(LogLevel::warning, "Failed to obtain ScpVBus XInput handle. XInput emulation will not be available."); };
 			device->onBluetoothExclusiveFailure += [](auto sender) { Logger::writeLine(LogLevel::warning, sender->name(), "Failed to open Bluetooth device exclusively."); };
 			device->onBluetoothConnected        += [](auto sender) { Logger::writeLine(LogLevel::info,    sender->name(), "Bluetooth connected."); };
-			device->onBluetoothIdleDisconnect   += [](auto sender) { Logger::writeLine(LogLevel::info,    sender->name(), "Bluetooth idle disconnect." /* TODO: std::string.Format(Resources.IdleDisconnect, idleTimeout)*/); };
+			device->onBluetoothIdleDisconnect   += [](auto sender) { Logger::writeLine(LogLevel::info,    sender->name(), "Bluetooth idle disconnect."); };
 			device->onBluetoothDisconnected     += [](auto sender) { Logger::writeLine(LogLevel::info,    sender->name(), "Bluetooth disconnected."); };
 			device->onUsbExclusiveFailure       += [](auto sender) { Logger::writeLine(LogLevel::warning, sender->name(), "Failed to open USB device exclusively."); };
 			device->onUsbConnected              += [](auto sender) { Logger::writeLine(LogLevel::info,    sender->name(), "USB connected."); };
@@ -281,7 +283,7 @@ void Ds4DeviceManager::toggleDevice(const std::wstring& instanceId)
 
 	if (!ShellExecuteExW(&info))
 	{
-		throw;
+		throw std::runtime_error("ShellExecuteExW failed");
 	}
 
 	const Handle handle(info.hProcess, true);

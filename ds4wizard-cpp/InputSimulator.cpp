@@ -41,7 +41,7 @@ void InputSimulator::simulateXInputButton(XInputButtons_t buttons, PressedState 
 			break;
 
 		default:
-			throw /* TODO new ArgumentOutOfRangeException(nameof(state), state, "Invalid pressed state.")*/;
+			throw std::out_of_range("invalid PressedState");
 	}
 
 	xpad.wButtons = dest;
@@ -120,7 +120,7 @@ void InputSimulator::simulateXInputAxis(XInputAxes& axes, float m)
 				break;
 
 			default:
-				throw /* TODO: new ArgumentOutOfRangeException(nameof(options), options, "Invalid XInput axis.")*/;
+				throw std::out_of_range("invalid XInputAxis");
 		}
 	}
 }
@@ -213,7 +213,7 @@ void InputSimulator::runMap(InputMap& m, InputModifier* modifier)
 {
 	if (m.inputType == 0)
 	{
-		throw /* TODO: new ArgumentOutOfRangeException(nameof(m.inputType), m.inputType, "InputType must be non-zero.")*/;
+		throw std::out_of_range("inputType must be non-zero.");
 	}
 
 	for (InputType_t value : InputType_values)
@@ -236,7 +236,7 @@ void InputSimulator::runMap(InputMap& m, InputModifier* modifier)
 			{
 				if (m.inputAxis.value_or(0) == 0)
 				{
-					throw /* TODO: new ArgumentNullException(nameof(m.InputAxis))*/;
+					throw std::invalid_argument("inputAxis has no value");
 				}
 
 				for (Ds4Axis_t bit : Ds4Axis_values)
@@ -303,7 +303,7 @@ void InputSimulator::runMap(InputMap& m, InputModifier* modifier)
 			}
 
 			default:
-				throw /* TODO: new ArgumentOutOfRangeException()*/;
+				throw std::out_of_range("invalid InputType");
 		}
 	}
 }
@@ -400,7 +400,7 @@ void InputSimulator::applyMap(InputMap& m, InputModifier* modifier, PressedState
 					break;
 
 				default:
-					throw /* TODO: new ArgumentOutOfRangeException(nameof(m.outputType), m.outputType, "Invalid output type.")*/;
+					throw std::out_of_range("invalid OutputType");
 			}
 
 			break;
@@ -408,7 +408,7 @@ void InputSimulator::applyMap(InputMap& m, InputModifier* modifier, PressedState
 		case SimulatorType::action:
 			if (!m.action.has_value() || m.action.value() == +ActionType::none)
 			{
-				throw /* TODO: new ArgumentNullException(nameof(m.action))*/;
+				throw std::invalid_argument("action has invalid or no value");
 			}
 
 			if (m.isActive() && (modifier && modifier->isActive()))
@@ -419,7 +419,7 @@ void InputSimulator::applyMap(InputMap& m, InputModifier* modifier, PressedState
 			break;
 
 		default:
-			throw /* TODO: new ArgumentOutOfRangeException(nameof(m.simulatorType), m.simulatorType, "Invalid map type.")*/;
+			throw std::out_of_range("invalid SimulatorType");
 	}
 }
 
@@ -548,7 +548,7 @@ void InputSimulator::runAction(ActionType action) const
 			break;
 
 		default:
-			throw /* TODO: new ArgumentOutOfRangeException(nameof(action), action, "Invalid action type.")*/;
+			throw std::out_of_range("invalid ActionType");
 	}
 }
 
@@ -618,8 +618,8 @@ void InputSimulator::updateTouchRegions()
 			continue;
 		}
 
-		updateTouchRegion(*region, /* TODO */ nullptr, Ds4Buttons::touch1, parent->input.data.touchPoint1, disallow);
-		updateTouchRegion(*region, /* TODO */ nullptr, Ds4Buttons::touch2, parent->input.data.touchPoint2, disallow);
+		updateTouchRegion(*region, /* TODO: touch modifier support */ nullptr, Ds4Buttons::touch1, parent->input.data.touchPoint1, disallow);
+		updateTouchRegion(*region, /* TODO: touch modifier support */ nullptr, Ds4Buttons::touch2, parent->input.data.touchPoint2, disallow);
 	}
 }
 
@@ -684,7 +684,7 @@ void InputSimulator::updatePressedStateImpl(InputMapBase& instance, const std::f
 			{
 				if (!instance.inputAxis.has_value() || instance.inputAxis.value() == 0)
 				{
-					throw /* TODO: new ArgumentNullException(nameof(instance.InputAxis))*/;
+					throw std::invalid_argument("inputAxis has invalid or no value");
 				}
 
 				const gsl::span<const Ds4Axis_t> s(Ds4Axis_values);
@@ -754,7 +754,7 @@ void InputSimulator::updatePressedStateImpl(InputMapBase& instance, const std::f
 				break;
 
 			default:
-				throw; // TODO
+				throw std::out_of_range("invalid InputType");
 		}
 	}
 }

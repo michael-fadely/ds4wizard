@@ -339,7 +339,7 @@ void Ds4Device::openBluetoothDevice(hid::HidInstance& device)
 
 		if (!openDevice(device, profile.exclusiveMode))
 		{
-			// TODO
+			// TODO: error handling
 			return;
 		}
 
@@ -380,7 +380,7 @@ void Ds4Device::openUsbDevice(hid::HidInstance& device)
 
 		if (!openDevice(device, profile.exclusiveMode))
 		{
-			// TODO
+			// TODO: error handling
 			return;
 		}
 

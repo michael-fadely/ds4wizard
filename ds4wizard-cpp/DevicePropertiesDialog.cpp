@@ -234,7 +234,7 @@ void DevicePropertiesDialog::resetPeakLatency() const
 
 void DevicePropertiesDialog::profileEditClicked(bool /*checked*/)
 {
-	// TODO
+	// TODO: implement actual functionality
 	auto dialog = new ProfileEditorDialog(this);
 	dialog->exec();
 	delete dialog;
@@ -286,7 +286,7 @@ high_resolution_clock::duration DevicePropertiesDialog::getGuiIdleTime() const
 			return duration_cast<high_resolution_clock::duration>(duration<double, std::ratio<3600>>(ui.spinBox_IdleTime->value()));
 
 		default:
-			throw;
+			throw std::out_of_range("invalid time unit");
 	}
 }
 
@@ -309,7 +309,7 @@ void DevicePropertiesDialog::timeUnitChanged(int index)
 			break;
 
 		default:
-			throw;
+			throw std::out_of_range("invalid time unit");
 	}
 
 	lastUnit = index;

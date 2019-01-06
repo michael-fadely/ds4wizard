@@ -62,7 +62,7 @@ void InputAxisOptions::applyDeadZone(float& analog) const
 			break;
 
 		default:
-			throw /*new ArgumentOutOfRangeException(nameof(DeadZoneMode), DeadZoneMode, "Invalid deadzone mode.")*/;
+			throw std::out_of_range("invalid DeadZoneMode");
 	}
 
 	if (invert.value_or(false))
@@ -219,12 +219,14 @@ bool MouseAxes::operator==(const MouseAxes& other) const
 	       && options == other.options;
 }
 
-void MouseAxes::readJson(const nlohmann::json& json)
+void MouseAxes::readJson(const nlohmann::json& /*json*/)
 {
-	throw; // TODO
+	// TODO: not implemented
+	throw std::runtime_error(__FUNCTION__ " not implemented");
 }
 
-void MouseAxes::writeJson(nlohmann::json& json) const
+void MouseAxes::writeJson(nlohmann::json& /*json*/) const
 {
-	throw; // TODO
+	// TODO: not implemented
+	throw std::runtime_error(__FUNCTION__ " not implemented");
 }

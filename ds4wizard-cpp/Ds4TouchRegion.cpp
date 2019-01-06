@@ -135,7 +135,7 @@ float Ds4TouchRegion::getTouchDelta(Ds4Buttons_t sender, Direction_t direction, 
 				result = std::clamp(std::clamp(x - sx, -width, width) / static_cast<float>(width), 0.0f, 1.0f);
 				break;
 			default:
-				throw /*new ArgumentOutOfRangeException(nameof(direction), direction, null) // TODO */;
+				throw std::runtime_error("invalid Direction");
 		}
 	}
 	else
@@ -168,7 +168,7 @@ float Ds4TouchRegion::getTouchDelta(Ds4Buttons_t sender, Direction_t direction, 
 				result = std::clamp(std::clamp(x - cx, -width, width) / static_cast<float>(cx), 0.f, 1.f);
 				break;
 			default:
-				throw /*new ArgumentOutOfRangeException(nameof(direction), direction, null)*/;
+				throw std::runtime_error("invalid Direction");
 		}
 	}
 

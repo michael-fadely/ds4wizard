@@ -191,7 +191,7 @@ float Ds4Input::getAxis(Ds4Axis_t axis, const std::optional<AxisPolarity>& polar
 			break;
 
 		default:
-			throw /*new ArgumentOutOfRangeException(nameof(axis), axis, null) // TODO */;
+			throw std::out_of_range("invalid Ds4Axis");
 	}
 
 	if (!polarity)
