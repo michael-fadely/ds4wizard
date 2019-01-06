@@ -88,11 +88,19 @@ public:
 	/**
 	 * \brief 
 	 * Disconnect the specified emulated XInput device.
-	 * \param userIndex The index to disconnect. -1 disconnects all devices.
+	 * \param userIndex The index to disconnect.
 	 * \param force Force disconnect.
 	 * \return \c true on success.
 	 */
 	bool disconnect(int userIndex, bool force = true);
+
+	/**
+	 * \brief
+	 * Disconnects all emulated XInput devices managed by the SCP driver.
+	 * \param force Forcefully disconnect the devices.
+	 * \return \c true on success.
+	 */
+	bool disconnectAll(bool force = true);
 
 	/**
 	 * \brief 
@@ -138,4 +146,9 @@ public:
 	 * \return The last stored emulated LED ID.
 	 */
 	uint8_t getLed(int userIndex);
+
+private:
+	static void validateUserIndex(int userIndex);
+	bool disconnect_impl(int userIndex, bool force);
+	VBusStatus syncStateImpl(int userIndex);
 };

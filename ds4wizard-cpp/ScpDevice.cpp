@@ -101,10 +101,7 @@ void ScpDevice::close()
 
 bool ScpDevice::connect(int userIndex)
 {
-	if (userIndex < 0 || userIndex > 3)
-	{
-		throw /*new IndexOutOfRangeException("User index must be in the range 0 to 3.") // TODO */;
-	}
+	validateUserIndex(userIndex);
 
 	auto buffer = BUSENUM_UNPLUG_HARDWARE::create(userIndex);
 
@@ -126,11 +123,59 @@ bool ScpDevice::connect(int userIndex)
 
 bool ScpDevice::disconnect(int userIndex, bool force)
 {
-	if (userIndex < -1 || userIndex > 3)
-	{
-		throw /*new IndexOutOfRangeException("User index must be in the range -1 to 3.") // TODO */;
-	}
+	validateUserIndex(userIndex);
+	return disconnect_impl(userIndex, force);
+}
 
+bool ScpDevice::disconnectAll(bool force)
+{
+	return disconnect_impl(-1, force);
+}
+
+VBusStatus ScpDevice::syncState(int userIndex, const XInputGamepad& gamepad)
+{
+	validateUserIndex(userIndex);
+	gamepads[userIndex] = gamepad;
+	return syncStateImpl(userIndex);
+}
+
+VBusStatus ScpDevice::syncState(int userIndex)
+{
+	validateUserIndex(userIndex);
+	return syncStateImpl(userIndex);
+}
+
+XInputGamepad ScpDevice::getGamepad(int userIndex)
+{
+	validateUserIndex(userIndex);
+	return gamepads[userIndex];
+}
+
+void ScpDevice::getVibration(int userIndex, uint8_t& leftMotor, uint8_t& rightMotor)
+{
+	validateUserIndex(userIndex);
+	const ScpVibration& vib = vibration[userIndex];
+
+	leftMotor  = vib.leftMotor;
+	rightMotor = vib.rightMotor;
+}
+
+uint8_t ScpDevice::getLed(int userIndex)
+{
+	validateUserIndex(userIndex);
+	return leds[userIndex];
+}
+
+void ScpDevice::validateUserIndex(int userIndex)
+{
+	if (userIndex < 0 || userIndex > 3)
+	{
+		throw std::out_of_range("User index must be in the range 0 to 3.");
+	}
+}
+
+bool ScpDevice::disconnect_impl(int userIndex, bool force)
+{
 	if (userIndex >= 0)
 	{
 		LOCK(portLock);
@@ -162,13 +207,7 @@ bool ScpDevice::disconnect(int userIndex, bool force)
 	                       &buffer, buffer.Size, nullptr, 0, nullptr, nullptr);
 }
 
-VBusStatus ScpDevice::syncState(int userIndex, const XInputGamepad& gamepad)
-{
-	gamepads[userIndex] = gamepad;
-	return syncState(userIndex);
-}
-
-VBusStatus ScpDevice::syncState(int userIndex)
+VBusStatus ScpDevice::syncStateImpl(int userIndex)
 {
 	const int busIndex = userIndex + 1;
 
@@ -218,22 +257,4 @@ VBusStatus ScpDevice::syncState(int userIndex)
 	}
 
 	return readBuffer[9] == 0 ? VBusStatus::DeviceNotReady : VBusStatus::Success;
-}
-
-XInputGamepad ScpDevice::getGamepad(int userIndex)
-{
-	return gamepads[userIndex];
-}
-
-void ScpDevice::getVibration(int userIndex, uint8_t& leftMotor, uint8_t& rightMotor)
-{
-	const ScpVibration& vib = vibration[userIndex];
-
-	leftMotor  = vib.leftMotor;
-	rightMotor = vib.rightMotor;
-}
-
-uint8_t ScpDevice::getLed(int userIndex)
-{
-	return leds[userIndex];
 }
