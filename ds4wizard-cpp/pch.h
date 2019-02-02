@@ -53,6 +53,11 @@
 #include <hid_instance.h>
 #include <hid_util.h>
 
+// ViGEm
+#include <ViGEm/Client.h>
+#include <ViGEm/Common.h>
+#include <ViGEm/km/BusShared.h>
+
 #include "average.h"
 #include "AxisOptions.h"
 #include "Bluetooth.h"
@@ -90,7 +95,6 @@
 #include "Pressable.h"
 #include "ProfileEditorDialog.h"
 #include "program.h"
-#include "ScpDevice.h"
 #include "Settings.h"
 #include "Stopwatch.h"
 #include "stringutil.h"

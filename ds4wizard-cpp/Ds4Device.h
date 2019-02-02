@@ -9,7 +9,6 @@
 #include "DeviceProfile.h"
 #include "hid_instance.h"
 #include "Stopwatch.h"
-#include "ScpDevice.h"
 #include "Ds4Input.h"
 #include "Ds4Output.h"
 #include "Event.h"

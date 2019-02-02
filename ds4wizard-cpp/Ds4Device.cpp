@@ -419,7 +419,6 @@ void Ds4Device::writeUsbAsync()
 	}
 
 	writeLatency.stop();
-	simulator.readXInput();
 
 	constexpr auto usb_output_offset = 4;
 
@@ -437,8 +436,6 @@ void Ds4Device::writeUsbAsync()
 
 void Ds4Device::writeBluetooth()
 {
-	simulator.readXInput();
-
 	constexpr auto bt_output_offset = 6;
 
 	const auto span = gsl::make_span(&bluetoothDevice->output_buffer[bt_output_offset],
@@ -490,6 +487,8 @@ void Ds4Device::run()
 	const bool useBluetooth = bluetooth && (preferredConnection == +ConnectionType::bluetooth || !usb);
 
 	dataReceived = false;
+
+	simulator.updateEmulators();
 
 	if (useUsb)
 	{
@@ -554,7 +553,7 @@ void Ds4Device::run()
 		simulator.runMaps();
 		readLatency.stop();
 
-		auto average = duration_cast<milliseconds>(readLatency.average());
+		const auto average = duration_cast<milliseconds>(readLatency.average());
 
 		if (average > settings.latencyThreshold)
 		{

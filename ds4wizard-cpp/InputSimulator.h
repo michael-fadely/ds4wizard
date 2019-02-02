@@ -2,22 +2,20 @@
 
 #include <deque>
 #include <functional>
-#include <mutex>
 
 #include "KeyboardSimulator.h"
 #include "MouseSimulator.h"
 #include "enums.h"
 #include "Pressable.h"
 #include "InputMap.h"
-#include "ScpDevice.h"
+#include "XInputGamepad.h"
+#include "ViGEmTarget.h"
 
 class Ds4Device;
 
 class InputSimulator
 {
 	static constexpr Ds4Buttons_t touchMask = Ds4Buttons::touch1 | Ds4Buttons::touch2;
-	static std::recursive_mutex s_scpLock;
-	static std::shared_ptr<ScpDevice> s_scpDevice;
 
 	Ds4Device* parent = nullptr;
 	DeviceProfile* profile = nullptr;
@@ -29,13 +27,14 @@ class InputSimulator
 	std::deque<Ds4TouchRegion*> touchRegions;
 
 	int realXInputIndex = -1;
-	XInputGamepad xpad {};
-	XInputGamepad last_xpad {};
-	std::shared_ptr<ScpDevice> scpDevice;
+	XInputGamepad xinputPad {};
+	XInputGamepad xinputLast {};
+	XINPUT_VIBRATION xinputVibration {};
+	std::unique_ptr<vigem::XInputTarget> xinputTarget;
 	XInputAxis_t simulatedXInputAxis = 0;
 
 public:
-	Event<Ds4Device> onScpXInputHandleFailure;
+	Event<Ds4Device> onXInputHandleFailure;
 
 	InputSimulator() = delete;
 	InputSimulator(const InputSimulator&) = delete;
@@ -53,7 +52,6 @@ public:
 	bool isOverriddenByModifierSet(InputMapBase& map);
 	void runMap(InputMap& m, InputModifier* modifier);
 	void applyProfile(DeviceProfile* profile);
-	void readXInput() const;
 	static PressedState handleTouchToggle(InputMap& m, InputModifier* modifier, const Pressable& pressable);
 	void applyMap(InputMap& m, InputModifier* modifier, PressedState state, float analog);
 	void simulateMouse(const InputMap& m, PressedState state, float analog);
@@ -67,11 +65,12 @@ public:
 	void updatePressedState(InputModifier& modifier);
 	void updatePressedState(InputMap& map, InputModifier* modifier);
 	void updateBindingState(InputMap& m, InputModifier* modifier);
+	void updateEmulators() const;
 
 private:
 	bool scpConnect();
 	void scpDisconnect();
 
-	static bool scpDeviceOpen();
-	static void scpDeviceClose();
+	bool scpDeviceOpen();
+	void scpDeviceClose();
 };

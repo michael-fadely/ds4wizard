@@ -1,5 +1,4 @@
 #include "pch.h"
-#include "ScpDevice.h"
 #include "Ds4Output.h"
 
 bool Ds4Output::update(const gsl::span<uint8_t>& buffer) const
@@ -42,9 +41,4 @@ bool Ds4Output::update(const gsl::span<uint8_t>& buffer) const
 	buffer[i]   = volumeSpeaker;
 
 	return result;
-}
-
-void Ds4Output::fromXInput(int index, ScpDevice* device)
-{
-	device->getVibration(index, leftMotor, rightMotor);
 }

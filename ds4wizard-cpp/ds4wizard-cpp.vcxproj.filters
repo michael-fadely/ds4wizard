@@ -1,9 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="stdafx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Settings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -29,9 +26,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="AxisOptions.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ScpDevice.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Bluetooth.cpp">
@@ -112,6 +106,15 @@
     <ClCompile Include="InputSimulator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ViGEmDriver.cpp">
+      <Filter>Source Files\ViGEm</Filter>
+    </ClCompile>
+    <ClCompile Include="ViGEmTarget.cpp">
+      <Filter>Source Files\ViGEm</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resource Files">
@@ -152,11 +155,14 @@
     <Filter Include="Source Files\User Interface">
       <UniqueIdentifier>{5cd2bbef-383a-41e3-8920-1b74c967e075}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\ViGEm">
+      <UniqueIdentifier>{ac610b0b-5f01-4213-8626-4ea3c04e7dfc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ViGEm">
+      <UniqueIdentifier>{0124fc3a-ff85-4972-b160-a57dd213abf6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="stdafx.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Settings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -188,9 +194,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AxisOptions.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ScpDevice.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="XInputGamepad.h">
@@ -273,6 +276,15 @@
     </ClInclude>
     <ClInclude Include="InputSimulator.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ViGEmDriver.h">
+      <Filter>Header Files\ViGEm</Filter>
+    </ClInclude>
+    <ClInclude Include="ViGEmTarget.h">
+      <Filter>Header Files\ViGEm</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

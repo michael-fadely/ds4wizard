@@ -29,27 +29,19 @@ BOOL IsElevated()
 DeviceProfileCache Program::profileCache {};
 Settings Program::settings {};
 Settings Program::lastSettings {};
-QString Program::settingsPath_;
-QString Program::settingsFilePath_;
-QString Program::profilesPath_;
-QString Program::devicesFilePath_;
+QString Program::settingsPath;
+QString Program::settingsFilePath;
+std::string Program::profilesPath_;
+std::string Program::devicesFilePath_;
 
-const QString& Program::settingsPath()
-{
-	return settingsPath_;
-}
+vigem::Driver Program::driver;
 
-const QString& Program::settingsFilePath()
-{
-	return settingsFilePath_;
-}
-
-const QString& Program::profilesPath()
+const std::string& Program::profilesPath()
 {
 	return profilesPath_;
 }
 
-const QString& Program::devicesFilePath()
+const std::string& Program::devicesFilePath()
 {
 	return devicesFilePath_;
 }
@@ -61,23 +53,25 @@ bool Program::isElevated()
 
 void Program::initialize()
 {
+	driver.open();
+
 	// HACK: don't do this?
 	QDir dir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
 	dir.cdUp();
 
 	const QString appDataLocation = dir.path();
 
-	settingsPath_     = appDataLocation + "/ds4wizard";
-	settingsFilePath_ = settingsPath() + "/settings.json";
-	profilesPath_     = settingsPath() + "/profiles";
-	devicesFilePath_  = settingsPath() + "/devices.json";
+	settingsPath     = appDataLocation + "/ds4wizard";
+	settingsFilePath = settingsPath + "/settings.json";
+	profilesPath_    = (settingsPath + "/profiles").toStdString();
+	devicesFilePath_ = (settingsPath + "/devices.json").toStdString();
 
 	isElevated_ = IsElevated() == TRUE;
 }
 
 void Program::loadSettings()
 {
-	QDir settingsDir(settingsPath());
+	QDir settingsDir(settingsPath);
 
 	if (!settingsDir.exists())
 	{
@@ -85,18 +79,18 @@ void Program::loadSettings()
 		return;
 	}
 
-	QFile file(settingsFilePath());
+	QFile file(settingsFilePath);
 
 	if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
 	{
-		qDebug() << "failed to open " << settingsFilePath() << "for reading.\n";
+		qDebug() << "failed to open " << settingsFilePath << "for reading.\n";
 		return;
 	}
 
-	QString val = file.readAll();
-	auto json = nlohmann::json::parse(val.toStdString());
-	settings = JsonData::fromJson<Settings>(json);
-	lastSettings = settings;
+	QString val     = file.readAll();
+	const auto json = nlohmann::json::parse(val.toStdString());
+	settings        = JsonData::fromJson<Settings>(json);
+	lastSettings    = settings;
 
 	file.close();
 }
@@ -108,20 +102,20 @@ void Program::saveSettings()
 		return;
 	}
 
-	QDir settingsDir(settingsPath());
+	QDir settingsDir(settingsPath);
 
 	if (!settingsDir.exists())
 	{
 		// there's evidently a good reason for mkpath
 		// to be non-static, but it still feels weird.
-		settingsDir.mkpath(settingsPath());
+		settingsDir.mkpath(settingsPath);
 	}
 
-	QFile file(settingsFilePath());
+	QFile file(settingsFilePath);
 
 	if (!file.open(QIODevice::WriteOnly))
 	{
-		qDebug() << "failed to open " << settingsFilePath() << "for writing.\n";
+		qDebug() << "failed to open " << settingsFilePath << "for writing.\n";
 		return;
 	}
 

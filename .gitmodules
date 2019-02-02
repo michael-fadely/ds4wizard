@@ -10,3 +10,6 @@
 [submodule "dependencies/fmt"]
 	path = dependencies/fmt
 	url = https://github.com/fmtlib/fmt.git
+[submodule "dependencies\\ViGEmClient"]
+	path = dependencies\\ViGEmClient
+	url = https://github.com/ViGEm/ViGEmClient.git

@@ -50,7 +50,9 @@ void DeviceProfileCache::saveSettings(const std::string& id, const DeviceSetting
 		return;
 	}
 
-	QDir devicesDir(Program::devicesFilePath());
+	const auto devicesFilePath = QString::fromStdString(Program::devicesFilePath());
+
+	QDir devicesDir(devicesFilePath);
 	devicesDir.cdUp();
 
 	if (!devicesDir.exists())
@@ -58,7 +60,7 @@ void DeviceProfileCache::saveSettings(const std::string& id, const DeviceSetting
 		devicesDir.mkpath(devicesDir.absolutePath());
 	}
 
-	QFile f(Program::devicesFilePath());
+	QFile f(devicesFilePath);
 
 	if (!f.open(QIODevice::WriteOnly | QIODevice::Text))
 	{
@@ -93,7 +95,8 @@ void DeviceProfileCache::removeProfile(const DeviceProfile& profile)
 
 	onProfileChanged(profile.name, std::string());
 
-	QDir profilesDir(Program::profilesPath());
+	const auto profilesPath = QString::fromStdString(Program::profilesPath());
+	QDir profilesDir(profilesPath);
 
 	if (!profilesDir.exists())
 	{
@@ -128,7 +131,7 @@ void DeviceProfileCache::updateProfile(const DeviceProfile& last, const DevicePr
 	{
 		LOCK(profiles);
 
-		QDir profilesPath = Program::profilesPath();
+		QDir profilesPath = QString::fromStdString(Program::profilesPath());
 
 		if (!profilesPath.exists())
 		{
@@ -180,7 +183,7 @@ void DeviceProfileCache::loadImpl()
 		LOCK(profiles);
 		profiles.clear();
 
-		QDir dir(Program::profilesPath());
+		QDir dir(QString::fromStdString(Program::profilesPath()));
 		if (dir.exists())
 		{
 			for (QString& fileName : dir.entryList({ "*.json" }, QDir::Files))
@@ -208,7 +211,7 @@ void DeviceProfileCache::loadImpl()
 		LOCK(deviceSettings);
 		deviceSettings.clear();
 
-		QFile devicesFile(Program::devicesFilePath());
+		QFile devicesFile(QString::fromStdString(Program::devicesFilePath()));
 		if (devicesFile.exists())
 		{
 			if (devicesFile.open(QIODevice::ReadOnly | QIODevice::Text))

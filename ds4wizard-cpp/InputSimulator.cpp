@@ -7,14 +7,10 @@
 
 using namespace std::chrono;
 
-std::recursive_mutex InputSimulator::s_scpLock {};
-std::shared_ptr<ScpDevice> InputSimulator::s_scpDevice = nullptr;
-
 InputSimulator::InputSimulator(Ds4Device* parent)
 	: parent(parent)
 {
 	scpDeviceOpen();
-	this->scpDevice = s_scpDevice;
 }
 
 InputSimulator::~InputSimulator()
@@ -24,7 +20,7 @@ InputSimulator::~InputSimulator()
 
 void InputSimulator::simulateXInputButton(XInputButtons_t buttons, PressedState state)
 {
-	XInputButtons_t dest = xpad.wButtons;
+	XInputButtons_t dest = xinputPad.wButtons;
 
 	switch (state)
 	{
@@ -44,7 +40,7 @@ void InputSimulator::simulateXInputButton(XInputButtons_t buttons, PressedState 
 			throw std::out_of_range("invalid PressedState");
 	}
 
-	xpad.wButtons = dest;
+	xinputPad.wButtons = dest;
 }
 
 void InputSimulator::simulateXInputAxis(XInputAxes& axes, float m)
@@ -72,49 +68,49 @@ void InputSimulator::simulateXInputAxis(XInputAxes& axes, float m)
 		switch (bit)
 		{
 			case XInputAxis::leftStickX:
-				if (isFirst || axis > std::abs(xpad.sThumbLX))
+				if (isFirst || axis > std::abs(xinputPad.sThumbLX))
 				{
-					xpad.sThumbLX = workAxis;
+					xinputPad.sThumbLX = workAxis;
 				}
 
 				break;
 
 			case XInputAxis::leftStickY:
-				if (isFirst || axis > std::abs(xpad.sThumbLY))
+				if (isFirst || axis > std::abs(xinputPad.sThumbLY))
 				{
-					xpad.sThumbLY = workAxis;
+					xinputPad.sThumbLY = workAxis;
 				}
 
 				break;
 
 			case XInputAxis::rightStickX:
-				if (isFirst || axis > std::abs(xpad.sThumbRX))
+				if (isFirst || axis > std::abs(xinputPad.sThumbRX))
 				{
-					xpad.sThumbRX = workAxis;
+					xinputPad.sThumbRX = workAxis;
 				}
 
 				break;
 
 			case XInputAxis::rightStickY:
-				if (isFirst || axis > std::abs(xpad.sThumbRY))
+				if (isFirst || axis > std::abs(xinputPad.sThumbRY))
 				{
-					xpad.sThumbRY = workAxis;
+					xinputPad.sThumbRY = workAxis;
 				}
 
 				break;
 
 			case XInputAxis::leftTrigger:
-				if (isFirst || trigger > xpad.bLeftTrigger)
+				if (isFirst || trigger > xinputPad.bLeftTrigger)
 				{
-					xpad.bLeftTrigger = trigger;
+					xinputPad.bLeftTrigger = trigger;
 				}
 
 				break;
 
 			case XInputAxis::rightTrigger:
-				if (isFirst || trigger > xpad.bRightTrigger)
+				if (isFirst || trigger > xinputPad.bRightTrigger)
 				{
-					xpad.bRightTrigger = trigger;
+					xinputPad.bRightTrigger = trigger;
 				}
 
 				break;
@@ -330,22 +326,6 @@ void InputSimulator::applyProfile(DeviceProfile* profile)
 	{
 		scpDisconnect();
 	}
-}
-
-void InputSimulator::readXInput() const
-{
-	if (!profile->useXInput || scpDevice == nullptr)
-	{
-		return;
-	}
-
-	if (realXInputIndex < 0)
-	{
-		return;
-	}
-
-	scpDevice->syncState(realXInputIndex);
-	parent->output.fromXInput(realXInputIndex, scpDevice.get());
 }
 
 PressedState InputSimulator::handleTouchToggle(InputMap& m, InputModifier* modifier, const Pressable& pressable)
@@ -571,10 +551,10 @@ void InputSimulator::runMaps()
 		updateBindingState(m, nullptr);
 	}
 
-	if (profile->useXInput && realXInputIndex >= 0 && xpad != last_xpad)
+	if (profile->useXInput && realXInputIndex >= 0 && xinputPad != xinputLast)
 	{
-		last_xpad = xpad;
-		scpDevice->syncState(realXInputIndex, xpad);
+		xinputLast = xinputPad;
+		xinputTarget->update(/*realXInputIndex,*/ xinputPad);
 	}
 }
 
@@ -818,7 +798,7 @@ void InputSimulator::updateBindingState(InputMap& m, InputModifier* modifier)
 	{
 		case InputType::touchRegion:
 		{
-			auto it = profile->touchRegions.find(m.inputRegion);
+			const auto it = profile->touchRegions.find(m.inputRegion);
 			if (it == profile->touchRegions.end())
 			{
 				break;
@@ -847,6 +827,17 @@ void InputSimulator::updateBindingState(InputMap& m, InputModifier* modifier)
 	runMap(m, modifier);
 }
 
+void InputSimulator::updateEmulators() const
+{
+	if (realXInputIndex < 0)
+	{
+		return;
+	}
+
+	parent->output.leftMotor  = static_cast<uint8_t>(xinputVibration.wLeftMotorSpeed >> 8);
+	parent->output.rightMotor = static_cast<uint8_t>(xinputVibration.wRightMotorSpeed >> 8);
+}
+
 bool InputSimulator::scpConnect()
 {
 	if (!scpDeviceOpen())
@@ -854,24 +845,21 @@ bool InputSimulator::scpConnect()
 		return false;
 	}
 
-	if (scpDevice == nullptr)
-	{
-		scpDevice = s_scpDevice;
-	}
-
 	if (realXInputIndex >= 0)
 	{
 		return true;
 	}
 
-	int index = profile->autoXInputIndex ? ScpDevice::getFreePort() : profile->xinputIndex;
+	// HACK:
+	int index = 0;
+	//int index = profile->autoXInputIndex ? ScpDevice::getFreePort() : profile->xinputIndex;
 
 	if (index < 0)
 	{
 		return false;
 	}
 
-	if (scpDevice->connect(index))
+	if (VIGEM_SUCCESS(xinputTarget->connect()))
 	{
 		realXInputIndex = index;
 		return true;
@@ -880,14 +868,14 @@ bool InputSimulator::scpConnect()
 	// If connecting an emulated XInput controller failed,
 	// it's likely because it's already connected. Disconnect
 	// it before continuing.
-	scpDevice->disconnect(index);
+	xinputTarget->disconnect();
 
 	bool ok = false;
 
 	// Try up to 4 times to recover the virtual controller.
 	for (size_t i = 0; i < 4; i++)
 	{
-		ok = scpDevice->connect(index);
+		ok = xinputTarget->connect();
 
 		if (ok)
 		{
@@ -900,7 +888,7 @@ bool InputSimulator::scpConnect()
 
 	if (!ok)
 	{
-		onScpXInputHandleFailure.invoke(parent);
+		onXInputHandleFailure.invoke(parent);
 		return false;
 	}
 
@@ -910,57 +898,39 @@ bool InputSimulator::scpConnect()
 
 void InputSimulator::scpDisconnect()
 {
-	if (realXInputIndex < 0 || !scpDevice)
+	if (realXInputIndex < 0 || !xinputTarget)
 	{
 		return;
 	}
 
-	scpDevice->disconnect(realXInputIndex);
+	xinputTarget->disconnect();
 	realXInputIndex = -1;
 }
 
 bool InputSimulator::scpDeviceOpen()
 {
-	std::lock_guard<std::recursive_mutex> lock(s_scpLock);
-
-	if (s_scpDevice != nullptr)
+	if (!Program::driver.isOpen())
 	{
-		return true;
-	}
-
-	std::unique_ptr<hid::HidInstance> info;
-
-	hid::enumerateGuid([&](const std::wstring& path, const std::wstring& instanceId) -> bool
-	{
-		info = std::make_unique<hid::HidInstance>(path, instanceId);
-		return true;
-	}, GUID_DEVINTERFACE_SCPVBUS);
-
-	if (info == nullptr)
-	{
-		// TODO: onScpDeviceMissing.invoke(this);
 		return false;
 	}
 
-	auto handle = Handle(CreateFile(info->path.c_str(), GENERIC_READ | GENERIC_WRITE,
-	                                FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, 0, nullptr), true);
+	xinputTarget = std::make_unique<vigem::XInputTarget>(&Program::driver);
 
-	if (!handle.isValid())
+	xinputTarget->notification += [this](auto sender, auto large, auto small, auto led) -> void
 	{
-		// TODO: onScpDeviceOpenFailed.invoke(this);
-		return false;
-	}
+		this->xinputVibration.wLeftMotorSpeed = (large << 8) | large;
+		this->xinputVibration.wRightMotorSpeed = (small << 8) | small;
+	};
 
-	s_scpDevice = std::make_shared<ScpDevice>(std::move(handle));
 	return true;
 }
 
 void InputSimulator::scpDeviceClose()
 {
-	if (s_scpDevice == nullptr)
+	if (xinputTarget)
 	{
-		return;
+		xinputTarget->disconnect();
 	}
 
-	s_scpDevice = nullptr;
+	xinputTarget = nullptr;
 }
