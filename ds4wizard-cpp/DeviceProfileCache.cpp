@@ -113,6 +113,11 @@ void DeviceProfileCache::removeProfile(const DeviceProfile& profile)
 
 void DeviceProfileCache::updateProfile(const DeviceProfile& last, const DeviceProfile& current)
 {
+	if (current.name.empty())
+	{
+		throw std::runtime_error("profile name cannot be empty");
+	}
+
 	{
 		LOCK(profiles);
 
@@ -151,7 +156,7 @@ void DeviceProfileCache::updateProfile(const DeviceProfile& last, const DevicePr
 
 		f.write(QByteArray::fromStdString(current.toJson().dump(4)));
 
-		if (!iequals(last.fileName(), current.fileName()))
+		if (!last.name.empty() && !iequals(last.fileName(), current.fileName()))
 		{
 			QFile file = profilesPath.filePath(QString::fromStdString(last.fileName()));
 			file.remove();

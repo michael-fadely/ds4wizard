@@ -73,7 +73,7 @@ void DeviceProfile::writeJson(nlohmann::json& json) const
 
 	nlohmann::json bindings_;
 
-	for (auto& binding : modifiers)
+	for (auto& binding : bindings)
 	{
 		bindings_.push_back(binding.toJson());
 	}

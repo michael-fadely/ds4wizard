@@ -73,10 +73,16 @@ MainWindow::MainWindow(QWidget* parent)
 
 	// HACK: for testing later
 	connect(ui.profileEdit, &QPushButton::clicked, this, [this](...)
-		{
-			auto dg = std::make_unique<ProfileEditorDialog>(this);
-			dg->exec();
-		});
+	{
+		auto dg = std::make_unique<ProfileEditorDialog>(this);
+		dg->exec();
+	});
+
+	// HACK: for testing later
+	connect(ui.profileAdd, &QPushButton::clicked, this, [this](...)
+	{
+		Program::profileCache.updateProfile({}, DeviceProfile::defaultProfile());
+	});
 
 	if (!supportsSystemTray || !Program::settings.startMinimized)
 	{
