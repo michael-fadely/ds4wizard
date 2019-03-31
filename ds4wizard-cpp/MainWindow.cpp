@@ -58,7 +58,7 @@ MainWindow::MainWindow(QWidget* parent)
 		trayIcon->show();
 	}
 
-	Logger::lineLogged += [this](auto a, auto b) -> void { onLineLogged(a, b); };
+	this->onLineLogged_ = Logger::lineLogged.add([this](auto a, auto b) -> void { onLineLogged(a, b); });
 
 	deviceManager = std::make_shared<Ds4DeviceManager>();
 	Program::profileCache.setDevices(deviceManager);
@@ -67,6 +67,9 @@ MainWindow::MainWindow(QWidget* parent)
 
 	ds4Items = new Ds4ItemModel(deviceManager);
 	ui.deviceList->setModel(ds4Items);
+
+	profileItems = new DeviceProfileItemModel(Program::profileCache);
+	ui.profileList->setModel(profileItems);
 
 	const auto deviceSelectionModel = ui.deviceList->selectionModel();
 	connect(deviceSelectionModel, &QItemSelectionModel::selectionChanged, this, &MainWindow::deviceSelectionChanged);
@@ -79,7 +82,7 @@ MainWindow::MainWindow(QWidget* parent)
 	});
 
 	// HACK: for testing later
-	connect(ui.profileAdd, &QPushButton::clicked, this, [this](...)
+	connect(ui.profileAdd, &QPushButton::clicked, this, [](...)
 	{
 		Program::profileCache.updateProfile({}, DeviceProfile::defaultProfile());
 	});
@@ -100,9 +103,11 @@ MainWindow::MainWindow(QWidget* parent)
 
 MainWindow::~MainWindow()
 {
+	delete ds4Items;
+	delete profileItems;
+
 	deviceManager->close();
 	delete trayIcon;
-	delete ds4Items;
 }
 
 void MainWindow::changeEvent(QEvent* e)
@@ -235,21 +240,6 @@ bool MainWindow::nativeEvent(const QByteArray& /*eventType*/, void* message, lon
 }
 #endif
 
-void MainWindow::populateProfileList() const
-{
-	ui.profileList->clear();
-
-	{
-		auto& profiles_lock = Program::profileCache.profiles_lock;
-		LOCK(profiles);
-
-		for (const DeviceProfile& profile : Program::profileCache.profiles)
-		{
-			ui.profileList->addItem(QString::fromStdString(profile.name));
-		}
-	}
-}
-
 void MainWindow::closeEvent(QCloseEvent* /*event*/)
 {
 	unregisterDeviceNotification();
@@ -332,7 +322,6 @@ void MainWindow::systemTrayExit(bool /*checked*/)
 void MainWindow::onProfilesLoaded()
 {
 	registerDeviceNotification();
-	populateProfileList();
 }
 
 void MainWindow::deviceSelectionChanged(const QItemSelection& selected, const QItemSelection& /*deselected*/) const

@@ -23,8 +23,15 @@ public:
 	std::recursive_mutex devices_lock;
 	std::deque<DeviceProfile> profiles;
 
-	// TODO: event Event Loaded;
-	// TODO: event Event ProfileChanged;
+	// profile, index
+	Event<DeviceProfileCache, const DeviceProfile&, int> profileAdded;
+
+	// old, new, old index, new index
+	// TODO: modify in-place
+	Event<DeviceProfileCache, const DeviceProfile&, const DeviceProfile&, int, int> profileChanged;
+
+	// profile, index
+	Event<DeviceProfileCache, const DeviceProfile&, int> profileRemoved;
 
 	DeviceProfileCache() = default;
 
@@ -36,7 +43,7 @@ public:
 	 * \brief 
 	 * Get a profile copy by name.
 	 * \param profileName The name of the profile to get.
-	 * \return A copy of the profile if found, else \c nullptr
+	 * \return A copy of the profile if found, else \c std::nullopt
 	 */
 	std::optional<DeviceProfile> getProfile(const std::string& profileName);
 
@@ -44,7 +51,7 @@ public:
 	 * \brief 
 	 * Returns a copy of the cached settings for the specified MAC address.
 	 * \param id The MAC address of the device whose settings are to be copied.
-	 * \return The settings associated with the MAC address, or \c nullptr if none.
+	 * \return The settings associated with the MAC address, or \c std::nullopt if none.
 	 */
 	std::optional<DeviceSettings> getSettings(const std::string& id);
 
@@ -55,6 +62,14 @@ public:
 	 * \param settings The settings to be stored.
 	 */
 	void saveSettings(const std::string& id, const DeviceSettings& settings);
+
+	/**
+	 * \brief 
+	 * Adds a profile.
+	 * \param current The new profile.
+	 * \return \c true on success, \c false if, for example, a profile with that name exists.
+	 */
+	bool addProfile(const DeviceProfile& current);
 
 	/**
 	 * \brief 

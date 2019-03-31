@@ -916,11 +916,12 @@ bool InputSimulator::scpDeviceOpen()
 
 	xinputTarget = std::make_unique<vigem::XInputTarget>(&Program::driver);
 
-	xinputTarget->notification += [this](auto sender, auto large, auto small, auto led) -> void
-	{
-		this->xinputVibration.wLeftMotorSpeed = (large << 8) | large;
-		this->xinputVibration.wRightMotorSpeed = (small << 8) | small;
-	};
+	xinputNotification = xinputTarget->notification.add(
+		[this](auto sender, auto large, auto small, auto led) -> void
+		{
+			this->xinputVibration.wLeftMotorSpeed = (large << 8) | large;
+			this->xinputVibration.wRightMotorSpeed = (small << 8) | small;
+		});
 
 	return true;
 }

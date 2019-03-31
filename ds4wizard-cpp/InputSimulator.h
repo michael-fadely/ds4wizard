@@ -32,6 +32,7 @@ class InputSimulator
 	XINPUT_VIBRATION xinputVibration {};
 	std::unique_ptr<vigem::XInputTarget> xinputTarget;
 	XInputAxis_t simulatedXInputAxis = 0;
+	EventToken xinputNotification;
 
 public:
 	Event<Ds4Device> onXInputHandleFailure;

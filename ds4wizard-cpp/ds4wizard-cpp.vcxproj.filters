@@ -115,6 +115,9 @@
     <ClCompile Include="ViGEmTarget.cpp">
       <Filter>Source Files\ViGEm</Filter>
     </ClCompile>
+    <ClCompile Include="DeviceProfileItemModel.cpp">
+      <Filter>Source Files\User Interface</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resource Files">
@@ -298,6 +301,9 @@
       <Filter>Header Files\User Interface</Filter>
     </QtMoc>
     <QtMoc Include="ProfileEditorDialog.h">
+      <Filter>Header Files\User Interface</Filter>
+    </QtMoc>
+    <QtMoc Include="DeviceProfileItemModel.h">
       <Filter>Header Files\User Interface</Filter>
     </QtMoc>
   </ItemGroup>

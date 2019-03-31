@@ -10,6 +10,9 @@ class Ds4ItemModel : public QAbstractListModel
 	Q_OBJECT
 
 	std::set<std::shared_ptr<Ds4Device>> devices;
+	std::unordered_map<std::shared_ptr<Ds4Device>, EventToken> tokens;
+	EventToken deviceOpened_;
+	EventToken deviceClosed_;
 
 public:
 	explicit Ds4ItemModel(const std::shared_ptr<Ds4DeviceManager>& deviceManager);

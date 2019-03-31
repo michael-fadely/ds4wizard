@@ -51,6 +51,7 @@ public:
 class Ds4DeviceManager
 {
 	std::recursive_mutex sync_lock, devices_lock;
+	std::unordered_map<std::shared_ptr<Ds4Device>, std::deque<EventToken>> tokens;
 
 public:
 	std::map<std::wstring, std::shared_ptr<Ds4Device>> devices;

@@ -11,15 +11,19 @@ Ds4ItemModel::Ds4ItemModel(const std::shared_ptr<Ds4DeviceManager>& deviceManage
 	connect(this, &Ds4ItemModel::s_onDeviceClosed, this, &Ds4ItemModel::onDeviceClosed);
 	connect(this, &Ds4ItemModel::s_onDeviceBatteryChanged, this, &Ds4ItemModel::onDeviceBatteryChanged);
 
-	deviceManager->deviceOpened += [this](auto, auto args)
-	{
-		emit s_onDeviceOpened(args);
-	};
+	this->deviceOpened_ = 
+		deviceManager->deviceOpened.add(
+		[this](auto, auto args)
+		{
+			emit s_onDeviceOpened(args);
+		});
 
-	deviceManager->deviceClosed += [this](auto, auto args)
-	{
-		emit s_onDeviceClosed(args);
-	};
+	this->deviceClosed_ =
+		deviceManager->deviceClosed.add(
+		[this](auto, auto args)
+		{
+			emit s_onDeviceClosed(args);
+		});
 }
 
 int Ds4ItemModel::rowCount(const QModelIndex& /*parent*/) const
@@ -97,10 +101,11 @@ void Ds4ItemModel::onDeviceOpened(std::shared_ptr<DeviceOpenedEventArgs> a)
 	{
 		auto device = a->device;
 
-		device->onBatteryLevelChanged += [this](auto sender) -> void
-		{
-			emit s_onDeviceBatteryChanged(sender);
-		};
+		tokens[device] = device->onBatteryLevelChanged.add(
+			[this](auto sender) -> void
+			{
+				emit s_onDeviceBatteryChanged(sender);
+			});
 
 		beginInsertRows({}, row, row);
 		endInsertRows();
@@ -119,6 +124,7 @@ void Ds4ItemModel::onDeviceClosed(std::shared_ptr<DeviceClosedEventArgs> a)
 
 	beginRemoveRows({}, row, row);
 	devices.erase(a->device);
+	tokens.erase(a->device);
 	endRemoveRows();
 }
 

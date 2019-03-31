@@ -80,6 +80,26 @@ void DeviceProfileCache::saveSettings(const std::string& id, const DeviceSetting
 	f.close();
 }
 
+bool DeviceProfileCache::addProfile(const DeviceProfile& current)
+{
+	if (getProfile(current.name).has_value())
+	{
+		return false;
+	}
+
+	int index;
+
+	{
+		LOCK(profiles);
+		profiles.push_back(current);
+
+		index = static_cast<int>(profiles.size() - 1);
+	}
+
+	profileAdded.invoke(this, current, index);
+	return true;
+}
+
 void DeviceProfileCache::removeProfile(const DeviceProfile& profile)
 {
 	{
@@ -89,6 +109,7 @@ void DeviceProfileCache::removeProfile(const DeviceProfile& profile)
 
 		if (it != profiles.end())
 		{
+			profileRemoved.invoke(this, *it, it - profiles.begin());
 			profiles.erase(it);
 		}
 	}
@@ -118,6 +139,9 @@ void DeviceProfileCache::updateProfile(const DeviceProfile& last, const DevicePr
 		throw std::runtime_error("profile name cannot be empty");
 	}
 
+	int oldIndex = -1;
+	int newIndex;
+
 	{
 		LOCK(profiles);
 
@@ -125,12 +149,15 @@ void DeviceProfileCache::updateProfile(const DeviceProfile& last, const DevicePr
 
 		if (it != profiles.end())
 		{
+			oldIndex = it - profiles.begin();
 			profiles.erase(it);
 		}
 
 		profiles.push_back(current);
+		newIndex = static_cast<int>(profiles.size() - 1);
 	}
 
+	profileChanged.invoke(this, last, current, oldIndex, newIndex);
 	onProfileChanged(last.name, current.name);
 
 	{

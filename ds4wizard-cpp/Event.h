@@ -2,6 +2,9 @@
 
 #include <deque>
 #include <functional>
+#include <memory>
+
+using EventToken = std::shared_ptr<void>;
 
 template <typename sender_t, typename... args_t>
 class Event
@@ -10,32 +13,41 @@ public:
 	using callback_t = std::function<void(sender_t* sender, args_t... args)>;
 
 private:
-	std::deque<callback_t> callbacks;
+	using weak_callback = std::weak_ptr<callback_t>;
+	using shared_callback = std::shared_ptr<callback_t>;
+
+	std::deque<weak_callback> callbacks;
 
 public:
-	Event& operator+=(callback_t callback)
+	[[nodiscard]] EventToken add(callback_t callback)
 	{
-		callbacks.emplace_back(std::move(callback));
-		return *this;
+		auto token = std::make_shared<callback_t>(std::move(callback));
+		callbacks.push_back(token);
+		return token;
 	}
 
-	Event& operator-=(callback_t callback)
+	void remove(EventToken token)
 	{
-		auto it = callbacks.find(callback);
-
-		if (it != callbacks.end())
-		{
-			callbacks.erase(it);
-		}
-
-		return *this;
+		std::remove(callbacks.begin(), callbacks.end(), token);
 	}
 
-	void invoke(sender_t* sender, args_t... args) const
+	void invoke(sender_t* sender, args_t... args)
 	{
-		for (auto& callback : callbacks)
+		auto predicate = [](weak_callback t) -> bool
 		{
-			callback(sender, args...);
+			return t.expired();
+		};
+
+		callbacks.erase(std::remove_if(callbacks.begin(), callbacks.end(), predicate), callbacks.end());
+
+		auto callbacks_ = callbacks;
+
+		for (auto weak : callbacks_)
+		{
+			if (auto shared = weak.lock())
+			{
+				(*shared)(sender, args...);
+			}
 		}
 	}
 };

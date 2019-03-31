@@ -153,24 +153,26 @@ bool Ds4DeviceManager::handleDevice(hid::HidInstance& hid)
 		if (it == devices.end())
 		{
 			device = std::make_shared<Ds4Device>();
+			auto& token_store = tokens.insert({ device, {} }).first->second;
 
-			device->onDeviceClosed += [this](auto sender) { onDs4DeviceClosed(sender); };
+			token_store.push_back(device->onDeviceClosed.add([this](auto sender) { onDs4DeviceClosed(sender); }));
 
 			// TODO: translatable
 
 			//device->onXInputHandleFailure    += [](auto sender) { Logger::writeLine(LogLevel::warning, "Failed to obtain ScpVBus XInput handle. XInput emulation will not be available."); };
-			device->onBluetoothExclusiveFailure += [](auto sender) { Logger::writeLine(LogLevel::warning, sender->name(), "Failed to open Bluetooth device exclusively."); };
-			device->onBluetoothConnected        += [](auto sender) { Logger::writeLine(LogLevel::info,    sender->name(), "Bluetooth connected."); };
-			device->onBluetoothIdleDisconnect   += [](auto sender) { Logger::writeLine(LogLevel::info,    sender->name(), "Bluetooth idle disconnect."); };
-			device->onBluetoothDisconnected     += [](auto sender) { Logger::writeLine(LogLevel::info,    sender->name(), "Bluetooth disconnected."); };
-			device->onUsbExclusiveFailure       += [](auto sender) { Logger::writeLine(LogLevel::warning, sender->name(), "Failed to open USB device exclusively."); };
-			device->onUsbConnected              += [](auto sender) { Logger::writeLine(LogLevel::info,    sender->name(), "USB connected."); };
+			token_store.push_back(device->onBluetoothExclusiveFailure.add([](auto sender) { Logger::writeLine(LogLevel::warning, sender->name(), "Failed to open Bluetooth device exclusively."); }));
+			token_store.push_back(device->onBluetoothConnected       .add([](auto sender) { Logger::writeLine(LogLevel::info,    sender->name(), "Bluetooth connected."); }));
+			token_store.push_back(device->onBluetoothIdleDisconnect  .add([](auto sender) { Logger::writeLine(LogLevel::info,    sender->name(), "Bluetooth idle disconnect."); }));
+			token_store.push_back(device->onBluetoothDisconnected    .add([](auto sender) { Logger::writeLine(LogLevel::info,    sender->name(), "Bluetooth disconnected."); }));
+			token_store.push_back(device->onUsbExclusiveFailure      .add([](auto sender) { Logger::writeLine(LogLevel::warning, sender->name(), "Failed to open USB device exclusively."); }));
+			token_store.push_back(device->onUsbConnected             .add([](auto sender) { Logger::writeLine(LogLevel::info,    sender->name(), "USB connected."); }));
 
-			device->onLatencyThresholdExceeded += [](auto sender, std::chrono::milliseconds value, std::chrono::milliseconds threshold)
+			token_store.push_back(device->onLatencyThresholdExceeded.add(
+			[](auto sender, std::chrono::milliseconds value, std::chrono::milliseconds threshold)
 			{
 				const std::string str = fmt::format("Input latency has exceeded the threshold. ({0} ms > {1} ms)", value.count(), threshold.count());
 				Logger::writeLine(LogLevel::warning, sender->name(), str);
-			};
+			}));
 
 			// TODO: don't toggle the device unless opening exclusively fails!
 			toggleDevice(hid.instanceId);
@@ -237,6 +239,7 @@ void Ds4DeviceManager::onDs4DeviceClosed(Ds4Device* sender)
 
 	auto args = std::make_shared<DeviceClosedEventArgs>(ptr);
 	deviceClosed.invoke(this, args);
+	tokens.erase(ptr);
 	devices.erase(it);
 }
 
@@ -256,6 +259,8 @@ void Ds4DeviceManager::close()
 
 		auto args = std::make_shared<DeviceClosedEventArgs>(ptr);
 		deviceClosed.invoke(this, args);
+
+		tokens.erase(ptr);
 	}
 }
 
