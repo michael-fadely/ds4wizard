@@ -914,14 +914,17 @@ bool InputSimulator::scpDeviceOpen()
 		return false;
 	}
 
-	xinputTarget = std::make_unique<vigem::XInputTarget>(&Program::driver);
+	if (xinputTarget == nullptr)
+	{
+		xinputTarget = std::make_unique<vigem::XInputTarget>(&Program::driver);
 
-	xinputNotification = xinputTarget->notification.add(
-		[this](auto sender, auto large, auto small, auto led) -> void
+		xinputNotification = xinputTarget->notification.add(
+	[this](auto sender, auto large, auto small, auto led) -> void
 		{
 			this->xinputVibration.wLeftMotorSpeed = (large << 8) | large;
 			this->xinputVibration.wRightMotorSpeed = (small << 8) | small;
 		});
+	}
 
 	return true;
 }
