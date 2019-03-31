@@ -9,7 +9,7 @@
 
 using namespace std::chrono;
 
-QColor toQt(const Ds4Color ds4Color)
+QColor toQt(const Ds4Color& ds4Color)
 {
 	return QColor(ds4Color.red, ds4Color.green, ds4Color.blue, 255);
 }
@@ -24,12 +24,13 @@ DevicePropertiesDialog::DevicePropertiesDialog(QWidget* parent, std::shared_ptr<
 	  device(std::move(device_))
 {
 	ui.setupUi(this);
+	ui.comboBox_Profile->setModel(new DeviceProfileItemModel(ui.comboBox_Profile, Program::profileCache, true));
 
 	connect(ui.pushButton_Edit, &QPushButton::clicked, this, &DevicePropertiesDialog::profileEditClicked);
 	connect(ui.buttonColor, &QPushButton::clicked, this, &DevicePropertiesDialog::colorEditClicked);
 	connect(ui.buttonBox, &QDialogButtonBox::accepted, this, &DevicePropertiesDialog::buttonBoxAccepted);
 
-	auto applyButton = ui.buttonBox->button(QDialogButtonBox::Apply);
+	const auto applyButton = ui.buttonBox->button(QDialogButtonBox::Apply);
 	connect(applyButton, &QPushButton::clicked, this, &DevicePropertiesDialog::applyButtonClicked);
 
 	connect(ui.comboBox_IdleUnit, SIGNAL(currentIndexChanged(int)), this, SLOT(timeUnitChanged(int)));
@@ -73,7 +74,10 @@ void DevicePropertiesDialog::setColorPickerColor() const
 
 void DevicePropertiesDialog::populateForm()
 {
-	// TODO: Profile (get profile list!)
+	if (!oldSettings.profile.empty())
+	{
+		ui.comboBox_Profile->setCurrentText(QString::fromStdString(oldSettings.profile));
+	}
 
 	ui.lineEdit_DeviceName->setText(QString::fromStdString(oldSettings.name));
 
@@ -156,6 +160,23 @@ void DevicePropertiesDialog::applySettings()
 	newSettings.light.color = toDs4(this->lightColor);
 
 	newSettings.idle.timeout = duration_cast<seconds>(getGuiIdleTime());
+
+	if (ui.comboBox_Profile->currentIndex() > 0)
+	{
+		std::string str = ui.comboBox_Profile->currentText().toStdString();
+		std::optional<DeviceProfile> profile = Program::profileCache.getProfile(str);
+
+		if (!profile.has_value())
+		{
+			throw std::runtime_error("invalid profile somehow");
+		}
+
+		newSettings.profile = profile->name;
+	}
+	else
+	{
+		newSettings.profile = std::string();
+	}
 
 	if (newSettings == oldSettings)
 	{

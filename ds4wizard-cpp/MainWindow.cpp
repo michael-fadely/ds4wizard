@@ -65,10 +65,10 @@ MainWindow::MainWindow(QWidget* parent)
 
 	connect(this, &MainWindow::s_onProfilesLoaded, this, &MainWindow::onProfilesLoaded);
 
-	ds4Items = new Ds4ItemModel(deviceManager);
+	ds4Items = new Ds4ItemModel(nullptr, deviceManager);
 	ui.deviceList->setModel(ds4Items);
 
-	profileItems = new DeviceProfileItemModel(Program::profileCache);
+	profileItems = new DeviceProfileItemModel(nullptr, Program::profileCache, false);
 	ui.profileList->setModel(profileItems);
 
 	const auto deviceSelectionModel = ui.deviceList->selectionModel();
@@ -103,8 +103,8 @@ MainWindow::MainWindow(QWidget* parent)
 
 MainWindow::~MainWindow()
 {
-	delete ds4Items;
 	delete profileItems;
+	delete ds4Items;
 
 	deviceManager->close();
 	delete trayIcon;

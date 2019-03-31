@@ -15,7 +15,7 @@ class Ds4ItemModel : public QAbstractListModel
 	EventToken deviceClosed_;
 
 public:
-	explicit Ds4ItemModel(const std::shared_ptr<Ds4DeviceManager>& deviceManager);
+	Ds4ItemModel(QObject* parent, const std::shared_ptr<Ds4DeviceManager>& deviceManager);
 
 	int rowCount(const QModelIndex& parent) const override;
 

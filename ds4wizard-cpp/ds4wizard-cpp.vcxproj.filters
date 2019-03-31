@@ -79,9 +79,6 @@
     <ClCompile Include="MainWindow.cpp">
       <Filter>Source Files\User Interface</Filter>
     </ClCompile>
-    <ClCompile Include="Ds4ItemModel.cpp">
-      <Filter>Source Files\User Interface</Filter>
-    </ClCompile>
     <ClCompile Include="DevicePropertiesDialog.cpp">
       <Filter>Source Files\User Interface</Filter>
     </ClCompile>
@@ -115,8 +112,11 @@
     <ClCompile Include="ViGEmTarget.cpp">
       <Filter>Source Files\ViGEm</Filter>
     </ClCompile>
+    <ClCompile Include="Ds4ItemModel.cpp">
+      <Filter>Models</Filter>
+    </ClCompile>
     <ClCompile Include="DeviceProfileItemModel.cpp">
-      <Filter>Source Files\User Interface</Filter>
+      <Filter>Models</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -163,6 +163,9 @@
     </Filter>
     <Filter Include="Source Files\ViGEm">
       <UniqueIdentifier>{0124fc3a-ff85-4972-b160-a57dd213abf6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Models">
+      <UniqueIdentifier>{03e10585-9e11-4a46-9475-816eceafadc1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -294,17 +297,17 @@
     <QtMoc Include="MainWindow.h">
       <Filter>Header Files\User Interface</Filter>
     </QtMoc>
-    <QtMoc Include="Ds4ItemModel.h">
-      <Filter>Header Files\User Interface</Filter>
-    </QtMoc>
     <QtMoc Include="DevicePropertiesDialog.h">
       <Filter>Header Files\User Interface</Filter>
     </QtMoc>
     <QtMoc Include="ProfileEditorDialog.h">
       <Filter>Header Files\User Interface</Filter>
     </QtMoc>
+    <QtMoc Include="Ds4ItemModel.h">
+      <Filter>Models</Filter>
+    </QtMoc>
     <QtMoc Include="DeviceProfileItemModel.h">
-      <Filter>Header Files\User Interface</Filter>
+      <Filter>Models</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>

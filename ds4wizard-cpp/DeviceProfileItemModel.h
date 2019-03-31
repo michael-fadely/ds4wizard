@@ -12,8 +12,10 @@ class DeviceProfileItemModel final : public QAbstractListModel
 	EventToken onProfileChanged_;
 	EventToken onProfileRemoved_;
 
+	bool includeDefault;
+
 public:
-	explicit DeviceProfileItemModel(DeviceProfileCache& profileCache);
+	DeviceProfileItemModel(QObject* parent, DeviceProfileCache& profileCache, bool includeDefault_);
 
 	int rowCount(const QModelIndex& parent) const override;
 

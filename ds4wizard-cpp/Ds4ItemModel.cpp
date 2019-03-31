@@ -2,7 +2,8 @@
 #include "Ds4ItemModel.h"
 #include <QMetaType>
 
-Ds4ItemModel::Ds4ItemModel(const std::shared_ptr<Ds4DeviceManager>& deviceManager)
+Ds4ItemModel::Ds4ItemModel(QObject* parent, const std::shared_ptr<Ds4DeviceManager>& deviceManager)
+	: QAbstractListModel(parent)
 {
 	qRegisterMetaType<std::shared_ptr<DeviceOpenedEventArgs>>("std::shared_ptr<DeviceOpenedEventArgs>");
 	qRegisterMetaType<std::shared_ptr<DeviceClosedEventArgs>>("std::shared_ptr<DeviceClosedEventArgs>");

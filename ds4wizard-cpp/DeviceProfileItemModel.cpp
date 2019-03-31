@@ -2,8 +2,8 @@
 #include "DeviceProfileCache.h"
 #include "DeviceProfileItemModel.h"
 
-DeviceProfileItemModel::DeviceProfileItemModel(DeviceProfileCache& profileCache)
-	: profileCache(profileCache)
+DeviceProfileItemModel::DeviceProfileItemModel(QObject* parent, DeviceProfileCache& profileCache, bool includeDefault_)
+	: QAbstractListModel(parent), profileCache(profileCache), includeDefault(includeDefault_)
 {
 	this->onProfileAdded_ = profileCache.profileAdded.add(
 	[this](DeviceProfileCache* sender, const DeviceProfile& profile, int index)
@@ -26,7 +26,7 @@ DeviceProfileItemModel::DeviceProfileItemModel(DeviceProfileCache& profileCache)
 
 int DeviceProfileItemModel::rowCount(const QModelIndex& parent) const
 {
-	return static_cast<int>(profileCache.profiles.size());
+	return static_cast<int>(profileCache.profiles.size()) + static_cast<int>(includeDefault);
 }
 
 int DeviceProfileItemModel::columnCount(const QModelIndex& parent) const
@@ -36,17 +36,31 @@ int DeviceProfileItemModel::columnCount(const QModelIndex& parent) const
 
 QVariant DeviceProfileItemModel::data(const QModelIndex& index, int role) const
 {
-	if (!index.isValid() || index.row() < 0 || static_cast<size_t>(index.row()) >= profileCache.profiles.size())
+	if (!index.isValid() || index.row() < 0 || role != Qt::DisplayRole)
 	{
 		return QVariant();
 	}
 
-	if (role != Qt::DisplayRole)
+	if (includeDefault)
+	{
+		if (static_cast<size_t>(index.row()) > profileCache.profiles.size())
+		{
+			return QVariant();
+		}
+	}
+	else if (static_cast<size_t>(index.row()) >= profileCache.profiles.size())
 	{
 		return QVariant();
 	}
 
-	return QString::fromStdString(profileCache.profiles[index.row()].name);
+	if (includeDefault && !index.row())
+	{
+		return tr("[Default]");
+	}
+
+	const auto row = index.row() - static_cast<int>(includeDefault);
+
+	return QString::fromStdString(profileCache.profiles[row].name);
 }
 
 QVariant DeviceProfileItemModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -73,12 +87,16 @@ QVariant DeviceProfileItemModel::headerData(int section, Qt::Orientation orienta
 
 void DeviceProfileItemModel::onProfileAdded(DeviceProfileCache* sender, const DeviceProfile& profile, int index)
 {
+	index += static_cast<int>(includeDefault);
 	beginInsertRows({}, index, index);
 	endInsertRows();
 }
 
 void DeviceProfileItemModel::onProfileChanged(DeviceProfileCache* sender, const DeviceProfile& oldProfile, const DeviceProfile& newProfile, int oldIndex, int newIndex)
 {
+	oldIndex += static_cast<int>(includeDefault);
+	newIndex += static_cast<int>(includeDefault);
+
 	if (oldIndex >= 0)
 	{
 		beginRemoveRows({}, oldIndex, oldIndex);
@@ -91,6 +109,7 @@ void DeviceProfileItemModel::onProfileChanged(DeviceProfileCache* sender, const 
 
 void DeviceProfileItemModel::onProfileRemoved(DeviceProfileCache* sender, const DeviceProfile& profile, int index)
 {
+	index += static_cast<int>(includeDefault);
 	beginRemoveRows({}, index, index);
 	endRemoveRows();
 }
