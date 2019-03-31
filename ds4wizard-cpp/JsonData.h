@@ -2,6 +2,9 @@
 
 #include <nlohmann/json.hpp>
 
+/**
+ * \brief A simple interface for de/serializable JSON objects.
+ */
 struct JsonData
 {
 	virtual ~JsonData() = default;

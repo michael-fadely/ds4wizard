@@ -262,9 +262,6 @@
     <ClInclude Include="pathutil.h">
       <Filter>Header Files\Utility</Filter>
     </ClInclude>
-    <ClInclude Include="bindutil.h">
-      <Filter>Header Files\Utility</Filter>
-    </ClInclude>
     <ClInclude Include="Event.h">
       <Filter>Header Files</Filter>
     </ClInclude>

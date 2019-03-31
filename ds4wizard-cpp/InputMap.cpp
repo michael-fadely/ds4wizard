@@ -353,7 +353,7 @@ InputMap::InputMap(SimulatorType simulatorType, InputType_t inputType, OutputTyp
 {
 }
 
-void InputMap::pressModifier(const InputModifier* modifier)
+void InputMap::pressWithModifier(const InputModifier* modifier)
 {
 	if (!modifier || modifier->isActive())
 	{

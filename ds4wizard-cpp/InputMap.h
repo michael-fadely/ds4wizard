@@ -25,8 +25,7 @@ public:
 	virtual bool isActive() const override;
 
 	/**
-	 * \brief 
-	 * Indicates if this instance has a persistent state
+	 * \brief Indicates if this instance has a persistent state
 	 * which is actively simulated.
 	 */
 	bool isPersistent() const;
@@ -1024,7 +1023,12 @@ public:
 
 	InputMap(SimulatorType simulatorType, InputType_t inputType, OutputType::T outputType);
 
-	void pressModifier(const InputModifier* modifier);
+	/**
+	 * \brief Activates a press state on this instance.
+	 * If a modifier is provided, it must be active for the press to succeed.
+	 * \param modifier The parent modifier, if any.
+	 */
+	void pressWithModifier(const InputModifier* modifier);
 
 	bool operator==(const InputMap& other) const;
 	bool operator!=(const InputMap& other) const;
@@ -1037,8 +1041,7 @@ class InputModifier : public InputMapBase
 {
 public:
 	/**
-	* \brief
-	* The bindings associated with this modifier set.
+	* \brief The bindings associated with this modifier set.
 	*/
 	std::deque<InputMap> bindings;
 

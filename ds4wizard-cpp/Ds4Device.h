@@ -94,14 +94,12 @@ public:
 	const std::string& safeMacAddress() const;
 
 	/**
-	 * \brief 
-	 * Gets the battery charge level in the range 1 to 10.
+	 * \brief Gets the battery charge level in the range 1 to 10.
 	 */
 	uint8_t battery() const;
 
 	/**
-	 * \brief 
-	 * Indicates if the controller is charging.
+	 * \brief Indicates if the controller is charging.
 	 */
 	bool charging() const;
 
@@ -129,8 +127,7 @@ public:
 	void applySettings(const DeviceSettings& newSettings);
 
 	/**
-	 * \brief 
-	 * Applies changes made to the device profile and opens device handles.
+	 * \brief Applies changes made to the device profile and opens device handles.
 	 */
 	void applyProfile();
 

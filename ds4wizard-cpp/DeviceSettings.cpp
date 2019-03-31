@@ -4,9 +4,7 @@
 using namespace std::chrono;
 
 DeviceSettings::DeviceSettings()
-	: useProfileLight(false),
-	  useProfileIdle(false),
-	  latencyThreshold(5)
+	: latencyThreshold(5)
 {
 }
 

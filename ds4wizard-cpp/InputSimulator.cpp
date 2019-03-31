@@ -122,9 +122,9 @@ void InputSimulator::simulateXInputAxis(XInputAxes& axes, float m)
 }
 
 // TODO: OPTIMIZE !!!
-void InputSimulator::getActive(InputMapBase& map)
+void InputSimulator::cacheModifierBindings(InputMapBase& map)
 {
-	if (!map_cache.empty())
+	if (!modifier_bindings.empty())
 	{
 		return;
 	}
@@ -140,7 +140,7 @@ void InputSimulator::getActive(InputMapBase& map)
 		{
 			if (&binding != &map)
 			{
-				map_cache.push_back(&binding);
+				modifier_bindings.push_back(&binding);
 			}
 		}
 	}
@@ -153,21 +153,21 @@ bool InputSimulator::isOverriddenByModifierSet(InputMapBase& map)
 		return false;
 	}
 
-	map_cache.clear();
+	modifier_bindings.clear();
 
 	/*maps = Profile.Modifiers
-		.Where(x = > x.IsActive)
-		.Select(y = > y.Bindings)
-		.Where(x = > x != nullptr)
-		.SelectMany(x = > x)
-		.Where(x = > !ReferenceEquals(x, map))
+		.Where(x => x.IsActive)
+		.Select(y => y.Bindings)
+		.Where(x => x != nullptr)
+		.SelectMany(x => x)
+		.Where(x => !ReferenceEquals(x, map))
 		.ToList();*/
 
 	if (map.inputType & InputType::button)
 	{
-		getActive(map);
+		cacheModifierBindings(map);
 
-		if (std::any_of(map_cache.begin(), map_cache.end(), [&](InputMap* x) -> bool
+		if (std::any_of(modifier_bindings.begin(), modifier_bindings.end(), [&](InputMap* x) -> bool
 		{
 			return (x->inputType & InputType::button) != 0 && (x->inputButtons.value_or(0) & map.inputButtons.value_or(0)) != 0;
 		}))
@@ -178,9 +178,9 @@ bool InputSimulator::isOverriddenByModifierSet(InputMapBase& map)
 
 	if (map.inputType & InputType::axis)
 	{
-		getActive(map);
+		cacheModifierBindings(map);
 
-		if (std::any_of(map_cache.begin(), map_cache.end(), [&](InputMap* x) -> bool
+		if (std::any_of(modifier_bindings.begin(), modifier_bindings.end(), [&](InputMap* x) -> bool
 		{
 			return (x->inputType & InputType::axis) != 0 && (x->inputAxis.value_or(0) & map.inputAxis.value_or(0)) != 0;
 		}))
@@ -191,9 +191,9 @@ bool InputSimulator::isOverriddenByModifierSet(InputMapBase& map)
 
 	if (map.inputType & InputType::touchRegion)
 	{
-		getActive(map);
+		cacheModifierBindings(map);
 
-		if (std::any_of(map_cache.begin(), map_cache.end(), [&](InputMap* x) -> bool
+		if (std::any_of(modifier_bindings.begin(), modifier_bindings.end(), [&](InputMap* x) -> bool
 		{
 			return (x->inputType & InputType::touchRegion) != 0 && x->inputRegion == map.inputRegion;
 		}))
@@ -741,17 +741,17 @@ void InputSimulator::updatePressedStateImpl(InputMapBase& instance, const std::f
 
 void InputSimulator::updatePressedState(InputModifier& modifier)
 {
-	const auto a = [&]() -> void
+	const auto press = [&]() -> void
 	{
 		modifier.press();
 	};
 
-	const auto b = [&]() -> void
+	const auto release = [&]() -> void
 	{
 		modifier.release();
 	};
 
-	updatePressedStateImpl(modifier, a, b);
+	updatePressedStateImpl(modifier, press, release);
 
 	if (modifier.bindings.empty())
 	{
@@ -766,17 +766,17 @@ void InputSimulator::updatePressedState(InputModifier& modifier)
 
 void InputSimulator::updatePressedState(InputMap& map, InputModifier* modifier)
 {
-	const auto a = [&]() -> void
+	const auto press = [&]() -> void
 	{
-		map.pressModifier(modifier);
+		map.pressWithModifier(modifier);
 	};
 
-	const auto b = [&]() -> void
+	const auto release = [&]() -> void
 	{
 		map.release();
 	};
 
-	updatePressedStateImpl(map, a, b);
+	updatePressedStateImpl(map, press, release);
 }
 
 void InputSimulator::updateBindingState(InputMap& m, InputModifier* modifier)
@@ -808,7 +808,7 @@ void InputSimulator::updateBindingState(InputMap& m, InputModifier* modifier)
 			{
 				if (it->second.isActive(touchMask))
 				{
-					m.pressModifier(modifier);
+					m.pressWithModifier(modifier);
 				}
 				else
 				{

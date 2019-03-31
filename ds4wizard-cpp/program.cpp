@@ -53,6 +53,7 @@ bool Program::isElevated()
 
 void Program::initialize()
 {
+	// TODO: check for and display error opening ViGEm driver handle
 	driver.open();
 
 	// HACK: don't do this?
