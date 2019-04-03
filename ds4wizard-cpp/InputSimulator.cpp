@@ -283,7 +283,7 @@ void InputSimulator::runMap(InputMap& m, InputModifier* modifier)
 					region.applyDeadZone(direction, analog);
 					applyMap(m, modifier, state, analog);
 
-					state = handleTouchToggle(m, modifier, region.state2);
+					state  = handleTouchToggle(m, modifier, region.state2);
 					analog = region.getTouchDelta(Ds4Buttons::touch2, direction, parent->input.data.touchPoint2);
 
 					if (analog < deadZone)
@@ -673,6 +673,7 @@ void InputSimulator::updatePressedStateImpl(InputMapBase& instance, const std::f
 				{
 					return (x & instance.inputAxis.value_or(0)) != 0;
 				});
+
 				size_t count = 0;
 
 				for (Ds4Axis_t bit : Ds4Axis_values)
@@ -919,9 +920,9 @@ bool InputSimulator::scpDeviceOpen()
 		xinputTarget = std::make_unique<vigem::XInputTarget>(&Program::driver);
 
 		xinputNotification = xinputTarget->notification.add(
-	[this](auto sender, auto large, auto small, auto led) -> void
+		[this](auto sender, auto large, auto small, auto led) -> void
 		{
-			this->xinputVibration.wLeftMotorSpeed = (large << 8) | large;
+			this->xinputVibration.wLeftMotorSpeed  = (large << 8) | large;
 			this->xinputVibration.wRightMotorSpeed = (small << 8) | small;
 		});
 	}
