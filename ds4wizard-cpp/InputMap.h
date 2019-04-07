@@ -45,11 +45,15 @@ public:
 
 	InputMapBase() = default;
 	InputMapBase(const InputMapBase& other);
+	InputMapBase(InputMapBase&& other) noexcept;
 
 	explicit InputMapBase(InputType_t inputType);
 	InputMapBase(InputType_t inputType, Ds4Buttons::T input);
 	InputMapBase(InputType_t inputType, Ds4Axis::T input);
 	InputMapBase(InputType_t inputType, std::string input);
+
+	InputMapBase& operator=(const InputMapBase&) = default;
+	InputMapBase& operator=(InputMapBase&& other) noexcept;
 
 	virtual void press() override;
 
@@ -1020,8 +1024,12 @@ public:
 	InputMap() = default;
 
 	InputMap(const InputMap& other) = default;
+	InputMap(InputMap&& other) noexcept;
 
 	InputMap(SimulatorType simulatorType, InputType_t inputType, OutputType::T outputType);
+
+	InputMap& operator=(const InputMap& other) = default;
+	InputMap& operator=(InputMap&& other) noexcept;
 
 	/**
 	 * \brief Activates a press state on this instance.
@@ -1053,6 +1061,11 @@ public:
 
 	// Copy constructor
 	InputModifier(const InputModifier& other);
+
+	InputModifier(InputModifier&& other) noexcept;
+
+	InputModifier& operator=(const InputModifier&) = default;
+	InputModifier& operator=(InputModifier&& other) noexcept;
 
 	bool operator==(const InputModifier& other) const;
 	bool operator!=(const InputModifier& other) const;

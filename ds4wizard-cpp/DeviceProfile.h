@@ -64,7 +64,10 @@ public:
 
 	DeviceProfile() = default;
 	DeviceProfile(const DeviceProfile&) = default;
+	DeviceProfile(DeviceProfile&& other) noexcept;
+
 	DeviceProfile& operator=(const DeviceProfile&) = default;
+	DeviceProfile& operator=(DeviceProfile&& other) noexcept;
 
 	bool operator==(const DeviceProfile& other) const;
 

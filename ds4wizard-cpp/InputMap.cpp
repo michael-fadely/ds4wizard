@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "InputMap.h"
- #include <utility>
+#include <utility>
 
 bool InputMapBase::performRapidFire() const
 {
@@ -57,6 +57,19 @@ InputMapBase::InputMapBase(const InputMapBase& other)
 {
 }
 
+InputMapBase::InputMapBase(InputMapBase&& other) noexcept
+	: Pressable(std::move(other)),
+	  inputType(other.inputType),
+	  inputButtons(other.inputButtons),
+	  inputAxis(other.inputAxis),
+	  inputRegion(std::move(other.inputRegion)),
+	  toggle(other.toggle),
+	  rapidFire(other.rapidFire),
+	  rapidFireInterval(other.rapidFireInterval),
+	  inputAxisOptions(std::move(other.inputAxisOptions))
+{
+}
+
 InputMapBase::InputMapBase(InputType_t inputType)
 	: inputType(inputType)
 {
@@ -78,6 +91,22 @@ InputMapBase::InputMapBase(InputType_t inputType, std::string input)
 	: inputType(inputType),
 	  inputRegion(std::move(input))
 {
+}
+
+InputMapBase& InputMapBase::operator=(InputMapBase&& other) noexcept
+{
+	Pressable::operator=(std::move(other));
+
+	inputType         = other.inputType;
+	inputButtons      = other.inputButtons;
+	inputAxis         = other.inputAxis;
+	inputRegion       = std::move(other.inputRegion);
+	toggle            = other.toggle;
+	rapidFire         = other.rapidFire;
+	rapidFireInterval = other.rapidFireInterval;
+	inputAxisOptions  = std::move(other.inputAxisOptions);
+
+	return *this;
 }
 
 void InputMapBase::press()
@@ -312,6 +341,19 @@ InputModifier::InputModifier(const InputModifier& other)
 	}
 }
 
+InputModifier::InputModifier(InputModifier&& other) noexcept
+	: InputMapBase(std::move(other)),
+	  bindings(std::move(other.bindings))
+{
+}
+
+InputModifier& InputModifier::operator=(InputModifier&& other) noexcept
+{
+	InputMapBase::operator=(std::move(other));
+	bindings = std::move(other.bindings);
+	return *this;
+}
+
 bool InputModifier::operator==(const InputModifier& other) const
 {
 	return InputMapBase::operator==(other) && bindings == other.bindings;
@@ -335,7 +377,7 @@ void InputModifier::readJson(const nlohmann::json& json)
 void InputModifier::writeJson(nlohmann::json& json) const
 {
 	InputMapBase::writeJson(json);
-	
+
 	nlohmann::json bindings_;
 
 	for (const auto& binding : bindings)
@@ -346,11 +388,44 @@ void InputModifier::writeJson(nlohmann::json& json) const
 	json["bindings"] = bindings_;
 }
 
+InputMap::InputMap(InputMap&& other) noexcept
+	: InputMapBase(std::move(other)),
+	  simulatorType(other.simulatorType),
+	  outputType(other.outputType),
+	  action(other.action),
+	  touchDirection(other.touchDirection),
+	  keyCode(other.keyCode),
+	  keyCodeModifiers(std::move(other.keyCodeModifiers)),
+	  mouseAxes(other.mouseAxes),
+	  mouseButton(other.mouseButton),
+	  xinputButtons(other.xinputButtons),
+	  xinputAxes(other.xinputAxes)
+{
+}
+
 InputMap::InputMap(SimulatorType simulatorType, InputType_t inputType, OutputType::T outputType)
 	: InputMapBase(inputType),
 	  simulatorType(simulatorType),
 	  outputType(outputType)
 {
+}
+
+InputMap& InputMap::operator=(InputMap&& other) noexcept
+{
+	InputMapBase::operator=(std::move(other));
+
+	simulatorType    = other.simulatorType;
+	outputType       = other.outputType;
+	action           = other.action;
+	touchDirection   = other.touchDirection;
+	keyCode          = other.keyCode;
+	keyCodeModifiers = std::move(other.keyCodeModifiers);
+	mouseAxes        = other.mouseAxes;
+	mouseButton      = other.mouseButton;
+	xinputButtons    = other.xinputButtons;
+	xinputAxes       = other.xinputAxes;
+
+	return *this;
 }
 
 void InputMap::pressWithModifier(const InputModifier* modifier)
@@ -388,7 +463,7 @@ bool InputMap::operator!=(const InputMap& other) const
 void InputMap::readJson(const nlohmann::json& json)
 {
 	InputMapBase::readJson(json);
-	
+
 	ENUM_DESERIALIZE_FLAGS(OutputType)(json["outputType"].get<std::string>(), outputType);
 
 	if (json.find("xinputButtons") != json.end())
