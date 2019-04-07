@@ -2,8 +2,7 @@
 #include "Ds4TouchRegion.h"
 
 Ds4TouchRegion::Ds4TouchRegion(Ds4TouchRegionType type, short left, short top, short right, short bottom, bool allowCrossOver)
-	: activeButtons(0),
-	  type(type),
+	: type(type),
 	  allowCrossOver(allowCrossOver),
 	  left(left),
 	  top(top),
@@ -13,9 +12,7 @@ Ds4TouchRegion::Ds4TouchRegion(Ds4TouchRegionType type, short left, short top, s
 }
 
 Ds4TouchRegion::Ds4TouchRegion(const Ds4TouchRegion& other)
-	: activeButtons(0),
-	  state1(), state2(),
-	  type(other.type),
+	: type(other.type),
 	  allowCrossOver(other.allowCrossOver),
 	  left(other.left),
 	  top(other.top),
