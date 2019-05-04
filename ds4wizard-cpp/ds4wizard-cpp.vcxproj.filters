@@ -118,6 +118,9 @@
     <ClCompile Include="DeviceProfileItemModel.cpp">
       <Filter>Models</Filter>
     </ClCompile>
+    <ClCompile Include="DeviceProfileModel.cpp">
+      <Filter>Models</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resource Files">
@@ -304,6 +307,9 @@
       <Filter>Models</Filter>
     </QtMoc>
     <QtMoc Include="DeviceProfileItemModel.h">
+      <Filter>Models</Filter>
+    </QtMoc>
+    <QtMoc Include="DeviceProfileModel.h">
       <Filter>Models</Filter>
     </QtMoc>
   </ItemGroup>

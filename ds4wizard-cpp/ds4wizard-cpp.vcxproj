@@ -152,6 +152,7 @@
     <ClCompile Include="DeviceProfile.cpp" />
     <ClCompile Include="DeviceProfileCache.cpp" />
     <ClCompile Include="DeviceProfileItemModel.cpp" />
+    <ClCompile Include="DeviceProfileModel.cpp" />
     <ClCompile Include="DevicePropertiesDialog.cpp" />
     <ClCompile Include="DeviceSettings.cpp" />
     <ClCompile Include="DeviceSettingsCommon.cpp" />
@@ -213,6 +214,10 @@
       <Define Condition="'$(Configuration)|$(Platform)'=='Release|x64'">_CRT_SECURE_NO_WARNINGS;NOMINMAX;WIN32_LEAN_AND_MEAN;UNICODE;_UNICODE;WIN32;WIN64;QT_NO_DEBUG;NDEBUG;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB</Define>
     </QtMoc>
     <QtMoc Include="DeviceProfileItemModel.h">
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\..\libhid;.\..\libdevicetoggle;.\..\dependencies\GSL\include;.\..\dependencies\better-enums;.\..\dependencies\json\include;.\..\dependencies\fmt\include;.\..\dependencies\ViGEmClient\include;.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets</IncludePath>
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\..\libhid;.\..\libdevicetoggle;.\..\dependencies\GSL\include;.\..\dependencies\better-enums;.\..\dependencies\json\include;.\..\dependencies\fmt\include;.\..\dependencies\ViGEmClient\include;.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets</IncludePath>
+    </QtMoc>
+    <QtMoc Include="DeviceProfileModel.h">
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\..\libhid;.\..\libdevicetoggle;.\..\dependencies\GSL\include;.\..\dependencies\better-enums;.\..\dependencies\json\include;.\..\dependencies\fmt\include;.\..\dependencies\ViGEmClient\include;.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets</IncludePath>
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\..\libhid;.\..\libdevicetoggle;.\..\dependencies\GSL\include;.\..\dependencies\better-enums;.\..\dependencies\json\include;.\..\dependencies\fmt\include;.\..\dependencies\ViGEmClient\include;.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets</IncludePath>
     </QtMoc>

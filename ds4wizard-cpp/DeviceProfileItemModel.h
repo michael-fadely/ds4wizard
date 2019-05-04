@@ -24,6 +24,8 @@ public:
 	QVariant data(const QModelIndex& index, int role) const override;
 	QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 
+	DeviceProfile getProfile(int index) const;
+
 private:
 	void onProfileAdded(DeviceProfileCache* sender, const DeviceProfile& profile, int index);
 	void onProfileChanged(DeviceProfileCache* sender, const DeviceProfile& oldProfile, const DeviceProfile& newProfile, int oldIndex, int newIndex);

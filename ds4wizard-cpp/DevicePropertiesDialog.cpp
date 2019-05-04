@@ -256,9 +256,9 @@ void DevicePropertiesDialog::resetPeakLatency() const
 void DevicePropertiesDialog::profileEditClicked(bool /*checked*/)
 {
 	// TODO: implement actual functionality
-	auto dialog = new ProfileEditorDialog(this);
-	dialog->exec();
-	delete dialog;
+	//auto dialog = new ProfileEditorDialog(this);
+	//dialog->exec();
+	//delete dialog;
 }
 
 void DevicePropertiesDialog::colorEditClicked(bool /*checked*/)

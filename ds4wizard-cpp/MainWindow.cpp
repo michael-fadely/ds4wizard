@@ -5,6 +5,7 @@
 #include "program.h"
 #include "Ds4DeviceManager.h"
 #include "Logger.h"
+#include "DeviceProfileModel.h"
 
 using namespace std::chrono;
 
@@ -77,15 +78,16 @@ MainWindow::MainWindow(QWidget* parent)
 	// HACK: for testing later
 	connect(ui.profileEdit, &QPushButton::clicked, this, [this](...)
 	{
-		auto dg = std::make_unique<ProfileEditorDialog>(this);
+		auto model = std::make_unique<DeviceProfileModel>(this, profileItems->getProfile(ui.profileList->currentIndex().row()));
+		auto dg = std::make_unique<ProfileEditorDialog>(model.get(), this);
 		dg->exec();
 	});
 
 	// HACK: for testing later
-	connect(ui.profileAdd, &QPushButton::clicked, this, [](...)
+	/*connect(ui.profileAdd, &QPushButton::clicked, this, [](...)
 	{
 		Program::profileCache.updateProfile({}, DeviceProfile::defaultProfile());
-	});
+	});*/
 
 	if (!supportsSystemTray || !Program::settings.startMinimized)
 	{
