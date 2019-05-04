@@ -267,6 +267,7 @@ void Ds4DeviceManager::close()
 void Ds4DeviceManager::toggleDevice(const std::wstring& instanceId)
 {
 	// TODO: check if windows 8 or newer, otherwise don't bother
+	// TODO: use CreateProcess and get console output
 
 	if (Program::isElevated())
 	{
@@ -290,9 +291,14 @@ void Ds4DeviceManager::toggleDevice(const std::wstring& instanceId)
 		throw std::runtime_error("ShellExecuteExW failed");
 	}
 
-	const Handle handle(info.hProcess, true);
+	Handle handle(info.hProcess, true);
 
 	WaitForSingleObject(handle.nativeHandle, INFINITE);
 
-	// TODO: either use GetExitCodeProcess to get the error code (if any) from the process, or use CreateProcess instead to get console output!
+	DWORD exitCode = 0;
+	if (!GetExitCodeProcess(handle.nativeHandle, &exitCode) || exitCode != 0)
+	{
+		handle.close();
+		throw std::runtime_error("Device toggle failed! Please report.");
+	}
 }
