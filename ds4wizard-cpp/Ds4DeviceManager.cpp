@@ -284,7 +284,6 @@ void Ds4DeviceManager::toggleDevice(const std::wstring& instanceId)
 	info.lpFile       = L"ds4wizard-device-toggle.exe";
 	info.lpParameters = params.c_str();
 	info.lpVerb       = L"runas";
-	//info.nShow        = SW_SHOW;
 
 	if (!ShellExecuteExW(&info))
 	{
@@ -294,4 +293,6 @@ void Ds4DeviceManager::toggleDevice(const std::wstring& instanceId)
 	const Handle handle(info.hProcess, true);
 
 	WaitForSingleObject(handle.nativeHandle, INFINITE);
+
+	// TODO: either use GetExitCodeProcess to get the error code (if any) from the process, or use CreateProcess instead to get console output!
 }
