@@ -116,6 +116,12 @@ namespace vigem
 		XInputTarget* xtarget = targets[target];
 		static_mutex.unlock();
 
+		// HACK: this is occasionally nullptr when connecting the controller via bluetooth; this is not a good fix
+		if (!xtarget)
+		{
+			return;
+		}
+
 		if (xtarget->parent->client == client)
 		{
 			xtarget->notification.invoke(xtarget, largeMotor, smallMotor, ledNumber);
