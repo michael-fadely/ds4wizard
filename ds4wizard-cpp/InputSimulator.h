@@ -208,21 +208,21 @@ private:
 	 * \brief Connects a virtual XInput device to the system.
 	 * \return \c true on success.
 	 */
-	bool scpConnect(); // TODO: rename
+	bool xinputConnect();
 
 	/**
 	 * \brief Disconnects a virtual XInput device from the system.
 	 */
-	void scpDisconnect(); // TODO: rename
+	void xinputDisconnect();
 
 	/**
 	 * \brief Acquires a handle to the XInput emulation driver.
 	 * \return \c true on success.
 	 */
-	bool scpDeviceOpen(); // TODO: rename
+	bool xinputDeviceOpen();
 
 	/**
 	 * \brief Closes the handle to the XInput emulation driver.
 	 */
-	void scpDeviceClose(); // TODO: rename
+	void xinputDeviceClose();
 };

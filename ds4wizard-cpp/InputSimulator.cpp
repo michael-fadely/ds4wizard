@@ -10,12 +10,12 @@ using namespace std::chrono;
 InputSimulator::InputSimulator(Ds4Device* parent)
 	: parent(parent)
 {
-	scpDeviceOpen();
+	xinputDeviceOpen();
 }
 
 InputSimulator::~InputSimulator()
 {
-	scpDisconnect();
+	xinputDisconnect();
 }
 
 void InputSimulator::simulateXInputButton(XInputButtons_t buttons, PressedState state)
@@ -317,14 +317,14 @@ void InputSimulator::applyProfile(DeviceProfile* profile)
 
 	if (profile->useXInput)
 	{
-		if (!scpConnect())
+		if (!xinputConnect())
 		{
-			scpDisconnect();
+			xinputDisconnect();
 		}
 	}
 	else
 	{
-		scpDisconnect();
+		xinputDisconnect();
 	}
 }
 
@@ -839,9 +839,9 @@ void InputSimulator::updateEmulators() const
 	parent->output.rightMotor = static_cast<uint8_t>(xinputVibration.wRightMotorSpeed >> 8);
 }
 
-bool InputSimulator::scpConnect()
+bool InputSimulator::xinputConnect()
 {
-	if (!scpDeviceOpen())
+	if (!xinputDeviceOpen())
 	{
 		return false;
 	}
@@ -851,9 +851,9 @@ bool InputSimulator::scpConnect()
 		return true;
 	}
 
-	// HACK:
-	int index = 0;
+	// HACK: not necessary for ViGEm
 	//int index = profile->autoXInputIndex ? ScpDevice::getFreePort() : profile->xinputIndex;
+	int index = 0;
 
 	if (index < 0)
 	{
@@ -897,7 +897,7 @@ bool InputSimulator::scpConnect()
 	return true;
 }
 
-void InputSimulator::scpDisconnect()
+void InputSimulator::xinputDisconnect()
 {
 	if (realXInputIndex < 0 || !xinputTarget)
 	{
@@ -908,7 +908,7 @@ void InputSimulator::scpDisconnect()
 	realXInputIndex = -1;
 }
 
-bool InputSimulator::scpDeviceOpen()
+bool InputSimulator::xinputDeviceOpen()
 {
 	if (!Program::driver.isOpen())
 	{
@@ -930,7 +930,7 @@ bool InputSimulator::scpDeviceOpen()
 	return true;
 }
 
-void InputSimulator::scpDeviceClose()
+void InputSimulator::xinputDeviceClose()
 {
 	if (xinputTarget)
 	{
