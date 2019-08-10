@@ -22,7 +22,7 @@ private:
 public:
 	PressedState simulatedState() const;
 
-	virtual bool isActive() const override;
+	[[nodiscard]] virtual bool isActive() const override;
 
 	/**
 	 * \brief Indicates if this instance has a persistent state

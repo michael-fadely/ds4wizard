@@ -31,7 +31,7 @@ namespace vigem
 		 * \brief Indicates the opened state of the ViGEm driver handle.
 		 * \return \c true if the handle is open.
 		 */
-		bool isOpen() const;
+		[[nodiscard]] bool isOpen() const;
 
 		/**
 		 * \brief If open, closes the handle to the ViGEm driver.

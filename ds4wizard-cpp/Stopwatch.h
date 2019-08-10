@@ -20,8 +20,8 @@ public:
 
 	void start();
 	Duration stop();
-	Duration elapsed() const;
+	[[nodiscard]] Duration elapsed() const;
 	bool running() const;
-	TimePoint start_time() const;
-	TimePoint end_time() const;
+	[[nodiscard]] TimePoint start_time() const;
+	[[nodiscard]] TimePoint end_time() const;
 };

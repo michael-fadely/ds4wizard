@@ -19,7 +19,7 @@ public:
 	 * \brief Indicates that this instance is in an active state, that is: just pressed or held.
 	 * \return \c true if active.
 	 */
-	virtual bool isActive() const;
+	[[nodiscard]] virtual bool isActive() const;
 
 	/**
 	 * \brief Changes a \c PressedState from an inactive to active state.
