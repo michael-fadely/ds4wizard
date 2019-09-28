@@ -487,13 +487,6 @@ void Ds4Device::writeBluetooth()
 	writeLatency.stop();
 }
 
-// HACK
-static bool peak_max = false;
-static size_t peak_i = 0;
-static std::array<float, 5> peak_f {};
-static float peak_last = 0.0f;
-static Stopwatch peak_sw;
-
 void Ds4Device::run()
 {
 	if (!peak_sw.running())
