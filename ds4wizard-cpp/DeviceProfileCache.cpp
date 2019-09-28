@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "DeviceProfileCache.h"
 #include "lock.h"
 #include <sstream>
@@ -50,7 +50,9 @@ void DeviceProfileCache::saveSettings(const std::string& id, const DeviceSetting
 		return;
 	}
 
-	QDir devicesDir(Program::devicesFilePath());
+	const auto devicesFilePath = QString::fromStdString(Program::devicesFilePath());
+
+	QDir devicesDir(devicesFilePath);
 	devicesDir.cdUp();
 
 	if (!devicesDir.exists())
@@ -58,7 +60,7 @@ void DeviceProfileCache::saveSettings(const std::string& id, const DeviceSetting
 		devicesDir.mkpath(devicesDir.absolutePath());
 	}
 
-	QFile f(Program::devicesFilePath());
+	QFile f(devicesFilePath);
 
 	if (!f.open(QIODevice::WriteOnly | QIODevice::Text))
 	{
@@ -78,6 +80,26 @@ void DeviceProfileCache::saveSettings(const std::string& id, const DeviceSetting
 	f.close();
 }
 
+bool DeviceProfileCache::addProfile(const DeviceProfile& current)
+{
+	if (getProfile(current.name).has_value())
+	{
+		return false;
+	}
+
+	int index;
+
+	{
+		LOCK(profiles);
+		profiles.push_back(current);
+
+		index = static_cast<int>(profiles.size() - 1);
+	}
+
+	profileAdded.invoke(this, current, index);
+	return true;
+}
+
 void DeviceProfileCache::removeProfile(const DeviceProfile& profile)
 {
 	{
@@ -87,13 +109,15 @@ void DeviceProfileCache::removeProfile(const DeviceProfile& profile)
 
 		if (it != profiles.end())
 		{
+			profileRemoved.invoke(this, *it, it - profiles.begin());
 			profiles.erase(it);
 		}
 	}
 
 	onProfileChanged(profile.name, std::string());
 
-	QDir profilesDir(Program::profilesPath());
+	const auto profilesPath = QString::fromStdString(Program::profilesPath());
+	QDir profilesDir(profilesPath);
 
 	if (!profilesDir.exists())
 	{
@@ -110,6 +134,14 @@ void DeviceProfileCache::removeProfile(const DeviceProfile& profile)
 
 void DeviceProfileCache::updateProfile(const DeviceProfile& last, const DeviceProfile& current)
 {
+	if (current.name.empty())
+	{
+		throw std::runtime_error("profile name cannot be empty");
+	}
+
+	int oldIndex = -1;
+	int newIndex;
+
 	{
 		LOCK(profiles);
 
@@ -117,18 +149,21 @@ void DeviceProfileCache::updateProfile(const DeviceProfile& last, const DevicePr
 
 		if (it != profiles.end())
 		{
+			oldIndex = it - profiles.begin();
 			profiles.erase(it);
 		}
 
 		profiles.push_back(current);
+		newIndex = static_cast<int>(profiles.size() - 1);
 	}
 
+	profileChanged.invoke(this, last, current, oldIndex, newIndex);
 	onProfileChanged(last.name, current.name);
 
 	{
 		LOCK(profiles);
 
-		QDir profilesPath = Program::profilesPath();
+		QDir profilesPath = QString::fromStdString(Program::profilesPath());
 
 		if (!profilesPath.exists())
 		{
@@ -148,7 +183,7 @@ void DeviceProfileCache::updateProfile(const DeviceProfile& last, const DevicePr
 
 		f.write(QByteArray::fromStdString(current.toJson().dump(4)));
 
-		if (!iequals(last.fileName(), current.fileName()))
+		if (!last.name.empty() && !iequals(last.fileName(), current.fileName()))
 		{
 			QFile file = profilesPath.filePath(QString::fromStdString(last.fileName()));
 			file.remove();
@@ -180,7 +215,7 @@ void DeviceProfileCache::loadImpl()
 		LOCK(profiles);
 		profiles.clear();
 
-		QDir dir(Program::profilesPath());
+		QDir dir(QString::fromStdString(Program::profilesPath()));
 		if (dir.exists())
 		{
 			for (QString& fileName : dir.entryList({ "*.json" }, QDir::Files))
@@ -208,7 +243,7 @@ void DeviceProfileCache::loadImpl()
 		LOCK(deviceSettings);
 		deviceSettings.clear();
 
-		QFile devicesFile(Program::devicesFilePath());
+		QFile devicesFile(QString::fromStdString(Program::devicesFilePath()));
 		if (devicesFile.exists())
 		{
 			if (devicesFile.open(QIODevice::ReadOnly | QIODevice::Text))

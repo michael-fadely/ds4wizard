@@ -3,12 +3,16 @@
 #include <QWidget>
 #include "ui_ProfileEditorDialog.h"
 
+class DeviceProfileModel;
+
 class ProfileEditorDialog : public QDialog
 {
 	Q_OBJECT
 
+	DeviceProfileModel* profileModel = nullptr;
+
 public:
-	explicit ProfileEditorDialog(QWidget* parent = Q_NULLPTR);
+	ProfileEditorDialog(DeviceProfileModel* profileModel_, QWidget* parent = Q_NULLPTR);
 	~ProfileEditorDialog();
 
 private:

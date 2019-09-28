@@ -3,6 +3,9 @@
 #include <cstdint>
 #include "JsonData.h"
 
+/**
+ * \brief PoD describing \c Ds4Device lightbar color.
+ */
 struct Ds4Color : JsonData
 {
 	uint8_t red   = 0;

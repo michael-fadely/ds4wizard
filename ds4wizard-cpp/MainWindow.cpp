@@ -1,10 +1,11 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "MainWindow.h"
 #include "DevicePropertiesDialog.h"
 #include "DeviceProfileCache.h"
 #include "program.h"
 #include "Ds4DeviceManager.h"
 #include "Logger.h"
+#include "DeviceProfileModel.h"
 
 using namespace std::chrono;
 
@@ -58,18 +59,35 @@ MainWindow::MainWindow(QWidget* parent)
 		trayIcon->show();
 	}
 
-	Logger::lineLogged += [this](auto a, auto b) -> void { onLineLogged(a, b); };
+	this->onLineLogged_ = Logger::lineLogged.add([this](auto a, auto b) -> void { onLineLogged(a, b); });
 
 	deviceManager = std::make_shared<Ds4DeviceManager>();
 	Program::profileCache.setDevices(deviceManager);
 
 	connect(this, &MainWindow::s_onProfilesLoaded, this, &MainWindow::onProfilesLoaded);
 
-	ds4Items = new Ds4ItemModel(deviceManager);
+	ds4Items = new Ds4ItemModel(nullptr, deviceManager);
 	ui.deviceList->setModel(ds4Items);
+
+	profileItems = new DeviceProfileItemModel(nullptr, Program::profileCache, false);
+	ui.profileList->setModel(profileItems);
 
 	const auto deviceSelectionModel = ui.deviceList->selectionModel();
 	connect(deviceSelectionModel, &QItemSelectionModel::selectionChanged, this, &MainWindow::deviceSelectionChanged);
+
+	// HACK: for testing later
+	connect(ui.profileEdit, &QPushButton::clicked, this, [this](...)
+	{
+		auto model = std::make_unique<DeviceProfileModel>(this, profileItems->getProfile(ui.profileList->currentIndex().row()));
+		auto dg = std::make_unique<ProfileEditorDialog>(model.get(), this);
+		dg->exec();
+	});
+
+	// HACK: for testing later
+	/*connect(ui.profileAdd, &QPushButton::clicked, this, [](...)
+	{
+		Program::profileCache.updateProfile({}, DeviceProfile::defaultProfile());
+	});*/
 
 	if (!supportsSystemTray || !Program::settings.startMinimized)
 	{
@@ -87,9 +105,11 @@ MainWindow::MainWindow(QWidget* parent)
 
 MainWindow::~MainWindow()
 {
+	delete profileItems;
+	delete ds4Items;
+
 	deviceManager->close();
 	delete trayIcon;
-	delete ds4Items;
 }
 
 void MainWindow::changeEvent(QEvent* e)
@@ -167,7 +187,9 @@ void MainWindow::registerDeviceNotification()
 
 	if (notificationHandle == nullptr || notificationHandle == INVALID_HANDLE_VALUE)
 	{
-		QMessageBox::warning(this, tr("Warning"), tr("Failed to register device notification event. The program will be unable to detect newly connected controllers."));
+		QMessageBox::warning(this, tr("Warning"),
+		                     tr("Failed to register device notification event. "
+		                        "The program will be unable to detect newly connected controllers."));
 	}
 }
 
@@ -220,22 +242,6 @@ bool MainWindow::nativeEvent(const QByteArray& /*eventType*/, void* message, lon
 }
 #endif
 
-void MainWindow::populateProfileList() const
-{
-	ui.profileList->clear();
-
-	auto& profiles_lock = Program::profileCache.profiles_lock;
-
-	{
-		LOCK(profiles);
-
-		for (const DeviceProfile& profile : Program::profileCache.profiles)
-		{
-			ui.profileList->addItem(QString::fromStdString(profile.name));
-		}
-	}
-}
-
 void MainWindow::closeEvent(QCloseEvent* /*event*/)
 {
 	unregisterDeviceNotification();
@@ -273,20 +279,14 @@ void MainWindow::devicePropertiesClicked()
 	auto device = ds4Items->getDevice(rows[0].row());
 	auto dialog = new DevicePropertiesDialog(this, device);
 
-	auto appliedSlot = [&] (const DeviceSettings& oldSettings, const DeviceSettings& newSettings) -> void
+	const auto appliedSlot = [device] (const DeviceSettings& /*oldSettings*/, const DeviceSettings& newSettings)
 	{
 		if (!device)
 		{
 			return;
 		}
 
-		{
-			// TODO: just provide a method to do this?
-			auto lock = device->lock();
-			device->settings = newSettings;
-			device->applyProfile();
-		}
-
+		device->applySettings(newSettings);
 		Program::profileCache.saveSettings(device->macAddress(), newSettings);
 	};
 
@@ -324,7 +324,6 @@ void MainWindow::systemTrayExit(bool /*checked*/)
 void MainWindow::onProfilesLoaded()
 {
 	registerDeviceNotification();
-	populateProfileList();
 }
 
 void MainWindow::deviceSelectionChanged(const QItemSelection& selected, const QItemSelection& /*deselected*/) const

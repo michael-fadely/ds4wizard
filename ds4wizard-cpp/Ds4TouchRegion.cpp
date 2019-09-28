@@ -1,9 +1,8 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "Ds4TouchRegion.h"
 
 Ds4TouchRegion::Ds4TouchRegion(Ds4TouchRegionType type, short left, short top, short right, short bottom, bool allowCrossOver)
-	: activeButtons(0),
-	  type(type),
+	: type(type),
 	  allowCrossOver(allowCrossOver),
 	  left(left),
 	  top(top),
@@ -13,9 +12,7 @@ Ds4TouchRegion::Ds4TouchRegion(Ds4TouchRegionType type, short left, short top, s
 }
 
 Ds4TouchRegion::Ds4TouchRegion(const Ds4TouchRegion& other)
-	: activeButtons(0),
-	  state1(), state2(),
-	  type(other.type),
+	: type(other.type),
 	  allowCrossOver(other.allowCrossOver),
 	  left(other.left),
 	  top(other.top),
@@ -135,7 +132,7 @@ float Ds4TouchRegion::getTouchDelta(Ds4Buttons_t sender, Direction_t direction, 
 				result = std::clamp(std::clamp(x - sx, -width, width) / static_cast<float>(width), 0.0f, 1.0f);
 				break;
 			default:
-				throw /*new ArgumentOutOfRangeException(nameof(direction), direction, null) // TODO */;
+				throw std::runtime_error("invalid Direction");
 		}
 	}
 	else
@@ -168,7 +165,7 @@ float Ds4TouchRegion::getTouchDelta(Ds4Buttons_t sender, Direction_t direction, 
 				result = std::clamp(std::clamp(x - cx, -width, width) / static_cast<float>(cx), 0.f, 1.f);
 				break;
 			default:
-				throw /*new ArgumentOutOfRangeException(nameof(direction), direction, null)*/;
+				throw std::runtime_error("invalid Direction");
 		}
 	}
 

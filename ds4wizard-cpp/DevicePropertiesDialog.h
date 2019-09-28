@@ -4,8 +4,8 @@
 #include <QColor>
 #include "ui_DevicePropertiesDialog.h"
 
-#include <memory>
 #include <atomic>
+#include <memory>
 #include <thread>
 
 class DevicePropertiesDialog : public QDialog

@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "Bluetooth.h"
 #include <winioctl.h>
 #include <BluetoothAPIs.h>

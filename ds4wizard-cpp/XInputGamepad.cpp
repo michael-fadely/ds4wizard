@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "XInputGamepad.h"
 
 bool XInputGamepad::operator==(const XInputGamepad& r) const
@@ -14,7 +14,13 @@ bool XInputGamepad::operator==(const XInputGamepad& r) const
 
 bool XInputGamepad::operator!=(const XInputGamepad& r) const
 {
-	return !(*this == r);
+	return wButtons != r.wButtons
+	       || bLeftTrigger != r.bLeftTrigger
+	       || bRightTrigger != r.bRightTrigger
+	       || sThumbLX != r.sThumbLX
+	       || sThumbLY != r.sThumbLY
+	       || sThumbRX != r.sThumbRX
+	       || sThumbRY != r.sThumbRY;
 }
 
 void XInputGamepad::toBytes(uint8_t* buffer, int offset) const

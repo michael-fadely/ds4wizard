@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "MainWindow.h"
 #include <QtWidgets/QApplication>
 #include "program.h"
@@ -47,6 +47,10 @@ LRESULT CALLBACK windowProc(
 
 int main(int argc, char** argv)
 {
+#ifdef Q_OS_WIN
+	SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
+#endif
+
 	CoInitialize(nullptr);
 	QApplication application(argc, argv);
 

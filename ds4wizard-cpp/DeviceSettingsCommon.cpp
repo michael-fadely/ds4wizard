@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "DeviceSettingsCommon.h"
 #include "Logger.h"
 #include <sstream>

@@ -1,5 +1,4 @@
-#include "stdafx.h"
-#include "ScpDevice.h"
+#include "pch.h"
 #include "Ds4Output.h"
 
 bool Ds4Output::update(const gsl::span<uint8_t>& buffer) const
@@ -24,8 +23,8 @@ bool Ds4Output::update(const gsl::span<uint8_t>& buffer) const
 	result      = result || buffer[i] != flashOnDur;
 	buffer[i++] = flashOnDur;
 
-	result    = result || buffer[i] != flashOffDur;
-	buffer[i] = flashOffDur;
+	result      = result || buffer[i] != flashOffDur;
+	buffer[i]   = flashOffDur;
 
 	i = 17;
 
@@ -38,13 +37,8 @@ bool Ds4Output::update(const gsl::span<uint8_t>& buffer) const
 	result      = result || buffer[i] != volumeMic;
 	buffer[i++] = volumeMic;
 
-	result    = result || buffer[i] != volumeSpeaker;
-	buffer[i] = volumeSpeaker;
+	result      = result || buffer[i] != volumeSpeaker;
+	buffer[i]   = volumeSpeaker;
 
 	return result;
-}
-
-void Ds4Output::fromXInput(int index, std::unique_ptr<ScpDevice>& device)
-{
-	device->getVibration(index, leftMotor, rightMotor);
 }

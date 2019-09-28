@@ -1,10 +1,12 @@
 #include <Windows.h>
 #include <hidsdi.h>
 #include <hidpi.h>
-#include <utility>
-#include "hid_instance.h"
-#include "hid_handle.h"
+
 #include <thread>
+#include <utility>
+
+#include "hid_handle.h"
+#include "hid_instance.h"
 
 using namespace hid;
 
@@ -20,20 +22,20 @@ HidInstance::HidInstance(std::wstring path)
 }
 
 HidInstance::HidInstance(HidInstance&& other) noexcept
-	: handle(std::move(other.handle)),
-	  flags(other.flags),
+	: flags(other.flags),
+	  handle(std::move(other.handle)),
 	  caps_(other.caps_),
 	  attributes_(other.attributes_),
-	  serialString(std::move(other.serialString)),
-	  serial(std::move(other.serial)),
-	  path(std::move(other.path)),
-	  instanceId(std::move(other.instanceId)),
-	  input_buffer(std::move(other.input_buffer)),
-	  output_buffer(std::move(other.output_buffer)),
 	  overlap_in(other.overlap_in),
 	  overlap_out(other.overlap_out),
 	  pending_read_(other.pending_read_),
-	  pending_write_(other.pending_write_)
+	  pending_write_(other.pending_write_),
+	  path(std::move(other.path)),
+	  instanceId(std::move(other.instanceId)),
+	  serialString(std::move(other.serialString)),
+	  serial(std::move(other.serial)),
+	  input_buffer(std::move(other.input_buffer)),
+	  output_buffer(std::move(other.output_buffer))
 {
 	other.flags = 0;
 }
@@ -252,6 +254,22 @@ bool HidInstance::checkPendingRead()
 		return false;
 	}
 
+	const auto wait = WaitForSingleObject(overlap_in.hEvent, 0);
+
+	switch (wait)
+	{
+		case WAIT_OBJECT_0:
+			pending_read_ = false;
+			return false;
+
+		case WAIT_TIMEOUT:
+			pending_read_ = true;
+			return true;
+
+		default:
+			break;
+	}
+
 	DWORD bytes_read;
 	pending_read_ = !GetOverlappedResult(handle.nativeHandle, &overlap_in, &bytes_read, FALSE);
 
@@ -294,7 +312,7 @@ bool HidInstance::readAsync(void* buffer, size_t size)
 
 	if (ReadFile(handle.nativeHandle, buffer, static_cast<DWORD>(size), nullptr, &overlap_in))
 	{
-		return true;
+		return WaitForSingleObject(overlap_in.hEvent, 0) == WAIT_OBJECT_0;
 	}
 
 	return checkAsyncReadError();
@@ -330,6 +348,22 @@ bool HidInstance::checkPendingWrite()
 	if (!pending_write_)
 	{
 		return false;
+	}
+
+	const auto wait = WaitForSingleObject(overlap_out.hEvent, 0);
+
+	switch (wait)
+	{
+		case WAIT_OBJECT_0:
+			pending_write_ = false;
+			return false;
+
+		case WAIT_TIMEOUT:
+			pending_write_ = true;
+			return true;
+
+		default:
+			break;
 	}
 
 	DWORD bytes_written;
@@ -374,7 +408,7 @@ bool HidInstance::writeAsync(const void* buffer, size_t size)
 
 	if (WriteFile(handle.nativeHandle, buffer, static_cast<DWORD>(size), nullptr, &overlap_out))
 	{
-		return true;
+		return WaitForSingleObject(overlap_out.hEvent, 0) == WAIT_OBJECT_0;
 	}
 
 	return checkAsyncWriteError();
@@ -394,7 +428,7 @@ void HidInstance::cancelAsync() const
 {
 	if (isOpen() && isAsync())
 	{
-		CancelIo(handle.nativeHandle);
+		CancelIoEx(handle.nativeHandle, nullptr);
 	}
 }
 

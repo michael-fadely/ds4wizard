@@ -5,6 +5,7 @@
 #include "Ds4DeviceManager.h"
 #include "Logger.h"
 #include "Ds4ItemModel.h"
+#include "DeviceProfileItemModel.h"
 
 class MainWindow : public QMainWindow
 {
@@ -19,19 +20,20 @@ public:
 
 private:
 	std::shared_ptr<Ds4DeviceManager> deviceManager;
-	Ds4ItemModel* ds4Items;
+	Ds4ItemModel* ds4Items = nullptr;
+	DeviceProfileItemModel* profileItems = nullptr;
 
 	Ui::MainWindow ui;
 	bool supportsSystemTray = false;
 	QSystemTrayIcon* trayIcon = nullptr;
 	PVOID notificationHandle = nullptr;
 	std::future<void> startupTask;
+	EventToken onLineLogged_;
 	void onLineLogged(void* sender, std::shared_ptr<LineLoggedEventArgs> args) const;
 
 	void registerDeviceNotification();
 	void unregisterDeviceNotification();
 	void doFindControllerThing(const std::wstring& name) const;
-	void populateProfileList() const;
 
 protected:
 

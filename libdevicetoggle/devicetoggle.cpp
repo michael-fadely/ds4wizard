@@ -7,22 +7,19 @@
 
 #include "devicetoggle.h"
 
-void toggleDevice(const std::wstring& instanceId)
+void toggleDevice_doWork(const std::wstring& instanceId, const HDEVINFO devInfoSet)
 {
-	GUID guid;
-	HidD_GetHidGuid(&guid);
-	const HDEVINFO devInfoSet = SetupDiGetClassDevs(&guid, instanceId.c_str(), nullptr, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
-
 	SP_DEVINFO_DATA devInfoData;
 	devInfoData.cbSize = sizeof(SP_DEVINFO_DATA);
 
 	if (!SetupDiEnumDeviceInfo(devInfoSet, 0, &devInfoData))
 	{
-		DWORD error = GetLastError();
+		const DWORD error = GetLastError();
 
 		std::stringstream message;
 		message << "Retrieving device info for instance ID "
-			<< std::string(instanceId.begin(), instanceId.end()) << " failed while attempting to toggle device with error code " << std::hex << std::setw(8) << std::setfill('0') << error;
+			<< std::string(instanceId.begin(), instanceId.end()) << " failed while attempting to toggle device with error code "
+			<< std::hex << std::setw(8) << std::setfill('0') << error;
 
 		throw std::runtime_error(message.str());
 	}
@@ -38,15 +35,17 @@ void toggleDevice(const std::wstring& instanceId)
 
 	// Prepare the device by setting the class install parameters.
 	bool success = SetupDiSetClassInstallParams(devInfoSet, &devInfoData,
-	                                            reinterpret_cast<PSP_CLASSINSTALL_HEADER>(&propChangeParams), sizeof(propChangeParams));
+	                                            reinterpret_cast<PSP_CLASSINSTALL_HEADER>(&propChangeParams),
+	                                            sizeof(propChangeParams));
 
 	if (!success)
 	{
-		DWORD error = GetLastError();
+		const DWORD error = GetLastError();
 
 		std::stringstream message;
 		message << "Failed to set class install parameters for device "
-			<< std::string(instanceId.begin(), instanceId.end()) << " with error code " << std::hex << std::setw(8) << std::setfill('0') << error;
+			<< std::string(instanceId.begin(), instanceId.end()) << " with error code "
+			<< std::hex << std::setw(8) << std::setfill('0') << error;
 
 		throw std::runtime_error(message.str());
 	}
@@ -56,11 +55,12 @@ void toggleDevice(const std::wstring& instanceId)
 
 	if (!success)
 	{
-		DWORD error = GetLastError();
+		const DWORD error = GetLastError();
 
 		std::stringstream message;
 		message << "Failed to disable device "
-			<< std::string(instanceId.begin(), instanceId.end()) << " with error code " << std::hex << std::setw(8) << std::setfill('0') << error;
+			<< std::string(instanceId.begin(), instanceId.end()) << " with error code "
+			<< std::hex << std::setw(8) << std::setfill('0') << error;
 
 		throw std::runtime_error(message.str());
 	}
@@ -70,15 +70,17 @@ void toggleDevice(const std::wstring& instanceId)
 
 	// Prepare the class install parameters again.
 	success = SetupDiSetClassInstallParams(devInfoSet, &devInfoData,
-	                                       reinterpret_cast<PSP_CLASSINSTALL_HEADER>(&propChangeParams), sizeof(propChangeParams));
+	                                       reinterpret_cast<PSP_CLASSINSTALL_HEADER>(&propChangeParams),
+	                                       sizeof(propChangeParams));
 
 	if (!success)
 	{
-		DWORD error = GetLastError();
+		const DWORD error = GetLastError();
 
 		std::stringstream message;
 		message << "Failed to set class install parameters for device "
-			<< std::string(instanceId.begin(), instanceId.end()) << " with error code " << std::hex << std::setw(8) << std::setfill('0') << error;
+			<< std::string(instanceId.begin(), instanceId.end()) << " with error code "
+			<< std::hex << std::setw(8) << std::setfill('0') << error;
 
 		throw std::runtime_error(message.str());
 	}
@@ -88,14 +90,50 @@ void toggleDevice(const std::wstring& instanceId)
 
 	if (!success)
 	{
-		DWORD error = GetLastError();
+		const DWORD error = GetLastError();
 
 		std::stringstream message;
 		message << "Failed to enable device "
-			<< std::string(instanceId.begin(), instanceId.end()) << " with error code " << std::hex << std::setw(8) << std::setfill('0') << error;
+			<< std::string(instanceId.begin(), instanceId.end()) << " with error code "
+			<< std::hex << std::setw(8) << std::setfill('0') << error;
+
+		throw std::runtime_error(message.str());
+	}
+}
+
+void toggleDevice(const std::wstring& instanceId)
+{
+	GUID guid;
+	HidD_GetHidGuid(&guid);
+	const HDEVINFO devInfoSet = SetupDiGetClassDevs(&guid, instanceId.c_str(), nullptr,
+	                                                DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
+
+	if (devInfoSet == nullptr || devInfoSet == INVALID_HANDLE_VALUE)
+	{
+		const DWORD error = GetLastError();
+
+		std::stringstream message;
+		message << "SetupDiGetClassDevs failed for device "
+			<< std::string(instanceId.begin(), instanceId.end()) << " with error code "
+			<< std::hex << std::setw(8) << std::setfill('0') << error;
 
 		throw std::runtime_error(message.str());
 	}
 
-	SetupDiDestroyDeviceInfoList(devInfoSet);
+	const auto release = [&]()
+	{
+		SetupDiDestroyDeviceInfoList(devInfoSet);
+	};
+
+	try
+	{
+		toggleDevice_doWork(instanceId, devInfoSet);
+	}
+	catch (const std::exception&)
+	{
+		release();
+		throw;
+	}
+
+	release();
 }

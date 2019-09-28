@@ -5,21 +5,18 @@
 #include "enums.h"
 
 /**
- * \brief 
- * A structure defining a DualShock 4 analog stick.
+ * \brief A structure defining a DualShock 4 analog stick.
  */
 struct Ds4Stick
 {
 	/**
-	 * \brief 
-	 * X axis of the DualShock 4 analog stick.
+	 * \brief X axis of the DualShock 4 analog stick.
 	 * Note that the center of the axis rests at 127, not 0.
 	 */
 	uint8_t x;
 
 	/**
-	 * \brief 
-	 * Y axis of the DualShock 4 analog stick.
+	 * \brief Y axis of the DualShock 4 analog stick.
 	 * Note that the center of the axis rests at 127, not 0.
 	 */
 	uint8_t y;
@@ -32,22 +29,19 @@ struct Ds4Stick
 };
 
 /**
- * \brief 
- * A structure defining a DualShock 4 vector with 2 signed short components.
+ * \brief A structure defining a DualShock 4 vector with 2 signed short components.
  * Used for points on the touch pad.
  */
 struct Ds4Vector2
 {
 	/**
-	 * \brief 
-	 * The X component of the point.
+	 * \brief The X component of the point.
 	 * Left is \c 0, center is \c 959, right is \c 1919.
 	 */
 	short x;
 
 	/**
-	 * \brief 
-	 * The Y component of the point.
+	 * \brief The Y component of the point.
 	 * Top is \c 0, center is \c 470, bottom is \c 942.
 	 */
 	short y;
@@ -60,8 +54,7 @@ struct Ds4Vector2
 };
 
 /**
- * \brief 
- * A structure defining a DualShock 4 vector with 3 signed \c short components.
+ * \brief A structure defining a DualShock 4 vector with 3 signed \c short components.
  * Used for the gyroscope and accelerometer.
  */
 struct Ds4Vector3

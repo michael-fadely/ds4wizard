@@ -13,6 +13,19 @@
 #define ENUM_VALUES(TYPE, LENGTH) extern const TYPE ## _t TYPE ## _values[LENGTH]
 
 BETTER_ENUM(AxisPolarity, int, none, positive, negative);
+
+/**
+ * \brief Configuration for axis dead zone scaling.
+ * none:
+ *     No dead zone is applied.
+ * 
+ * hardLimit:
+ *     When an axis reaches the dead zone threshold, the raw value is let through.
+ * 
+ * scale:
+ *     When the dead zone threshold is reached, the axis output is scaled relative to that threshold (normalized).
+ *     Example: If the dead zone is 0.2 and an axis reaches or exceeds that value, it will be normalized to [0.0 .. 1.0].
+ */
 BETTER_ENUM(DeadZoneMode, int, none, hardLimit, scale);
 
 // TODO: better name
@@ -20,30 +33,50 @@ BETTER_ENUM(SimulatorType, int, none, input, action);
 
 BETTER_ENUM(ActionType, int, none, bluetoothDisconnect);
 
+BETTER_ENUM(MouseButton, int, left, right, middle, ex1, ex2);
+
+/**
+ * \brief Bitfield representing an input source from real hardware (DualShock 4).
+ */
 struct InputType
 {
-	enum T
+	enum T : uint32_t
 	{
+		/** \brief None - invalid state. */
 		none,
-		button      = 1 << 0,
-		axis        = 1 << 1,
+		/** \brief Requested input is a digital button. */
+		button = 1 << 0,
+		/** \brief Requested input is an axis. */
+		axis = 1 << 1,
+		/** \brief Requested input is a user-configured touch region. */
 		touchRegion = 1 << 2
 	};
 };
 
+/**
+ * \brief Integral representation of \c InputType
+ * \sa InputType
+ */
 using InputType_t = uint32_t;
 
 ENUM_FLAGS(InputType);
 ENUM_VALUES(InputType, 3);
 
+/**
+ * \brief Bitfield representing an output simulation type.
+ */
 struct OutputType // TODO: vjoy output support
 {
-	enum T
+	enum T : uint32_t
 	{
+		/** \brief None - invalid state. */
 		none,
-		xinput   = 1 << 0,
+		/** \brief Desired output device is an XInput device. */
+		xinput = 1 << 0,
+		/** \brief Desired output device is a keyboard. */
 		keyboard = 1 << 1,
-		mouse    = 1 << 2
+		/** \brief Desired output device is a mouse. */
+		mouse = 1 << 2
 	};
 };
 
@@ -127,29 +160,24 @@ enum class Hat
 };
 
 /**
- * \brief 
- * Indicates a digital button's pressed state.
+ * \brief Indicates a digital button's pressed state.
  */
 enum class PressedState
 {
 	/**
-	 * \brief 
-	 * The button has been off for more than one poll.
+	 * \brief The button has been off for more than one poll.
 	 */
 	off,
 	/**
-	 * \brief 
-	 * The button was off last poll, but has now been pressed.
+	 * \brief The button was off last poll, but has now been pressed.
 	 */
 	pressed,
 	/**
-	 * \brief 
-	 * The button has been on (held) for more than one poll.
+	 * \brief The button has been on (held) for more than one poll.
 	 */
 	on,
 	/**
-	 * \brief 
-	 * The button was on (held), but has now been released.
+	 * \brief The button was on (held), but has now been released.
 	 */
 	released
 };

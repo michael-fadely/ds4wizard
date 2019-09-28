@@ -1,12 +1,43 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "pathutil.h"
 #include "DeviceProfile.h"
+#include "JsonData.h"
 
 using namespace std::chrono;
 
 std::string DeviceProfile::fileName() const
 {
 	return validatedFileName(name + ".json");
+}
+
+DeviceProfile::DeviceProfile(DeviceProfile&& other) noexcept
+	: DeviceSettingsCommon(std::move(other)),
+	  name(std::move(other.name)),
+	  exclusiveMode(other.exclusiveMode),
+	  useXInput(other.useXInput),
+	  autoXInputIndex(other.autoXInputIndex),
+	  xinputIndex(other.xinputIndex),
+	  touchRegions(std::move(other.touchRegions)),
+	  bindings(std::move(other.bindings)),
+	  modifiers(std::move(other.modifiers))
+
+{
+}
+
+DeviceProfile& DeviceProfile::operator=(DeviceProfile&& other) noexcept
+{
+	DeviceSettingsCommon::operator=(std::move(other));
+
+	name            = std::move(other.name);
+	exclusiveMode   = other.exclusiveMode;
+	useXInput       = other.useXInput;
+	autoXInputIndex = other.autoXInputIndex;
+	xinputIndex     = other.xinputIndex;
+	touchRegions    = std::move(other.touchRegions);
+	bindings        = std::move(other.bindings);
+	modifiers       = std::move(other.modifiers);
+
+	return *this;
 }
 
 bool DeviceProfile::operator==(const DeviceProfile& other) const
@@ -72,7 +103,7 @@ void DeviceProfile::writeJson(nlohmann::json& json) const
 
 	nlohmann::json bindings_;
 
-	for (auto& binding : modifiers)
+	for (auto& binding : bindings)
 	{
 		bindings_.push_back(binding.toJson());
 	}
@@ -91,7 +122,7 @@ void DeviceProfile::writeJson(nlohmann::json& json) const
 
 #pragma region trash
 
-static constexpr auto DEFAULT_PROFILE_JSON = 
+static constexpr auto DEFAULT_PROFILE_JSON =
 R"(
 {
   "exclusiveMode": true,
