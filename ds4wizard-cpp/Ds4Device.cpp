@@ -500,13 +500,15 @@ void Ds4Device::run()
 	// HACK: make this class manage the light state
 	output.lightColor = activeLight.color;
 
+	float peak_scaled = 0.0f;
+
 	// HACK: see above
 	if (activeLight.idleFade)
 	{
 		const Ds4LightOptions& l = settings.useProfileLight ? profile.light : settings.light;
 
 		auto color = l.color;
-		float peak_scaled = peak_last;
+		peak_scaled = peak_last;
 
 		if (peak_sw.elapsed() >= 15ms)
 		{
@@ -524,7 +526,7 @@ void Ds4Device::run()
 
 			peak_i %= peak_f.size();
 
-			if (peak_max)
+			/*if (peak_max)
 			{
 				peak_scaled = 0.0f;
 
@@ -532,16 +534,17 @@ void Ds4Device::run()
 				{
 					peak_scaled += f / static_cast<float>(peak_f.size());
 				}
-			}
+			}*/
 
 			peak_last = peak_scaled;
 
 			peak_sw.start();
 		}
 
-		uint8_t cl = 255 * peak_scaled;
-
+		const uint8_t cl = 255 * peak_scaled;
 		color.red = std::clamp(color.red + cl, 0, 255);
+		
+		//color = Ds4Color::lerp(color, Ds4Color(255, 0, 0), peak_scaled);
 
 		const double m = isIdle() ? 1.0 : std::clamp(duration_cast<milliseconds>(idleTime.elapsed()).count()
 		                                             / static_cast<double>(duration_cast<milliseconds>(idleTimeout()).count()),
@@ -564,6 +567,10 @@ void Ds4Device::run()
 	dataReceived = false;
 
 	simulator.updateEmulators();
+
+	constexpr auto upper_bound = 0.8f;
+	output.leftMotor  = 255 * (std::clamp(peak_scaled - upper_bound, 0.0f, upper_bound) / upper_bound);
+	output.rightMotor = 255 * ((std::clamp(peak_scaled, 0.0f, upper_bound) / upper_bound) - (static_cast<float>(output.leftMotor) / 255.0f));
 
 	if (useUsb)
 	{
