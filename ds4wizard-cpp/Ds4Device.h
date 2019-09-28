@@ -24,7 +24,7 @@ class Ds4Device
 {
 	bool peak_max = false;
 	size_t peak_i = 0;
-	std::array<float, 5> peak_f {};
+	std::array<float, 100> peak_f {};
 	float peak_last = 0.0f;
 	Stopwatch peak_sw;
 	

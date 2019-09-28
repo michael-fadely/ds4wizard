@@ -500,7 +500,45 @@ void Ds4Device::run()
 	// HACK: make this class manage the light state
 	output.lightColor = activeLight.color;
 
-	float peak_scaled = 0.0f;
+	float peak_scaled = peak_last;
+
+	if (peak_sw.elapsed() >= 15ms)
+	{
+		float peak = 0.0f;
+		pMeterInfo->GetPeakValue(&peak);
+
+		if (peak == 4.00000005e-10f)
+		{
+			peak = 0.0f;
+		}
+
+		//constexpr auto peak_threshold = 0.0f;
+		//peak_scaled = std::max(0.0f, peak - peak_threshold) / peak_threshold;
+		peak_scaled = peak;
+
+		peak_f[peak_i++] = peak_scaled;
+
+		if (peak_i >= peak_f.size())
+		{
+			peak_max = true;
+		}
+
+		peak_i %= peak_f.size();
+
+		/*if (peak_max)
+		{
+			peak_scaled = 0.0f;
+
+			for (auto f : peak_f)
+			{
+				peak_scaled += f / static_cast<float>(peak_f.size());
+			}
+		}*/
+
+		peak_last = peak_scaled;
+
+		peak_sw.start();
+	}
 
 	// HACK: see above
 	if (activeLight.idleFade)
@@ -508,38 +546,6 @@ void Ds4Device::run()
 		const Ds4LightOptions& l = settings.useProfileLight ? profile.light : settings.light;
 
 		auto color = l.color;
-		peak_scaled = peak_last;
-
-		if (peak_sw.elapsed() >= 15ms)
-		{
-			float peak = 0.0f;
-			pMeterInfo->GetPeakValue(&peak);
-
-			peak_scaled = std::max(0.0f, peak - 0.5f) / 0.5f;
-
-			peak_f[peak_i++] = peak_scaled;
-
-			if (peak_i >= peak_f.size())
-			{
-				peak_max = true;
-			}
-
-			peak_i %= peak_f.size();
-
-			/*if (peak_max)
-			{
-				peak_scaled = 0.0f;
-
-				for (auto f : peak_f)
-				{
-					peak_scaled += f / static_cast<float>(peak_f.size());
-				}
-			}*/
-
-			peak_last = peak_scaled;
-
-			peak_sw.start();
-		}
 
 		const uint8_t cl = 255 * peak_scaled;
 		color.red = std::clamp(color.red + cl, 0, 255);
