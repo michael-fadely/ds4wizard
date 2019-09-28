@@ -7,7 +7,7 @@
 
 namespace vigem
 {
-	std::recursive_mutex XInputTarget::static_mutex;
+	std::recursive_mutex XInputTarget::target_mutex;
 	std::unordered_map<PVIGEM_TARGET, XInputTarget*> XInputTarget::targets;
 
 	XInputTarget::XInputTarget(Driver* parent)
@@ -41,6 +41,7 @@ namespace vigem
 			return VIGEM_ERROR_NONE;
 		}
 
+		auto guard = parent->lock();
 		VIGEM_ERROR result = vigem_target_add(parent->client, target);
 
 		if (!VIGEM_SUCCESS(result))
@@ -58,9 +59,9 @@ namespace vigem
 		}
 		else
 		{
-			static_mutex.lock();
+			target_mutex.lock();
 			targets[target] = this;
-			static_mutex.unlock();
+			target_mutex.unlock();
 		}
 
 		return result;
@@ -78,6 +79,7 @@ namespace vigem
 			return VIGEM_ERROR_NONE;
 		}
 
+		auto guard = parent->lock();
 		const VIGEM_ERROR result = vigem_target_remove(parent->client, target);
 
 		if (VIGEM_SUCCESS(result))
@@ -86,9 +88,9 @@ namespace vigem
 
 			vigem_target_x360_unregister_notification(target);
 
-			static_mutex.lock();
+			target_mutex.lock();
 			targets.erase(target);
-			static_mutex.unlock();
+			target_mutex.unlock();
 		}
 
 		return result;
@@ -96,11 +98,13 @@ namespace vigem
 
 	void XInputTarget::update(const XInputGamepad& data) const
 	{
+		auto guard = parent->lock();
 		vigem_target_x360_update(parent->client, this->target, *reinterpret_cast<const XUSB_REPORT*>(&data));
 	}
 
 	void XInputTarget::close()
 	{
+		auto guard = parent->lock();
 		disconnect();
 
 		if (target)
@@ -112,9 +116,9 @@ namespace vigem
 
 	void XInputTarget::raiseEvent(PVIGEM_CLIENT client, PVIGEM_TARGET target, uint8_t largeMotor, uint8_t smallMotor, uint8_t ledNumber)
 	{
-		static_mutex.lock();
+		target_mutex.lock();
 		XInputTarget* xtarget = targets[target];
-		static_mutex.unlock();
+		target_mutex.unlock();
 
 		// HACK: this is occasionally nullptr when connecting the controller via bluetooth; this is not a good fix
 		if (!xtarget)

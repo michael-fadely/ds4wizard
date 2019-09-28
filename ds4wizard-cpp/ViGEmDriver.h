@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ViGEm/Client.h>
+#include <mutex>
 
 namespace vigem
 {
@@ -10,6 +11,7 @@ namespace vigem
 	{
 		friend class XInputTarget;
 		PVIGEM_CLIENT client = nullptr;
+		std::recursive_mutex vigem_mutex;
 
 	public:
 		/**
@@ -43,5 +45,10 @@ namespace vigem
 		 */
 		Driver& operator=(const Driver&) = delete;
 		Driver& operator=(Driver&& rhs) noexcept;
+
+		auto lock()
+		{
+			return std::unique_lock(vigem_mutex);
+		}
 	};
 }

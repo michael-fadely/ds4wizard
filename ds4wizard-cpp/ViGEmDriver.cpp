@@ -3,7 +3,6 @@
 #include <ViGEm/Client.h>
 
 #include "ViGEmDriver.h"
-#include "ViGEmTarget.h"
 
 namespace vigem
 {
@@ -25,6 +24,7 @@ namespace vigem
 			return VIGEM_ERROR_NONE;
 		}
 
+		auto guard = lock();
 		client = vigem_alloc();
 		const VIGEM_ERROR result = vigem_connect(client);
 
@@ -46,6 +46,7 @@ namespace vigem
 	{
 		if (isOpen())
 		{
+			auto guard = lock();
 			vigem_disconnect(client);
 			vigem_free(client);
 			client = nullptr;

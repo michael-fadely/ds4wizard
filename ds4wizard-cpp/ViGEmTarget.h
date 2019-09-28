@@ -15,11 +15,11 @@ namespace vigem
 	{
 		friend class Driver;
 
-		Driver const* parent;
+		Driver* parent;
 		PVIGEM_TARGET target = nullptr;
 		bool connected_ = false;
 
-		static std::recursive_mutex static_mutex;
+		static std::recursive_mutex target_mutex;
 		static std::unordered_map<PVIGEM_TARGET, XInputTarget*> targets;
 
 	public:
