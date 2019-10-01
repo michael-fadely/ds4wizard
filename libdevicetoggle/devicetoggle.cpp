@@ -1,11 +1,17 @@
 #include <iomanip>
 #include <sstream>
+#include <codecvt>
 
 #include <Windows.h>
 #include <SetupAPI.h>
 #include <hidsdi.h>
 
 #include "devicetoggle.h"
+
+std::string to_string(const std::wstring& wstr)
+{
+	return std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(wstr);
+}
 
 void toggleDevice_doWork(const std::wstring& instanceId, const HDEVINFO devInfoSet)
 {
@@ -18,7 +24,7 @@ void toggleDevice_doWork(const std::wstring& instanceId, const HDEVINFO devInfoS
 
 		std::stringstream message;
 		message << "Retrieving device info for instance ID "
-			<< std::string(instanceId.begin(), instanceId.end()) << " failed while attempting to toggle device with error code "
+			<< to_string(instanceId) << " failed while attempting to toggle device with error code "
 			<< std::hex << std::setw(8) << std::setfill('0') << error;
 
 		throw std::runtime_error(message.str());
@@ -44,7 +50,7 @@ void toggleDevice_doWork(const std::wstring& instanceId, const HDEVINFO devInfoS
 
 		std::stringstream message;
 		message << "Failed to set class install parameters for device "
-			<< std::string(instanceId.begin(), instanceId.end()) << " with error code "
+			<< to_string(instanceId) << " with error code "
 			<< std::hex << std::setw(8) << std::setfill('0') << error;
 
 		throw std::runtime_error(message.str());
@@ -59,7 +65,7 @@ void toggleDevice_doWork(const std::wstring& instanceId, const HDEVINFO devInfoS
 
 		std::stringstream message;
 		message << "Failed to disable device "
-			<< std::string(instanceId.begin(), instanceId.end()) << " with error code "
+			<< to_string(instanceId) << " with error code "
 			<< std::hex << std::setw(8) << std::setfill('0') << error;
 
 		throw std::runtime_error(message.str());
@@ -79,7 +85,7 @@ void toggleDevice_doWork(const std::wstring& instanceId, const HDEVINFO devInfoS
 
 		std::stringstream message;
 		message << "Failed to set class install parameters for device "
-			<< std::string(instanceId.begin(), instanceId.end()) << " with error code "
+			<< to_string(instanceId) << " with error code "
 			<< std::hex << std::setw(8) << std::setfill('0') << error;
 
 		throw std::runtime_error(message.str());
@@ -94,7 +100,7 @@ void toggleDevice_doWork(const std::wstring& instanceId, const HDEVINFO devInfoS
 
 		std::stringstream message;
 		message << "Failed to enable device "
-			<< std::string(instanceId.begin(), instanceId.end()) << " with error code "
+			<< to_string(instanceId) << " with error code "
 			<< std::hex << std::setw(8) << std::setfill('0') << error;
 
 		throw std::runtime_error(message.str());
@@ -114,7 +120,7 @@ void toggleDevice(const std::wstring& instanceId)
 
 		std::stringstream message;
 		message << "SetupDiGetClassDevs failed for device "
-			<< std::string(instanceId.begin(), instanceId.end()) << " with error code "
+			<< to_string(instanceId) << " with error code "
 			<< std::hex << std::setw(8) << std::setfill('0') << error;
 
 		throw std::runtime_error(message.str());
