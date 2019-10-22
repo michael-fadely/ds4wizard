@@ -12,13 +12,13 @@ MouseSimulator::~MouseSimulator()
 
 void MouseSimulator::buttonUp(MouseButton button)
 {
-	pressedButtons.insert(button);
+	pressedButtons.erase(button);
 	press(button, false);
 }
 
 void MouseSimulator::buttonDown(MouseButton button)
 {
-	pressedButtons.erase(button);
+	pressedButtons.insert(button);
 	press(button, true);
 }
 
