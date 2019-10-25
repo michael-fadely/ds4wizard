@@ -82,8 +82,7 @@ size_t Ds4DeviceManager::deviceCount()
 
 std::unique_lock<std::recursive_mutex> Ds4DeviceManager::lockDevices()
 {
-	std::unique_lock<std::recursive_mutex> devices_guard(devices_lock);
-	return devices_guard;
+	return std::unique_lock<std::recursive_mutex>(devices_lock);
 }
 
 bool Ds4DeviceManager::handleDevice(hid::HidInstance& hid)
