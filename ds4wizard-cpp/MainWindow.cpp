@@ -10,7 +10,7 @@
 using namespace std::chrono;
 
 MainWindow::MainWindow(QWidget* parent)
-	: QMainWindow(parent)
+	: QMainWindow(parent), ui()
 {
 	const auto now = []() -> auto { return high_resolution_clock::now(); };
 	const auto start = now();
@@ -78,16 +78,16 @@ MainWindow::MainWindow(QWidget* parent)
 	// HACK: for testing later
 	connect(ui.profileEdit, &QPushButton::clicked, this, [this](...)
 	{
-		auto model = std::make_unique<DeviceProfileModel>(this, profileItems->getProfile(ui.profileList->currentIndex().row()));
+		const auto model = std::make_unique<DeviceProfileModel>(this, profileItems->getProfile(ui.profileList->currentIndex().row()));
 		auto dg = std::make_unique<ProfileEditorDialog>(model.get(), this);
 		dg->exec();
 	});
 
 	// HACK: for testing later
-	/*connect(ui.profileAdd, &QPushButton::clicked, this, [](...)
+	connect(ui.profileAdd, &QPushButton::clicked, this, [](...)
 	{
 		Program::profileCache.updateProfile({}, DeviceProfile::defaultProfile());
-	});*/
+	});
 
 	if (!supportsSystemTray || !Program::settings.startMinimized)
 	{
@@ -181,9 +181,9 @@ void MainWindow::registerDeviceNotification()
 	filter.dbcc_classguid  = guid;
 	filter.dbcc_devicetype = DBT_DEVTYP_DEVICEINTERFACE;
 
-	auto hwnd = reinterpret_cast<HWND>(this->winId());
+	const auto windowHandle = reinterpret_cast<HWND>(this->winId());
 
-	notificationHandle = RegisterDeviceNotification(hwnd, &filter, DEVICE_NOTIFY_WINDOW_HANDLE);
+	notificationHandle = RegisterDeviceNotification(windowHandle, &filter, DEVICE_NOTIFY_WINDOW_HANDLE);
 
 	if (notificationHandle == nullptr || notificationHandle == INVALID_HANDLE_VALUE)
 	{
@@ -204,7 +204,7 @@ void MainWindow::unregisterDeviceNotification()
 	notificationHandle = nullptr;
 }
 
-void MainWindow::doFindControllerThing(const std::wstring& name) const
+void MainWindow::findController(const std::wstring& name) const
 {
 	try
 	{
@@ -220,7 +220,7 @@ bool MainWindow::wndProc(tagMSG* msg) const
 {
 	if (msg->message == WM_DEVICECHANGE && msg->wParam == DBT_DEVICEARRIVAL)
 	{
-		auto hdr = reinterpret_cast<DEV_BROADCAST_HDR*>(msg->lParam);
+		const auto hdr = reinterpret_cast<DEV_BROADCAST_HDR*>(msg->lParam);
 
 		if (!hdr || hdr->dbch_devicetype != DBT_DEVTYP_DEVICEINTERFACE)
 		{
@@ -228,7 +228,7 @@ bool MainWindow::wndProc(tagMSG* msg) const
 		}
 
 		auto devInterface = reinterpret_cast<DEV_BROADCAST_DEVICEINTERFACE*>(msg->lParam);
-		doFindControllerThing(devInterface->dbcc_name);
+		findController(devInterface->dbcc_name);
 	}
 
 	return false;

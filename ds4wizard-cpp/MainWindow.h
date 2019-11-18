@@ -33,7 +33,7 @@ private:
 
 	void registerDeviceNotification();
 	void unregisterDeviceNotification();
-	void doFindControllerThing(const std::wstring& name) const;
+	void findController(const std::wstring& name) const;
 
 protected:
 
