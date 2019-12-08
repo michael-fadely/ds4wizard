@@ -110,7 +110,7 @@ void DeviceProfileItemModel::onProfileChanged(DeviceProfileCache* sender, const 
 	}
 
 	beginInsertRows({}, newIndex, newIndex);
-	endRemoveRows();
+	endInsertRows();
 }
 
 void DeviceProfileItemModel::onProfileRemoved(DeviceProfileCache* sender, const DeviceProfile& profile, int index)
