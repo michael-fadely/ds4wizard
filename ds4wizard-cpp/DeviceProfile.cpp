@@ -11,7 +11,7 @@ std::string DeviceProfile::fileName() const
 }
 
 DeviceProfile::DeviceProfile(DeviceProfile&& other) noexcept
-	: DeviceSettingsCommon(std::move(other)),
+	: DeviceSettingsCommon(other),
 	  name(std::move(other.name)),
 	  exclusiveMode(other.exclusiveMode),
 	  useXInput(other.useXInput),
@@ -26,7 +26,7 @@ DeviceProfile::DeviceProfile(DeviceProfile&& other) noexcept
 
 DeviceProfile& DeviceProfile::operator=(DeviceProfile&& other) noexcept
 {
-	DeviceSettingsCommon::operator=(std::move(other));
+	DeviceSettingsCommon::operator=(other);
 
 	name            = std::move(other.name);
 	exclusiveMode   = other.exclusiveMode;
