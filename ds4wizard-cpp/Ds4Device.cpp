@@ -545,12 +545,22 @@ void Ds4Device::run()
 	{
 		const Ds4LightOptions& l = settings.useProfileLight ? profile.light : settings.light;
 
+	#define LERP
+
+	#ifdef LERP
+		Ds4Color color = {
+			l.color.blue,
+			l.color.red,
+			l.color.green
+		};
+
+		color = Ds4Color::lerp(l.color, color, peak_scaled);
+	#else
 		auto color = l.color;
 
 		const uint8_t cl = 255 * peak_scaled;
 		color.red = std::clamp(color.red + cl, 0, 255);
-		
-		//color = Ds4Color::lerp(color, Ds4Color(255, 0, 0), peak_scaled);
+	#endif
 
 		const double m = isIdle() ? 1.0 : std::clamp(duration_cast<milliseconds>(idleTime.elapsed()).count()
 		                                             / static_cast<double>(duration_cast<milliseconds>(idleTimeout()).count()),
