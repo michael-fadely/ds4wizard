@@ -39,11 +39,11 @@ private:
 	void applySettings();
 
 signals:
-	void readoutChanged(Ds4InputData data);
+	void readoutChanged(Ds4Buttons_t heldButtons, Ds4InputData data);
 
 private slots:
 	void tabChanged(int index);
-	void updateReadout(Ds4InputData data) const;
+	void updateReadout(Ds4Buttons_t heldButtons, Ds4InputData data) const;
 	void resetPeakLatency() const;
 	void profileEditClicked(bool checked);
 	void colorEditClicked(bool checked);

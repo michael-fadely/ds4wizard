@@ -24,7 +24,7 @@ struct Ds4Stick
 	bool operator==(const Ds4Stick& other) const;
 	bool operator!=(const Ds4Stick& right) const;
 
-	float lengthSquared() const;
+	int lengthSquared() const;
 	float length() const;
 };
 
@@ -49,7 +49,7 @@ struct Ds4Vector2
 	bool operator==(const Ds4Vector2& other) const;
 	bool operator!=(const Ds4Vector2& other) const;
 
-	float lengthSquared() const;
+	int lengthSquared() const;
 	float length() const;
 };
 
@@ -64,29 +64,32 @@ struct Ds4Vector3
 	bool operator==(const Ds4Vector3& other) const;
 	bool operator!=(const Ds4Vector3& other) const;
 
-	float lengthSquared() const;
+	int lengthSquared() const;
 	float length() const;
 };
 
 struct Ds4InputData
 {
-	Ds4Stick   leftStick;
-	Ds4Stick   rightStick;
-	Hat        dPad;
-	bool       square;
-	bool       cross;
-	bool       circle;
-	bool       triangle;
-	bool       l1;
-	bool       r1;
-	bool       l2;
-	bool       r2;
-	bool       share;
-	bool       options;
-	bool       l3;
-	bool       r3;
-	bool       ps;
-	bool       touchButton;
+	Ds4ButtonsRaw_t activeButtons;
+	Ds4Stick     leftStick;
+	Ds4Stick     rightStick;
+
+	[[nodiscard]] Hat dPad() const;
+	[[nodiscard]] bool square() const;
+	[[nodiscard]] bool cross() const;
+	[[nodiscard]] bool circle() const;
+	[[nodiscard]] bool triangle() const;
+	[[nodiscard]] bool l1() const;
+	[[nodiscard]] bool r1() const;
+	[[nodiscard]] bool l2() const;
+	[[nodiscard]] bool r2() const;
+	[[nodiscard]] bool share() const;
+	[[nodiscard]] bool options() const;
+	[[nodiscard]] bool l3() const;
+	[[nodiscard]] bool r3() const;
+	[[nodiscard]] bool ps() const;
+	[[nodiscard]] bool touchButton() const;
+
 	uint8_t    frameCount;
 	uint8_t    leftTrigger;
 	uint8_t    rightTrigger;

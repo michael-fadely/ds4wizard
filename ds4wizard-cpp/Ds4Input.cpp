@@ -9,30 +9,40 @@ inline void Ds4Input::addButton(bool pressed, Ds4Buttons_t buttons)
 	}
 }
 
+void Ds4Input::updateButtons()
+{
+	const Ds4Buttons_t lastDpad = heldButtons & Ds4Buttons::dpad;
+	heldButtons = Ds4Buttons::fromRaw(data.activeButtons);
+
+	addButton(data.touch1, Ds4Buttons::touch1);
+	addButton(data.touch2, Ds4Buttons::touch2);
+
+	// check if the hat switch is valid, otherwise use last hat switch
+	switch (data.dPad())
+	{
+		case Hat::north:
+		case Hat::northEast:
+		case Hat::east:
+		case Hat::southEast:
+		case Hat::south:
+		case Hat::southWest:
+		case Hat::west:
+		case Hat::northWest:
+		case Hat::none:
+			break;
+
+		default:
+			heldButtons |= lastDpad;
+			break;
+	}
+}
+
 void Ds4Input::update(const gsl::span<uint8_t>& buffer)
 {
-	const Ds4Buttons_t lastDpad = heldButtons & (Ds4Buttons::up | Ds4Buttons::down | Ds4Buttons::left | Ds4Buttons::right);
-	heldButtons = 0;
-
 	data.leftStick.x       = buffer[0];
 	data.leftStick.y       = buffer[1];
 	data.rightStick.x      = buffer[2];
 	data.rightStick.y      = buffer[3];
-	data.dPad              = static_cast<Hat>(buffer[4] & 0xF);
-	data.square            = !!((buffer[4] >> 4) & 1); // TODO: bitfield
-	data.cross             = !!((buffer[4] >> 5) & 1); // TODO: bitfield
-	data.circle            = !!((buffer[4] >> 6) & 1); // TODO: bitfield
-	data.triangle          = !!((buffer[4] >> 7) & 1); // TODO: bitfield
-	data.l1                = !!((buffer[5] >> 0) & 1); // TODO: bitfield
-	data.r1                = !!((buffer[5] >> 1) & 1); // TODO: bitfield
-	data.l2                = !!((buffer[5] >> 2) & 1); // TODO: bitfield
-	data.r2                = !!((buffer[5] >> 3) & 1); // TODO: bitfield
-	data.share             = !!((buffer[5] >> 4) & 1); // TODO: bitfield
-	data.options           = !!((buffer[5] >> 5) & 1); // TODO: bitfield
-	data.l3                = !!((buffer[5] >> 6) & 1); // TODO: bitfield
-	data.r3                = !!((buffer[5] >> 7) & 1); // TODO: bitfield
-	data.ps                = !!((buffer[6] >> 0) & 1); // TODO: bitfield
-	data.touchButton       = !!((buffer[6] >> 1) & 1); // TODO: bitfield
 	data.frameCount        = static_cast<uint8_t>((buffer[6] >> 2) & 0x3F);
 	data.leftTrigger       = buffer[7];
 	data.rightTrigger      = buffer[8];
@@ -69,56 +79,9 @@ void Ds4Input::update(const gsl::span<uint8_t>& buffer)
 		data.battery = 10;
 	}
 
-	addButton(data.cross, Ds4Buttons::cross);
-	addButton(data.circle, Ds4Buttons::circle);
-	addButton(data.square, Ds4Buttons::square);
-	addButton(data.triangle, Ds4Buttons::triangle);
-	addButton(data.l1, Ds4Buttons::l1);
-	addButton(data.r1, Ds4Buttons::r1);
-	addButton(data.l2, Ds4Buttons::l2);
-	addButton(data.r2, Ds4Buttons::r2);
-	addButton(data.share, Ds4Buttons::share);
-	addButton(data.options, Ds4Buttons::options);
-	addButton(data.l3, Ds4Buttons::l3);
-	addButton(data.r3, Ds4Buttons::r3);
-	addButton(data.ps, Ds4Buttons::ps);
-	addButton(data.touchButton, Ds4Buttons::touchButton);
+	data.activeButtons = *reinterpret_cast<Ds4ButtonsRaw_t*>(&buffer[4]);
 
-	addButton(data.touch1, Ds4Buttons::touch1);
-	addButton(data.touch2, Ds4Buttons::touch2);
-
-	switch (data.dPad)
-	{
-		case Hat::north:
-			heldButtons |= Ds4Buttons::up;
-			break;
-		case Hat::northEast:
-			heldButtons |= Ds4Buttons::up | Ds4Buttons::right;
-			break;
-		case Hat::east:
-			heldButtons |= Ds4Buttons::right;
-			break;
-		case Hat::southEast:
-			heldButtons |= Ds4Buttons::right | Ds4Buttons::down;
-			break;
-		case Hat::south:
-			heldButtons |= Ds4Buttons::down;
-			break;
-		case Hat::southWest:
-			heldButtons |= Ds4Buttons::down | Ds4Buttons::left;
-			break;
-		case Hat::west:
-			heldButtons |= Ds4Buttons::left;
-			break;
-		case Hat::northWest:
-			heldButtons |= Ds4Buttons::left | Ds4Buttons::up;
-			break;
-		case Hat::none:
-			break;
-		default:
-			heldButtons |= lastDpad;
-			break;
-	}
+	updateButtons();
 
 	updateChangedState();
 }
@@ -132,9 +95,9 @@ void Ds4Input::updateChangedState()
 
 	constexpr Ds4Buttons_t touchMask = Ds4Buttons::touch1 | Ds4Buttons::touch2 | Ds4Buttons::touchButton;
 
-	touchChanged = lastTouchFrame != data.touchFrame
-	               || (pressedButtons & touchMask) != 0
-	               || (releasedButtons & touchMask) != 0;
+	touchChanged = lastTouchFrame != data.touchFrame ||
+	               (pressedButtons & touchMask) != 0 ||
+	               (releasedButtons & touchMask) != 0;
 
 	lastTouchFrame = data.touchFrame;
 }
@@ -164,30 +127,30 @@ float Ds4Input::getAxis(Ds4Axis_t axis, const std::optional<AxisPolarity>& polar
 			break;
 
 		case Ds4Axis::leftTrigger:
-			result = data.leftTrigger / 255.0f;
+			result = static_cast<float>(data.leftTrigger) / 255.0f;
 			break;
 		case Ds4Axis::rightTrigger:
-			result = data.rightTrigger / 255.0f;
+			result = static_cast<float>(data.rightTrigger) / 255.0f;
 			break;
 
 		case Ds4Axis::accelX:
-			result = std::clamp(data.accel.x / (std::numeric_limits<short>::max() + 1.0f), 0.0f, 1.0f);
+			result = std::clamp(static_cast<float>(data.accel.x) / (std::numeric_limits<short>::max() + 1.0f), 0.0f, 1.0f);
 			break;
 		case Ds4Axis::accelY:
-			result = std::clamp(data.accel.y / (std::numeric_limits<short>::max() + 1.0f), 0.0f, 1.0f);
+			result = std::clamp(static_cast<float>(data.accel.y) / (std::numeric_limits<short>::max() + 1.0f), 0.0f, 1.0f);
 			break;
 		case Ds4Axis::accelZ:
-			result = std::clamp(data.accel.z / (std::numeric_limits<short>::max() + 1.0f), 0.0f, 1.0f);
+			result = std::clamp(static_cast<float>(data.accel.z) / (std::numeric_limits<short>::max() + 1.0f), 0.0f, 1.0f);
 			break;
 
 		case Ds4Axis::gyroX:
-			result = std::clamp(data.gyro.x / (std::numeric_limits<short>::max() + 1.0f), 0.0f, 1.0f);
+			result = std::clamp(static_cast<float>(data.gyro.x) / (std::numeric_limits<short>::max() + 1.0f), 0.0f, 1.0f);
 			break;
 		case Ds4Axis::gyroY:
-			result = std::clamp(data.gyro.y / (std::numeric_limits<short>::max() + 1.0f), 0.0f, 1.0f);
+			result = std::clamp(static_cast<float>(data.gyro.y) / (std::numeric_limits<short>::max() + 1.0f), 0.0f, 1.0f);
 			break;
 		case Ds4Axis::gyroZ:
-			result = std::clamp(data.gyro.z / (std::numeric_limits<short>::max() + 1.0f), 0.0f, 1.0f);
+			result = std::clamp(static_cast<float>(data.gyro.z) / (std::numeric_limits<short>::max() + 1.0f), 0.0f, 1.0f);
 			break;
 
 		default:

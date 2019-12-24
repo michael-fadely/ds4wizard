@@ -50,7 +50,7 @@ void deserializeFlags_ ## TYPE ## (const std::string& input, TYPE ## _t& value) 
 	}                                                                           \
 }
 
-static const InputType_t InputType_values[] = {
+const InputType_t InputType_values[] = {
 	InputType::button,
 	InputType::axis,
 	InputType::touchRegion
@@ -64,7 +64,7 @@ static const char* InputType_names[] = {
 
 SERIALIZE_DEF(InputType)
 
-static const XInputAxis_t XInputAxis_values[] = {
+const XInputAxis_t XInputAxis_values[] = {
 	XInputAxis::leftStickX,
 	XInputAxis::leftStickY,
 	XInputAxis::rightStickX,
@@ -84,7 +84,7 @@ static const char* XInputAxis_names[] = {
 
 SERIALIZE_DEF(XInputAxis)
 
-static const XInputButtons_t XInputButtons_values[] = {
+const XInputButtons_t XInputButtons_values[] = {
 	XInputButtons::dPadUp,
 	XInputButtons::dPadDown,
 	XInputButtons::dPadLeft,
@@ -124,7 +124,52 @@ static const char* XInputButtons_names[] = {
 
 SERIALIZE_DEF(XInputButtons)
 
-static const Ds4Buttons_t Ds4Buttons_values[] = {
+const Ds4ButtonsRaw_t Ds4ButtonsRaw_values[] = {
+	Ds4ButtonsRaw::hat,
+	Ds4ButtonsRaw::square,
+	Ds4ButtonsRaw::cross,
+	Ds4ButtonsRaw::circle,
+	Ds4ButtonsRaw::triangle,
+	Ds4ButtonsRaw::l1,
+	Ds4ButtonsRaw::r1,
+	Ds4ButtonsRaw::l2,
+	Ds4ButtonsRaw::r2,
+	Ds4ButtonsRaw::share,
+	Ds4ButtonsRaw::options,
+	Ds4ButtonsRaw::l3,
+	Ds4ButtonsRaw::r3,
+	Ds4ButtonsRaw::ps,
+	Ds4ButtonsRaw::touchButton,
+};
+
+static const char* Ds4ButtonsRaw_names[] = {
+	"hat",
+	"square",
+	"cross",
+	"circle",
+	"triangle",
+	"l1",
+	"r1",
+	"l2",
+	"r2",
+	"share",
+	"options",
+	"l3",
+	"r3",
+	"ps",
+	"touchButton",
+};
+
+Hat Ds4ButtonsRaw::getHat(Ds4ButtonsRaw_t value)
+{
+	return static_cast<Hat>(value & hat_mask);
+}
+
+const Ds4Buttons_t Ds4Buttons_values[] = {
+	Ds4Buttons::up,
+	Ds4Buttons::down,
+	Ds4Buttons::left,
+	Ds4Buttons::right,
 	Ds4Buttons::square,
 	Ds4Buttons::cross,
 	Ds4Buttons::circle,
@@ -141,13 +186,13 @@ static const Ds4Buttons_t Ds4Buttons_values[] = {
 	Ds4Buttons::touchButton,
 	Ds4Buttons::touch1,
 	Ds4Buttons::touch2,
-	Ds4Buttons::up,
-	Ds4Buttons::down,
-	Ds4Buttons::left,
-	Ds4Buttons::right
 };
 
 static const char* Ds4Buttons_names[] = {
+	"up",
+	"down",
+	"left",
+	"right",
 	"square",
 	"cross",
 	"circle",
@@ -164,15 +209,50 @@ static const char* Ds4Buttons_names[] = {
 	"touchButton",
 	"touch1",
 	"touch2",
-	"up",
-	"down",
-	"left",
-	"right"
 };
+
+Ds4Buttons_t Ds4Buttons::fromRaw(Ds4ButtonsRaw_t bits)
+{
+	const auto maskWithoutHat = Ds4ButtonsRaw::mask ^ Ds4ButtonsRaw::hat_mask;
+
+	Ds4Buttons_t result = bits & maskWithoutHat;
+	
+	switch (Ds4ButtonsRaw::getHat(bits))
+	{
+		case Hat::north:
+			result |= Ds4Buttons::up;
+			break;
+		case Hat::northEast:
+			result |= Ds4Buttons::up | Ds4Buttons::right;
+			break;
+		case Hat::east:
+			result |= Ds4Buttons::right;
+			break;
+		case Hat::southEast:
+			result |= Ds4Buttons::right | Ds4Buttons::down;
+			break;
+		case Hat::south:
+			result |= Ds4Buttons::down;
+			break;
+		case Hat::southWest:
+			result |= Ds4Buttons::down | Ds4Buttons::left;
+			break;
+		case Hat::west:
+			result |= Ds4Buttons::left;
+			break;
+		case Hat::northWest:
+			result |= Ds4Buttons::left | Ds4Buttons::up;
+			break;
+		case Hat::none:
+			break;
+	}
+
+	return result;
+}
 
 SERIALIZE_DEF(Ds4Buttons)
 
-static const Ds4Axis_t Ds4Axis_values[] = {
+const Ds4Axis_t Ds4Axis_values[] = {
 	Ds4Axis::leftStickX,
 	Ds4Axis::leftStickY,
 	Ds4Axis::rightStickX,
@@ -204,7 +284,7 @@ static const char* Ds4Axis_names[] = {
 
 SERIALIZE_DEF(Ds4Axis)
 
-static const Ds4Extensions_t Ds4Extensions_values[] = {
+const Ds4Extensions_t Ds4Extensions_values[] = {
 	Ds4Extensions::cable,
 	Ds4Extensions::headphones,
 	Ds4Extensions::microphone,
@@ -220,7 +300,7 @@ static const char* Ds4Extensions_names[] = {
 
 SERIALIZE_DEF(Ds4Extensions)
 
-static const Direction_t Direction_values[] = {
+const Direction_t Direction_values[] = {
 	Direction::up,
 	Direction::down,
 	Direction::left,
@@ -236,7 +316,7 @@ static const char* Direction_names[] = {
 
 SERIALIZE_DEF(Direction)
 
-static const OutputType_t OutputType_values[] = {
+const OutputType_t OutputType_values[] = {
 	OutputType::xinput,
 	OutputType::keyboard,
 	OutputType::mouse,

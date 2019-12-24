@@ -12,14 +12,16 @@ bool Ds4Stick::operator!=(const Ds4Stick& right) const
 	return !(*this == right);
 }
 
-float Ds4Stick::lengthSquared() const
+int Ds4Stick::lengthSquared() const
 {
-	return (float)x * (float)x + (float)y * (float)y;
+	const auto xi = static_cast<int>(x);
+	const auto yi = static_cast<int>(y);
+	return xi * xi + yi * yi;
 }
 
 float Ds4Stick::length() const
 {
-	return std::sqrt(lengthSquared());
+	return std::sqrt(static_cast<float>(lengthSquared()));
 }
 
 bool Ds4Vector2::operator==(const Ds4Vector2& other) const
@@ -32,14 +34,16 @@ bool Ds4Vector2::operator!=(const Ds4Vector2& other) const
 	return !(*this == other);
 }
 
-float Ds4Vector2::lengthSquared() const
+int Ds4Vector2::lengthSquared() const
 {
-	return (float)x * (float)x + (float)y * (float)y;
+	const auto xi = static_cast<int>(x);
+	const auto yi = static_cast<int>(y);
+	return xi * xi + yi * yi;
 }
 
 float Ds4Vector2::length() const
 {
-	return std::sqrt(lengthSquared());
+	return std::sqrt(static_cast<float>(lengthSquared()));
 }
 
 bool Ds4Vector3::operator==(const Ds4Vector3& other) const
@@ -52,36 +56,101 @@ bool Ds4Vector3::operator!=(const Ds4Vector3& other) const
 	return !(*this == other);
 }
 
-float Ds4Vector3::lengthSquared() const
+int Ds4Vector3::lengthSquared() const
 {
-	return (float)x * (float)x + (float)y * (float)y + (float)z * (float)z;
+	const auto xi = static_cast<int>(x);
+	const auto yi = static_cast<int>(y);
+	const auto zi = static_cast<int>(z);
+	
+	return xi * xi + yi * yi + zi * zi;
 }
 
 float Ds4Vector3::length() const
 {
-	return std::sqrt(lengthSquared());
+	return static_cast<float>(std::sqrt(static_cast<double>(lengthSquared())));
+}
+
+Hat Ds4InputData::dPad() const
+{
+	return static_cast<Hat>(activeButtons & Ds4Buttons::dpad);
+}
+
+bool Ds4InputData::square() const
+{
+	return !!(activeButtons & Ds4Buttons::square);
+}
+
+bool Ds4InputData::cross() const
+{
+	return !!(activeButtons & Ds4Buttons::cross);
+}
+
+bool Ds4InputData::circle() const
+{
+	return !!(activeButtons & Ds4Buttons::circle);
+}
+
+bool Ds4InputData::triangle() const
+{
+	return !!(activeButtons & Ds4Buttons::triangle);
+}
+
+bool Ds4InputData::l1() const
+{
+	return !!(activeButtons & Ds4Buttons::l1);
+}
+
+bool Ds4InputData::r1() const
+{
+	return !!(activeButtons & Ds4Buttons::r1);
+}
+
+bool Ds4InputData::l2() const
+{
+	return !!(activeButtons & Ds4Buttons::l2);
+}
+
+bool Ds4InputData::r2() const
+{
+	return !!(activeButtons & Ds4Buttons::r2);
+}
+
+bool Ds4InputData::share() const
+{
+	return !!(activeButtons & Ds4Buttons::share);
+}
+
+bool Ds4InputData::options() const
+{
+	return !!(activeButtons & Ds4Buttons::options);
+}
+
+bool Ds4InputData::l3() const
+{
+	return !!(activeButtons & Ds4Buttons::l3);
+}
+
+bool Ds4InputData::r3() const
+{
+	return !!(activeButtons & Ds4Buttons::r3);
+}
+
+bool Ds4InputData::ps() const
+{
+	return !!(activeButtons & Ds4Buttons::ps);
+}
+
+bool Ds4InputData::touchButton() const
+{
+	return !!(activeButtons & Ds4Buttons::touchButton);
 }
 
 bool Ds4InputData::operator==(const Ds4InputData& other) const
 {
 	return frameCount      == other.frameCount &&
+	       activeButtons   == other.activeButtons &&
 	       leftStick       == other.leftStick &&
 	       rightStick      == other.rightStick &&
-	       dPad            == other.dPad &&
-	       square          == other.square &&
-	       cross           == other.cross &&
-	       circle          == other.circle &&
-	       triangle        == other.triangle &&
-	       l1              == other.l1 &&
-	       r1              == other.r1 &&
-	       l2              == other.l2 &&
-	       r2              == other.r2 &&
-	       share           == other.share &&
-	       options         == other.options &&
-	       l3              == other.l3 &&
-	       r3              == other.r3 &&
-	       ps              == other.ps &&
-	       touchButton     == other.touchButton &&
 	       leftTrigger     == other.leftTrigger &&
 	       rightTrigger    == other.rightTrigger &&
 	       battery         == other.battery &&

@@ -21,7 +21,8 @@ Ds4Color toDs4(const QColor& color)
 
 DevicePropertiesDialog::DevicePropertiesDialog(QWidget* parent, std::shared_ptr<Ds4Device> device_)
 	: QDialog(parent),
-	  device(std::move(device_))
+	  device(std::move(device_)),
+	  ui()
 {
 	ui.setupUi(this);
 	ui.comboBox_Profile->setModel(new DeviceProfileItemModel(ui.comboBox_Profile, Program::profileCache, true));
@@ -46,6 +47,7 @@ DevicePropertiesDialog::DevicePropertiesDialog(QWidget* parent, std::shared_ptr<
 		connect(ui.tabWidget, &QTabWidget::currentChanged, this, &DevicePropertiesDialog::tabChanged);
 
 		qRegisterMetaType<Ds4InputData>("Ds4InputData");
+		qRegisterMetaType<Ds4Buttons_t>("Ds4Buttons_t");
 		connect(this, &DevicePropertiesDialog::readoutChanged, this, &DevicePropertiesDialog::updateReadout);
 		connect(ui.buttonResetPeak, &QToolButton::clicked, this, &DevicePropertiesDialog::resetPeakLatency);
 	}
@@ -106,14 +108,16 @@ void DevicePropertiesDialog::populateForm()
 void DevicePropertiesDialog::readoutMethod()
 {
 	Ds4InputData last {};
+
 	while (doReadout)
 	{
-		auto data = device->input.data;
+		Ds4InputData data = device->input.data;
+		Ds4Buttons_t heldButtons = device->input.heldButtons;
 
 		if (data != last)
 		{
 			last = data;
-			emit readoutChanged(data);
+			emit readoutChanged(heldButtons, data);
 		}
 
 		auto averageRead = device->getReadLatency();
@@ -200,7 +204,7 @@ void DevicePropertiesDialog::tabChanged(int index)
 	}
 }
 
-void DevicePropertiesDialog::updateReadout(Ds4InputData data) const
+void DevicePropertiesDialog::updateReadout(Ds4Buttons_t heldButtons, Ds4InputData data) const
 {
 	// Left stick
 	ui.labelLX->setNum(data.leftStick.x);
@@ -234,6 +238,9 @@ void DevicePropertiesDialog::updateReadout(Ds4InputData data) const
 
 	ui.labelTriggerR->setNum(data.rightTrigger);
 	ui.sliderTriggerR->setValue(data.rightTrigger);
+
+	ui.labelRawButtons->setText(QString::fromStdString(fmt::format("{0:08X}", data.activeButtons & Ds4ButtonsRaw::mask)));
+	ui.labelButtons->setText(QString::fromStdString(fmt::format("{0:08X}", heldButtons)));
 
 	// TODO: write latency
 	auto latency = device->getReadLatency();

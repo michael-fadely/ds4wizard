@@ -537,9 +537,9 @@ void Ds4Device::run()
 	const float ry = input.getAxis(Ds4Axis::rightStickY, std::nullopt);
 	const float rs = std::sqrt(rx * rx + ry * ry);
 
-	// TODO: gyro/accel
-	if (input.buttonsChanged || input.heldButtons
-	    || ls >= 0.25f || rs >= 0.25f)
+	// TODO: gyro/accel - definitely needs to be configurable
+	if (input.buttonsChanged || input.heldButtons ||
+	    ls >= 0.25f || rs >= 0.25f)
 	{
 		idleTime.start();
 	}

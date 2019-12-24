@@ -182,34 +182,80 @@ enum class PressedState
 	released
 };
 
-struct Ds4Buttons
+#define DS4_BUTTONS_RAW \
+	square      = 1 << 4, \
+	cross       = 1 << 5, \
+	circle      = 1 << 6, \
+	triangle    = 1 << 7, \
+	l1          = 1 << 8,  \
+	r1          = 1 << 9,  \
+	l2          = 1 << 10, \
+	r2          = 1 << 11, \
+	share       = 1 << 12, \
+	options     = 1 << 13, \
+	l3          = 1 << 14, \
+	r3          = 1 << 15, \
+	ps          = 1 << 16, \
+	touchButton = 1 << 17
+
+using Ds4ButtonsRaw_t = uint32_t;
+
+/**
+ * \brief Bitfield representing the button status bits reported by the DualShock 4.
+ */
+struct Ds4ButtonsRaw
 {
-	enum T : uint32_t
+	enum T : Ds4ButtonsRaw_t
 	{
-		square      = 1 << 0,
-		cross       = 1 << 1,
-		circle      = 1 << 2,
-		triangle    = 1 << 3,
-		l1          = 1 << 4,
-		r1          = 1 << 5,
-		l2          = 1 << 6,
-		r2          = 1 << 7,
-		share       = 1 << 8,
-		options     = 1 << 9,
-		l3          = 1 << 10,
-		r3          = 1 << 11,
-		ps          = 1 << 12,
-		touchButton = 1 << 13,
-		touch1      = 1 << 14,
-		touch2      = 1 << 15,
-		up          = 1 << 16,
-		down        = 1 << 17,
-		left        = 1 << 18,
-		right       = 1 << 19
+		// first 4 bits are the hat switch
+		hat = 0b1111,
+		DS4_BUTTONS_RAW
 	};
+
+	static const Ds4ButtonsRaw_t mask = 0x0003FFFF;
+	static const Ds4ButtonsRaw_t hat_mask = 0xF;
+
+	/**
+	 * \brief Get the Hat Switch portion of the bitfield and return it as a \c Hat enum.
+	 * \param value Bitfield of buttons.
+	 * \return The Hat Switch portion of the bitfield.
+	 */
+	static Hat getHat(Ds4ButtonsRaw_t value);
+
+	static_assert(mask & touchButton, "nope");
+	static_assert(mask & hat, "nope");
 };
 
+ENUM_VALUES(Ds4ButtonsRaw, 15);
+
 using Ds4Buttons_t = uint32_t;
+
+/**
+ * \brief Serializable version of \sa Ds4ButtonsRaw to simplify
+ * binding extra elements, such as touch sensor states and individual d-pad directions.
+ */
+struct Ds4Buttons
+{
+	enum T : Ds4Buttons_t
+	{
+		up    = 1 << 0,
+		down  = 1 << 1,
+		left  = 1 << 2,
+		right = 1 << 3,
+		
+		DS4_BUTTONS_RAW,
+
+		touch1 = 1 << 18,
+		touch2 = 1 << 19
+	};
+
+	static const Ds4Buttons_t mask = 0x000FFFFF;
+	static const Ds4Buttons_t dpad = up | down | left | right;
+
+	static Ds4Buttons_t fromRaw(Ds4ButtonsRaw_t bits);
+
+	static_assert(mask & right, "nope");
+};
 
 ENUM_FLAGS(Ds4Buttons);
 ENUM_VALUES(Ds4Buttons, 20);

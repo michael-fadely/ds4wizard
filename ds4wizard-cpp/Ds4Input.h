@@ -69,4 +69,5 @@ private:
 	uint8_t lastTouchFrame {};
 
 	void addButton(bool pressed, Ds4Buttons_t buttons);
+	void updateButtons();
 };
