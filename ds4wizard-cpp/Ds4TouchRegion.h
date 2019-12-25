@@ -10,12 +10,16 @@
 #include "AxisOptions.h"
 #include "JsonData.h"
 
-// TODO: TrackPad
-// TODO: TrackBall (surface friction, constant friction, "haptic" feedback)
-// TODO: Slider
+// TODO: TrackPad - basically always auto-centering stick
+// TODO: Slider (maybe just "cursor", with toggle-able X and Y axes?)
 // TODO: Make auto-center an option instead of type?
 
-BETTER_ENUM(Ds4TouchRegionType, int, none, button, stick, stickAutoCenter)
+/*
+ * How do we detect a touch pad flick?
+ * - points[newest] - points[oldest], where points = circular buffer of last N touch points
+ */
+
+BETTER_ENUM(Ds4TouchRegionType, int, none, button, stick, stickAutoCenter, trackball)
 
 /**
  * \brief A user-defined \c Ds4Device touch region.
@@ -26,13 +30,13 @@ class Ds4TouchRegion : public JsonData
 	Ds4Vector2 pointStart1 {};
 	Ds4Vector2 pointStart2 {};
 
-public:
 	/**
 	 * \brief "Buttons" (touches) active in this region.
 	 * \sa Ds4Buttons, Ds4Buttons_t
 	 */
-	Ds4Buttons_t activeButtons = 0; // TODO: private set
+	Ds4Buttons_t activeButtons = 0;
 
+public:
 	/**
 	 * \brief Pressed state for multi-touch point 1.
 	 * \sa Pressable

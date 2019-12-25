@@ -197,6 +197,8 @@
     </ClCompile>
     <ClCompile Include="Stopwatch.cpp" />
     <ClCompile Include="stringutil.cpp" />
+    <ClCompile Include="Trackball.cpp" />
+    <ClCompile Include="Vector2.cpp" />
     <ClCompile Include="ViGEmDriver.cpp" />
     <ClCompile Include="ViGEmTarget.cpp" />
     <ClCompile Include="XInputGamepad.cpp" />
@@ -242,6 +244,7 @@
     <ClInclude Include="Ds4TouchRegion.h" />
     <ClInclude Include="enums.h" />
     <ClInclude Include="Event.h" />
+    <ClInclude Include="gmath.h" />
     <ClInclude Include="InputMap.h" />
     <ClInclude Include="InputSimulator.h" />
     <ClInclude Include="JsonData.h" />
@@ -258,6 +261,8 @@
     <ClInclude Include="pathutil.h" />
     <ClInclude Include="Stopwatch.h" />
     <ClInclude Include="stringutil.h" />
+    <ClInclude Include="Trackball.h" />
+    <ClInclude Include="Vector2.h" />
     <ClInclude Include="ViGEmDriver.h" />
     <ClInclude Include="ViGEmTarget.h" />
     <ClInclude Include="XInputGamepad.h" />
@@ -268,7 +273,6 @@
       <Define Condition="'$(Configuration)|$(Platform)'=='Release|x64'">UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;QT_NO_DEBUG;NDEBUG;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;QT_UITOOLS_LIB</Define>
     </QtMoc>
     <ClInclude Include="ConnectionType.h" />
-    <ClInclude Include="lerp.h" />
     <ClInclude Include="lock.h" />
     <ClInclude Include="Pressable.h" />
     <ClInclude Include="program.h" />

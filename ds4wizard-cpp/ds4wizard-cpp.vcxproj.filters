@@ -121,6 +121,12 @@
     <ClCompile Include="DeviceProfileModel.cpp">
       <Filter>Models</Filter>
     </ClCompile>
+    <ClCompile Include="Trackball.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Vector2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resource Files">
@@ -250,9 +256,6 @@
     <ClInclude Include="enums.h">
       <Filter>Header Files\Utility</Filter>
     </ClInclude>
-    <ClInclude Include="lerp.h">
-      <Filter>Header Files\Utility</Filter>
-    </ClInclude>
     <ClInclude Include="lock.h">
       <Filter>Header Files\Utility</Filter>
     </ClInclude>
@@ -291,6 +294,15 @@
     </ClInclude>
     <ClInclude Include="ViGEmTarget.h">
       <Filter>Header Files\ViGEm</Filter>
+    </ClInclude>
+    <ClInclude Include="Trackball.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="gmath.h">
+      <Filter>Header Files\Utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
