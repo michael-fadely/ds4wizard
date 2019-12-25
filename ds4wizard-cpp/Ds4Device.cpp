@@ -12,6 +12,9 @@
 #include "Bluetooth.h"
 #include "Ds4AutoLightColor.h"
 
+// TODO: allow enabling, disabling, and remapping of individual output (and eventual virtual input) DS4 motors
+// TODO: allow enabling, disabling, and remapping of individual input XInput rumble motors
+
 using namespace std::chrono;
 
 bool Ds4Device::disconnectOnIdle() const
