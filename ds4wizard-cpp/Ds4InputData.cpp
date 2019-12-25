@@ -72,77 +72,77 @@ float Ds4Vector3::length() const
 
 Hat Ds4InputData::dPad() const
 {
-	return static_cast<Hat>(activeButtons & Ds4Buttons::dpad);
+	return static_cast<Hat>(activeButtons & Ds4ButtonsRaw::hat);
 }
 
 bool Ds4InputData::square() const
 {
-	return !!(activeButtons & Ds4Buttons::square);
+	return !!(activeButtons & Ds4ButtonsRaw::square);
 }
 
 bool Ds4InputData::cross() const
 {
-	return !!(activeButtons & Ds4Buttons::cross);
+	return !!(activeButtons & Ds4ButtonsRaw::cross);
 }
 
 bool Ds4InputData::circle() const
 {
-	return !!(activeButtons & Ds4Buttons::circle);
+	return !!(activeButtons & Ds4ButtonsRaw::circle);
 }
 
 bool Ds4InputData::triangle() const
 {
-	return !!(activeButtons & Ds4Buttons::triangle);
+	return !!(activeButtons & Ds4ButtonsRaw::triangle);
 }
 
 bool Ds4InputData::l1() const
 {
-	return !!(activeButtons & Ds4Buttons::l1);
+	return !!(activeButtons & Ds4ButtonsRaw::l1);
 }
 
 bool Ds4InputData::r1() const
 {
-	return !!(activeButtons & Ds4Buttons::r1);
+	return !!(activeButtons & Ds4ButtonsRaw::r1);
 }
 
 bool Ds4InputData::l2() const
 {
-	return !!(activeButtons & Ds4Buttons::l2);
+	return !!(activeButtons & Ds4ButtonsRaw::l2);
 }
 
 bool Ds4InputData::r2() const
 {
-	return !!(activeButtons & Ds4Buttons::r2);
+	return !!(activeButtons & Ds4ButtonsRaw::r2);
 }
 
 bool Ds4InputData::share() const
 {
-	return !!(activeButtons & Ds4Buttons::share);
+	return !!(activeButtons & Ds4ButtonsRaw::share);
 }
 
 bool Ds4InputData::options() const
 {
-	return !!(activeButtons & Ds4Buttons::options);
+	return !!(activeButtons & Ds4ButtonsRaw::options);
 }
 
 bool Ds4InputData::l3() const
 {
-	return !!(activeButtons & Ds4Buttons::l3);
+	return !!(activeButtons & Ds4ButtonsRaw::l3);
 }
 
 bool Ds4InputData::r3() const
 {
-	return !!(activeButtons & Ds4Buttons::r3);
+	return !!(activeButtons & Ds4ButtonsRaw::r3);
 }
 
 bool Ds4InputData::ps() const
 {
-	return !!(activeButtons & Ds4Buttons::ps);
+	return !!(activeButtons & Ds4ButtonsRaw::ps);
 }
 
 bool Ds4InputData::touchButton() const
 {
-	return !!(activeButtons & Ds4Buttons::touchButton);
+	return !!(activeButtons & Ds4ButtonsRaw::touchButton);
 }
 
 bool Ds4InputData::operator==(const Ds4InputData& other) const
