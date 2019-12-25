@@ -53,20 +53,12 @@ class Ds4Device
 
 	InputSimulator simulator;
 
-	// Delta time (for things like mouse movement).
-	// Assumes 1000 Hz virtual polling rate.
-	Stopwatch deltaStopwatch {};
-
 public:
 	enum class BluetoothDisconnectReason
 	{
 		none,
 		idle
 	};
-
-	// Delta time (for things like mouse movement).
-	// Assumes 1000 Hz virtual polling rate.
-	float deltaTime = 1.0f;
 
 	Event<Ds4Device> onDeviceClosed;
 	Event<Ds4Device> onBatteryLevelChanged;

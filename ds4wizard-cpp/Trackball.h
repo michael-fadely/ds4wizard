@@ -31,7 +31,7 @@ struct TrackballSettings : JsonData
 	void writeJson(nlohmann::json& json) const override;
 };
 
-class TrackballEmulator
+class TrackballSimulator
 {
 	Vector2 direction_ {};
 	float currentSpeed_ = 0.0f;
@@ -39,7 +39,7 @@ class TrackballEmulator
 public:
 	TrackballSettings settings;
 
-	explicit TrackballEmulator(const TrackballSettings& settings);
+	explicit TrackballSimulator(const TrackballSettings& settings);
 
 	[[nodiscard]] Vector2 direction() const { return direction_; }
 	[[nodiscard]] float currentSpeed() const { return currentSpeed_; }

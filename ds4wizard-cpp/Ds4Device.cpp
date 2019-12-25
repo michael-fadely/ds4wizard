@@ -461,9 +461,6 @@ void Ds4Device::writeBluetooth()
 
 void Ds4Device::run()
 {
-	deltaTime = static_cast<float>(duration_cast<milliseconds>(deltaStopwatch.elapsed()).count());
-	deltaStopwatch.start();
-
 	// HACK: make this class manage the light state
 	output.lightColor = activeLight.color;
 
@@ -618,9 +615,9 @@ void Ds4Device::run()
 
 void Ds4Device::controllerThread()
 {
+	simulator.start();
 	readLatency.start();
 	idleTime.start();
-	deltaStopwatch.start();
 
 	while (connected() && running)
 	{

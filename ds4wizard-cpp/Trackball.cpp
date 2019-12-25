@@ -69,19 +69,19 @@ void TrackballSettings::writeJson(nlohmann::json& json) const
 	json["ballSpeed"]      = ballSpeed;
 }
 
-TrackballEmulator::TrackballEmulator(const TrackballSettings& settings)
+TrackballSimulator::TrackballSimulator(const TrackballSettings& settings)
 	: settings(settings)
 {
 }
 
 #pragma endregion
 
-bool TrackballEmulator::rolling() const
+bool TrackballSimulator::rolling() const
 {
 	return gmath::is_zero(currentSpeed());
 }
 
-TrackballEmulator::TrackballState TrackballEmulator::applyDirectionalForce(Vector2 targetDirection, float factor, float deltaTime)
+TrackballSimulator::TrackballState TrackballSimulator::applyDirectionalForce(Vector2 targetDirection, float factor, float deltaTime)
 {
 	if (gmath::is_zero(factor))
 	{
@@ -107,24 +107,24 @@ TrackballEmulator::TrackballState TrackballEmulator::applyDirectionalForce(Vecto
 	return TrackballState::accelerating;
 }
 
-TrackballEmulator::TrackballState TrackballEmulator::update(float deltaTime)
+TrackballSimulator::TrackballState TrackballSimulator::update(float deltaTime)
 {
 	decelerate(deltaTime);
 
 	return rolling() ? TrackballState::decelerating : TrackballState::stopped;
 }
 
-void TrackballEmulator::accelerate(float factor, float deltaTime)
+void TrackballSimulator::accelerate(float factor, float deltaTime)
 {
 	currentSpeed_ = std::min(currentSpeed_ + (settings.ballSpeed * settings.touchFriction * factor * deltaTime), settings.ballSpeed);
 }
 
-void TrackballEmulator::slow(float deltaTime)
+void TrackballSimulator::slow(float deltaTime)
 {
 	currentSpeed_ = std::max(0.0f, currentSpeed_ - (settings.ballSpeed * settings.touchFriction * deltaTime));
 }
 
-void TrackballEmulator::decelerate(float deltaTime)
+void TrackballSimulator::decelerate(float deltaTime)
 {
 	currentSpeed_ = std::max(0.0f, currentSpeed_ - (settings.ballSpeed * settings.ballFriction * deltaTime));
 }

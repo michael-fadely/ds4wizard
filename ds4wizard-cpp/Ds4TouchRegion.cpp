@@ -1,8 +1,14 @@
 #include "pch.h"
 #include "Ds4TouchRegion.h"
 
+Ds4TouchRegion::Ds4TouchRegion()
+	: trackball(TrackballSettings()) // UNDONE
+{
+}
+
 Ds4TouchRegion::Ds4TouchRegion(Ds4TouchRegionType type, short left, short top, short right, short bottom, bool allowCrossOver)
-	: type(type),
+	: trackball(TrackballSettings()), // UNDONE
+	  type(type),
 	  allowCrossOver(allowCrossOver),
 	  left(left),
 	  top(top),
@@ -12,7 +18,8 @@ Ds4TouchRegion::Ds4TouchRegion(Ds4TouchRegionType type, short left, short top, s
 }
 
 Ds4TouchRegion::Ds4TouchRegion(const Ds4TouchRegion& other)
-	: type(other.type),
+	: trackball(TrackballSettings()), // UNDONE
+	  type(other.type),
 	  allowCrossOver(other.allowCrossOver),
 	  left(other.left),
 	  top(other.top),
@@ -22,19 +29,45 @@ Ds4TouchRegion::Ds4TouchRegion(const Ds4TouchRegion& other)
 {
 }
 
-bool Ds4TouchRegion::isInRegion(Ds4Buttons_t sender, const Ds4Vector2& point) const
+void Ds4TouchRegion::update(float deltaTime)
 {
-	return isInRegion(sender, point.x, point.y);
+	if (type != +Ds4TouchRegionType::trackball)
+	{
+		return;
+	}
+
+	if (!isActive(Ds4Buttons::touch1 | Ds4Buttons::touch2))
+	{
+		trackball.update(deltaTime);
+		return;
+	}
+
+	// UNDONE: auto touchDelta = getTouchDelta(activeButtons, )
 }
 
-bool Ds4TouchRegion::isInRegion(Ds4Buttons_t sender, short x, short y) const
+bool Ds4TouchRegion::isInRegion(Ds4Buttons_t sender, const Ds4Vector2& point)
 {
-	if (x >= left && x <= right && y >= top && y <= bottom)
+	if (sender & Ds4Buttons::touch1)
+	{
+		points1.insert(point);
+	}
+
+	if (sender & Ds4Buttons::touch2)
+	{
+		points2.insert(point);
+	}
+	
+	if (point.x >= left && point.x <= right && point.y >= top && point.y <= bottom)
 	{
 		return true;
 	}
 
-	return !allowCrossOver && isActive(sender);
+	if (allowCrossOver || !isActive(sender))
+	{
+		return false;
+	}
+
+	return true;
 }
 
 Ds4Vector2 Ds4TouchRegion::getStartPoint(Ds4Buttons_t sender) const
@@ -79,10 +112,12 @@ void Ds4TouchRegion::setActive(Ds4Buttons_t sender, const Ds4Vector2& point)
 	if ((sender & Ds4Buttons::touch1) != 0)
 	{
 		pointStart1 = point;
+		points1.fill(point);
 	}
 	else if ((sender & Ds4Buttons::touch2) != 0)
 	{
 		pointStart2 = point;
+		points2.fill(point);
 	}
 }
 
@@ -101,77 +136,156 @@ void Ds4TouchRegion::setInactive(Ds4Buttons_t sender)
 	}
 }
 
+// HACK: why should you be able to provide a touch point??? This should be handled internally given the last updated touch point!
 float Ds4TouchRegion::getTouchDelta(Ds4Buttons_t sender, Direction_t direction, const Ds4Vector2& point) const
 {
 	short x = std::clamp(point.x, left, right);
 	short y = std::clamp(point.y, top, bottom);
 	float result;
 
-	if (type == +Ds4TouchRegionType::stickAutoCenter)
+	/*
+	 * HACK: this is so disjointed!
+	 * Why is the emulation type specified here *at all*?
+	 * You should be able to ask for a delta kind (from
+	 * region center, from start, from data points) and
+	 * be done!
+	 */
+	switch (type)
 	{
-		Ds4Vector2 start = getStartPoint(sender);
-
-		int width  = std::max(start.x - left, right - start.x);
-		int height = std::max(start.y - top, bottom - start.y);
-
-		short sx = start.x;
-		short sy = start.y;
-
-		switch (direction)
+		case +Ds4TouchRegionType::stickAutoCenter:
 		{
-			case Direction::up:
-				result = std::abs(std::clamp(std::clamp(y - sy, -height, height) / static_cast<float>(height), -1.0f, 0.0f));
-				break;
-			case Direction::down:
-				result = std::clamp(std::clamp(y - sy, -height, height) / static_cast<float>(height), 0.0f, 1.0f);
-				break;
-			case Direction::left:
-				result = std::abs(std::clamp(std::clamp(x - sx, -width, width) / static_cast<float>(width), -1.0f, 0.0f));
-				break;
-			case Direction::right:
-				result = std::clamp(std::clamp(x - sx, -width, width) / static_cast<float>(width), 0.0f, 1.0f);
-				break;
-			default:
-				throw std::runtime_error("invalid Direction");
+			Ds4Vector2 start = getStartPoint(sender);
+
+			int width  = std::max(start.x - left, right - start.x);
+			int height = std::max(start.y - top, bottom - start.y);
+
+			short sx = start.x;
+			short sy = start.y;
+
+			switch (direction)
+			{
+				case Direction::up:
+					result = std::abs(std::clamp(std::clamp(y - sy, -height, height) / static_cast<float>(height), -1.0f, 0.0f));
+					break;
+
+				case Direction::down:
+					result = std::clamp(std::clamp(y - sy, -height, height) / static_cast<float>(height), 0.0f, 1.0f);
+					break;
+
+				case Direction::left:
+					result = std::abs(std::clamp(std::clamp(x - sx, -width, width) / static_cast<float>(width), -1.0f, 0.0f));
+					break;
+
+				case Direction::right:
+					result = std::clamp(std::clamp(x - sx, -width, width) / static_cast<float>(width), 0.0f, 1.0f);
+					break;
+
+				default:
+					throw std::runtime_error("invalid Direction");
+			}
+
+			break;
 		}
-	}
-	else
-	{
-		x -= left;
-		y -= top;
 
-		int width  = right - left;
-		int height = bottom - top;
-
-		int cx = width / 2;
-		int cy = height / 2;
-
-		switch (direction)
+		case +Ds4TouchRegionType::trackball:
 		{
-			case Direction::up:
-				//result = std::abs(((y - cy).Clamp(-height, height) / (float)cy).Clamp(-1.0f, 0.0f));
-				result = std::abs(std::clamp(std::clamp(y - cy, -height, height) / static_cast<float>(cy), -1.0f, 0.f));
+			Ds4Vector2 start {};
+			Ds4Vector2 end {};
+
+			if (sender & Ds4Buttons::touch1)
+			{
+				start = points1.oldest();
+				end = points1.newest();
+			}
+			else if (sender & Ds4Buttons::touch2)
+			{
+				start = points2.oldest();
+				end = points2.newest();
+			}
+			else
+			{
+				result = 0.0f;
 				break;
-			case Direction::down:
-				//result = ((y - cy).Clamp(-height, height) / (float)cy).Clamp(0.0f, 1.0f);
-				result = std::clamp(std::clamp(y - cy, -height, height) / static_cast<float>(cy), 0.f, 1.f);
-				break;
-			case Direction::left:
-				//result = std::abs(((x - cx).Clamp(-width, width) / (float)cx).Clamp(-1.0f, 0.0f));
-				result = std::abs(std::clamp(std::clamp(x - cx, -width, width) / static_cast<float>(cx), -1.0f, 0.f));
-				break;
-			case Direction::right:
-				//result = ((x - cx).Clamp(-width, width) / (float)cx).Clamp(0.0f, 1.0f);
-				result = std::clamp(std::clamp(x - cx, -width, width) / static_cast<float>(cx), 0.f, 1.f);
-				break;
-			default:
-				throw std::runtime_error("invalid Direction");
+			}
+
+			int width  = right - left;
+			int height = bottom - top;
+
+			switch (direction)
+			{
+				case Direction::up:
+					result = std::abs(std::clamp(std::clamp(end.y - start.y, -height, height) / static_cast<float>(height), -1.0f, 0.0f));
+					break;
+
+				case Direction::down:
+					result = std::clamp(std::clamp(end.y - start.y, -height, height) / static_cast<float>(height), 0.0f, 1.0f);
+					break;
+
+				case Direction::left:
+					result = std::abs(std::clamp(std::clamp(end.x - start.x, -width, width) / static_cast<float>(width), -1.0f, 0.0f));
+					break;
+
+				case Direction::right:
+					result = std::clamp(std::clamp(end.x - start.x, -width, width) / static_cast<float>(width), 0.0f, 1.0f);
+					break;
+
+				/* UNDONE: case Direction::none:
+				{
+					const Vector2 start_     = { start.x, start.y };
+					const Vector2 end_       = { end.x, end.y };
+					const float regionLength = std::sqrt(static_cast<float>((width * width) + (height * height)));
+
+					result = std::clamp((end_ - start_).length() / regionLength, 0.0f, 1.0f);
+					break;
+				}*/
+
+				default:
+					throw std::runtime_error("invalid Direction");
+			}
+
+			break;
+		}
+
+		default:
+		{
+			x = static_cast<short>(x - left);
+			y = static_cast<short>(y - top);
+
+			int width  = right - left;
+			int height = bottom - top;
+
+			int cx = width / 2;
+			int cy = height / 2;
+
+			switch (direction)
+			{
+				case Direction::up:
+					result = std::abs(std::clamp(std::clamp(y - cy, -height, height) / static_cast<float>(cy), -1.0f, 0.f));
+					break;
+
+				case Direction::down:
+					result = std::clamp(std::clamp(y - cy, -height, height) / static_cast<float>(cy), 0.f, 1.f);
+					break;
+
+				case Direction::left:
+					result = std::abs(std::clamp(std::clamp(x - cx, -width, width) / static_cast<float>(cx), -1.0f, 0.f));
+					break;
+
+				case Direction::right:
+					result = std::clamp(std::clamp(x - cx, -width, width) / static_cast<float>(cx), 0.f, 1.f);
+					break;
+
+				default:
+					throw std::runtime_error("invalid Direction");
+			}
+			break;
 		}
 	}
 
 	return result;
 }
 
+// HACK: why does this just provide the dead zone? Why doesn't it do its own simulation?
 float Ds4TouchRegion::getDeadZone(Direction_t direction)
 {
 	return touchAxisOptions[direction].deadZone.value_or(0.0f);

@@ -18,6 +18,11 @@ InputSimulator::~InputSimulator()
 	xinputDisconnect();
 }
 
+void InputSimulator::start()
+{
+	deltaStopwatch.start();
+}
+
 void InputSimulator::simulateXInputButton(XInputButtons_t buttons, PressedState state)
 {
 	XInputButtons_t dest = xinputPad.wButtons;
@@ -266,6 +271,10 @@ void InputSimulator::runMap(InputMap& m, InputModifier* modifier)
 					state = handleTouchToggle(m, modifier, region.state2);
 					applyMap(m, modifier, state, Pressable::isActiveState(state) ? 1.0f : 0.0f);
 				}
+				else if (region.type == +Ds4TouchRegionType::trackball)
+				{
+					
+				}
 				else
 				{
 					Direction_t direction = m.touchDirection.value();
@@ -427,7 +436,7 @@ void InputSimulator::simulateMouse(const InputMap& m, PressedState state, float 
 		return;
 	}
 
-	analog *= parent->deltaTime;
+	analog *= deltaTime;
 
 	// TODO: /!\ actually the thing (GetAxisOptions)
 	Direction_t direction = m.mouseAxes.value().directions;
@@ -573,8 +582,16 @@ void InputSimulator::runAction(ActionType action) const
  * -- place into "inactive" queue?
  */
 
+void InputSimulator::updateDeltaTime()
+{
+	deltaTime = static_cast<float>(duration_cast<milliseconds>(deltaStopwatch.elapsed()).count());
+	deltaStopwatch.start();
+}
+
 void InputSimulator::runMaps()
 {
+	updateDeltaTime();
+	
 	simulatedXInputAxis = 0;
 
 	for (InputModifier& modifier : profile->modifiers)
@@ -601,6 +618,8 @@ void InputSimulator::runMaps()
 
 void InputSimulator::runPersistent()
 {
+	updateDeltaTime();
+
 	simulatedXInputAxis = 0;
 
 	for (InputModifier& modifier : profile->modifiers)
@@ -623,8 +642,6 @@ void InputSimulator::runPersistent()
 void InputSimulator::updateTouchRegions()
 {
 	Ds4Buttons_t disallow = 0;
-
-	// foreach (Ds4TouchRegion region in Profile.TouchRegions.Values.OrderBy(x = > !x.IsActive(touchMask) && !x.AllowCrossOver))
 
 	std::sort(touchRegions.begin(), touchRegions.end(), [](const Ds4TouchRegion* a, const Ds4TouchRegion* b)
 	{

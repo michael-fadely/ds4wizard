@@ -39,6 +39,14 @@ class InputSimulator
 	XInputAxis_t simulatedXInputAxis = 0;
 	EventToken xinputNotification;
 
+	// Delta time (for things like mouse movement).
+	// Assumes 1000 Hz virtual polling rate.
+	Stopwatch deltaStopwatch {};
+
+	// Delta time (for things like mouse movement).
+	// Assumes 1000 Hz virtual polling rate.
+	float deltaTime = 1.0f;
+
 public:
 	/** \brief Event raised when a handle to a virtual XInput device cannot be acquired. */
 	Event<Ds4Device> onXInputHandleFailure;
@@ -56,6 +64,8 @@ public:
 
 	explicit InputSimulator(Ds4Device* parent);
 	~InputSimulator();
+
+	void start();
 
 	/**
 	 * \brief Simulates XInput buttons.
@@ -137,7 +147,9 @@ public:
 	 * \param action The action to perform.
 	 */
 	void runAction(ActionType action) const;
-	
+
+	void updateDeltaTime();
+
 	/**
 	 * \brief Runs all input maps managed by this instance.
 	 */
