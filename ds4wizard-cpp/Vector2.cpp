@@ -19,7 +19,7 @@ Vector2::Vector2(float x, float y)  // NOLINT(cppcoreguidelines-pro-type-member-
 
 float Vector2::operator[](size_t i) const
 {
-	if (i >= 3)
+	if (i >= 2)
 	{
 		throw;
 	}
