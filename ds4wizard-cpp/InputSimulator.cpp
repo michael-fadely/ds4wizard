@@ -146,6 +146,11 @@ bool InputSimulator::isOverriddenByModifierSet(InputMapBase& map)
 		       !!(m->inputAxes.value_or(0) & map.inputAxes.value());
 	};
 
+	auto checkTouchMap = [&](InputMap const* m)
+	{
+		return m->isActive();
+	};
+
 	for (auto& pair : modifierMaps)
 	{
 		auto& cache = pair.second;
@@ -210,7 +215,7 @@ bool InputSimulator::isOverriddenByModifierSet(InputMapBase& map)
 				continue;
 			}
 
-			if (std::any_of(collection->cbegin(), collection->cend(), [](InputMap const* m) -> bool { return m->isActive(); }))
+			if (std::any_of(collection->cbegin(), collection->cend(), checkTouchMap))
 			{
 				return true;
 			}
@@ -944,7 +949,7 @@ bool InputSimulator::updateBindingState(InputMap& map, InputModifier* modifier)
 	if (modifier != nullptr && map.toggle != true && !modifier->isActive())
 	{
 		map.release();
-		runMap(map, modifier); // TODO: too many layers; like an ogre
+		runMap(map, modifier);
 
 		if (map.isActive() != wasActive)
 		{
@@ -1016,18 +1021,12 @@ bool InputSimulator::xinputConnect()
 		return true;
 	}
 
-	// HACK: not necessary for ViGEm
 	//int index = profile->autoXInputIndex ? ScpDevice::getFreePort() : profile->xinputIndex;
-	int index = 0;
-
-	if (index < 0)
-	{
-		return false;
-	}
 
 	if (VIGEM_SUCCESS(xinputTarget->connect()))
 	{
-		realXInputIndex = index;
+		// TODO: get LED index from ViGEm
+		realXInputIndex = 0;
 		return true;
 	}
 
@@ -1058,7 +1057,7 @@ bool InputSimulator::xinputConnect()
 		return false;
 	}
 
-	realXInputIndex = index;
+	realXInputIndex = 0;
 	return true;
 }
 
