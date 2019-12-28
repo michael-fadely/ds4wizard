@@ -30,9 +30,12 @@ class InputSimulator
 
 	Ds4TouchRegionCache touchRegions;
 
-	MapCacheCollection<InputMap> maps;
-	MapCacheCollection<InputModifier> modifiers;
 	std::unordered_map<InputModifier*, MapCacheCollection<InputMap>> modifierMaps;
+	MapCacheCollection<InputModifier> modifiers;
+	MapCacheCollection<InputMap> maps;
+
+	std::unordered_set<InputMap*> activeMaps;
+	std::unordered_set<InputModifier*> activeModifiers;
 
 	int realXInputIndex = -1;
 	XInputGamepad xinputPad {};
@@ -83,17 +86,9 @@ public:
 	 * \param m The magnitude of the axes.
 	 */
 	void simulateXInputAxis(XInputAxes& axes, float m);
-
+	
 	/**
-	 * \brief Caches \c InputMap instances which are controlled by an \c InputModifier.
-	 * Excludes the provided map under the assumption that it is not handled by any \c InputModifier.
-	 * This information will be used later in \c isOverriddenByModifierSet
-	 * \param map The input map to be excluded.
-	 */
-	void cacheModifierBindings(InputMapBase& map);
-
-	/**
-	 * \brief Checks if an input map is overriden by a currently active modifier set.
+	 * \brief Checks if the given input map is overridden by an input map from the currently-active modifier set.
 	 * \param map The map whose overridden state is to be checked.
 	 * \return \c true if overridden by a modifier.
 	 */
@@ -152,6 +147,7 @@ public:
 	void runAction(ActionType action) const;
 
 	void updateDeltaTime();
+	void runModifiers();
 
 	/**
 	 * \brief Runs all input maps managed by this instance.

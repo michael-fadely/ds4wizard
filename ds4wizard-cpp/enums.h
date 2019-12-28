@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <cstdint>
 #include <enum.h>
 
@@ -10,7 +11,8 @@
 #define ENUM_SERIALIZE_FLAGS(TYPE) serializeFlags_ ## TYPE
 #define ENUM_DESERIALIZE_FLAGS(TYPE) deserializeFlags_ ## TYPE
 
-#define ENUM_VALUES(TYPE, LENGTH) extern const TYPE ## _t TYPE ## _values[LENGTH]
+// TODO: make this a member of the struct
+#define ENUM_VALUES(TYPE, LENGTH) extern const std::array<TYPE ## _t, LENGTH> TYPE ## _values;
 
 BETTER_ENUM(AxisPolarity, int, none, positive, negative);
 

@@ -126,51 +126,24 @@ void InputSimulator::simulateXInputAxis(XInputAxes& axes, float m)
 	}
 }
 
-// TODO: OPTIMIZE !!!
-void InputSimulator::cacheModifierBindings(InputMapBase& map)
-{
-	if (!modifier_bindings.empty())
-	{
-		return;
-	}
-
-	for (InputModifier& mod : profile->modifiers)
-	{
-		if (!mod.isActive())
-		{
-			continue;
-		}
-
-		for (InputMap& binding : mod.bindings)
-		{
-			if (&binding != &map)
-			{
-				modifier_bindings.push_back(&binding);
-			}
-		}
-	}
-}
-
 bool InputSimulator::isOverriddenByModifierSet(InputMapBase& map)
 {
-	if (profile->modifiers.empty())
+	if (modifierMaps.empty())
 	{
 		return false;
 	}
 
-	modifier_bindings.clear();
+	// UNDONE: modifier_bindings was used for activated bindings
 
-	/*maps = Profile.Modifiers
-		.Where(x => x.IsActive)
-		.Select(y => y.Bindings)
-		.Where(x => x != nullptr)
-		.SelectMany(x => x)
-		.Where(x => !ReferenceEquals(x, map))
-		.ToList();*/
-
-	if (map.inputType & InputType::button)
+	if (map.inputType & InputType::button && map.inputButtons.value_or(0) != 0)
 	{
-		cacheModifierBindings(map);
+		for (const Ds4Buttons_t bit : Ds4Buttons_values)
+		{
+			if (map.inputButtons.value() & bit)
+			{
+				// UNDONE
+			}
+		}
 
 		if (std::any_of(modifier_bindings.begin(), modifier_bindings.end(), [&](InputMap* x) -> bool
 		{
@@ -261,17 +234,17 @@ void InputSimulator::runMap(InputMap& m, InputModifier* modifier)
 
 			case InputType::touchRegion:
 			{
-				Ds4TouchRegion& region = profile->touchRegions[m.inputTouchRegion];
+				Ds4TouchRegion* region = touchRegions[m.inputTouchRegion];
 
-				if (region.type == +Ds4TouchRegionType::button || !m.touchDirection.has_value() || m.touchDirection == Direction::none)
+				if (region->type == +Ds4TouchRegionType::button || !m.touchDirection.has_value() || m.touchDirection == Direction::none)
 				{
-					PressedState state = handleTouchToggle(m, modifier, region.state1);
+					PressedState state = handleTouchToggle(m, modifier, region->state1);
 					applyMap(m, modifier, state, Pressable::isActiveState(state) ? 1.0f : 0.0f);
 
-					state = handleTouchToggle(m, modifier, region.state2);
+					state = handleTouchToggle(m, modifier, region->state2);
 					applyMap(m, modifier, state, Pressable::isActiveState(state) ? 1.0f : 0.0f);
 				}
-				else if (region.type == +Ds4TouchRegionType::trackball)
+				else if (region->type == +Ds4TouchRegionType::trackball)
 				{
 					
 				}
@@ -279,28 +252,28 @@ void InputSimulator::runMap(InputMap& m, InputModifier* modifier)
 				{
 					Direction_t direction = m.touchDirection.value();
 
-					float deadZone = region.getDeadZone(direction);
+					float deadZone = region->getDeadZone(direction);
 
-					PressedState state = handleTouchToggle(m, modifier, region.state1);
-					float analog = region.getTouchDelta(Ds4Buttons::touch1, direction, parent->input.data.touchPoint1);
+					PressedState state = handleTouchToggle(m, modifier, region->state1);
+					float analog = region->getTouchDelta(Ds4Buttons::touch1, direction, parent->input.data.touchPoint1);
 
 					if (analog < deadZone)
 					{
 						Pressable::release(state);
 					}
 
-					region.applyDeadZone(direction, analog);
+					region->applyDeadZone(direction, analog);
 					applyMap(m, modifier, state, analog);
 
-					state  = handleTouchToggle(m, modifier, region.state2);
-					analog = region.getTouchDelta(Ds4Buttons::touch2, direction, parent->input.data.touchPoint2);
+					state  = handleTouchToggle(m, modifier, region->state2);
+					analog = region->getTouchDelta(Ds4Buttons::touch2, direction, parent->input.data.touchPoint2);
 
 					if (analog < deadZone)
 					{
 						Pressable::release(state);
 					}
 
-					region.applyDeadZone(direction, analog);
+					region->applyDeadZone(direction, analog);
 					applyMap(m, modifier, state, analog);
 				}
 
@@ -331,8 +304,9 @@ void InputSimulator::applyProfile(DeviceProfile* profile)
 
 	for (auto& modifier : profile->modifiers)
 	{
-		MapCacheCollection<InputMap> cache;
-		modifier
+		MapCacheCollection<InputMap> mapCache;
+		mapCache.cache(gsl::make_span(modifier.bindings), touchRegions);
+		modifierMaps[&modifier] = std::move(mapCache);
 	}
 
 	if (profile->useXInput)
@@ -560,7 +534,7 @@ void InputSimulator::runAction(ActionType action) const
  *
  * would solve a lot of problems for trackball emulation, such as:
  * - rumble
- * -- I want to rumble for x amount of time on y motor, but what if
+ * -- I want to rumble for x amount of time on y motor, but if
  *    something else is trying to rumble? I want to select the max of
  *    the two requests, but they have to be able to *stop* eventually!
  * -- I need to decelerate the ball over time as well
@@ -599,23 +573,60 @@ void InputSimulator::updateDeltaTime()
 	deltaStopwatch.start();
 }
 
+void InputSimulator::runModifiers()
+{
+	for (const Ds4Buttons_t bit : Ds4Buttons_values)
+	{
+		auto collection = modifiers.getButtonMaps(bit);
+
+		if (!collection.has_value())
+		{
+			continue;
+		}
+
+		// TODO: make this a method with callback in MapCache
+		for (InputModifier* modifier : collection.value)
+		{
+			if (modifiers.visited(modifier))
+			{
+				continue;
+			}
+
+			updatePressedState(*modifier);
+
+			if (modifier->isActive())
+			{
+				modifiers.visit(modifier);
+			}
+		}
+	}
+}
+
 void InputSimulator::runMaps()
 {
 	updateDeltaTime();
 	
 	simulatedXInputAxis = 0;
 
-	for (InputModifier& modifier : profile->modifiers)
-	{
-		updatePressedState(modifier);
-	}
+	/* UNDONE: order of execution:
+	 * 1. non-touch region modifiers
+	 * 2. touch regions
+	 * 3. touch region modifiers
+	 * 3. maps
+	 */
+
+	// "why not check parent->input.buttonsChanged?"
+	// because this will also handle mappings with persistent state,
+	// like a rapid fire or toggle, to make sure they're updated
+
+	runModifiers();
 
 	if (parent->input.touchChanged)
 	{
 		updateTouchRegions();
 	}
 
-	for (InputMap& m : profile->bindings)
+	for (InputMap& m : )
 	{
 		updateBindingState(m, nullptr);
 	}
@@ -633,19 +644,19 @@ void InputSimulator::runPersistent()
 
 	simulatedXInputAxis = 0;
 
-	for (InputModifier& modifier : profile->modifiers)
+	for (InputModifier* modifier : modifiers.set)
 	{
-		if (modifier.isPersistent())
+		if (modifier->isPersistent())
 		{
-			updatePressedState(modifier);
+			updatePressedState(*modifier);
 		}
 	}
 
-	for (InputMap& m : profile->bindings)
+	for (InputMap* map : maps.set)
 	{
-		if (m.isPersistent())
+		if (map->isPersistent())
 		{
-			updateBindingState(m, nullptr);
+			updateBindingState(*map, nullptr);
 		}
 	}
 }
@@ -731,16 +742,16 @@ void InputSimulator::updatePressedStateImpl(InputMapBase& instance, const std::f
 
 			case InputType::axis:
 			{
-				if (!instance.inputAxes.has_value() || instance.inputAxes.value() == 0)
+				if (instance.inputAxes.value_or(0) == 0)
 				{
 					throw std::invalid_argument("inputAxes has invalid or no value");
 				}
 
-				const gsl::span<const Ds4Axes_t> s(Ds4Axes_values);
+				const gsl::span<const Ds4Axes_t> axes(Ds4Axes_values);
 
-				const size_t target = std::count_if(s.begin(), s.end(), [&](Ds4Axes_t x) -> bool
+				const size_t target = std::count_if(axes.begin(), axes.end(), [&](Ds4Axes_t x) -> bool
 				{
-					return (x & instance.inputAxes.value_or(0)) != 0;
+					return (x & instance.inputAxes.value()) != 0;
 				});
 
 				size_t count = 0;
@@ -780,15 +791,15 @@ void InputSimulator::updatePressedStateImpl(InputMapBase& instance, const std::f
 
 			case InputType::touchRegion:
 			{
-				auto it = profile->touchRegions.find(instance.inputTouchRegion);
-				if (it == profile->touchRegions.end())
+				auto it = touchRegions.find(instance.inputTouchRegion);
+				if (it == touchRegions.end())
 				{
 					break;
 				}
 
 				auto& region = it->second;
 
-				if (region.isActive(touchMask))
+				if (region->isActive(touchMask))
 				{
 					press();
 				}

@@ -43,6 +43,21 @@ using Ds4TouchRegionCollection = std::map<std::string, Ds4TouchRegion>;
  */
 using Ds4TouchRegionCache = std::map<std::string, Ds4TouchRegion*>;
 
+/*
+ * for when you inevitably come to this code and think:
+ * "why doesn't this have InputModifier support?"
+ *
+ * - a Ds4TouchRegion is a virtual input, not a mapping;
+ * - InputMapBase can use Ds4TouchRegion as an input;
+ * - an InputMap which is part of an InputModifier that
+ *   references a Ds4TouchRegion will not execute unless
+ *   its InputModifier conditions are met.
+ *
+ * in conclusion:
+ * - it does, indirectly;
+ * - (InputMapBase <- Ds4TouchRegion), (InputModifier : InputMapBase) -> (InputMap: InputMapBase)
+ */
+
 /**
  * \brief A user-defined \c Ds4Device touch region.
  * \sa Ds4Device

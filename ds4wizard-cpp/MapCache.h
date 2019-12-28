@@ -5,9 +5,7 @@
 
 #include "enums.h"
 #include "Ds4TouchRegion.h"
-
-// UNDONE: move constructor
-// UNDONE: copy constructor
+#include <set>
 
 template <typename T, typename Map>
 class MapCache
@@ -18,6 +16,8 @@ class MapCache
 	std::unordered_map<T, MapSet> maps;
 
 public:
+	MapCache() = default;
+
 	/**
 	 * \brief Move constructor.
 	 * \param other The instance to move.
@@ -154,6 +154,13 @@ class MapCacheCollection
 
 public:
 	/**
+	 * \brief Set of all maps managed by this collection.
+	 */
+	std::set<Map*> set;
+
+	MapCacheCollection() = default;
+
+	/**
 	 * \brief Move constructor.
 	 * \param other The instance to move.
 	 */
@@ -206,12 +213,12 @@ public:
 	 */
 	void clear()
 	{
+		set.clear();
 		buttonMaps.clear();
 		axisMaps.clear();
 		touchMaps.clear();
 	}
 
-	// HACK: bad description
 	/**
 	 * \brief Cache a collection of \c Map.
 	 * \param maps The range of \c Map to be cached.
@@ -228,6 +235,7 @@ public:
 					if (map.inputButtons.value() & bit)
 					{
 						buttonMaps.cache(bit, &map);
+						set.insert(&map);
 					}
 				}
 			}
@@ -239,6 +247,7 @@ public:
 					if (map.inputAxes.value() & bit)
 					{
 						axisMaps.cache(bit, &map);
+						set.insert(&map);
 					}
 				}
 			}
@@ -248,6 +257,7 @@ public:
 				if (touchRegions.find(map.inputTouchRegion) != touchRegions.cend())
 				{
 					touchMaps.cache(map.inputTouchRegion, &map);
+					set.insert(&map);
 				}
 			}
 		}
@@ -295,5 +305,20 @@ public:
 		return buttonMaps.visited(value) ||
 		       axisMaps.visited(value) ||
 		       touchMaps.visited(value);
+	}
+
+	auto getButtonMaps(Ds4Buttons_t key)
+	{
+		return buttonMaps.get(key);
+	}
+
+	auto getAxisMaps(Ds4Axes_t key)
+	{
+		return axisMaps.get(key);
+	}
+
+	auto getTouchMaps(const std::string& key)
+	{
+		return touchMaps.get(key);
 	}
 };
