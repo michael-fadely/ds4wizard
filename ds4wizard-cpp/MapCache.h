@@ -1,28 +1,50 @@
 #pragma once
 
+#include <functional>
 #include <unordered_map>
 #include <unordered_set>
 
 #include "enums.h"
 #include "Ds4TouchRegion.h"
-#include <set>
 
-template <typename T, typename Map>
+template <typename Key, typename Map>
 class MapCache
 {
-	using MapSet = std::unordered_set<Map*>;
+public:
+	using Key_t = Key;
+	using Map_t = Map;
 
-	std::unordered_set<Map const*> visitedMaps;
-	std::unordered_map<T, MapSet> maps;
+	/**
+	 * \brief The underlying set type used to store the cache.
+	 */
+	using MapSet = std::unordered_set<Map_t*>;
+
+	/**
+	 * \brief Type declaration for the callback used by \sa visit
+	 */
+	using Visitor = std::function<bool(Map_t*)>;
+
+private:
+	MapSet allMaps_ {};
+	MapSet visitedMaps {};
+	std::unordered_map<Key_t, MapSet> maps {};
 
 public:
+	/**
+	 * \brief A set of all maps managed by this instance.
+	 */
+	[[nodiscard]] MapSet& allMaps() const
+	{
+		return allMaps_;
+	}
+
 	MapCache() = default;
 
 	/**
 	 * \brief Move constructor.
 	 * \param other The instance to move.
 	 */
-	MapCache(MapCache<T, Map>&& other) noexcept
+	MapCache(MapCache<Key_t, Map_t>&& other) noexcept
 		: visitedMaps(std::move(other.visitedMaps)),
 		  maps(std::move(other.maps))
 	{
@@ -33,7 +55,7 @@ public:
 	 * \param other The instance to move.
 	 * \return Reference to the destination instance.
 	 */
-	MapCache<T, Map>& operator=(MapCache<T, Map>&& other) noexcept
+	MapCache<Key_t, Map_t>& operator=(MapCache<Key_t, Map_t>&& other) noexcept
 	{
 		visitedMaps = std::move(other.visitedMaps);
 		maps        = std::move(other.maps);
@@ -45,14 +67,14 @@ public:
 	 * \brief Copy constructor. Disabled.
 	 * \param other Instance to copy.
 	 */
-	MapCache(const MapCache<T, Map>& other) = delete;
+	MapCache(const MapCache<Key_t, Map_t>& other) = delete;
 
 	/**
 	 * \brief Copy assignment operator. Disabled.
 	 * \param other The instance to copy.
 	 * \return Reference to the destination instance.
 	 */
-	MapCache<T, Map>& operator=(const MapCache<T, Map>& other) = delete;
+	MapCache<Key_t, Map_t>& operator=(const MapCache<Key_t, Map_t>& other) = delete;
 
 	/**
 	 * \brief Clear the visited state of all maps cached by this instance.
@@ -63,26 +85,29 @@ public:
 	}
 
 	/**
-	 * \brief Clears all the cached maps and their visited state from this instance.
+	 * \brief Clears all the cached maps from this instance.
 	 */
 	void clear()
 	{
 		reset();
+		allMaps_.clear();
 		maps.clear();
 	}
 
 	/**
-	 * \brief Cache a given \c Map.
+	 * \brief Cache a given \c Map_t.
 	 * \param key They key to associate with the value.
 	 * \param value The value to cache.
 	 * \return \c true if the value was not already cached.
 	 */
-	bool cache(const T& key, Map* value)
+	bool cache(const Key_t& key, Map_t* value)
 	{
 		if (value == nullptr)
 		{
 			return false;
 		}
+
+		allMaps_.insert(value);
 
 		auto it = maps.find(key);
 
@@ -98,30 +123,35 @@ public:
 	}
 
 	/**
-	 * \brief Get a collection of cached \c Map for a given key.
+	 * \brief Get a collection of cached \c Map_t for a given key.
 	 * \param key The key to search by.
-	 * \return \c std::nullopt if not found, otherwise \c MapSet.
+	 * \return A pointer to the \c MapSet found for the given key, or \c nullptr.
 	 */
-	std::optional<MapSet> get(const T& key)
+	MapSet* get(const Key_t& key)
 	{
 		auto it = maps.find(key);
 
 		if (it == maps.end())
 		{
-			return std::nullopt;
+			return nullptr;
 		}
 
-		return maps;
+		return &it->second;
 	}
 
 	/**
-	 * \brief Marks a given \c Map as visited.
+	 * \brief Marks a given \c Map_t as visited.
 	 * \param value The value to mark as visited.
 	 * \return \c false if \p has already been visited or is \c nullptr, else \c true.
 	 */
-	bool visit(Map const* value)
+	bool markVisited(Map_t* value)
 	{
 		if (value == nullptr)
+		{
+			return false;
+		}
+
+		if (allMaps_.find(value) == allMaps_.cend())
 		{
 			return false;
 		}
@@ -129,12 +159,35 @@ public:
 		return visitedMaps.insert(value).second;
 	}
 
+	void visit(const Key_t& key, Visitor visitor)
+	{
+		MapSet* collection = get(key);
+
+		if (collection == nullptr)
+		{
+			return;
+		}
+
+		for (Map_t* map : *collection)
+		{
+			if (wasVisited(map))
+			{
+				continue;
+			}
+
+			if (visitor(map))
+			{
+				markVisited(map);
+			}
+		}
+	}
+
 	/**
-	 * \brief Check if a given \c Map has been visited.
-	 * \param value The \c Map to check the visited state of.
-	 * \return \c true if the \c Map has been visited.
+	 * \brief Check if a given \c Map_t has been visited.
+	 * \param value The \c Map_t to check the visited state of.
+	 * \return \c true if the \c Map_t has been visited.
 	 */
-	[[nodiscard]] bool visited(Map const* value) const
+	[[nodiscard]] bool wasVisited(Map_t* value) const
 	{
 		return visitedMaps.find(value) != visitedMaps.end();
 	}
@@ -151,12 +204,16 @@ class MapCacheCollection
 	MapCache<Ds4Buttons_t, Map> buttonMaps;
 	MapCache<Ds4Axes_t,    Map> axisMaps;
 	MapCache<std::string,  Map> touchMaps;
+	std::unordered_set<Map*> allMaps_;
 
 public:
 	/**
 	 * \brief Set of all maps managed by this collection.
 	 */
-	std::set<Map*> set;
+	[[nodiscard]] const auto& allMaps() const
+	{
+		return allMaps_;
+	}
 
 	MapCacheCollection() = default;
 
@@ -213,18 +270,18 @@ public:
 	 */
 	void clear()
 	{
-		set.clear();
+		allMaps_.clear();
 		buttonMaps.clear();
 		axisMaps.clear();
 		touchMaps.clear();
 	}
 
-	/**
+	/** TODO: use range for maps
 	 * \brief Cache a collection of \c Map.
 	 * \param maps The range of \c Map to be cached.
 	 * \param touchRegions Touch region cache to be used for binding validation.
 	 */
-	void cache(gsl::span<Map> maps, const Ds4TouchRegionCache& touchRegions)
+	void cache(std::deque<Map> maps, const Ds4TouchRegionCache& touchRegions)
 	{
 		for (auto& map : maps)
 		{
@@ -235,7 +292,7 @@ public:
 					if (map.inputButtons.value() & bit)
 					{
 						buttonMaps.cache(bit, &map);
-						set.insert(&map);
+						allMaps_.insert(&map);
 					}
 				}
 			}
@@ -247,7 +304,7 @@ public:
 					if (map.inputAxes.value() & bit)
 					{
 						axisMaps.cache(bit, &map);
-						set.insert(&map);
+						allMaps_.insert(&map);
 					}
 				}
 			}
@@ -257,7 +314,7 @@ public:
 				if (touchRegions.find(map.inputTouchRegion) != touchRegions.cend())
 				{
 					touchMaps.cache(map.inputTouchRegion, &map);
-					set.insert(&map);
+					allMaps_.insert(&map);
 				}
 			}
 		}
@@ -268,7 +325,7 @@ public:
 	 * \param value The value to mark as visited.
 	 * \return \c false if \p has already been visited or is \c nullptr, else \c true.
 	 */
-	bool visit(Map const* value)
+	bool markVisited(Map* value)
 	{
 		if (value == nullptr)
 		{
@@ -279,17 +336,17 @@ public:
 
 		if (value->inputType & InputType::button && value->inputButtons.has_value())
 		{
-			result = buttonMaps.visit(value);
+			result = buttonMaps.markVisited(value);
 		}
 
 		if (value->inputType & InputType::axis && value->inputAxes.has_value())
 		{
-			result = result || axisMaps.visit(value);
+			result = result || axisMaps.markVisited(value);
 		}
 
 		if (value->inputType & InputType::touchRegion && value->inputTouchRegion.length())
 		{
-			result = result || touchMaps.visit(value);
+			result = result || touchMaps.markVisited(value);
 		}
 
 		return result;
@@ -300,25 +357,40 @@ public:
 	 * \param value The \c Map to check the visited state of.
 	 * \return \c true if the \c Map has been visited.
 	 */
-	[[nodiscard]] bool visited(Map const* value) const
+	[[nodiscard]] bool wasVisited(Map* value) const
 	{
-		return buttonMaps.visited(value) ||
-		       axisMaps.visited(value) ||
-		       touchMaps.visited(value);
+		return buttonMaps.wasVisited(value) ||
+		       axisMaps.wasVisited(value) ||
+		       touchMaps.wasVisited(value);
 	}
 
-	auto getButtonMaps(Ds4Buttons_t key)
+	typename decltype(buttonMaps)::MapSet* getButtonMaps(Ds4Buttons_t key)
 	{
 		return buttonMaps.get(key);
 	}
 
-	auto getAxisMaps(Ds4Axes_t key)
+	typename decltype(axisMaps)::MapSet* getAxisMaps(Ds4Axes_t key)
 	{
 		return axisMaps.get(key);
 	}
 
-	auto getTouchMaps(const std::string& key)
+	typename decltype(touchMaps)::MapSet* getTouchMaps(const std::string& key)
 	{
 		return touchMaps.get(key);
+	}
+
+	void visitButtonMaps(typename decltype(buttonMaps)::Key_t key, typename decltype(buttonMaps)::Visitor visitor)
+	{
+		buttonMaps.visit(key, visitor);
+	}
+
+	void visitAxisMaps(typename decltype(axisMaps)::Key_t key, typename decltype(axisMaps)::Visitor visitor)
+	{
+		axisMaps.visit(key, visitor);
+	}
+
+	void visitTouchMaps(typename decltype(touchMaps)::Key_t key, typename decltype(touchMaps)::Visitor visitor)
+	{
+		touchMaps.visit(key, visitor);
 	}
 };

@@ -58,6 +58,7 @@
 #include <ViGEm/Common.h>
 #include <ViGEm/km/BusShared.h>
 
+#include "MapCache.h"
 #include "average.h"
 #include "AxisOptions.h"
 #include "Bluetooth.h"

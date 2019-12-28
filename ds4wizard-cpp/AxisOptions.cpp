@@ -129,6 +129,7 @@ void InputAxisOptions::writeJson(nlohmann::json& json) const
 	}
 }
 
+// TODO: if this can be made const, many other things could be made const throughout the code!
 AxisOptions XInputAxes::getAxisOptions(XInputAxis::T axis)
 {
 	if (options.empty())

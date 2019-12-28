@@ -1,6 +1,5 @@
 #pragma once
 
-#include <map>
 #include <unordered_map>
 
 #include <enum.h>
@@ -31,17 +30,19 @@ BETTER_ENUM(Ds4TouchRegionType, int,
 
 class Ds4TouchRegion;
 
-/**
- * \brief An explicitly-ordered collection of \c Ds4TouchRegion
- * \sa Ds4TouchRegion
- */
-using Ds4TouchRegionCollection = std::map<std::string, Ds4TouchRegion>;
+// TODO: make these use sorted maps
 
 /**
- * \brief An explicitly-ordered collection of \c Ds4TouchRegion* as a caching mechanism.
+ * \brief A collection of \c Ds4TouchRegion
+ * \sa Ds4TouchRegion
+ */
+using Ds4TouchRegionCollection = std::unordered_map<std::string, Ds4TouchRegion>;
+
+/**
+ * \brief A collection of \c Ds4TouchRegion* as a caching mechanism.
  * \sa Ds4TouchRegion, Ds4TouchRegionCollection
  */
-using Ds4TouchRegionCache = std::map<std::string, Ds4TouchRegion*>;
+using Ds4TouchRegionCache = std::unordered_map<std::string, Ds4TouchRegion*>;
 
 /*
  * for when you inevitably come to this code and think:

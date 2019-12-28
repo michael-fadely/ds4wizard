@@ -1,9 +1,8 @@
 #pragma once
 
-#include <map>
-#include <unordered_map>
-#include <unordered_set>
 #include <functional>
+#include <unordered_set>
+#include <unordered_map>
 
 #include "KeyboardSimulator.h"
 #include "MouseSimulator.h"
@@ -29,10 +28,11 @@ class InputSimulator
 	MouseSimulator mouse;
 
 	Ds4TouchRegionCache touchRegions;
+	std::vector<Ds4TouchRegion*> sortableTouchRegions;
 
 	std::unordered_map<InputModifier*, MapCacheCollection<InputMap>> modifierMaps;
 	MapCacheCollection<InputModifier> modifiers;
-	MapCacheCollection<InputMap> maps;
+	MapCacheCollection<InputMap> bindings;
 
 	std::unordered_set<InputMap*> activeMaps;
 	std::unordered_set<InputModifier*> activeModifiers;
@@ -95,9 +95,9 @@ public:
 	bool isOverriddenByModifierSet(InputMapBase& map);
 
 	/**
-	 * \brief Runs an input map with an optional parent modifier set.
+	 * \brief Runs an input map with an optional parent modifier.
 	 * \param m The map to run.
-	 * \param modifier The parent modifier set, if any.
+	 * \param modifier The parent modifier, if any.
 	 */
 	void runMap(InputMap& m, InputModifier* modifier);
 
@@ -147,7 +147,9 @@ public:
 	void runAction(ActionType action) const;
 
 	void updateDeltaTime();
-	void runModifiers();
+	void updateModifiers();
+	void updateBindings();
+	void reset();
 
 	/**
 	 * \brief Runs all input maps managed by this instance.
@@ -168,13 +170,12 @@ public:
 	/**
 	 * \brief Updates a provided touch region, handling allowed/disallowed overlap, etc.
 	 * \param region The touch region to update.
-	 * \param modifier The parent modifier set, if any.
 	 * \param sender The touch sender (touch A or touch B)
 	 * \param point The point on the touch pad that \a sender was fired from.
 	 * \param disallow Buttons to disallow if a region does not allow overlap.
 	 */
-	void updateTouchRegion(Ds4TouchRegion& region, InputModifier* modifier, Ds4Buttons_t sender,
-	                       Ds4Vector2& point, Ds4Buttons_t& disallow);
+	void updateTouchRegion(Ds4TouchRegion& region, Ds4Buttons_t sender,
+	                       Ds4Vector2& point, Ds4Buttons_t& disallow) const;
 	
 	/**
 	 * \brief Internal implementation of \sa updatePressedState
@@ -187,27 +188,34 @@ public:
 	/**
 	 * \brief Updates the pressed state of a modifier set and its managed child bindings.
 	 * \param modifier The modifier to update.
+	 * \return \c true if the active state of the modifier has changed.
 	 */
-	void updatePressedState(InputModifier& modifier);
+	bool updateModifier(InputModifier& modifier);
 	
 	/**
-	 * \brief Generic method for updating the pressed state of a binding.
-	 * If provided, the parent modifier set must be active for a press to activate.
+	 * \brief
+	 * Generic method for updating the pressed state of a binding.
+	 * If provided, the parent \p modifier must be active for \p map to be pressed.
 	 * Otherwise, the map's pressed state is made inactive.
+	 * 
 	 * \param map The map to update.
 	 * \param modifier The parent modifier set, if any.
 	 */
-	void updatePressedState(InputMap& map, InputModifier* modifier);
+	bool updatePressedState(InputMap& map, InputModifier* modifier);
 	
 	/**
-	 * \brief Root level method for updating input mappings and simulating inputs.
+	 * \brief
+	 * Root level method for updating input mappings and simulating inputs.
 	 * Updates pressed state accounting for modifiers, runs special actions, etc.
-	 * If provided, the parent modifier set must be active for a press to activate.
+	 * If provided, the parent \p modifier must be active for \p map to be activated.
 	 * Otherwise, the map's pressed state is made inactive.
-	 * \param m The map to update.
+	 * 
+	 * \param map The map to update.
 	 * \param modifier The parent modifier set, if any.
+	 *
+	 * \return \c true if the pressed state of the map has changed.
 	 */
-	void updateBindingState(InputMap& m, InputModifier* modifier);
+	bool updateBindingState(InputMap& map, InputModifier* modifier);
 	
 	/**
 	 * \brief Polls information from emulation endpoints (e.g XInput) if necessary.

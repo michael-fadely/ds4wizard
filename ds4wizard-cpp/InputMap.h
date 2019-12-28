@@ -20,15 +20,22 @@ private:
 	Stopwatch rapidStopwatch;
 
 public:
-	PressedState simulatedState() const;
+	/**
+	 * \brief
+	 * The pressed state of the underlying emulated mapping.
+	 * For example if \c toggle and \c isToggled are \c true,
+	 * this function will return \c PressedState::pressed or \c PressedState::on.
+	 * \sa PressedState
+	 */
+	[[nodiscard]] PressedState simulatedState() const;
 
-	[[nodiscard]] virtual bool isActive() const override;
+	[[nodiscard]] bool isActive() const override;
 
 	/**
 	 * \brief Indicates if this instance has a persistent state
 	 * which is actively simulated.
 	 */
-	bool isPersistent() const;
+	[[nodiscard]] bool isPersistent() const;
 
 	InputType_t inputType = 0;
 
@@ -55,20 +62,20 @@ public:
 	InputMapBase& operator=(const InputMapBase&) = default;
 	InputMapBase& operator=(InputMapBase&& other) noexcept;
 
-	virtual void press() override;
+	void press() override;
 
 protected:
 	void updateRapidState();
 
 public:
-	virtual void release() override;
+	void release() override;
 	InputAxisOptions getAxisOptions(Ds4Axes_t axis);
 
 	bool operator==(const InputMapBase& other) const;
 	bool operator!=(const InputMapBase& other) const;
 
-	virtual void readJson(const nlohmann::json& json) override;
-	virtual void writeJson(nlohmann::json& json) const override;
+	void readJson(const nlohmann::json& json) override;
+	void writeJson(nlohmann::json& json) const override;
 };
 
 class InputModifier;

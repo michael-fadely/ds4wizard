@@ -45,12 +45,11 @@ public:
 	 */
 	int xinputIndex = 0;
 
+	// TODO: make ordered with std::map
 	/**
-	 * \brief Ordered map of touchpad regions referenced by name.
-	 * Touch region definitions and execution are first come first serve
-	 * with other factors notwithstanding.
+	 * \brief Map of touchpad regions referenced by name.
 	 */
-	std::map<std::string, Ds4TouchRegion> touchRegions;
+	std::unordered_map<std::string, Ds4TouchRegion> touchRegions;
 
 	/**
 	 * \brief Input-to-output bindings managed by this profile.
