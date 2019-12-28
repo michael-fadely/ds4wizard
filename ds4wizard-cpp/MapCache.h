@@ -281,7 +281,7 @@ public:
 	 * \param maps The range of \c Map to be cached.
 	 * \param touchRegions Touch region cache to be used for binding validation.
 	 */
-	void cache(std::deque<Map> maps, const Ds4TouchRegionCache& touchRegions)
+	void cache(std::deque<Map>& maps, const Ds4TouchRegionCache& touchRegions)
 	{
 		for (auto& map : maps)
 		{
