@@ -187,7 +187,7 @@ bool InputSimulator::isOverriddenByModifierSet(InputMapBase& map)
 
 		if (std::any_of(modifier_bindings.begin(), modifier_bindings.end(), [&](InputMap* x) -> bool
 		{
-			return (x->inputType & InputType::axis) != 0 && (x->inputAxis.value_or(0) & map.inputAxis.value_or(0)) != 0;
+			return (x->inputType & InputType::axis) != 0 && (x->inputAxes.value_or(0) & map.inputAxes.value_or(0)) != 0;
 		}))
 		{
 			return true;
@@ -200,7 +200,7 @@ bool InputSimulator::isOverriddenByModifierSet(InputMapBase& map)
 
 		if (std::any_of(modifier_bindings.begin(), modifier_bindings.end(), [&](InputMap* x) -> bool
 		{
-			return (x->inputType & InputType::touchRegion) != 0 && x->inputRegion == map.inputRegion;
+			return (x->inputType & InputType::touchRegion) != 0 && x->inputTouchRegion == map.inputTouchRegion;
 		}))
 		{
 			return true;
@@ -235,21 +235,21 @@ void InputSimulator::runMap(InputMap& m, InputModifier* modifier)
 
 			case InputType::axis:
 			{
-				if (m.inputAxis.value_or(0) == 0)
+				if (m.inputAxes.value_or(0) == 0)
 				{
-					throw std::invalid_argument("inputAxis has no value");
+					throw std::invalid_argument("inputAxes has no value");
 				}
 
-				for (Ds4Axis_t bit : Ds4Axis_values)
+				for (Ds4Axes_t bit : Ds4Axes_values)
 				{
-					if (!(m.inputAxis.value() & bit))
+					if (!(m.inputAxes.value() & bit))
 					{
 						continue;
 					}
 
 					InputAxisOptions options = m.getAxisOptions(bit);
 
-					float analog = parent->input.getAxis(m.inputAxis.value(), options.polarity);
+					float analog = parent->input.getAxis(m.inputAxes.value(), options.polarity);
 					options.applyDeadZone(analog);
 
 					PressedState state = m.simulatedState();
@@ -261,7 +261,7 @@ void InputSimulator::runMap(InputMap& m, InputModifier* modifier)
 
 			case InputType::touchRegion:
 			{
-				Ds4TouchRegion& region = profile->touchRegions[m.inputRegion];
+				Ds4TouchRegion& region = profile->touchRegions[m.inputTouchRegion];
 
 				if (region.type == +Ds4TouchRegionType::button || !m.touchDirection.has_value() || m.touchDirection == Direction::none)
 				{
@@ -315,13 +315,24 @@ void InputSimulator::runMap(InputMap& m, InputModifier* modifier)
 
 void InputSimulator::applyProfile(DeviceProfile* profile)
 {
-	this->profile = profile;
-
 	touchRegions.clear();
 
 	for (auto& pair : profile->touchRegions)
 	{
-		touchRegions.push_back(&pair.second);
+		touchRegions[pair.first] = &pair.second;
+	}
+
+	maps.clear();
+	modifiers.clear();
+	modifierMaps.clear();
+
+	maps.cache(gsl::make_span(profile->bindings), touchRegions);
+	modifiers.cache(gsl::make_span(profile->modifiers), touchRegions);
+
+	for (auto& modifier : profile->modifiers)
+	{
+		MapCacheCollection<InputMap> cache;
+		modifier
 	}
 
 	if (profile->useXInput)
@@ -720,30 +731,30 @@ void InputSimulator::updatePressedStateImpl(InputMapBase& instance, const std::f
 
 			case InputType::axis:
 			{
-				if (!instance.inputAxis.has_value() || instance.inputAxis.value() == 0)
+				if (!instance.inputAxes.has_value() || instance.inputAxes.value() == 0)
 				{
-					throw std::invalid_argument("inputAxis has invalid or no value");
+					throw std::invalid_argument("inputAxes has invalid or no value");
 				}
 
-				const gsl::span<const Ds4Axis_t> s(Ds4Axis_values);
+				const gsl::span<const Ds4Axes_t> s(Ds4Axes_values);
 
-				const size_t target = std::count_if(s.begin(), s.end(), [&](Ds4Axis_t x) -> bool
+				const size_t target = std::count_if(s.begin(), s.end(), [&](Ds4Axes_t x) -> bool
 				{
-					return (x & instance.inputAxis.value_or(0)) != 0;
+					return (x & instance.inputAxes.value_or(0)) != 0;
 				});
 
 				size_t count = 0;
 
-				for (Ds4Axis_t bit : Ds4Axis_values)
+				for (Ds4Axes_t bit : Ds4Axes_values)
 				{
-					if (!(instance.inputAxis.value() & bit))
+					if (!(instance.inputAxes.value() & bit))
 					{
 						continue;
 					}
 
 					InputAxisOptions options = instance.getAxisOptions(bit);
 
-					float axis = parent->input.getAxis(instance.inputAxis.value(), options.polarity);
+					float axis = parent->input.getAxis(instance.inputAxes.value(), options.polarity);
 
 					if (axis >= options.deadZone.value_or(0.0f))
 					{
@@ -769,7 +780,7 @@ void InputSimulator::updatePressedStateImpl(InputMapBase& instance, const std::f
 
 			case InputType::touchRegion:
 			{
-				auto it = profile->touchRegions.find(instance.inputRegion);
+				auto it = profile->touchRegions.find(instance.inputTouchRegion);
 				if (it == profile->touchRegions.end())
 				{
 					break;
@@ -857,7 +868,7 @@ void InputSimulator::updateBindingState(InputMap& m, InputModifier* modifier)
 	{
 		case InputType::touchRegion:
 		{
-			const auto it = profile->touchRegions.find(m.inputRegion);
+			const auto it = profile->touchRegions.find(m.inputTouchRegion);
 			if (it == profile->touchRegions.end())
 			{
 				break;

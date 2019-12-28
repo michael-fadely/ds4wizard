@@ -252,22 +252,22 @@ Ds4Buttons_t Ds4Buttons::fromRaw(Ds4ButtonsRaw_t bits)
 
 SERIALIZE_DEF(Ds4Buttons)
 
-const Ds4Axis_t Ds4Axis_values[] = {
-	Ds4Axis::leftStickX,
-	Ds4Axis::leftStickY,
-	Ds4Axis::rightStickX,
-	Ds4Axis::rightStickY,
-	Ds4Axis::leftTrigger,
-	Ds4Axis::rightTrigger,
-	Ds4Axis::accelX,
-	Ds4Axis::accelY,
-	Ds4Axis::accelZ,
-	Ds4Axis::gyroX,
-	Ds4Axis::gyroY,
-	Ds4Axis::gyroZ,
+const Ds4Axes_t Ds4Axes_values[] = {
+	Ds4Axes::leftStickX,
+	Ds4Axes::leftStickY,
+	Ds4Axes::rightStickX,
+	Ds4Axes::rightStickY,
+	Ds4Axes::leftTrigger,
+	Ds4Axes::rightTrigger,
+	Ds4Axes::accelX,
+	Ds4Axes::accelY,
+	Ds4Axes::accelZ,
+	Ds4Axes::gyroX,
+	Ds4Axes::gyroY,
+	Ds4Axes::gyroZ,
 };
 
-static const char* Ds4Axis_names[] = {
+static const char* Ds4Axes_names[] = {
 	"leftStickX",
 	"leftStickY",
 	"rightStickX",
@@ -282,7 +282,7 @@ static const char* Ds4Axis_names[] = {
 	"gyroZ"
 };
 
-SERIALIZE_DEF(Ds4Axis)
+SERIALIZE_DEF(Ds4Axes)
 
 const Ds4Extensions_t Ds4Extensions_values[] = {
 	Ds4Extensions::cable,

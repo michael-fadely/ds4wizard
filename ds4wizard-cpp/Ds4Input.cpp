@@ -37,8 +37,75 @@ void Ds4Input::updateButtons()
 	}
 }
 
+void Ds4Input::updateAxes(const Ds4InputData& last)
+{
+	axes = 0;
+
+	if (data.leftStick.x != last.leftStick.x)
+	{
+		axes |= Ds4Axes::leftStickX;
+	}
+
+	if (data.leftStick.y != last.leftStick.y)
+	{
+		axes |= Ds4Axes::leftStickY;
+	}
+
+	if (data.rightStick.x != last.rightStick.x)
+	{
+		axes |= Ds4Axes::rightStickX;
+	}
+
+	if (data.rightStick.y != last.rightStick.y)
+	{
+		axes |= Ds4Axes::rightStickY;
+	}
+
+	if (data.leftTrigger != last.leftTrigger)
+	{
+		axes |= Ds4Axes::leftTrigger;
+	}
+
+	if (data.rightTrigger != last.rightTrigger)
+	{
+		axes |= Ds4Axes::rightTrigger;
+	}
+
+	if (data.accel.x != last.accel.x)
+	{
+		axes |= Ds4Axes::accelX;
+	}
+	
+	if (data.accel.y != last.accel.y)
+	{
+		axes |= Ds4Axes::accelY;
+	}
+	
+	if (data.accel.z != last.accel.z)
+	{
+		axes |= Ds4Axes::accelZ;
+	}
+	
+	if (data.gyro.x != last.gyro.x)
+	{
+		axes |= Ds4Axes::gyroX;
+	}
+	
+	if (data.gyro.y != last.gyro.y)
+	{
+		axes |= Ds4Axes::gyroY;
+	}
+	
+	if (data.gyro.z != last.gyro.z)
+	{
+		axes |= Ds4Axes::gyroZ;
+	}
+}
+
 void Ds4Input::update(const gsl::span<uint8_t>& buffer)
 {
+	Ds4InputData last = data;
+
 	data.leftStick.x       = buffer[0];
 	data.leftStick.y       = buffer[1];
 	data.rightStick.x      = buffer[2];
@@ -68,6 +135,8 @@ void Ds4Input::update(const gsl::span<uint8_t>& buffer)
 	data.lastTouchPoint1.y = static_cast<short>((*reinterpret_cast<int16_t*>(&buffer[44]) >> 4) & 0xFFF);
 	data.lastTouchPoint2.x = static_cast<short>(*reinterpret_cast<int16_t*>(&buffer[47]) & 0xFFF);
 	data.lastTouchPoint2.y = static_cast<short>((*reinterpret_cast<int16_t*>(&buffer[48]) >> 4) & 0xFFF);
+
+	updateAxes(last);
 
 	if (!(data.extensions & Ds4Extensions::cable))
 	{
@@ -102,59 +171,59 @@ void Ds4Input::updateChangedState()
 	lastTouchFrame = data.touchFrame;
 }
 
-float Ds4Input::getAxis(Ds4Axis_t axis, const std::optional<AxisPolarity>& polarity) const
+float Ds4Input::getAxis(Ds4Axes_t axis, const std::optional<AxisPolarity>& polarity) const
 {
 	float result;
 
 	switch (axis)
 	{
-		case Ds4Axis::leftStickX:
+		case Ds4Axes::leftStickX:
 			result = std::min(1.0f, std::clamp(data.leftStick.x - 128, -127, 127) / 127.0f);
 			result = std::clamp(result, -1.0f, 1.0f);
 			break;
-		case Ds4Axis::leftStickY:
+		case Ds4Axes::leftStickY:
 			result = -std::min(1.0f, std::clamp(data.leftStick.y - 128, -127, 127) / 127.0f);
 			result = std::clamp(result, -1.0f, 1.0f);
 			break;
 
-		case Ds4Axis::rightStickX:
+		case Ds4Axes::rightStickX:
 			result = std::min(1.0f, std::clamp(data.rightStick.x - 128, -127, 127) / 127.0f);
 			result = std::clamp(result, -1.0f, 1.0f);
 			break;
-		case Ds4Axis::rightStickY:
+		case Ds4Axes::rightStickY:
 			result = -std::min(1.0f, std::clamp(data.rightStick.y - 128, -127, 127) / 127.0f);
 			result = std::clamp(result, -1.0f, 1.0f);
 			break;
 
-		case Ds4Axis::leftTrigger:
+		case Ds4Axes::leftTrigger:
 			result = static_cast<float>(data.leftTrigger) / 255.0f;
 			break;
-		case Ds4Axis::rightTrigger:
+		case Ds4Axes::rightTrigger:
 			result = static_cast<float>(data.rightTrigger) / 255.0f;
 			break;
 
-		case Ds4Axis::accelX:
+		case Ds4Axes::accelX:
 			result = std::clamp(static_cast<float>(data.accel.x) / (std::numeric_limits<short>::max() + 1.0f), 0.0f, 1.0f);
 			break;
-		case Ds4Axis::accelY:
+		case Ds4Axes::accelY:
 			result = std::clamp(static_cast<float>(data.accel.y) / (std::numeric_limits<short>::max() + 1.0f), 0.0f, 1.0f);
 			break;
-		case Ds4Axis::accelZ:
+		case Ds4Axes::accelZ:
 			result = std::clamp(static_cast<float>(data.accel.z) / (std::numeric_limits<short>::max() + 1.0f), 0.0f, 1.0f);
 			break;
 
-		case Ds4Axis::gyroX:
+		case Ds4Axes::gyroX:
 			result = std::clamp(static_cast<float>(data.gyro.x) / (std::numeric_limits<short>::max() + 1.0f), 0.0f, 1.0f);
 			break;
-		case Ds4Axis::gyroY:
+		case Ds4Axes::gyroY:
 			result = std::clamp(static_cast<float>(data.gyro.y) / (std::numeric_limits<short>::max() + 1.0f), 0.0f, 1.0f);
 			break;
-		case Ds4Axis::gyroZ:
+		case Ds4Axes::gyroZ:
 			result = std::clamp(static_cast<float>(data.gyro.z) / (std::numeric_limits<short>::max() + 1.0f), 0.0f, 1.0f);
 			break;
 
 		default:
-			throw std::out_of_range("invalid Ds4Axis");
+			throw std::out_of_range("invalid Ds4Axes");
 	}
 
 	if (!polarity)

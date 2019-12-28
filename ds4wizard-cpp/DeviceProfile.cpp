@@ -168,7 +168,7 @@ R"(
       "touchDirection": "up",
       "xinputButtons": "dPadUp",
       "inputType": "touchRegion",
-      "inputRegion": "Right Half"
+      "inputTouchRegion": "Right Half"
     },
     {
       "simulatorType": "input",
@@ -176,7 +176,7 @@ R"(
       "touchDirection": "down",
       "xinputButtons": "dPadDown",
       "inputType": "touchRegion",
-      "inputRegion": "Right Half"
+      "inputTouchRegion": "Right Half"
     },
     {
       "simulatorType": "input",
@@ -184,7 +184,7 @@ R"(
       "touchDirection": "left",
       "xinputButtons": "dPadLeft",
       "inputType": "touchRegion",
-      "inputRegion": "Right Half"
+      "inputTouchRegion": "Right Half"
     },
     {
       "simulatorType": "input",
@@ -192,7 +192,7 @@ R"(
       "touchDirection": "right",
       "xinputButtons": "dPadRight",
       "inputType": "touchRegion",
-      "inputRegion": "Right Half"
+      "inputTouchRegion": "Right Half"
     },
     {
       "simulatorType": "input",
@@ -529,7 +529,7 @@ R"(
         }
       ],
       "inputType": "touchRegion",
-      "inputRegion": "Left Half"
+      "inputTouchRegion": "Left Half"
     },
     {
       "bindings": [
@@ -542,7 +542,7 @@ R"(
         }
       ],
       "inputType": "touchRegion",
-      "inputRegion": "Right Half"
+      "inputTouchRegion": "Right Half"
     },
     {
       "bindings": [

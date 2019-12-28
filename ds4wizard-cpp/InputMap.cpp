@@ -48,8 +48,8 @@ InputMapBase::InputMapBase(const InputMapBase& other)
 	: Pressable(other),
 	  inputType(other.inputType),
 	  inputButtons(other.inputButtons),
-	  inputAxis(other.inputAxis),
-	  inputRegion(other.inputRegion),
+	  inputAxes(other.inputAxes),
+	  inputTouchRegion(other.inputTouchRegion),
 	  toggle(other.toggle),
 	  rapidFire(other.rapidFire),
 	  rapidFireInterval(other.rapidFireInterval),
@@ -61,8 +61,8 @@ InputMapBase::InputMapBase(InputMapBase&& other) noexcept
 	: Pressable(std::move(other)),
 	  inputType(other.inputType),
 	  inputButtons(other.inputButtons),
-	  inputAxis(other.inputAxis),
-	  inputRegion(std::move(other.inputRegion)),
+	  inputAxes(other.inputAxes),
+	  inputTouchRegion(std::move(other.inputTouchRegion)),
 	  toggle(other.toggle),
 	  rapidFire(other.rapidFire),
 	  rapidFireInterval(other.rapidFireInterval),
@@ -81,15 +81,15 @@ InputMapBase::InputMapBase(InputType_t inputType, Ds4Buttons::T input)
 {
 }
 
-InputMapBase::InputMapBase(InputType_t inputType, Ds4Axis::T input)
+InputMapBase::InputMapBase(InputType_t inputType, Ds4Axes::T input)
 	: inputType(inputType),
-	  inputAxis(input)
+	  inputAxes(input)
 {
 }
 
 InputMapBase::InputMapBase(InputType_t inputType, std::string input)
 	: inputType(inputType),
-	  inputRegion(std::move(input))
+	  inputTouchRegion(std::move(input))
 {
 }
 
@@ -99,8 +99,8 @@ InputMapBase& InputMapBase::operator=(InputMapBase&& other) noexcept
 
 	inputType         = other.inputType;
 	inputButtons      = other.inputButtons;
-	inputAxis         = other.inputAxis;
-	inputRegion       = std::move(other.inputRegion);
+	inputAxes         = other.inputAxes;
+	inputTouchRegion       = std::move(other.inputTouchRegion);
 	toggle            = other.toggle;
 	rapidFire         = other.rapidFire;
 	rapidFireInterval = other.rapidFireInterval;
@@ -183,7 +183,7 @@ void InputMapBase::release()
 	}
 }
 
-InputAxisOptions InputMapBase::getAxisOptions(Ds4Axis_t axis)
+InputAxisOptions InputMapBase::getAxisOptions(Ds4Axes_t axis)
 {
 	if (inputAxisOptions.empty())
 	{
@@ -206,8 +206,8 @@ bool InputMapBase::operator==(const InputMapBase& other) const
 {
 	return inputType == other.inputType
 	       && inputButtons == other.inputButtons
-	       && inputAxis == other.inputAxis
-	       && inputRegion == other.inputRegion
+	       && inputAxes == other.inputAxes
+	       && inputTouchRegion == other.inputTouchRegion
 	       && toggle == other.toggle
 	       && rapidFire == other.rapidFire
 	       && rapidFireInterval == other.rapidFireInterval
@@ -235,16 +235,16 @@ void InputMapBase::readJson(const nlohmann::json& json)
 		inputButtons = inputButtons_;
 	}
 
-	if (json.find("inputAxis") != json.end())
+	if (json.find("inputAxes") != json.end())
 	{
-		Ds4Axis_t inputAxis_;
-		ENUM_DESERIALIZE_FLAGS(Ds4Axis)(json["inputAxis"].get<std::string>(), inputAxis_);
-		inputAxis = inputAxis_;
+		Ds4Axes_t inputAxis_;
+		ENUM_DESERIALIZE_FLAGS(Ds4Axes)(json["inputAxes"].get<std::string>(), inputAxis_);
+		inputAxes = inputAxis_;
 	}
 
-	if (json.find("inputRegion") != json.end())
+	if (json.find("inputTouchRegion") != json.end())
 	{
-		inputRegion = json["inputRegion"];
+		inputTouchRegion = json["inputTouchRegion"];
 	}
 
 	if (json.find("toggle") != json.end())
@@ -268,8 +268,8 @@ void InputMapBase::readJson(const nlohmann::json& json)
 
 		for (const auto& pair : inputAxisOptions_)
 		{
-			Ds4Axis_t flags;
-			ENUM_DESERIALIZE_FLAGS(Ds4Axis)(pair.key(), flags);
+			Ds4Axes_t flags;
+			ENUM_DESERIALIZE_FLAGS(Ds4Axes)(pair.key(), flags);
 			inputAxisOptions[flags] = fromJson<InputAxisOptions>(pair.value());
 		}
 	}
@@ -284,12 +284,15 @@ void InputMapBase::writeJson(nlohmann::json& json) const
 		json["inputButtons"] = ENUM_SERIALIZE_FLAGS(Ds4Buttons)(inputButtons.value()).c_str();
 	}
 
-	if (inputAxis.has_value())
+	if (inputAxes.has_value())
 	{
-		json["inputAxis"] = ENUM_SERIALIZE_FLAGS(Ds4Axis)(inputAxis.value()).c_str();
+		json["inputAxes"] = ENUM_SERIALIZE_FLAGS(Ds4Axes)(inputAxes.value()).c_str();
 	}
 
-	json["inputRegion"] = inputRegion.c_str();
+	if (inputTouchRegion.length())
+	{
+		json["inputTouchRegion"] = inputTouchRegion.c_str();
+	}
 
 	if (toggle.has_value())
 	{
@@ -310,7 +313,7 @@ void InputMapBase::writeJson(nlohmann::json& json) const
 
 	for (const auto& pair : inputAxisOptions)
 	{
-		auto key = ENUM_SERIALIZE_FLAGS(Ds4Axis)(pair.first);
+		auto key = ENUM_SERIALIZE_FLAGS(Ds4Axes)(pair.first);
 		inputAxisOptions_[key] = pair.second.toJson();
 	}
 
@@ -322,7 +325,7 @@ InputModifier::InputModifier(InputType_t type, Ds4Buttons::T buttons)
 {
 }
 
-InputModifier::InputModifier(InputType_t type, Ds4Axis::T axis)
+InputModifier::InputModifier(InputType_t type, Ds4Axes::T axis)
 	: InputMapBase(type, axis)
 {
 }

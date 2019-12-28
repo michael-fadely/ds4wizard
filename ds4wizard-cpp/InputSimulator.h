@@ -1,6 +1,8 @@
 #pragma once
 
-#include <deque>
+#include <map>
+#include <unordered_map>
+#include <unordered_set>
 #include <functional>
 
 #include "KeyboardSimulator.h"
@@ -10,6 +12,7 @@
 #include "InputMap.h"
 #include "XInputGamepad.h"
 #include "ViGEmTarget.h"
+#include "MapCache.h"
 
 class Ds4Device;
 
@@ -21,15 +24,15 @@ class InputSimulator
 	static constexpr Ds4Buttons_t touchMask = Ds4Buttons::touch1 | Ds4Buttons::touch2;
 
 	Ds4Device* parent = nullptr;
-	DeviceProfile* profile = nullptr;
 
 	KeyboardSimulator keyboard;
 	MouseSimulator mouse;
 
-	/** \brief Bindings affected by modifier sets. */
-	std::deque<InputMap*> modifier_bindings; // TODO: OPTIMIZE !!!
-	/** \brief Cache for touch regions. */
-	std::deque<Ds4TouchRegion*> touchRegions;
+	Ds4TouchRegionCache touchRegions;
+
+	MapCacheCollection<InputMap> maps;
+	MapCacheCollection<InputModifier> modifiers;
+	std::unordered_map<InputModifier*, MapCacheCollection<InputMap>> modifierMaps;
 
 	int realXInputIndex = -1;
 	XInputGamepad xinputPad {};

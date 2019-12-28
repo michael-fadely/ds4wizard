@@ -260,7 +260,7 @@ struct Ds4Buttons
 ENUM_FLAGS(Ds4Buttons);
 ENUM_VALUES(Ds4Buttons, 20);
 
-struct Ds4Axis
+struct Ds4Axes
 {
 	enum T : uint32_t
 	{
@@ -279,9 +279,9 @@ struct Ds4Axis
 	};
 };
 
-using Ds4Axis_t = uint32_t;
-ENUM_FLAGS(Ds4Axis);
-ENUM_VALUES(Ds4Axis, 12);
+using Ds4Axes_t = uint32_t;
+ENUM_FLAGS(Ds4Axes);
+ENUM_VALUES(Ds4Axes, 12);
 
 struct Ds4Extensions
 {

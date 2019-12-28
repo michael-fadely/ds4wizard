@@ -529,12 +529,12 @@ void Ds4Device::run()
 		}
 	}
 
-	const float lx = input.getAxis(Ds4Axis::leftStickX, std::nullopt);
-	const float ly = input.getAxis(Ds4Axis::leftStickY, std::nullopt);
+	const float lx = input.getAxis(Ds4Axes::leftStickX, std::nullopt);
+	const float ly = input.getAxis(Ds4Axes::leftStickY, std::nullopt);
 	const float ls = std::sqrt(lx * lx + ly * ly);
 
-	const float rx = input.getAxis(Ds4Axis::rightStickX, std::nullopt);
-	const float ry = input.getAxis(Ds4Axis::rightStickY, std::nullopt);
+	const float rx = input.getAxis(Ds4Axes::rightStickX, std::nullopt);
+	const float ry = input.getAxis(Ds4Axes::rightStickY, std::nullopt);
 	const float rs = std::sqrt(rx * rx + ry * ry);
 
 	// TODO: gyro/accel - definitely needs to be configurable

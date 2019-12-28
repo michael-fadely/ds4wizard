@@ -1,5 +1,6 @@
 #pragma once
 
+#include <map>
 #include <unordered_map>
 
 #include <enum.h>
@@ -10,6 +11,7 @@
 #include "AxisOptions.h"
 #include "JsonData.h"
 #include "Trackball.h"
+#include "circular_buffer.h"
 
 // TODO: TrackPad - basically always auto-centering stick
 // TODO: Slider (maybe just "cursor", with toggle-able X and Y axes?)
@@ -27,39 +29,19 @@ BETTER_ENUM(Ds4TouchRegionType, int,
             stickAutoCenter,
             trackball)
 
-template <typename T, size_t n>
-struct circular_buffer
-{
-	std::array<T, n> points;
+class Ds4TouchRegion;
 
-	size_t l = n - 1;
-	size_t i = 0;
+/**
+ * \brief An explicitly-ordered collection of \c Ds4TouchRegion
+ * \sa Ds4TouchRegion
+ */
+using Ds4TouchRegionCollection = std::map<std::string, Ds4TouchRegion>;
 
-	void insert(T value)
-	{
-		l = i;
-		points[i++] = value;
-		i %= n;
-	}
-
-	void fill(T value)
-	{
-		for (auto& p : points)
-		{
-			p = value;
-		}
-	}
-
-	[[nodiscard]] T newest() const
-	{
-		return points[i - 1];
-	}
-
-	[[nodiscard]] T oldest() const
-	{
-		return points[i];
-	}
-};
+/**
+ * \brief An explicitly-ordered collection of \c Ds4TouchRegion* as a caching mechanism.
+ * \sa Ds4TouchRegion, Ds4TouchRegionCollection
+ */
+using Ds4TouchRegionCache = std::map<std::string, Ds4TouchRegion*>;
 
 /**
  * \brief A user-defined \c Ds4Device touch region.
