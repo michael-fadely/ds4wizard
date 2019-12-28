@@ -184,7 +184,8 @@ public:
 	 * \param release Release callback.
 	 */
 	void updatePressedStateImpl(InputMapBase& instance, const std::function<void()>& press, const std::function<void()>& release);
-	
+	void updateActiveModifiers(InputModifier& modifier);
+
 	/**
 	 * \brief Updates the pressed state of a modifier set and its managed child bindings.
 	 * \param modifier The modifier to update.
@@ -202,7 +203,8 @@ public:
 	 * \param modifier The parent modifier set, if any.
 	 */
 	bool updatePressedState(InputMap& map, InputModifier* modifier);
-	
+	void updateActiveMaps(InputMap& map);
+
 	/**
 	 * \brief
 	 * Root level method for updating input mappings and simulating inputs.

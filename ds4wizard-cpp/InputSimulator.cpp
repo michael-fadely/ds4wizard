@@ -852,6 +852,18 @@ void InputSimulator::updatePressedStateImpl(InputMapBase& instance, const std::f
 	}
 }
 
+void InputSimulator::updateActiveModifiers(InputModifier& modifier)
+{
+	if (modifier.isActive())
+	{
+		activeModifiers.insert(&modifier);
+	}
+	else
+	{
+		activeModifiers.erase(&modifier);
+	}
+}
+
 bool InputSimulator::updateModifier(InputModifier& modifier)
 {
 	const PressedState oldPressedState = modifier.pressedState;
@@ -872,14 +884,7 @@ bool InputSimulator::updateModifier(InputModifier& modifier)
 	// add to or remove from the collection of active modifiers for later update.
 	if (modifier.isActive() != wasActive)
 	{
-		if (modifier.isActive())
-		{
-			activeModifiers.insert(&modifier);
-		}
-		else
-		{
-			activeModifiers.erase(&modifier);
-		}
+		updateActiveModifiers(modifier);
 	}
 
 	if (!modifier.bindings.empty())
@@ -913,44 +918,57 @@ bool InputSimulator::updatePressedState(InputMap& map, InputModifier* modifier)
 	// add to or remove from the collection of active modifiers for later update.
 	if (map.isActive() != wasActive)
 	{
-		if (map.isActive())
-		{
-			activeMaps.insert(&map);
-		}
-		else
-		{
-			activeMaps.erase(&map);
-		}
+		updateActiveMaps(map);
 	}
 
 	return oldPressedState != map.pressedState;
 }
 
+void InputSimulator::updateActiveMaps(InputMap& map)
+{
+	if (map.isActive())
+	{
+		activeMaps.insert(&map);
+	}
+	else
+	{
+		activeMaps.erase(&map);
+	}
+}
+
 bool InputSimulator::updateBindingState(InputMap& map, InputModifier* modifier)
 {
+	const PressedState oldPressedState = map.pressedState;
+	const bool wasActive = map.isActive();
+	
 	if (modifier != nullptr && map.toggle != true && !modifier->isActive())
 	{
-		const PressedState oldPressedState = map.pressedState;
-
 		map.release();
 		runMap(map, modifier); // TODO: too many layers; like an ogre
+
+		if (map.isActive() != wasActive)
+		{
+			updateActiveMaps(map);
+		}
 
 		return map.pressedState != oldPressedState;
 	}
 
 	if (map.inputType != InputType::touchRegion)
 	{
-		return updatePressedState(map, modifier);
+		bool result = updatePressedState(map, modifier);
+
+		runMap(map, modifier);
+
+		return result;
 	}
 
 	const auto it = touchRegions.find(map.inputTouchRegion);
+
 	if (it == touchRegions.end())
 	{
 		return false;
 	}
-
-	const PressedState oldPressedState = map.pressedState;
-	const bool wasActive = map.isActive();
 
 	if (map.touchDirection == Direction::none)
 	{
@@ -969,14 +987,7 @@ bool InputSimulator::updateBindingState(InputMap& map, InputModifier* modifier)
 	// add to or remove from the collection of active modifiers for later update.
 	if (map.isActive() != wasActive)
 	{
-		if (map.isActive())
-		{
-			activeMaps.insert(&map);
-		}
-		else
-		{
-			activeMaps.erase(&map);
-		}
+		updateActiveMaps(map);
 	}
 
 	return map.pressedState != oldPressedState;

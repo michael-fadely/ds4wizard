@@ -311,7 +311,7 @@ R"(
         }
       },
       "inputType": "axis",
-      "inputAxis": "leftStickY",
+      "inputAxes": "leftStickY",
       "inputAxisOptions": {
         "leftStickY": {
           "polarity": "positive"
@@ -330,7 +330,7 @@ R"(
         }
       },
       "inputType": "axis",
-      "inputAxis": "leftStickY",
+      "inputAxes": "leftStickY",
       "inputAxisOptions": {
         "leftStickY": {
           "polarity": "negative"
@@ -349,7 +349,7 @@ R"(
         }
       },
       "inputType": "axis",
-      "inputAxis": "leftStickX",
+      "inputAxes": "leftStickX",
       "inputAxisOptions": {
         "leftStickX": {
           "polarity": "positive"
@@ -368,7 +368,7 @@ R"(
         }
       },
       "inputType": "axis",
-      "inputAxis": "leftStickX",
+      "inputAxes": "leftStickX",
       "inputAxisOptions": {
         "leftStickX": {
           "polarity": "negative"
@@ -387,7 +387,7 @@ R"(
         }
       },
       "inputType": "axis",
-      "inputAxis": "rightStickY",
+      "inputAxes": "rightStickY",
       "inputAxisOptions": {
         "rightStickY": {
           "polarity": "positive"
@@ -406,7 +406,7 @@ R"(
         }
       },
       "inputType": "axis",
-      "inputAxis": "rightStickY",
+      "inputAxes": "rightStickY",
       "inputAxisOptions": {
         "rightStickY": {
           "polarity": "negative"
@@ -425,7 +425,7 @@ R"(
         }
       },
       "inputType": "axis",
-      "inputAxis": "rightStickX",
+      "inputAxes": "rightStickX",
       "inputAxisOptions": {
         "rightStickX": {
           "polarity": "positive"
@@ -444,7 +444,7 @@ R"(
         }
       },
       "inputType": "axis",
-      "inputAxis": "rightStickX",
+      "inputAxes": "rightStickX",
       "inputAxisOptions": {
         "rightStickX": {
           "polarity": "negative"
@@ -458,7 +458,7 @@ R"(
         "axes": "leftTrigger"
       },
       "inputType": "axis",
-      "inputAxis": "leftTrigger"
+      "inputAxes": "leftTrigger"
     },
     {
       "simulatorType": "input",
@@ -467,7 +467,7 @@ R"(
         "axes": "rightTrigger"
       },
       "inputType": "axis",
-      "inputAxis": "rightTrigger"
+      "inputAxes": "rightTrigger"
     }
   ],
   "modifiers": [
