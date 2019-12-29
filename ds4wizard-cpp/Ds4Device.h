@@ -28,8 +28,9 @@ class Ds4Device
 	bool running = false;
 	std::recursive_mutex sync_lock;
 
-	// Read-Only
 	Stopwatch idleTime {};
+	Stopwatch writeTime {};
+	const std::chrono::milliseconds writeFrequency = std::chrono::milliseconds(4);
 
 	inline static const Ds4Color fadeColor {};
 

@@ -100,19 +100,7 @@ TrackballSimulator::TrackballState TrackballSimulator::applyDirectionalForce(Vec
 		return TrackballState::stopped;
 	}
 
-#if 0
-	// slow first to help bias towards the desired direction
-	slow(deltaTime);
-
-	const Vector2 currentVelocity = direction_ * currentSpeed_;
-	const Vector2 targetVelocity = direction * (factor * settings.ballSpeed * settings.touchFriction);
-
-	// calculate the combined normalized direction
-	direction_ = (currentVelocity + targetVelocity).normalized();
-#else
 	direction_ = targetDirection;
-#endif
-
 	accelerate(deltaTime, factor);
 	return TrackballState::accelerating;
 }
@@ -121,8 +109,6 @@ void TrackballSimulator::update(float deltaTime)
 {
 	doWork(deltaTime, Ds4Buttons::touch1);
 	//doWork(deltaTime, Ds4Buttons::touch2);
-
-	qDebug() << "delta time: " << deltaTime;
 }
 
 void TrackballSimulator::accelerate(float deltaTime, float factor)

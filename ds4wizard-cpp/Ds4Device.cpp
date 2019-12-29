@@ -416,6 +416,11 @@ void Ds4Device::setupUsbOutputBuffer() const
 
 void Ds4Device::writeUsbAsync()
 {
+	if (writeTime.elapsed() < writeFrequency)
+	{
+		return;
+	}
+
 	if (usbDevice->checkPendingWrite())
 	{
 		return;
@@ -439,6 +444,11 @@ void Ds4Device::writeUsbAsync()
 
 void Ds4Device::writeBluetooth()
 {
+	if (writeTime.elapsed() < writeFrequency)
+	{
+		return;
+	}
+
 	constexpr auto bt_output_offset = 6;
 
 	const auto span = gsl::make_span(&bluetoothDevice->output_buffer[bt_output_offset],
@@ -616,6 +626,7 @@ void Ds4Device::controllerThread()
 	simulator.start();
 	readLatency.start();
 	idleTime.start();
+	writeTime.start();
 
 	while (connected() && running)
 	{

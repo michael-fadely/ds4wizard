@@ -621,50 +621,9 @@ void InputSimulator::runAction(ActionType action) const
 	}
 }
 
-/*
- * TODO: consider replacement of runMaps and runPersistent - see below
- *
- * think of this like a physics simulation.
- * a simulator must be capable of activation (running) and deactivation (sleeping).
- *
- * would solve a lot of problems for trackball emulation, such as:
- * - rumble
- * -- I want to rumble for x amount of time on y motor, but if
- *    something else is trying to rumble? I want to select the max of
- *    the two requests, but they have to be able to *stop* eventually!
- * -- I need to decelerate the ball over time as well
- * --- but what about a persistent touched state? it would need to store that, OR the touch region needs to always be in the queue first
- *
- * ISimulator interface
- * - active state (active, inactive)
- * -- would handle "persistent" mappings
- * -- would allow manual re-queue prevention if still active
- * - method: update(float deltaTime)
- * - method: activate() ???
- * - allows for non-input binding persistent state elements (emulated trackball, for instance!)
- *
- * how do you activate inactive maps? (X was pressed! BECOME ALIVE!)
- * - build tree with lookup by source button, axis, touch region inputs (incl. mappings w/ modifiers)
- * -- how? idk
- *
- * inactive - basic flow of execution:
- * - on load, immediately detect all on-by-default mappings and mark active
- * -- I didn't even think of that! Did I even make that possible? Axes???
- * - upon activation, place in active simulator queue
- * -- remove from "inactive queue"?
- * -- should it be "updated" immediately upon activation? should we defer
- *    adding to the active queue until after the whole queue has been checked?
- *
- * active - flow of execution:
- * - iterate over active simulators
- * - run `update(deltaTime)` and check state
- * - if inactive, immediately remove from active queue
- * -- place into "inactive" queue?
- */
-
 void InputSimulator::updateDeltaTime()
 {
-	deltaTime = static_cast<float>(duration_cast<milliseconds>(deltaStopwatch.elapsed()).count());
+	deltaTime = static_cast<float>(duration_cast<milliseconds>(deltaStopwatch.elapsed()).count()) / deltaTimeTarget;
 	deltaStopwatch.start();
 }
 
@@ -976,22 +935,9 @@ void InputSimulator::updatePressedStateImpl(InputMapBase& instance, const std::f
 	}
 }
 
-void InputSimulator::updateActiveModifiers(InputModifier& modifier)
-{
-	if (modifier.isActive())
-	{
-		activeModifiers.insert(&modifier);
-	}
-	else
-	{
-		activeModifiers.erase(&modifier);
-	}
-}
-
 bool InputSimulator::updateModifier(InputModifier& modifier)
 {
 	const PressedState oldPressedState = modifier.pressedState;
-	const bool wasActive = modifier.isActive();
 
 	const auto press = [&]() -> void
 	{
@@ -1004,12 +950,6 @@ bool InputSimulator::updateModifier(InputModifier& modifier)
 	};
 
 	updatePressedStateImpl(modifier, press, release);
-
-	// add to or remove from the collection of active modifiers for later update.
-	if (modifier.isActive() != wasActive)
-	{
-		updateActiveModifiers(modifier);
-	}
 
 	if (!modifier.bindings.empty())
 	{
@@ -1025,7 +965,6 @@ bool InputSimulator::updateModifier(InputModifier& modifier)
 bool InputSimulator::updatePressedState(InputMap& map, InputModifier* modifier)
 {
 	const PressedState oldPressedState = map.pressedState;
-	const bool wasActive = map.isActive();
 
 	const auto press = [&]() -> void
 	{
@@ -1039,42 +978,17 @@ bool InputSimulator::updatePressedState(InputMap& map, InputModifier* modifier)
 
 	updatePressedStateImpl(map, press, release);
 
-	// add to or remove from the collection of active modifiers for later update.
-	if (map.isActive() != wasActive)
-	{
-		updateActiveMaps(map);
-	}
-
 	return oldPressedState != map.pressedState;
-}
-
-void InputSimulator::updateActiveMaps(InputMap& map)
-{
-	if (map.isActive())
-	{
-		activeMaps.insert(&map);
-	}
-	else
-	{
-		activeMaps.erase(&map);
-	}
 }
 
 bool InputSimulator::updateBindingState(InputMap& map, InputModifier* modifier)
 {
 	const PressedState oldPressedState = map.pressedState;
-	const bool wasActive = map.isActive();
 	
 	if (modifier != nullptr && map.toggle != true && !modifier->isActive())
 	{
 		map.release();
 		runMap(map, modifier);
-
-		if (map.isActive() != wasActive)
-		{
-			updateActiveMaps(map);
-		}
-
 		return map.pressedState != oldPressedState;
 	}
 
@@ -1107,13 +1021,6 @@ bool InputSimulator::updateBindingState(InputMap& map, InputModifier* modifier)
 	}
 
 	runMap(map, modifier);
-
-	// add to or remove from the collection of active modifiers for later update.
-	if (map.isActive() != wasActive)
-	{
-		updateActiveMaps(map);
-	}
-
 	return map.pressedState != oldPressedState;
 }
 

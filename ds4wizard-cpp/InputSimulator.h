@@ -37,21 +37,14 @@ class InputSimulator
 	MapCacheCollection<InputModifier> modifiers;
 	MapCacheCollection<InputMap> bindings;
 
-	std::unordered_set<InputMap*> activeMaps;
-	std::unordered_set<InputModifier*> activeModifiers;
-
 	int realXInputIndex = -1;
 	XInputGamepad xinputPad {};
 	XInputGamepad xinputLast {};
 	std::shared_ptr<vigem::XInputTarget> xinputTarget;
 	XInputAxis_t simulatedXInputAxis = 0;
 
-	// Delta time (for things like mouse movement).
-	// Assumes 1000 Hz virtual polling rate.
 	Stopwatch deltaStopwatch {};
-
-	// Delta time (for things like mouse movement).
-	// Assumes 1000 Hz virtual polling rate.
+	const float deltaTimeTarget = 1000.0f / 1.0f;
 	float deltaTime = 1.0f;
 
 	std::unique_ptr<XInputRumbleSimulator> xinputRumbleSimulator;
@@ -195,7 +188,6 @@ public:
 	 * \param release Release callback.
 	 */
 	void updatePressedStateImpl(InputMapBase& instance, const std::function<void()>& press, const std::function<void()>& release);
-	void updateActiveModifiers(InputModifier& modifier);
 
 	/**
 	 * \brief Updates the pressed state of a modifier set and its managed child bindings.
@@ -214,7 +206,6 @@ public:
 	 * \param modifier The parent modifier set, if any.
 	 */
 	bool updatePressedState(InputMap& map, InputModifier* modifier);
-	void updateActiveMaps(InputMap& map);
 
 	/**
 	 * \brief
