@@ -12,6 +12,8 @@
 #include "XInputGamepad.h"
 #include "ViGEmTarget.h"
 #include "MapCache.h"
+#include "ISimulator.h"
+#include "XInputRumbleSimulator.h"
 
 class Ds4Device;
 
@@ -40,10 +42,8 @@ class InputSimulator
 	int realXInputIndex = -1;
 	XInputGamepad xinputPad {};
 	XInputGamepad xinputLast {};
-	XINPUT_VIBRATION xinputVibration {};
-	std::unique_ptr<vigem::XInputTarget> xinputTarget;
+	std::shared_ptr<vigem::XInputTarget> xinputTarget;
 	XInputAxis_t simulatedXInputAxis = 0;
-	EventToken xinputNotification;
 
 	// Delta time (for things like mouse movement).
 	// Assumes 1000 Hz virtual polling rate.
@@ -52,6 +52,9 @@ class InputSimulator
 	// Delta time (for things like mouse movement).
 	// Assumes 1000 Hz virtual polling rate.
 	float deltaTime = 1.0f;
+
+	std::unique_ptr<XInputRumbleSimulator> xinputRumbleSimulator;
+	std::unordered_set<ISimulator*> simulators;
 
 public:
 	/** \brief Event raised when a handle to a virtual XInput device cannot be acquired. */
@@ -151,6 +154,12 @@ public:
 	void updateBindings();
 	void reset();
 
+	void setRumble(uint8_t leftMotor, uint8_t rightMotor);
+
+	bool addSimulator(ISimulator* simulator);
+	bool removeSimulator(ISimulator* simulator);
+	void runSimulators();
+
 	/**
 	 * \brief Runs all input maps managed by this instance.
 	 */
@@ -219,11 +228,6 @@ public:
 	 */
 	bool updateBindingState(InputMap& map, InputModifier* modifier);
 	
-	/**
-	 * \brief Polls information from emulation endpoints (e.g XInput) if necessary.
-	 */
-	void updateEmulators() const;
-
 private:
 	/**
 	 * \brief Connects a virtual XInput device to the system.

@@ -488,7 +488,7 @@ void Ds4Device::run()
 
 	dataReceived = false;
 
-	simulator.updateEmulators();
+	// UNDONE simulator.updateEmulators();
 
 	if (useUsb)
 	{

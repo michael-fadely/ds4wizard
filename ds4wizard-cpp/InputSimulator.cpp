@@ -5,6 +5,7 @@
 
 #include "Ds4Device.h"
 #include "InputSimulator.h"
+#include "XInputRumbleSimulator.h"
 
 using namespace std::chrono;
 
@@ -330,6 +331,13 @@ void InputSimulator::runMap(InputMap& m, InputModifier* modifier)
 
 void InputSimulator::applyProfile(DeviceProfile* profile)
 {
+	for (auto& simulator : simulators)
+	{
+		simulator->deactivate(1.0f);
+	}
+
+	simulators.clear();
+
 	touchRegions.clear();
 	sortableTouchRegions.clear();
 
@@ -359,11 +367,16 @@ void InputSimulator::applyProfile(DeviceProfile* profile)
 		{
 			xinputDisconnect();
 		}
+		else
+		{
+			addSimulator(xinputRumbleSimulator.get());
+		}
 	}
 	else
 	{
 		xinputDisconnect();
 	}
+
 }
 
 PressedState InputSimulator::handleTouchToggle(InputMap& m, InputModifier* modifier, const Pressable& pressable)
@@ -666,12 +679,77 @@ void InputSimulator::updateBindings()
 
 void InputSimulator::reset()
 {
+	parent->output.leftMotor  = 0;
+	parent->output.rightMotor = 0;
+
 	bindings.reset();
 	modifiers.reset();
 
 	updateDeltaTime();
 	
 	simulatedXInputAxis = 0;
+}
+
+void InputSimulator::setRumble(uint8_t leftMotor, uint8_t rightMotor)
+{
+	parent->output.leftMotor  = std::max(leftMotor, parent->output.leftMotor);
+	parent->output.rightMotor = std::max(rightMotor, parent->output.rightMotor);
+}
+
+bool InputSimulator::addSimulator(ISimulator* simulator)
+{
+	if (simulator == nullptr)
+	{
+		return false;
+	}
+
+	auto it = simulators.find(simulator);
+
+	if (it != simulators.end())
+	{
+		return false;
+	}
+
+	simulators.insert(simulator);
+	simulator->activate(deltaTime);
+	return true;
+}
+
+bool InputSimulator::removeSimulator(ISimulator* simulator)
+{
+	if (simulator == nullptr)
+	{
+		return false;
+	}
+
+	auto it = simulators.find(simulator);
+
+	if (it == simulators.end())
+	{
+		return false;
+	}
+
+	simulators.erase(it);
+	return true;
+}
+
+void InputSimulator::runSimulators()
+{
+	for (auto it = simulators.begin(); it != simulators.end();)
+	{
+		ISimulator* ptr = *it;
+		ptr->update(deltaTime);
+
+		if (ptr->state == SimulatorState::inactive)
+		{
+			ptr->deactivate(deltaTime);
+			it = simulators.erase(it);
+		}
+		else
+		{
+			++it;
+		}
+	}
 }
 
 void InputSimulator::runMaps()
@@ -681,6 +759,8 @@ void InputSimulator::runMaps()
 	updateTouchRegions();
 	updateModifiers();
 	updateBindings();
+
+	runSimulators();
 
 	if (parent->profile.useXInput && realXInputIndex >= 0 && xinputPad != xinputLast)
 	{
@@ -708,6 +788,8 @@ void InputSimulator::runPersistent()
 			updateBindingState(*map, nullptr);
 		}
 	}
+
+	runSimulators();
 }
 
 void InputSimulator::updateTouchRegions()
@@ -998,17 +1080,6 @@ bool InputSimulator::updateBindingState(InputMap& map, InputModifier* modifier)
 	return map.pressedState != oldPressedState;
 }
 
-void InputSimulator::updateEmulators() const
-{
-	if (realXInputIndex < 0)
-	{
-		return;
-	}
-
-	parent->output.leftMotor  = static_cast<uint8_t>(xinputVibration.wLeftMotorSpeed >> 8);
-	parent->output.rightMotor = static_cast<uint8_t>(xinputVibration.wRightMotorSpeed >> 8);
-}
-
 bool InputSimulator::xinputConnect()
 {
 	if (!xinputDeviceOpen())
@@ -1081,14 +1152,11 @@ bool InputSimulator::xinputDeviceOpen()
 
 	if (xinputTarget == nullptr)
 	{
-		xinputTarget = std::make_unique<vigem::XInputTarget>(&Program::driver);
+		xinputTarget = std::make_shared<vigem::XInputTarget>(&Program::driver);
 
-		xinputNotification = xinputTarget->notification.add(
-		[this](auto sender, auto large, auto small, auto led) -> void
-		{
-			this->xinputVibration.wLeftMotorSpeed  = (large << 8) | large;
-			this->xinputVibration.wRightMotorSpeed = (small << 8) | small;
-		});
+		xinputRumbleSimulator = std::make_unique<XInputRumbleSimulator>(this);
+		xinputRumbleSimulator->xinputTarget = xinputTarget;
+
 	}
 
 	return true;
@@ -1096,6 +1164,12 @@ bool InputSimulator::xinputDeviceOpen()
 
 void InputSimulator::xinputDeviceClose()
 {
+	if (xinputRumbleSimulator)
+	{
+		removeSimulator(xinputRumbleSimulator.get());
+		xinputRumbleSimulator = nullptr;
+	}
+
 	if (xinputTarget)
 	{
 		xinputTarget->disconnect();

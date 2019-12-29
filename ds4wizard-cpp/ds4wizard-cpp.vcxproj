@@ -171,6 +171,7 @@
     <ClCompile Include="enums.cpp" />
     <ClCompile Include="InputMap.cpp" />
     <ClCompile Include="InputSimulator.cpp" />
+    <ClCompile Include="ISimulator.cpp" />
     <ClCompile Include="KeyboardSimulator.cpp" />
     <ClCompile Include="Latency.cpp" />
     <ClCompile Include="Logger.cpp" />
@@ -202,6 +203,7 @@
     <ClCompile Include="ViGEmDriver.cpp" />
     <ClCompile Include="ViGEmTarget.cpp" />
     <ClCompile Include="XInputGamepad.cpp" />
+    <ClCompile Include="XInputRumbleSimulator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="average.h" />
@@ -212,6 +214,7 @@
     <ClInclude Include="DeviceIdleOptions.h" />
     <ClInclude Include="DeviceProfile.h" />
     <ClInclude Include="DeviceProfileCache.h" />
+    <ClInclude Include="XInputRumbleSimulator.h" />
     <QtMoc Include="DevicePropertiesDialog.h">
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\..\GSL\include;.\..\libhid;.\..\libdevicetoggle;.\..\better-enums;.\..\json\include;.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets</IncludePath>
       <Define Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">_CRT_SECURE_NO_WARNINGS;NOMINMAX;WIN32_LEAN_AND_MEAN;UNICODE;_UNICODE;WIN32;WIN64;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB</Define>
@@ -248,6 +251,7 @@
     <ClInclude Include="gmath.h" />
     <ClInclude Include="InputMap.h" />
     <ClInclude Include="InputSimulator.h" />
+    <ClInclude Include="ISimulator.h" />
     <ClInclude Include="JsonData.h" />
     <ClInclude Include="KeyboardSimulator.h" />
     <ClInclude Include="Latency.h" />

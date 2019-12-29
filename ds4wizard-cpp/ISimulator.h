@@ -1,5 +1,7 @@
 #pragma once
 
+class InputSimulator;
+
 enum class SimulatorState
 {
 	inactive,
@@ -9,8 +11,11 @@ enum class SimulatorState
 class ISimulator
 {
 public:
-	virtual ~ISimulator() = default;
 	SimulatorState state;
+	InputSimulator* parent;
+
+	explicit ISimulator(InputSimulator* parent);
+	virtual ~ISimulator() = default;
 
 	virtual void activate(float deltaTime);
 	virtual void update(float deltaTime) = 0;
