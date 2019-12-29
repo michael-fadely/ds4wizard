@@ -66,11 +66,3 @@ void RumbleSequence::add(const RumbleSequenceElement& element)
 {
 	sequence.push(element);
 }
-
-void RumbleSequence::onActivate(float deltaTime)
-{
-}
-
-void RumbleSequence::onDeactivate(float deltaTime)
-{
-}

@@ -488,8 +488,6 @@ void Ds4Device::run()
 
 	dataReceived = false;
 
-	// UNDONE simulator.updateEmulators();
-
 	if (useUsb)
 	{
 		writeUsbAsync();

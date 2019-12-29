@@ -69,8 +69,9 @@ void TrackballSettings::writeJson(nlohmann::json& json) const
 	json["ballSpeed"]      = ballSpeed;
 }
 
-TrackballSimulator::TrackballSimulator(const TrackballSettings& settings)
-	: settings(settings)
+TrackballSimulator::TrackballSimulator(const TrackballSettings& settings, InputSimulator* parent)
+	: ISimulator(parent),
+	  settings(settings)
 {
 }
 
@@ -102,19 +103,17 @@ TrackballSimulator::TrackballState TrackballSimulator::applyDirectionalForce(Vec
 	direction_ = targetDirection;
 #endif
 
-	accelerate(factor, deltaTime);
+	accelerate(deltaTime, factor);
 
 	return TrackballState::accelerating;
 }
 
-TrackballSimulator::TrackballState TrackballSimulator::update(float deltaTime)
+void TrackballSimulator::update(float deltaTime)
 {
 	decelerate(deltaTime);
-
-	return rolling() ? TrackballState::decelerating : TrackballState::stopped;
 }
 
-void TrackballSimulator::accelerate(float factor, float deltaTime)
+void TrackballSimulator::accelerate(float deltaTime, float factor)
 {
 	currentSpeed_ = std::min(currentSpeed_ + (settings.ballSpeed * settings.touchFriction * factor * deltaTime), settings.ballSpeed);
 }

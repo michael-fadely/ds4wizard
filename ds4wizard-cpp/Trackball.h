@@ -1,9 +1,10 @@
 #pragma once
 #include "Vector2.h"
+#include "ISimulator.h"
 
 struct TrackballVibration : JsonData
 {
-	bool enabled   = false;
+	bool  enabled  = false;
 	float factor   = 1.0f;
 	float deadZone = 0.0f;
 
@@ -31,7 +32,7 @@ struct TrackballSettings : JsonData
 	void writeJson(nlohmann::json& json) const override;
 };
 
-class TrackballSimulator
+class TrackballSimulator : ISimulator
 {
 	Vector2 direction_ {};
 	float currentSpeed_ = 0.0f;
@@ -39,7 +40,7 @@ class TrackballSimulator
 public:
 	TrackballSettings settings;
 
-	explicit TrackballSimulator(const TrackballSettings& settings);
+	TrackballSimulator(const TrackballSettings& settings, InputSimulator* parent);
 
 	[[nodiscard]] Vector2 direction() const { return direction_; }
 	[[nodiscard]] float currentSpeed() const { return currentSpeed_; }
@@ -76,11 +77,11 @@ public:
 	 * \param deltaTime Delta time to be used in acceleration and deceleration.
 	 * \return A \c TrackballState indicating the state of the ball after the call.
 	 */
-	TrackballState update(float deltaTime);
+	void update(float deltaTime) override;
 
 private:
 	/** \brief Accelerate the ball! */
-	void accelerate(float factor, float deltaTime);
+	void accelerate(float deltaTime, float factor);
 	/** \brief Assume ball is being touched and slow the ball to a stop. */
 	void slow(float deltaTime);
 	/** \brief Allow the ball to naturally decelerate with nothing but friction. */

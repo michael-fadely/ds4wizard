@@ -32,10 +32,5 @@ public:
 	explicit RumbleSequence(InputSimulator* parent);
 
 	void update(float deltaTime) override;
-
 	void add(const RumbleSequenceElement& element);
-
-private:
-	void onActivate(float deltaTime) override;
-	void onDeactivate(float deltaTime) override;
 };
