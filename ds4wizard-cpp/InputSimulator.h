@@ -14,6 +14,7 @@
 #include "MapCache.h"
 #include "ISimulator.h"
 #include "XInputRumbleSimulator.h"
+#include "RumbleSequence.h"
 
 class Ds4Device;
 
@@ -55,6 +56,7 @@ class InputSimulator
 
 	std::unique_ptr<XInputRumbleSimulator> xinputRumbleSimulator;
 	std::unordered_set<ISimulator*> simulators;
+	std::unique_ptr<RumbleSequence> rumbleSequence;
 
 public:
 	/** \brief Event raised when a handle to a virtual XInput device cannot be acquired. */

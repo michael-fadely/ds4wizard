@@ -6,6 +6,7 @@
 #include "Ds4Device.h"
 #include "InputSimulator.h"
 #include "XInputRumbleSimulator.h"
+#include "RumbleSequence.h"
 
 using namespace std::chrono;
 
@@ -377,6 +378,29 @@ void InputSimulator::applyProfile(DeviceProfile* profile)
 		xinputDisconnect();
 	}
 
+	this->rumbleSequence = std::make_unique<RumbleSequence>(this);
+
+	RumbleSequenceElement first = {
+		RumbleSequenceBlending::none,
+		125,
+		0,
+		255
+	};
+
+	RumbleSequenceElement second = {
+		RumbleSequenceBlending::none,
+		125,
+		0,
+		0
+	};
+
+	rumbleSequence->add(first);
+	rumbleSequence->add(second);
+
+	rumbleSequence->add(first);
+	rumbleSequence->add(second);
+
+	addSimulator(rumbleSequence.get());
 }
 
 PressedState InputSimulator::handleTouchToggle(InputMap& m, InputModifier* modifier, const Pressable& pressable)

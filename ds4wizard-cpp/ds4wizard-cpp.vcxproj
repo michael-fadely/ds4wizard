@@ -191,6 +191,7 @@
     <ClCompile Include="Pressable.cpp" />
     <ClCompile Include="ProfileEditorDialog.cpp" />
     <ClCompile Include="program.cpp" />
+    <ClCompile Include="RumbleSequence.cpp" />
     <ClCompile Include="Settings.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -214,6 +215,7 @@
     <ClInclude Include="DeviceIdleOptions.h" />
     <ClInclude Include="DeviceProfile.h" />
     <ClInclude Include="DeviceProfileCache.h" />
+    <ClInclude Include="RumbleSequence.h" />
     <ClInclude Include="XInputRumbleSimulator.h" />
     <QtMoc Include="DevicePropertiesDialog.h">
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\..\GSL\include;.\..\libhid;.\..\libdevicetoggle;.\..\better-enums;.\..\json\include;.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets</IncludePath>
