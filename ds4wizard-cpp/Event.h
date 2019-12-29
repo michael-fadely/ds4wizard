@@ -1,6 +1,6 @@
 #pragma once
 
-#include <deque>
+#include <unordered_map>
 #include <functional>
 #include <memory>
 
@@ -46,7 +46,10 @@ public:
 	 */
 	void remove(EventToken token)
 	{
-		callbacks.erase(std::remove(callbacks.begin(), callbacks.end(), token));
+		callbacks.erase(std::remove_if(callbacks.begin(), callbacks.end(), [token](auto ptr) -> bool
+		{
+			return ptr.lock() == token;
+		}));
 	}
 
 	/**
