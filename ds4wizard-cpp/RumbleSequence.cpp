@@ -21,7 +21,7 @@ void RumbleSequence::update(float deltaTime)
 	const auto elapsed = stopwatch.elapsed();
 
 	if (!currentElement.has_value() ||
-		elapsed >= milliseconds(currentElement->durationMilliseconds))
+	    elapsed >= milliseconds(currentElement->durationMilliseconds))
 	{
 		stopwatch.start();
 		currentElement = sequence.front();
@@ -65,4 +65,33 @@ void RumbleSequence::update(float deltaTime)
 void RumbleSequence::add(const RumbleSequenceElement& element)
 {
 	sequence.push(element);
+}
+
+RumbleTimer::RumbleTimer(InputSimulator* parent, Stopwatch::Duration duration, uint8_t left, uint8_t right)
+	: ISimulator(parent),
+	  duration(duration),
+	  left(left),
+	  right(right)
+{
+}
+
+void RumbleTimer::reset()
+{
+	stopwatch.start();
+}
+
+void RumbleTimer::update(float deltaTime)
+{
+	if (stopwatch.elapsed() >= duration)
+	{
+		deactivate(deltaTime);
+		return;
+	}
+
+	parent->setRumble(left, right);
+}
+
+void RumbleTimer::onActivate(float deltaTime)
+{
+	reset();
 }

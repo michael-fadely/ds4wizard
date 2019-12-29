@@ -32,6 +32,12 @@ ISimulator* Ds4TouchRegion::getSimulator(InputSimulator* parent)
 	return result;
 }
 
+void Ds4TouchRegion::clamp(Ds4Vector2& point)
+{
+	point.x = std::clamp(point.x, left, right);
+	point.y = std::clamp(point.y, top, bottom);
+}
+
 Ds4TouchRegion::Ds4TouchRegion() = default;
 
 Ds4TouchRegion::Ds4TouchRegion(Ds4TouchRegionType type, short left, short top, short right, short bottom, bool allowCrossOver)

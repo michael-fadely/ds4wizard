@@ -1,6 +1,7 @@
 #pragma once
 #include "Vector2.h"
 #include "ISimulator.h"
+#include "RumbleSequence.h"
 
 class Ds4TouchRegion;
 
@@ -39,6 +40,7 @@ class TrackballSimulator : public ISimulator
 	Vector2 direction_ {};
 	float currentSpeed_ = 0.0f;
 	Ds4TouchRegion* region;
+	std::shared_ptr<RumbleTimer> rumbleTimer;
 
 public:
 	TrackballSettings settings;

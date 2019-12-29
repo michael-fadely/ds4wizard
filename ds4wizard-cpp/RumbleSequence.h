@@ -34,3 +34,21 @@ public:
 	void update(float deltaTime) override;
 	void add(const RumbleSequenceElement& element);
 };
+
+class RumbleTimer : public ISimulator
+{
+	Stopwatch stopwatch;
+
+public:
+	RumbleTimer(InputSimulator* parent, Stopwatch::Duration duration,
+	            uint8_t left, uint8_t right);
+
+	Stopwatch::Duration duration;
+	uint8_t left;
+	uint8_t right;
+
+	void reset();
+
+	void update(float deltaTime) override;
+	void onActivate(float deltaTime) override;
+};

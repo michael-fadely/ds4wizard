@@ -113,6 +113,7 @@ public:
 	Pressable state2;
 
 	ISimulator* getSimulator(InputSimulator* parent);
+	void clamp(Ds4Vector2& point);
 
 	// TODO: toggle for multi-touch press
 

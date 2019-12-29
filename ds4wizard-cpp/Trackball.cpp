@@ -72,6 +72,7 @@ void TrackballSettings::writeJson(nlohmann::json& json) const
 TrackballSimulator::TrackballSimulator(const TrackballSettings& settings, Ds4TouchRegion* region, InputSimulator* parent)
 	: ISimulator(parent),
 	  region(region),
+	  rumbleTimer(std::make_shared<RumbleTimer>(parent, std::chrono::milliseconds(125), 0, 0)),
 	  settings(settings)
 {
 }
@@ -120,6 +121,8 @@ void TrackballSimulator::update(float deltaTime)
 {
 	doWork(deltaTime, Ds4Buttons::touch1);
 	//doWork(deltaTime, Ds4Buttons::touch2);
+
+	qDebug() << "delta time: " << deltaTime;
 }
 
 void TrackballSimulator::accelerate(float deltaTime, float factor)
@@ -142,7 +145,7 @@ void doStupidShit(const circular_buffer<Ds4TouchHistory, n>& points,
                 std::optional<Ds4TouchHistory>& newest, std::optional<Ds4TouchHistory>& oldest)
 {
 	newest = points.newest();
-	oldest = points.oldest();
+	oldest = newest;
 
 	// UNDONE: use this to calculate a flick threshold
 	
@@ -156,7 +159,6 @@ void doStupidShit(const circular_buffer<Ds4TouchHistory, n>& points,
 			break;
 		}
 	}
-	
 }
 
 void TrackballSimulator::doWork(float deltaTime, Ds4Buttons_t touchId)
@@ -177,8 +179,11 @@ void TrackballSimulator::doWork(float deltaTime, Ds4Buttons_t touchId)
 
 	if (newest.has_value() && oldest.has_value())
 	{
-		const auto& pa = newest->point;
-		const auto& pb = oldest->point;
+		auto pa = newest->point;
+		auto pb = oldest->point;
+
+		region->clamp(pa);
+		region->clamp(pb);
 
 		direction = {
 			static_cast<float>(pa.x - pb.x) / width,
@@ -189,7 +194,6 @@ void TrackballSimulator::doWork(float deltaTime, Ds4Buttons_t touchId)
 		direction.normalize();
 	}
 
-	float lastSpeed = currentSpeed();
 	TrackballState state;
 
 	if (region->isActive(touchId))
@@ -211,7 +215,9 @@ void TrackballSimulator::doWork(float deltaTime, Ds4Buttons_t touchId)
 	{
 		case TrackballState::slowing:
 			qDebug() << "slow";
-			parent->setRumble(left, 0);
+			rumbleTimer->left = left;
+			rumbleTimer->reset();
+			parent->addSimulator(rumbleTimer.get());
 			break;
 
 		case TrackballState::decelerating:
