@@ -69,8 +69,9 @@ void TrackballSettings::writeJson(nlohmann::json& json) const
 	json["ballSpeed"]      = ballSpeed;
 }
 
-TrackballSimulator::TrackballSimulator(const TrackballSettings& settings, InputSimulator* parent)
+TrackballSimulator::TrackballSimulator(const TrackballSettings& settings, Ds4TouchRegion* region, InputSimulator* parent)
 	: ISimulator(parent),
+	  region(region),
 	  settings(settings)
 {
 }
@@ -79,15 +80,23 @@ TrackballSimulator::TrackballSimulator(const TrackballSettings& settings, InputS
 
 bool TrackballSimulator::rolling() const
 {
-	return gmath::is_zero(currentSpeed());
+	return !gmath::is_zero(currentSpeed());
 }
 
 TrackballSimulator::TrackballState TrackballSimulator::applyDirectionalForce(Vector2 targetDirection, float factor, float deltaTime)
 {
 	if (gmath::is_zero(factor))
 	{
+		bool wasRolling = rolling();
+
 		slow(deltaTime);
-		return rolling() ? TrackballState::slowing : TrackballState::stopped;
+
+		if (wasRolling)
+		{
+			return TrackballState::slowing;
+		}
+
+		return TrackballState::stopped;
 	}
 
 #if 0
@@ -104,13 +113,13 @@ TrackballSimulator::TrackballState TrackballSimulator::applyDirectionalForce(Vec
 #endif
 
 	accelerate(deltaTime, factor);
-
 	return TrackballState::accelerating;
 }
 
 void TrackballSimulator::update(float deltaTime)
 {
-	decelerate(deltaTime);
+	doWork(deltaTime, Ds4Buttons::touch1);
+	//doWork(deltaTime, Ds4Buttons::touch2);
 }
 
 void TrackballSimulator::accelerate(float deltaTime, float factor)
@@ -126,4 +135,94 @@ void TrackballSimulator::slow(float deltaTime)
 void TrackballSimulator::decelerate(float deltaTime)
 {
 	currentSpeed_ = std::max(0.0f, currentSpeed_ - (settings.ballSpeed * settings.ballFriction * deltaTime));
+}
+
+template <size_t n>
+void doStupidShit(const circular_buffer<Ds4TouchHistory, n>& points,
+                std::optional<Ds4TouchHistory>& newest, std::optional<Ds4TouchHistory>& oldest)
+{
+	newest = points.newest();
+	oldest = points.oldest();
+
+	// UNDONE: use this to calculate a flick threshold
+	
+	static constexpr auto threshold = std::chrono::milliseconds(125);
+
+	for (size_t i = 0; i < points.count; i++)
+	{
+		if (newest->timestamp - points[i].timestamp < threshold)
+		{
+			oldest = points[i];
+			break;
+		}
+	}
+	
+}
+
+void TrackballSimulator::doWork(float deltaTime, Ds4Buttons_t touchId)
+{
+	auto width  = region->right - region->left;
+	auto height = region->bottom - region->top;
+
+	std::optional<Ds4TouchHistory> newest;
+	std::optional<Ds4TouchHistory> oldest;
+	
+	if (region->isActive(touchId))
+	{
+		doStupidShit(region->getPoints(touchId), newest, oldest);
+	}
+
+	Vector2 direction = Vector2::zero;
+	float force = 0.0f;
+
+	if (newest.has_value() && oldest.has_value())
+	{
+		const auto& pa = newest->point;
+		const auto& pb = oldest->point;
+
+		direction = {
+			static_cast<float>(pa.x - pb.x) / width,
+			static_cast<float>(pa.y - pb.y) / height
+		};
+
+		force = direction.length();
+		direction.normalize();
+	}
+
+	float lastSpeed = currentSpeed();
+	TrackballState state;
+
+	if (region->isActive(touchId))
+	{
+		state = applyDirectionalForce(direction, force, deltaTime);
+	}
+	else
+	{
+		decelerate(deltaTime);
+		state = rolling() ? TrackballState::decelerating : TrackballState::stopped;
+	}
+
+	const float f = currentSpeed_ / settings.ballSpeed;
+
+	uint8_t left  = static_cast<uint8_t>(std::clamp(f * settings.touchVibration.factor * 255.0f, 0.0f, 255.0f));
+	uint8_t right = static_cast<uint8_t>(std::clamp(f * settings.ballVibration.factor * 255.0f, 0.0f, 255.0f));
+
+	switch (state)
+	{
+		case TrackballState::slowing:
+			qDebug() << "slow";
+			parent->setRumble(left, 0);
+			break;
+
+		case TrackballState::decelerating:
+			parent->setRumble(0, right);
+			break;
+
+		case TrackballState::accelerating:
+			parent->setRumble(0, right);
+			break;
+
+		default:
+			break;
+	}
 }

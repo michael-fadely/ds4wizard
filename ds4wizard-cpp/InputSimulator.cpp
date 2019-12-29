@@ -290,7 +290,19 @@ void InputSimulator::runMap(InputMap& m, InputModifier* modifier)
 				}
 				else if (region->type == +Ds4TouchRegionType::trackball)
 				{
-					
+					Direction_t direction = m.touchDirection.value();
+
+					PressedState state = handleTouchToggle(m, modifier, region->state1);
+					float analog = region->getTouchDelta(Ds4Buttons::touch1, direction);
+
+					region->applyDeadZone(direction, analog);
+					applyMap(m, modifier, state, analog);
+
+					state  = handleTouchToggle(m, modifier, region->state2);
+					analog = region->getTouchDelta(Ds4Buttons::touch2, direction);
+
+					region->applyDeadZone(direction, analog);
+					applyMap(m, modifier, state, analog);
 				}
 				else
 				{
@@ -299,7 +311,7 @@ void InputSimulator::runMap(InputMap& m, InputModifier* modifier)
 					float deadZone = region->getDeadZone(direction);
 
 					PressedState state = handleTouchToggle(m, modifier, region->state1);
-					float analog = region->getTouchDelta(Ds4Buttons::touch1, direction, parent->input.data.touchPoint1);
+					float analog = region->getTouchDelta(Ds4Buttons::touch1, direction);
 
 					if (analog < deadZone)
 					{
@@ -310,7 +322,7 @@ void InputSimulator::runMap(InputMap& m, InputModifier* modifier)
 					applyMap(m, modifier, state, analog);
 
 					state  = handleTouchToggle(m, modifier, region->state2);
-					analog = region->getTouchDelta(Ds4Buttons::touch2, direction, parent->input.data.touchPoint2);
+					analog = region->getTouchDelta(Ds4Buttons::touch2, direction);
 
 					if (analog < deadZone)
 					{
@@ -346,6 +358,7 @@ void InputSimulator::applyProfile(DeviceProfile* profile)
 	{
 		touchRegions[pair.first] = &pair.second;
 		sortableTouchRegions.emplace_back(&pair.second);
+		addSimulator(pair.second.getSimulator(this));
 	}
 
 	bindings.clear();

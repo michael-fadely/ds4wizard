@@ -139,7 +139,7 @@ R"(
       "bottom": 941
     },
     "Right Half": {
-      "type": "stickAutoCenter",
+      "type": "trackball",
       "allowCrossOver": false,
       "left": 960,
       "top": 0,
@@ -157,6 +157,21 @@ R"(
         },
         "right": {
           "deadZone": 0.25
+        }
+      },
+      "trackballSettings": {
+        "touchFriction": 0.025,
+        "ballFriction": 0.0025,
+        "ballSpeed": 100.0,
+        "touchVibration": {
+          "enabled": true,
+          "factor": 1.0,
+          "deadZone": 0.0
+        },
+        "ballVibration": {
+          "enabled": true,
+          "factor": 1.0,
+          "deadZone": 0.0
         }
       }
     }

@@ -3,6 +3,7 @@
 template <typename T, size_t n>
 struct circular_buffer
 {
+	const size_t count = n;
 	std::array<T, n> points;
 
 	size_t l = n - 1;
@@ -25,11 +26,16 @@ struct circular_buffer
 
 	[[nodiscard]] T newest() const
 	{
-		return points[i - 1];
+		return points[l];
 	}
 
 	[[nodiscard]] T oldest() const
 	{
 		return points[i];
+	}
+
+	const T& operator[](size_t index) const
+	{
+		return points[(index + i) % n];
 	}
 };

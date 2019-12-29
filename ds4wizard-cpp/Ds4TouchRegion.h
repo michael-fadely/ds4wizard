@@ -1,6 +1,7 @@
 #pragma once
 
 #include <unordered_map>
+#include <chrono>
 
 #include <enum.h>
 
@@ -9,8 +10,8 @@
 #include "Pressable.h"
 #include "AxisOptions.h"
 #include "JsonData.h"
-#include "Trackball.h"
 #include "circular_buffer.h"
+#include "Trackball.h"
 
 // TODO: TrackPad - basically always auto-centering stick
 // TODO: Slider (maybe just "cursor", with toggle-able X and Y axes?)
@@ -59,6 +60,24 @@ using Ds4TouchRegionCache = std::unordered_map<std::string, Ds4TouchRegion*>;
  * - (InputMapBase <- Ds4TouchRegion), (InputModifier : InputMapBase) -> (InputMap: InputMapBase)
  */
 
+struct Ds4TouchHistory
+{
+	using Clock     = std::chrono::high_resolution_clock;
+	using TimePoint = Clock::time_point;
+	using Duration  = Clock::duration;
+
+	TimePoint timestamp {};
+	Ds4Vector2 point {};
+
+	explicit Ds4TouchHistory(const Ds4Vector2& point)
+		: timestamp(Clock::now()),
+		  point(point)
+	{
+	}
+
+	Ds4TouchHistory() = default;
+};
+
 /**
  * \brief A user-defined \c Ds4Device touch region.
  * \sa Ds4Device
@@ -74,10 +93,12 @@ class Ds4TouchRegion : public JsonData
 	 */
 	Ds4Buttons_t activeButtons = 0;
 
-	circular_buffer<Ds4Vector2, 30> points1 {}, points2 {};
+	circular_buffer<Ds4TouchHistory, 30> points1 {}, points2 {};
+
+	std::shared_ptr<TrackballSimulator> trackball;
 
 public:
-	TrackballSimulator trackball;
+	std::shared_ptr<TrackballSettings> trackballSettings;
 
 	/**
 	 * \brief Pressed state for multi-touch point 1.
@@ -90,6 +111,8 @@ public:
 	 * \sa Pressable
 	 */
 	Pressable state2;
+
+	ISimulator* getSimulator(InputSimulator* parent);
 
 	// TODO: toggle for multi-touch press
 
@@ -149,7 +172,7 @@ public:
 	 */
 	Ds4TouchRegion(const Ds4TouchRegion& other);
 
-	void update(float deltaTime);
+	Ds4TouchRegion& operator=(const Ds4TouchRegion& other);
 
 	/**
 	 * \brief Check if a point is within the bounds of this touch region.
@@ -193,7 +216,9 @@ public:
 	 * \param point The current coordinates of the sender.
 	 * \return The delta between the start point and \a point.
 	 */
-	[[nodiscard]] float getTouchDelta(Ds4Buttons_t sender, Direction_t direction, const Ds4Vector2& point) const;
+	[[nodiscard]] float getTouchDelta(Ds4Buttons_t sender, Direction_t direction) const;
+
+	const decltype(points1)& getPoints(Ds4Buttons_t sender) const;
 
 	/**
 	 * \brief Get the dead zone of the specified touch direction.

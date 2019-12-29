@@ -2,6 +2,8 @@
 #include "Vector2.h"
 #include "ISimulator.h"
 
+class Ds4TouchRegion;
+
 struct TrackballVibration : JsonData
 {
 	bool  enabled  = false;
@@ -32,15 +34,16 @@ struct TrackballSettings : JsonData
 	void writeJson(nlohmann::json& json) const override;
 };
 
-class TrackballSimulator : ISimulator
+class TrackballSimulator : public ISimulator
 {
 	Vector2 direction_ {};
 	float currentSpeed_ = 0.0f;
+	Ds4TouchRegion* region;
 
 public:
 	TrackballSettings settings;
 
-	TrackballSimulator(const TrackballSettings& settings, InputSimulator* parent);
+	TrackballSimulator(const TrackballSettings& settings, Ds4TouchRegion* region, InputSimulator* parent);
 
 	[[nodiscard]] Vector2 direction() const { return direction_; }
 	[[nodiscard]] float currentSpeed() const { return currentSpeed_; }
@@ -86,4 +89,6 @@ private:
 	void slow(float deltaTime);
 	/** \brief Allow the ball to naturally decelerate with nothing but friction. */
 	void decelerate(float deltaTime);
+
+	void doWork(float deltaTime, Ds4Buttons_t touchId);
 };
