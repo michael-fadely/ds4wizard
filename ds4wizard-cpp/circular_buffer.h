@@ -8,14 +8,14 @@ struct circular_buffer
 	size_t l = n - 1;
 	size_t i = 0;
 
-	void insert(T value)
+	void insert(const T& value)
 	{
 		l = i;
 		points[i++] = value;
 		i %= n;
 	}
 
-	void fill(T value)
+	void fill(const T& value)
 	{
 		for (auto& p : points)
 		{
