@@ -180,7 +180,7 @@ R"(
     {
       "simulatorType": "input",
       "outputType": "xinput",
-      "touchDirection": "up",
+      "inputTouchDirection": "up",
       "xinputButtons": "dPadUp",
       "inputType": "touchRegion",
       "inputTouchRegion": "Right Half"
@@ -188,7 +188,7 @@ R"(
     {
       "simulatorType": "input",
       "outputType": "xinput",
-      "touchDirection": "down",
+      "inputTouchDirection": "down",
       "xinputButtons": "dPadDown",
       "inputType": "touchRegion",
       "inputTouchRegion": "Right Half"
@@ -196,7 +196,7 @@ R"(
     {
       "simulatorType": "input",
       "outputType": "xinput",
-      "touchDirection": "left",
+      "inputTouchDirection": "left",
       "xinputButtons": "dPadLeft",
       "inputType": "touchRegion",
       "inputTouchRegion": "Right Half"
@@ -204,7 +204,7 @@ R"(
     {
       "simulatorType": "input",
       "outputType": "xinput",
-      "touchDirection": "right",
+      "inputTouchDirection": "right",
       "xinputButtons": "dPadRight",
       "inputType": "touchRegion",
       "inputTouchRegion": "Right Half"

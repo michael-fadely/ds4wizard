@@ -29,14 +29,12 @@ PressedState InputMapBase::simulatedState() const
 
 bool InputMapBase::isActive() const
 {
+	if (toggle == true)
 	{
-		if (toggle == true)
-		{
-			return isToggled;
-		}
-
-		return Pressable::isActive();
+		return isToggled;
 	}
+
+	return Pressable::isActive();
 }
 
 bool InputMapBase::isPersistent() const
@@ -50,6 +48,7 @@ InputMapBase::InputMapBase(const InputMapBase& other)
 	  inputButtons(other.inputButtons),
 	  inputAxes(other.inputAxes),
 	  inputTouchRegion(other.inputTouchRegion),
+	  inputTouchDirection(other.inputTouchDirection),
 	  toggle(other.toggle),
 	  rapidFire(other.rapidFire),
 	  rapidFireInterval(other.rapidFireInterval),
@@ -63,6 +62,7 @@ InputMapBase::InputMapBase(InputMapBase&& other) noexcept
 	  inputButtons(other.inputButtons),
 	  inputAxes(other.inputAxes),
 	  inputTouchRegion(std::move(other.inputTouchRegion)),
+	  inputTouchDirection(other.inputTouchDirection),
 	  toggle(other.toggle),
 	  rapidFire(other.rapidFire),
 	  rapidFireInterval(other.rapidFireInterval),
@@ -95,14 +95,15 @@ InputMapBase::InputMapBase(InputType_t inputType, std::string input)
 
 InputMapBase& InputMapBase::operator=(InputMapBase&& other) noexcept
 {
-	inputType         = other.inputType;
-	inputButtons      = other.inputButtons;
-	inputAxes         = other.inputAxes;
-	inputTouchRegion  = std::move(other.inputTouchRegion);
-	toggle            = other.toggle;
-	rapidFire         = other.rapidFire;
-	rapidFireInterval = other.rapidFireInterval;
-	inputAxisOptions  = std::move(other.inputAxisOptions);
+	inputType           = other.inputType;
+	inputButtons        = other.inputButtons;
+	inputAxes           = other.inputAxes;
+	inputTouchRegion    = std::move(other.inputTouchRegion);
+	inputTouchDirection = other.inputTouchDirection;
+	toggle              = other.toggle;
+	rapidFire           = other.rapidFire;
+	rapidFireInterval   = other.rapidFireInterval;
+	inputAxisOptions    = std::move(other.inputAxisOptions);
 
 	Pressable::operator=(std::move(other));
 
@@ -111,12 +112,12 @@ InputMapBase& InputMapBase::operator=(InputMapBase&& other) noexcept
 
 void InputMapBase::press()
 {
+	Pressable::press();
+
 	if (toggle == true && pressedState == PressedState::pressed)
 	{
 		isToggled = !isToggled;
 	}
-
-	Pressable::press();
 
 	if (rapidFire == true)
 	{
@@ -208,6 +209,7 @@ bool InputMapBase::operator==(const InputMapBase& other) const
 	       && inputButtons == other.inputButtons
 	       && inputAxes == other.inputAxes
 	       && inputTouchRegion == other.inputTouchRegion
+	       && inputTouchDirection == other.inputTouchDirection
 	       && toggle == other.toggle
 	       && rapidFire == other.rapidFire
 	       && rapidFireInterval == other.rapidFireInterval
@@ -245,6 +247,13 @@ void InputMapBase::readJson(const nlohmann::json& json)
 	if (json.find("inputTouchRegion") != json.end())
 	{
 		inputTouchRegion = json["inputTouchRegion"];
+	}
+
+	if (json.find("inputTouchDirection") != json.end())
+	{
+		Direction_t touchDirection_;
+		ENUM_DESERIALIZE_FLAGS(Direction)(json["inputTouchDirection"].get<std::string>(), touchDirection_);
+		inputTouchDirection = touchDirection_;
 	}
 
 	if (json.find("toggle") != json.end())
@@ -292,6 +301,11 @@ void InputMapBase::writeJson(nlohmann::json& json) const
 	if (inputTouchRegion.length())
 	{
 		json["inputTouchRegion"] = inputTouchRegion.c_str();
+	}
+
+	if (inputTouchDirection.has_value())
+	{
+		json["inputTouchDirection"] = ENUM_SERIALIZE_FLAGS(Direction)(inputTouchDirection.value()).c_str();
 	}
 
 	if (toggle.has_value())
@@ -396,7 +410,6 @@ InputMap::InputMap(InputMap&& other) noexcept
 	  simulatorType(other.simulatorType),
 	  outputType(other.outputType),
 	  action(other.action),
-	  touchDirection(other.touchDirection),
 	  keyCode(other.keyCode),
 	  keyCodeModifiers(std::move(other.keyCodeModifiers)),
 	  mouseAxes(other.mouseAxes),
@@ -418,7 +431,6 @@ InputMap& InputMap::operator=(InputMap&& other) noexcept
 	simulatorType    = other.simulatorType;
 	outputType       = other.outputType;
 	action           = other.action;
-	touchDirection   = other.touchDirection;
 	keyCode          = other.keyCode;
 	keyCodeModifiers = std::move(other.keyCodeModifiers);
 	mouseAxes        = other.mouseAxes;
@@ -453,7 +465,6 @@ bool InputMap::operator==(const InputMap& other) const
 	       && xinputButtons == other.xinputButtons
 	       && xinputAxes == other.xinputAxes
 	       && mouseAxes == other.mouseAxes
-	       && touchDirection == other.touchDirection
 	       && mouseButton == other.mouseButton;
 }
 
@@ -473,13 +484,6 @@ void InputMap::readJson(const nlohmann::json& json)
 		XInputButtons_t xinputButtons_;
 		ENUM_DESERIALIZE_FLAGS(XInputButtons)(json["xinputButtons"].get<std::string>(), xinputButtons_);
 		xinputButtons = xinputButtons_;
-	}
-
-	if (json.find("touchDirection") != json.end())
-	{
-		Direction_t touchDirection_;
-		ENUM_DESERIALIZE_FLAGS(Direction)(json["touchDirection"].get<std::string>(), touchDirection_);
-		touchDirection = touchDirection_;
 	}
 
 	if (json.find("simulatorType") != json.end())
@@ -527,11 +531,6 @@ void InputMap::writeJson(nlohmann::json& json) const
 	if (xinputButtons.has_value())
 	{
 		json["xinputButtons"] = ENUM_SERIALIZE_FLAGS(XInputButtons)(xinputButtons.value()).c_str();
-	}
-
-	if (touchDirection.has_value())
-	{
-		json["touchDirection"] = ENUM_SERIALIZE_FLAGS(Direction)(touchDirection.value()).c_str();
 	}
 
 	json["simulatorType"] = simulatorType._to_string();

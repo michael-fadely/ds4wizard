@@ -7,14 +7,10 @@ ISimulator* Ds4TouchRegion::getSimulator(InputSimulator* parent)
 
 	switch (static_cast<Ds4TouchRegionType::_enumerated>(type))
 	{
-		/*case Ds4TouchRegionType::button:
-			break;
-
+		case Ds4TouchRegionType::button:
 		case Ds4TouchRegionType::stick:
-			break;
-
 		case Ds4TouchRegionType::stickAutoCenter:
-			break;*/
+			break;
 
 		case Ds4TouchRegionType::trackball:
 			if (!trackball)
@@ -23,6 +19,28 @@ ISimulator* Ds4TouchRegion::getSimulator(InputSimulator* parent)
 			}
 
 			result = trackball.get();
+			break;
+
+		default:
+			break;
+	}
+
+	return result;
+}
+
+std::optional<PressedState> Ds4TouchRegion::getSimulatorState() const
+{
+	std::optional<PressedState> result;
+
+	switch (static_cast<Ds4TouchRegionType::_enumerated>(type))
+	{
+		case Ds4TouchRegionType::button:
+		case Ds4TouchRegionType::stick:
+		case Ds4TouchRegionType::stickAutoCenter:
+			break;
+
+		case Ds4TouchRegionType::trackball:
+			result = trackball->rolling() ? PressedState::on : PressedState::off;
 			break;
 
 		default:
@@ -99,7 +117,7 @@ bool Ds4TouchRegion::isInRegion(Ds4Buttons_t sender, const Ds4Vector2& point)
 		return true;
 	}
 
-	if (allowCrossOver || !isActive(sender))
+	if (allowCrossOver || !isTouchActive(sender))
 	{
 		return false;
 	}
@@ -122,12 +140,48 @@ Ds4Vector2 Ds4TouchRegion::getStartPoint(Ds4Buttons_t sender) const
 	return {};
 }
 
-bool Ds4TouchRegion::isActive(Ds4Buttons_t sender) const
+bool Ds4TouchRegion::isTouchActive(Ds4Buttons_t sender) const
 {
 	return (activeButtons & (sender & (Ds4Buttons::touch1 | Ds4Buttons::touch2))) != 0;
 }
 
-void Ds4TouchRegion::setActive(Ds4Buttons_t sender, const Ds4Vector2& point)
+bool Ds4TouchRegion::isActive(Ds4Buttons_t sender, Direction_t direction) const
+{
+	switch (type)
+	{
+		case Ds4TouchRegionType::none:
+			return false;
+
+		case Ds4TouchRegionType::button:
+			return isTouchActive(sender);
+
+		case Ds4TouchRegionType::stick:
+		case Ds4TouchRegionType::stickAutoCenter:
+		case Ds4TouchRegionType::trackball:
+		{
+			if (direction == Direction::none)
+			{
+				return isTouchActive(sender);
+			}
+
+			const auto simulatorState = getSimulatorState();
+
+			if (simulatorState.has_value() && !Pressable::isActiveState(*simulatorState))
+			{
+				return false;
+			}
+
+			float axis = getSimulatedAxis(sender, direction);
+			applyDeadZone(direction, axis);
+			return !gmath::is_zero(axis);
+		}
+
+		default:
+			throw;
+	}
+}
+
+void Ds4TouchRegion::activateTouch(Ds4Buttons_t sender, const Ds4Vector2& point)
 {
 	if ((sender & Ds4Buttons::touch1) != 0)
 	{
@@ -139,7 +193,7 @@ void Ds4TouchRegion::setActive(Ds4Buttons_t sender, const Ds4Vector2& point)
 		state2.press();
 	}
 
-	if (isActive(sender))
+	if (isTouchActive(sender))
 	{
 		return;
 	}
@@ -158,7 +212,7 @@ void Ds4TouchRegion::setActive(Ds4Buttons_t sender, const Ds4Vector2& point)
 	}
 }
 
-void Ds4TouchRegion::setInactive(Ds4Buttons_t sender, Ds4Vector2 point)
+void Ds4TouchRegion::deactivateTouch(Ds4Buttons_t sender, Ds4Vector2 point)
 {
 	activeButtons &= ~(sender & (Ds4Buttons::touch1 | Ds4Buttons::touch2));
 
@@ -192,13 +246,6 @@ float Ds4TouchRegion::getSimulatedAxis(Ds4Buttons_t sender, Direction_t directio
 	short y = std::clamp(point.y, top, bottom);
 	float result;
 
-	/*
-	 * HACK: this is so disjointed!
-	 * Why is the emulation type specified here *at all*?
-	 * You should be able to ask for a delta kind (from
-	 * region center, from start, from data points) and
-	 * be done!
-	 */
 	switch (type)
 	{
 		case +Ds4TouchRegionType::stickAutoCenter:
@@ -284,19 +331,19 @@ float Ds4TouchRegion::getSimulatedAxis(Ds4Buttons_t sender, Direction_t directio
 			switch (direction)
 			{
 				case Direction::up:
-					result = std::abs(std::clamp(std::clamp(y - cy, -height, height) / static_cast<float>(cy), -1.0f, 0.f));
+					result = std::abs(std::clamp(std::clamp(y - cy, -height, height) / static_cast<float>(cy), -1.0f, 0.0f));
 					break;
 
 				case Direction::down:
-					result = std::clamp(std::clamp(y - cy, -height, height) / static_cast<float>(cy), 0.f, 1.f);
+					result = std::clamp(std::clamp(y - cy, -height, height) / static_cast<float>(cy), 0.0f, 1.0f);
 					break;
 
 				case Direction::left:
-					result = std::abs(std::clamp(std::clamp(x - cx, -width, width) / static_cast<float>(cx), -1.0f, 0.f));
+					result = std::abs(std::clamp(std::clamp(x - cx, -width, width) / static_cast<float>(cx), -1.0f, 0.0f));
 					break;
 
 				case Direction::right:
-					result = std::clamp(std::clamp(x - cx, -width, width) / static_cast<float>(cx), 0.f, 1.f);
+					result = std::clamp(std::clamp(x - cx, -width, width) / static_cast<float>(cx), 0.0f, 1.0f);
 					break;
 
 				default:
@@ -327,12 +374,26 @@ const decltype(Ds4TouchRegion::points1)& Ds4TouchRegion::getPoints(Ds4Buttons_t 
 // HACK: why does this just provide the dead zone? Why doesn't it do its own simulation?
 float Ds4TouchRegion::getDeadZone(Direction_t direction)
 {
+	const auto it = touchAxisOptions.find(direction);
+
+	if (it == touchAxisOptions.end())
+	{
+		return 0.0f;
+	}
+
 	return touchAxisOptions[direction].deadZone.value_or(0.0f);
 }
 
-void Ds4TouchRegion::applyDeadZone(Direction_t direction, float& analog)
+void Ds4TouchRegion::applyDeadZone(Direction_t direction, float& analog) const
 {
-	InputAxisOptions options = touchAxisOptions[direction];
+	const auto it = touchAxisOptions.find(direction);
+
+	if (it == touchAxisOptions.end())
+	{
+		return;
+	}
+	
+	const InputAxisOptions& options = it->second;
 	options.applyDeadZone(analog);
 }
 

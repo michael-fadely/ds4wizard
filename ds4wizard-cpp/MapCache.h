@@ -45,7 +45,8 @@ public:
 	 * \param other The instance to move.
 	 */
 	MapCache(MapCache<Key_t, Map_t>&& other) noexcept
-		: visitedMaps(std::move(other.visitedMaps)),
+		: allMaps_(std::move(other.allMaps_)),
+		  visitedMaps(std::move(other.visitedMaps)),
 		  maps(std::move(other.maps))
 	{
 	}
@@ -57,6 +58,7 @@ public:
 	 */
 	MapCache<Key_t, Map_t>& operator=(MapCache<Key_t, Map_t>&& other) noexcept
 	{
+		allMaps_    = std::move(other.allMaps_);
 		visitedMaps = std::move(other.visitedMaps);
 		maps        = std::move(other.maps);
 
@@ -204,6 +206,7 @@ class MapCacheCollection
 	MapCache<Ds4Buttons_t, Map> buttonMaps;
 	MapCache<Ds4Axes_t,    Map> axisMaps;
 	MapCache<std::string,  Map> touchMaps;
+
 	std::unordered_set<Map*> allMaps_;
 
 public:

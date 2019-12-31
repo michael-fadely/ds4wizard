@@ -244,7 +244,7 @@ void TrackballSimulator::simulate(float deltaTime, Ds4Buttons_t touchId)
 	std::optional<Ds4TouchHistory> newest;
 	std::optional<Ds4TouchHistory> oldest;
 
-	const bool touching = region->isActive(touchId);
+	const bool touching = region->isTouchActive(touchId);
 	
 	if (touching)
 	{
@@ -263,8 +263,8 @@ void TrackballSimulator::simulate(float deltaTime, Ds4Buttons_t touchId)
 		region->clamp(pb);
 
 		direction = {
-			static_cast<float>(pa.x - pb.x) / width,
-			static_cast<float>(pa.y - pb.y) / height
+			static_cast<float>(pb.x - pa.x) / width,
+			static_cast<float>(pb.y - pa.y) / height
 		};
 
 		force = direction.length();

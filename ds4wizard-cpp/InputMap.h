@@ -42,6 +42,7 @@ public:
 	std::optional<Ds4Buttons_t> inputButtons;
 	std::optional<Ds4Axes_t> inputAxes;
 	std::string inputTouchRegion;
+	std::optional<Direction_t> inputTouchDirection;
 
 	std::optional<bool> toggle;
 	std::optional<bool> rapidFire;
@@ -1009,12 +1010,6 @@ public:
 	OutputType_t outputType     = 0;
 
 	std::optional<ActionType> action;
-
-	#pragma region Touch
-
-	std::optional<Direction_t> touchDirection;
-
-	#pragma endregion
 
 	#pragma region Keyboard
 

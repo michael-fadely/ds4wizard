@@ -119,6 +119,8 @@ public:
 
 	ISimulator* getSimulator(InputSimulator* parent);
 
+	std::optional<PressedState> getSimulatorState() const;
+
 	/**
 	 * \brief Clamp a point to the bounds of this touch region.
 	 * \param point The point to clamp.
@@ -205,21 +207,23 @@ public:
 	 * \param sender The multi-touch sender (touch 1, touch 2).
 	 * \return \c true if the sender is active in this region.
 	 */
-	[[nodiscard]] bool isActive(Ds4Buttons_t sender) const;
+	[[nodiscard]] bool isTouchActive(Ds4Buttons_t sender) const;
+
+	[[nodiscard]] bool isActive(Ds4Buttons_t sender, Direction_t direction) const;
 
 	/**
 	 * \brief Activate the specified multi-touch senders at the given point in this touch region.
 	 * \param sender The multi-touch sender (touch 1, touch 2).
 	 * \param point The starting point of the activation.
 	 */
-	void setActive(Ds4Buttons_t sender, const Ds4Vector2& point);
+	void activateTouch(Ds4Buttons_t sender, const Ds4Vector2& point);
 
 	/**
 	 * \brief De-activate the specified multi-touch senders in this region.
 	 * \param sender The multi-touch sender (touch 1, touch 2).
 	 * \param point The last point reported by the device.
 	 */
-	void setInactive(Ds4Buttons_t sender, Ds4Vector2 point);
+	void deactivateTouch(Ds4Buttons_t sender, Ds4Vector2 point);
 
 	/**
 	 * \brief Get the delta of the activation point and current touch coordinates.
@@ -243,7 +247,7 @@ public:
 	 * \param direction The direction of touch movement.
 	 * \param analog The value to apply the dead zone formula to.
 	 */
-	void applyDeadZone(Direction_t direction, float& analog);
+	void applyDeadZone(Direction_t direction, float& analog) const;
 
 	bool operator==(const Ds4TouchRegion& other) const;
 	bool operator!=(const Ds4TouchRegion& other) const;

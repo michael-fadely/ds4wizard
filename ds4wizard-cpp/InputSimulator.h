@@ -97,7 +97,7 @@ public:
 	 * \param m The map to run.
 	 * \param modifier The parent modifier, if any.
 	 */
-	void runMap(InputMap& m, InputModifier* modifier);
+	void runMap(const InputMap& m, InputModifier const* modifier);
 
 	/**
 	 * \brief Applies a profile to the device.
@@ -149,7 +149,7 @@ public:
 	void updateBindings();
 	void reset();
 
-	void setRumble(uint8_t leftMotor, uint8_t rightMotor);
+	void setRumble(uint8_t leftMotor, uint8_t rightMotor) const;
 
 	bool addSimulator(ISimulator* simulator);
 	bool removeSimulator(ISimulator* simulator);
@@ -187,7 +187,7 @@ public:
 	 * \param press Press callback.
 	 * \param release Release callback.
 	 */
-	void updatePressedStateImpl(InputMapBase& instance, const std::function<void()>& press, const std::function<void()>& release);
+	void updatePressedState(InputMapBase& instance, const std::function<void()>& press, const std::function<void()>& release);
 
 	/**
 	 * \brief Updates the pressed state of a modifier set and its managed child bindings.
@@ -195,17 +195,6 @@ public:
 	 * \return \c true if the active state of the modifier has changed.
 	 */
 	bool updateModifier(InputModifier& modifier);
-	
-	/**
-	 * \brief
-	 * Generic method for updating the pressed state of a binding.
-	 * If provided, the parent \p modifier must be active for \p map to be pressed.
-	 * Otherwise, the map's pressed state is made inactive.
-	 * 
-	 * \param map The map to update.
-	 * \param modifier The parent modifier set, if any.
-	 */
-	bool updatePressedState(InputMap& map, InputModifier* modifier);
 
 	/**
 	 * \brief
