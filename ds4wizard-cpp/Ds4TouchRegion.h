@@ -1,7 +1,7 @@
 #pragma once
 
-#include <unordered_map>
 #include <chrono>
+#include <unordered_map>
 
 #include <enum.h>
 
@@ -23,10 +23,15 @@
  */
 
 BETTER_ENUM(Ds4TouchRegionType, int,
+            /** \brief No type specified. Considered invalid. */
             none,
+            /** \brief Simulates a digital button. */
             button,
+            /** \brief Simulates an analog stick. */
             stick,
+            /** \brief Simulates an analog stick which scales. */
             stickAutoCenter,
+            /** \brief  */
             trackball)
 
 class Ds4TouchRegion;
@@ -55,9 +60,7 @@ using Ds4TouchRegionCache = std::unordered_map<std::string, Ds4TouchRegion*>;
  *   references a Ds4TouchRegion will not execute unless
  *   its InputModifier conditions are met.
  *
- * in conclusion:
- * - it does, indirectly;
- * - (InputMapBase <- Ds4TouchRegion), (InputModifier : InputMapBase) -> (InputMap: InputMapBase)
+ * in conclusion: it does, indirectly.
  */
 
 struct Ds4TouchHistory
@@ -77,6 +80,8 @@ struct Ds4TouchHistory
 
 	Ds4TouchHistory() = default;
 };
+
+// TODO: /!\ just let the region pull the touch data on its own!
 
 /**
  * \brief A user-defined \c Ds4Device touch region.
@@ -113,7 +118,12 @@ public:
 	Pressable state2;
 
 	ISimulator* getSimulator(InputSimulator* parent);
-	void clamp(Ds4Vector2& point);
+
+	/**
+	 * \brief Clamp a point to the bounds of this touch region.
+	 * \param point The point to clamp.
+	 */
+	void clamp(Ds4Vector2& point) const;
 
 	// TODO: toggle for multi-touch press
 
@@ -207,19 +217,19 @@ public:
 	/**
 	 * \brief De-activate the specified multi-touch senders in this region.
 	 * \param sender The multi-touch sender (touch 1, touch 2).
+	 * \param point The last point reported by the device.
 	 */
-	void setInactive(Ds4Buttons_t sender);
+	void setInactive(Ds4Buttons_t sender, Ds4Vector2 point);
 
 	/**
 	 * \brief Get the delta of the activation point and current touch coordinates.
 	 * \param sender The multi-touch sender (touch 1, touch 2).
 	 * \param direction The direction of touch movement.
-	 * \param point The current coordinates of the sender.
 	 * \return The delta between the start point and \a point.
 	 */
-	[[nodiscard]] float getTouchDelta(Ds4Buttons_t sender, Direction_t direction) const;
+	[[nodiscard]] float getSimulatedAxis(Ds4Buttons_t sender, Direction_t direction) const;
 
-	const decltype(points1)& getPoints(Ds4Buttons_t sender) const;
+	[[nodiscard]] const decltype(points1)& getPoints(Ds4Buttons_t sender) const;
 
 	/**
 	 * \brief Get the dead zone of the specified touch direction.

@@ -8,7 +8,7 @@ std::string serializeFlags_ ## TYPE (TYPE ## _t value)                          
 {                                                                               \
 	bool empty = true;                                                          \
 	std::stringstream ss;                                                       \
-    size_t i = 0;                                                               \
+	size_t i = 0;                                                               \
                                                                                 \
 	for (auto bit : TYPE ## _values)                                            \
 	{                                                                           \

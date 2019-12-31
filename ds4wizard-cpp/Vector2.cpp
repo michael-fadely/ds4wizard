@@ -234,6 +234,20 @@ bool Vector2::near_equal(const Vector2& rhs) const
 	return gmath::near_equal(x, rhs.x) && gmath::near_equal(y, rhs.y);
 }
 
+Vector2 Vector2::lerp(const Vector2& start, const Vector2& end, float amount)
+{
+	return { gmath::lerp(start.x, end.x, amount), gmath::lerp(start.y, end.y, amount) };
+}
+
+Vector2 Vector2::clamp(const Vector2& v, float lower, float upper)
+{
+	return
+	{
+		std::clamp(v.x, lower, upper),
+		std::clamp(v.y, lower, upper)
+	};
+}
+
 Vector2 operator*(float lhs, const Vector2& rhs)
 {
 	return rhs * lhs;

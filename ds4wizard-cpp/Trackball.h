@@ -37,8 +37,6 @@ struct TrackballSettings : JsonData
 
 class TrackballSimulator : public ISimulator
 {
-	Vector2 direction_ {};
-	float currentSpeed_ = 0.0f;
 	Ds4TouchRegion* region;
 	std::shared_ptr<RumbleTimer> rumbleTimer;
 
@@ -47,8 +45,7 @@ public:
 
 	TrackballSimulator(const TrackballSettings& settings, Ds4TouchRegion* region, InputSimulator* parent);
 
-	[[nodiscard]] Vector2 direction() const { return direction_; }
-	[[nodiscard]] float currentSpeed() const { return currentSpeed_; }
+	Vector2 velocity {};
 	[[nodiscard]] bool rolling() const;
 
 	/**
@@ -68,14 +65,16 @@ public:
 
 	/**
 	 * \brief Apply a force to the ball in a given direction.
-	 *        If \p factor is zero, it is assumed that the ball is being
-	 *        explicitly slowed by an external force (i.e. touch).
+	 *        If \p force is zero, the ball will slow down according to \p touching.
+	 *        If \p touching is \c false, standard friction is applied.
+	 *        Otherwise, touch friction is applied.
+	 * \param touching Indicates that the ball is being touched.
 	 * \param targetDirection The direction to apply the force.
-	 * \param factor The amount of \c settings.ballSpeed to apply.
+	 * \param force The amount of \c settings.ballSpeed to apply.
 	 * \param deltaTime Delta time to be used in acceleration and deceleration.
 	 * \return A \c TrackballState indicating the state of the ball after the call.
 	 */
-	TrackballState applyDirectionalForce(Vector2 targetDirection, float factor, float deltaTime);
+	TrackballState applyDirectionalForce(bool touching, Vector2 targetDirection, float force, float deltaTime);
 
 	/**
 	 * \brief Update the ball without any external influence.
@@ -86,11 +85,11 @@ public:
 
 private:
 	/** \brief Accelerate the ball! */
-	void accelerate(float deltaTime, float factor);
+	void accelerate(const Vector2& direction, float factor, float deltaTime);
 	/** \brief Assume ball is being touched and slow the ball to a stop. */
 	void slow(float deltaTime);
 	/** \brief Allow the ball to naturally decelerate with nothing but friction. */
 	void decelerate(float deltaTime);
-
-	void doWork(float deltaTime, Ds4Buttons_t touchId);
+	
+	void simulate(float deltaTime, Ds4Buttons_t touchId);
 };

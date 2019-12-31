@@ -32,7 +32,7 @@ ISimulator* Ds4TouchRegion::getSimulator(InputSimulator* parent)
 	return result;
 }
 
-void Ds4TouchRegion::clamp(Ds4Vector2& point)
+void Ds4TouchRegion::clamp(Ds4Vector2& point) const
 {
 	point.x = std::clamp(point.x, left, right);
 	point.y = std::clamp(point.y, top, bottom);
@@ -65,6 +65,11 @@ Ds4TouchRegion::Ds4TouchRegion(const Ds4TouchRegion& other)
 
 Ds4TouchRegion& Ds4TouchRegion::operator=(const Ds4TouchRegion& other)
 {
+	if (this == &other)
+	{
+		return *this;
+	}
+	
 	trackballSettings = other.trackballSettings;
 	type              = other.type;
 	allowCrossOver    = other.allowCrossOver;
@@ -153,23 +158,24 @@ void Ds4TouchRegion::setActive(Ds4Buttons_t sender, const Ds4Vector2& point)
 	}
 }
 
-void Ds4TouchRegion::setInactive(Ds4Buttons_t sender)
+void Ds4TouchRegion::setInactive(Ds4Buttons_t sender, Ds4Vector2 point)
 {
 	activeButtons &= ~(sender & (Ds4Buttons::touch1 | Ds4Buttons::touch2));
 
 	if ((sender & Ds4Buttons::touch1) != 0)
 	{
+		points1.insert(Ds4TouchHistory(point));
 		state1.release();
 	}
 
 	if ((sender & Ds4Buttons::touch2) != 0)
 	{
+		points2.insert(Ds4TouchHistory(point));
 		state2.release();
 	}
 }
 
-// HACK: why should you be able to provide a touch point??? This should be handled internally given the last updated touch point!
-float Ds4TouchRegion::getTouchDelta(Ds4Buttons_t sender, Direction_t direction) const
+float Ds4TouchRegion::getSimulatedAxis(Ds4Buttons_t sender, Direction_t direction) const
 {
 	Ds4Vector2 point {};
 
@@ -232,26 +238,29 @@ float Ds4TouchRegion::getTouchDelta(Ds4Buttons_t sender, Direction_t direction) 
 
 		case +Ds4TouchRegionType::trackball:
 		{
+			const Vector2 normalized = trackball->velocity.normalized();
+			const float length = trackball->velocity.length();
+
 			switch (direction)
 			{
 				case Direction::up:
-					result = std::clamp((trackball->direction().y * trackball->currentSpeed()) / trackball->settings.ballSpeed, 0.0f, 1.0f);
+					result = std::clamp((normalized.y * length) / trackball->settings.ballSpeed, 0.0f, 1.0f);
 					break;
 
 				case Direction::down:
-					result = std::abs(std::clamp((trackball->direction().y * trackball->currentSpeed()) / trackball->settings.ballSpeed, -1.0f, 0.0f));
+					result = std::abs(std::clamp((normalized.y * length) / trackball->settings.ballSpeed, -1.0f, 0.0f));
 					break;
 
 				case Direction::left:
-					result = std::clamp((trackball->direction().x * trackball->currentSpeed()) / trackball->settings.ballSpeed, 0.0f, 1.0f);
+					result = std::clamp((normalized.x * length) / trackball->settings.ballSpeed, 0.0f, 1.0f);
 					break;
 
 				case Direction::right:
-					result = std::abs(std::clamp((trackball->direction().x * trackball->currentSpeed()) / trackball->settings.ballSpeed, -1.0f, 0.0f));
+					result = std::abs(std::clamp((normalized.x * length) / trackball->settings.ballSpeed, -1.0f, 0.0f));
 					break;
 
 				case Direction::none:
-					result = (trackball->direction() * trackball->currentSpeed()).length() / trackball->settings.ballSpeed;
+					result = (normalized * length).length() / trackball->settings.ballSpeed;
 					break;
 
 				default:

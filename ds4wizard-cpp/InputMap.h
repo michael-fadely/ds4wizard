@@ -69,7 +69,7 @@ protected:
 
 public:
 	void release() override;
-	InputAxisOptions getAxisOptions(Ds4Axes_t axis);
+	InputAxisOptions getAxisOptions(Ds4Axes_t axis) const;
 
 	bool operator==(const InputMapBase& other) const;
 	bool operator!=(const InputMapBase& other) const;

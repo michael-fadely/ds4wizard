@@ -12,33 +12,48 @@
 #define ENUM_DESERIALIZE_FLAGS(TYPE) deserializeFlags_ ## TYPE
 
 // TODO: make this a member of the struct
-#define ENUM_VALUES(TYPE, LENGTH) extern const std::array<TYPE ## _t, LENGTH> TYPE ## _values;
+#define ENUM_VALUES(TYPE, LENGTH) extern const std::array<TYPE ## _t, LENGTH> TYPE ## _values
 
-BETTER_ENUM(AxisPolarity, int, none, positive, negative);
+BETTER_ENUM(AxisPolarity, int,
+            none,
+            positive,
+            negative)
 
 /**
  * \brief Configuration for axis dead zone scaling.
- * none:
- *     No dead zone is applied.
- * 
- * hardLimit:
- *     When an axis reaches the dead zone threshold, the raw value is let through.
- * 
- * scale:
- *     When the dead zone threshold is reached, the axis output is scaled relative to that threshold (normalized).
- *     Example: If the dead zone is 0.2 and an axis reaches or exceeds that value, it will be normalized to [0.0 .. 1.0].
  */
-BETTER_ENUM(DeadZoneMode, int, none, hardLimit, scale);
+BETTER_ENUM(DeadZoneMode, int,
+            /** \brief No dead zone is applied. */
+            none,
+            /** \brief When an axis reaches the dead zone threshold, the raw value is let through. */
+            hardLimit,
+            /**
+             * \brief
+             * When the dead zone threshold is reached, the axis output is scaled relative to that threshold (normalized).
+             * Example: if the dead zone is 0.2 and an axis reaches or exceeds that value, it will be normalized to [0.0 .. 1.0].
+             */
+            scale)
 
-// TODO: better name
-BETTER_ENUM(SimulatorType, int, none, input, action);
+// TODO: /!\ better name
+BETTER_ENUM(SimulatorType, int, none, input, action)
 
-BETTER_ENUM(ActionType, int, none, bluetoothDisconnect);
+// TODO: vibrate, set light color
+BETTER_ENUM(ActionType, int, none, bluetoothDisconnect)
 
-BETTER_ENUM(MouseButton, int, left, right, middle, ex1, ex2);
+BETTER_ENUM(MouseButton, int,
+            /** \brief The left mouse button. */
+            left,
+            /** \brief The right mouse button. */
+            right,
+            /** \brief The middle mouse button (the scroll click). */
+            middle,
+            /** \brief Extra mouse button 1, i.e. mouse button 4. */
+            ex1,
+            /** \brief Extra mouse button 2, i.e. mouse button 5. */
+            ex2)
 
 /**
- * \brief Bitfield representing an input source from real hardware (DualShock 4).
+ * \brief The type of input to poll from the device.
  */
 struct InputType
 {
@@ -87,6 +102,9 @@ using OutputType_t = uint32_t;
 ENUM_FLAGS(OutputType);
 ENUM_VALUES(OutputType, 3);
 
+/**
+ * \brief Bitfield representing Xbox 360 digital buttons.
+ */
 struct XInputButtons
 {
 	enum T : uint16_t
@@ -114,6 +132,9 @@ using XInputButtons_t = uint16_t;
 ENUM_FLAGS(XInputButtons);
 ENUM_VALUES(XInputButtons, 16);
 
+/**
+ * \brief Bitfield representing Xbox 360 axes.
+ */
 struct XInputAxis
 {
 	enum T : uint32_t
@@ -132,6 +153,9 @@ using XInputAxis_t = uint32_t;
 ENUM_FLAGS(XInputAxis);
 ENUM_VALUES(XInputAxis, 6);
 
+/**
+ * \brief Bitfield representing the direction of an action.
+ */
 struct Direction
 {
 	enum T : uint32_t
@@ -148,6 +172,9 @@ using Direction_t = uint32_t;
 ENUM_FLAGS(Direction);
 ENUM_VALUES(Direction, 4);
 
+/**
+ * \brief The values that can be represented by a Hat Switch.
+ */
 enum class Hat
 {
 	north,
@@ -184,7 +211,7 @@ enum class PressedState
 	released
 };
 
-#define DS4_BUTTONS_RAW \
+#define DS4_BUTTONS_RAW  /* NOLINT(cppcoreguidelines-macro-usage) */ \
 	square      = 1 << 4, \
 	cross       = 1 << 5, \
 	circle      = 1 << 6, \
@@ -203,7 +230,7 @@ enum class PressedState
 using Ds4ButtonsRaw_t = uint32_t;
 
 /**
- * \brief Bitfield representing the button status bits reported by the DualShock 4.
+ * \brief Bitfield representing the raw button status bits reported by the DualShock 4.
  */
 struct Ds4ButtonsRaw
 {
@@ -262,6 +289,9 @@ struct Ds4Buttons
 ENUM_FLAGS(Ds4Buttons);
 ENUM_VALUES(Ds4Buttons, 20);
 
+/**
+ * \brief Bitfield representing the axes provided by the DualShock 4.
+ */
 struct Ds4Axes
 {
 	enum T : uint32_t
@@ -285,14 +315,21 @@ using Ds4Axes_t = uint32_t;
 ENUM_FLAGS(Ds4Axes);
 ENUM_VALUES(Ds4Axes, 12);
 
+/**
+ * \brief Bitfield representing the (known) extensions reported by the DualShock 4.
+ */
 struct Ds4Extensions
 {
 	enum T : uint8_t
 	{
-		cable      = 1 << 0,
+		/** \brief A power/data cable is plugged into the controller. */
+		cable = 1 << 0,
+		/** \brief Heaphones/speakers are plugged into the controller's 3.5mm jack. */
 		headphones = 1 << 1,
+		/** \brief A microphone is plugged into the controller. */
 		microphone = 1 << 2,
-		unknown    = 1 << 3
+		/** \brief An unknown extension is connected to the controller. */
+		unknown = 1 << 3
 	};
 };
 

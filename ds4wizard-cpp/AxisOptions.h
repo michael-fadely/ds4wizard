@@ -112,7 +112,7 @@ public:
 	 * \param axis The axis to retrieve the configuration for.
 	 * \return The configuration for the requested axis, or empty configuration if not found.
 	 */
-	AxisOptions getAxisOptions(XInputAxis::T axis);
+	AxisOptions getAxisOptions(XInputAxis::T axis) const;
 
 	bool operator==(const XInputAxes& other) const;
 	bool operator!=(const XInputAxes& other) const;

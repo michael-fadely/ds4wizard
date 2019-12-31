@@ -129,8 +129,7 @@ void InputAxisOptions::writeJson(nlohmann::json& json) const
 	}
 }
 
-// TODO: if this can be made const, many other things could be made const throughout the code!
-AxisOptions XInputAxes::getAxisOptions(XInputAxis::T axis)
+AxisOptions XInputAxes::getAxisOptions(XInputAxis::T axis) const
 {
 	if (options.empty())
 	{
@@ -144,10 +143,7 @@ AxisOptions XInputAxes::getAxisOptions(XInputAxis::T axis)
 		return it->second;
 	}
 
-	// HACK: separate into its own cache
-	AxisOptions result {};
-	options[axis] = result;
-	return result;
+	return AxisOptions();
 }
 
 bool XInputAxes::operator==(const XInputAxes& other) const

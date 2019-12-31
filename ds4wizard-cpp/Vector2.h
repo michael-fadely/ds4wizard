@@ -61,6 +61,9 @@ public:
 
 	float dot(const Vector2& rhs) const;
 	bool near_equal(const Vector2& rhs) const;
+
+	static Vector2 lerp(const Vector2& start, const Vector2& end, float amount);
+	static Vector2 clamp(const Vector2& v, float lower, float upper);
 };
 
 Vector2 operator*(float lhs, const Vector2& rhs);

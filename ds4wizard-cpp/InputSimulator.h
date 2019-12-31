@@ -44,7 +44,7 @@ class InputSimulator
 	XInputAxis_t simulatedXInputAxis = 0;
 
 	Stopwatch deltaStopwatch {};
-	const float deltaTimeTarget = 1000.0f / 1.0f;
+	const float deltaTimeTarget = 1000.0f / 60.0f;
 	float deltaTime = 1.0f;
 
 	std::unique_ptr<XInputRumbleSimulator> xinputRumbleSimulator;
@@ -83,14 +83,14 @@ public:
 	 * \param axes The axes to simulate.
 	 * \param m The magnitude of the axes.
 	 */
-	void simulateXInputAxis(XInputAxes& axes, float m);
+	void simulateXInputAxis(const XInputAxes& axes, float m);
 	
 	/**
 	 * \brief Checks if the given input map is overridden by an input map from the currently-active modifier set.
 	 * \param map The map whose overridden state is to be checked.
 	 * \return \c true if overridden by a modifier.
 	 */
-	bool isOverriddenByModifierSet(InputMapBase& map);
+	bool isOverriddenByModifierSet(const InputMapBase& map);
 
 	/**
 	 * \brief Runs an input map with an optional parent modifier.
@@ -112,7 +112,7 @@ public:
 	 * \param pressable The pressable state of the touch region.
 	 * \return The simulated pressed state.
 	 */
-	static PressedState handleTouchToggle(InputMap& m, InputModifier* modifier, const Pressable& pressable);
+	static PressedState handleTouchToggle(const InputMap& m, InputModifier const* modifier, const Pressable& pressable);
 
 	/**
 	 * \brief Applies a map's state as determined by \sa runMap
@@ -121,7 +121,7 @@ public:
 	 * \param state The pressed state to apply, if applicable.
 	 * \param analog Analog value to apply, if applicable.
 	 */
-	void applyMap(InputMap& m, InputModifier* modifier, PressedState state, float analog);
+	void applyMap(const InputMap& m, InputModifier const* modifier, PressedState state, float analog);
 
 	/**
 	 * \brief Simulates mouse inputs.

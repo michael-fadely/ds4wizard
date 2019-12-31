@@ -95,8 +95,6 @@ InputMapBase::InputMapBase(InputType_t inputType, std::string input)
 
 InputMapBase& InputMapBase::operator=(InputMapBase&& other) noexcept
 {
-	Pressable::operator=(std::move(other));
-
 	inputType         = other.inputType;
 	inputButtons      = other.inputButtons;
 	inputAxes         = other.inputAxes;
@@ -105,6 +103,8 @@ InputMapBase& InputMapBase::operator=(InputMapBase&& other) noexcept
 	rapidFire         = other.rapidFire;
 	rapidFireInterval = other.rapidFireInterval;
 	inputAxisOptions  = std::move(other.inputAxisOptions);
+
+	Pressable::operator=(std::move(other));
 
 	return *this;
 }
@@ -183,7 +183,7 @@ void InputMapBase::release()
 	}
 }
 
-InputAxisOptions InputMapBase::getAxisOptions(Ds4Axes_t axis)
+InputAxisOptions InputMapBase::getAxisOptions(Ds4Axes_t axis) const
 {
 	if (inputAxisOptions.empty())
 	{
@@ -352,8 +352,8 @@ InputModifier::InputModifier(InputModifier&& other) noexcept
 
 InputModifier& InputModifier::operator=(InputModifier&& other) noexcept
 {
-	InputMapBase::operator=(std::move(other));
 	bindings = std::move(other.bindings);
+	InputMapBase::operator=(std::move(other));
 	return *this;
 }
 
@@ -415,8 +415,6 @@ InputMap::InputMap(SimulatorType simulatorType, InputType_t inputType, OutputTyp
 
 InputMap& InputMap::operator=(InputMap&& other) noexcept
 {
-	InputMapBase::operator=(std::move(other));
-
 	simulatorType    = other.simulatorType;
 	outputType       = other.outputType;
 	action           = other.action;
@@ -428,6 +426,7 @@ InputMap& InputMap::operator=(InputMap&& other) noexcept
 	xinputButtons    = other.xinputButtons;
 	xinputAxes       = other.xinputAxes;
 
+	InputMapBase::operator=(std::move(other));
 	return *this;
 }
 

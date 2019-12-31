@@ -161,7 +161,7 @@ R"(
       },
       "trackballSettings": {
         "touchFriction": 1.0,
-        "ballFriction": 0.0,
+        "ballFriction": 0.1,
         "ballSpeed": 100.0,
         "touchVibration": {
           "enabled": true,
