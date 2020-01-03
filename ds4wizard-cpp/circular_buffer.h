@@ -1,13 +1,16 @@
 #pragma once
 
-template <typename T, size_t n>
+template <typename T, ptrdiff_t n>
 struct circular_buffer
 {
-	const size_t count = n;
+private:
 	std::array<T, n> points;
 
-	size_t l = n - 1;
-	size_t i = 0;
+	ptrdiff_t l = n - 1;
+	ptrdiff_t i = 0;
+
+public:
+	const ptrdiff_t count = n;
 
 	void insert(const T& value)
 	{
@@ -34,8 +37,8 @@ struct circular_buffer
 		return points[i];
 	}
 
-	const T& operator[](size_t index) const
+	const T& operator[](ptrdiff_t index) const
 	{
-		return points[(index + i) % n];
+		return points[(index + n + i) % n];
 	}
 };
