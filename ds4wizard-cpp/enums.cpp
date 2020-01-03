@@ -8,7 +8,7 @@ std::string serializeFlags_ ## TYPE (TYPE ## _t value)                          
 {                                                                               \
 	bool empty = true;                                                          \
 	std::stringstream ss;                                                       \
-    size_t i = 0;                                                               \
+	size_t i = 0;                                                               \
                                                                                 \
 	for (auto bit : TYPE ## _values)                                            \
 	{                                                                           \
@@ -50,7 +50,7 @@ void deserializeFlags_ ## TYPE ## (const std::string& input, TYPE ## _t& value) 
 	}                                                                           \
 }
 
-const InputType_t InputType_values[] = {
+const std::array<InputType_t, 3> InputType_values = {
 	InputType::button,
 	InputType::axis,
 	InputType::touchRegion
@@ -64,7 +64,7 @@ static const char* InputType_names[] = {
 
 SERIALIZE_DEF(InputType)
 
-const XInputAxis_t XInputAxis_values[] = {
+const std::array<XInputAxis_t, 6> XInputAxis_values = {
 	XInputAxis::leftStickX,
 	XInputAxis::leftStickY,
 	XInputAxis::rightStickX,
@@ -84,7 +84,7 @@ static const char* XInputAxis_names[] = {
 
 SERIALIZE_DEF(XInputAxis)
 
-const XInputButtons_t XInputButtons_values[] = {
+const std::array<XInputButtons_t, 16> XInputButtons_values = {
 	XInputButtons::dPadUp,
 	XInputButtons::dPadDown,
 	XInputButtons::dPadLeft,
@@ -124,7 +124,7 @@ static const char* XInputButtons_names[] = {
 
 SERIALIZE_DEF(XInputButtons)
 
-const Ds4ButtonsRaw_t Ds4ButtonsRaw_values[] = {
+const std::array<Ds4ButtonsRaw_t, 15> Ds4ButtonsRaw_values = {
 	Ds4ButtonsRaw::hat,
 	Ds4ButtonsRaw::square,
 	Ds4ButtonsRaw::cross,
@@ -165,7 +165,7 @@ Hat Ds4ButtonsRaw::getHat(Ds4ButtonsRaw_t value)
 	return static_cast<Hat>(value & hat_mask);
 }
 
-const Ds4Buttons_t Ds4Buttons_values[] = {
+const std::array<Ds4Buttons_t, 20> Ds4Buttons_values = {
 	Ds4Buttons::up,
 	Ds4Buttons::down,
 	Ds4Buttons::left,
@@ -252,22 +252,22 @@ Ds4Buttons_t Ds4Buttons::fromRaw(Ds4ButtonsRaw_t bits)
 
 SERIALIZE_DEF(Ds4Buttons)
 
-const Ds4Axis_t Ds4Axis_values[] = {
-	Ds4Axis::leftStickX,
-	Ds4Axis::leftStickY,
-	Ds4Axis::rightStickX,
-	Ds4Axis::rightStickY,
-	Ds4Axis::leftTrigger,
-	Ds4Axis::rightTrigger,
-	Ds4Axis::accelX,
-	Ds4Axis::accelY,
-	Ds4Axis::accelZ,
-	Ds4Axis::gyroX,
-	Ds4Axis::gyroY,
-	Ds4Axis::gyroZ,
+const std::array<Ds4Axes_t, 12> Ds4Axes_values = {
+	Ds4Axes::leftStickX,
+	Ds4Axes::leftStickY,
+	Ds4Axes::rightStickX,
+	Ds4Axes::rightStickY,
+	Ds4Axes::leftTrigger,
+	Ds4Axes::rightTrigger,
+	Ds4Axes::accelX,
+	Ds4Axes::accelY,
+	Ds4Axes::accelZ,
+	Ds4Axes::gyroX,
+	Ds4Axes::gyroY,
+	Ds4Axes::gyroZ,
 };
 
-static const char* Ds4Axis_names[] = {
+static const char* Ds4Axes_names[] = {
 	"leftStickX",
 	"leftStickY",
 	"rightStickX",
@@ -282,9 +282,9 @@ static const char* Ds4Axis_names[] = {
 	"gyroZ"
 };
 
-SERIALIZE_DEF(Ds4Axis)
+SERIALIZE_DEF(Ds4Axes)
 
-const Ds4Extensions_t Ds4Extensions_values[] = {
+const std::array<Ds4Extensions_t, 4> Ds4Extensions_values = {
 	Ds4Extensions::cable,
 	Ds4Extensions::headphones,
 	Ds4Extensions::microphone,
@@ -298,9 +298,34 @@ static const char* Ds4Extensions_names[] = {
 	"unknown"
 };
 
+Ds4VectorInput::T Ds4VectorInput::fromAxes(Ds4Axes_t axes)
+{
+	if (axes & Ds4Axes::leftStick)
+	{
+		return Ds4VectorInput::leftStick;
+	}
+
+	if (axes & Ds4Axes::rightStick)
+	{
+		return Ds4VectorInput::rightStick;
+	}
+
+	if (axes & Ds4Axes::accelerometer)
+	{
+		return Ds4VectorInput::accelerometer;
+	}
+
+	if (axes & Ds4Axes::gyroscope)
+	{
+		return Ds4VectorInput::gyroscope;
+	}
+
+	return Ds4VectorInput::none;
+}
+
 SERIALIZE_DEF(Ds4Extensions)
 
-const Direction_t Direction_values[] = {
+const std::array<Direction_t, 4> Direction_values = {
 	Direction::up,
 	Direction::down,
 	Direction::left,
@@ -316,7 +341,7 @@ static const char* Direction_names[] = {
 
 SERIALIZE_DEF(Direction)
 
-const OutputType_t OutputType_values[] = {
+const std::array<OutputType_t, 3> OutputType_values = {
 	OutputType::xinput,
 	OutputType::keyboard,
 	OutputType::mouse,

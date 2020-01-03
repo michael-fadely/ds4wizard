@@ -1,7 +1,8 @@
 #pragma once
 
-#include <deque>
 #include <functional>
+#include <unordered_set>
+#include <unordered_map>
 
 #include "KeyboardSimulator.h"
 #include "MouseSimulator.h"
@@ -10,6 +11,10 @@
 #include "InputMap.h"
 #include "XInputGamepad.h"
 #include "ViGEmTarget.h"
+#include "MapCache.h"
+#include "ISimulator.h"
+#include "XInputRumbleSimulator.h"
+#include "RumbleSequence.h"
 
 class Ds4Device;
 
@@ -21,23 +26,30 @@ class InputSimulator
 	static constexpr Ds4Buttons_t touchMask = Ds4Buttons::touch1 | Ds4Buttons::touch2;
 
 	Ds4Device* parent = nullptr;
-	DeviceProfile* profile = nullptr;
 
 	KeyboardSimulator keyboard;
 	MouseSimulator mouse;
 
-	/** \brief Bindings affected by modifier sets. */
-	std::deque<InputMap*> modifier_bindings; // TODO: OPTIMIZE !!!
-	/** \brief Cache for touch regions. */
-	std::deque<Ds4TouchRegion*> touchRegions;
+	Ds4TouchRegionCache touchRegions;
+	std::vector<Ds4TouchRegion*> sortableTouchRegions;
+
+	std::unordered_map<InputModifier*, MapCacheCollection<InputMap>> modifierMaps;
+	MapCacheCollection<InputModifier> modifiers;
+	MapCacheCollection<InputMap> bindings;
 
 	int realXInputIndex = -1;
 	XInputGamepad xinputPad {};
 	XInputGamepad xinputLast {};
-	XINPUT_VIBRATION xinputVibration {};
-	std::unique_ptr<vigem::XInputTarget> xinputTarget;
+	std::shared_ptr<vigem::XInputTarget> xinputTarget;
 	XInputAxis_t simulatedXInputAxis = 0;
-	EventToken xinputNotification;
+
+	Stopwatch deltaStopwatch {};
+	const float deltaTimeTarget = 1000.0f / 60.0f;
+	float deltaTime = 1.0f;
+
+	std::unique_ptr<XInputRumbleSimulator> xinputRumbleSimulator;
+	std::unordered_set<ISimulator*> simulators;
+	std::unique_ptr<RumbleSequence> rumbleSequence;
 
 public:
 	/** \brief Event raised when a handle to a virtual XInput device cannot be acquired. */
@@ -58,6 +70,12 @@ public:
 	~InputSimulator();
 
 	/**
+	 * \brief Performs any required initialization before simulations can occur.
+	 */
+	void start();
+
+private:
+	/**
 	 * \brief Simulates XInput buttons.
 	 * \param buttons Buttons to simulate.
 	 * \param state The state of \a buttons
@@ -69,36 +87,30 @@ public:
 	 * \param axes The axes to simulate.
 	 * \param m The magnitude of the axes.
 	 */
-	void simulateXInputAxis(XInputAxes& axes, float m);
-
+	void simulateXInputAxis(const XInputAxes& axes, float m);
+	
 	/**
-	 * \brief Caches \c InputMap instances which are controlled by an \c InputModifier.
-	 * Excludes the provided map under the assumption that it is not handled by any \c InputModifier.
-	 * This information will be used later in \c isOverriddenByModifierSet
-	 * \param map The input map to be excluded.
-	 */
-	void cacheModifierBindings(InputMapBase& map);
-
-	/**
-	 * \brief Checks if an input map is overriden by a currently active modifier set.
+	 * \brief Checks if the given input map is overridden by an input map from the currently-active modifier set.
 	 * \param map The map whose overridden state is to be checked.
 	 * \return \c true if overridden by a modifier.
 	 */
-	bool isOverriddenByModifierSet(InputMapBase& map);
+	bool isOverriddenByModifierSet(const InputMapBase& map);
 
 	/**
-	 * \brief Runs an input map with an optional parent modifier set.
+	 * \brief Runs an input map with an optional parent modifier.
 	 * \param m The map to run.
-	 * \param modifier The parent modifier set, if any.
+	 * \param modifier The parent modifier, if any.
 	 */
-	void runMap(InputMap& m, InputModifier* modifier);
+	void runMap(const InputMap& m, InputModifier const* modifier);
 
+public:
 	/**
 	 * \brief Applies a profile to the device.
 	 * \param profile The profile to apply.
 	 */
 	void applyProfile(DeviceProfile* profile);
 
+private:
 	/**
 	 * \brief Handles toggles which are managed by touch regions.
 	 * \param m The input map managed by a touch region.
@@ -106,7 +118,7 @@ public:
 	 * \param pressable The pressable state of the touch region.
 	 * \return The simulated pressed state.
 	 */
-	static PressedState handleTouchToggle(InputMap& m, InputModifier* modifier, const Pressable& pressable);
+	static PressedState handleTouchToggle(const InputMap& m, InputModifier const* modifier, const Pressable& pressable);
 
 	/**
 	 * \brief Applies a map's state as determined by \sa runMap
@@ -115,7 +127,7 @@ public:
 	 * \param state The pressed state to apply, if applicable.
 	 * \param analog Analog value to apply, if applicable.
 	 */
-	void applyMap(InputMap& m, InputModifier* modifier, PressedState state, float analog);
+	void applyMap(const InputMap& m, InputModifier const* modifier, PressedState state, float analog);
 
 	/**
 	 * \brief Simulates mouse inputs.
@@ -137,7 +149,58 @@ public:
 	 * \param action The action to perform.
 	 */
 	void runAction(ActionType action) const;
+
+	/**
+	 * \brief Updates the delta time scale. Called by \sa startTick
+	 */
+	void updateDeltaTime();
+
+	/**
+	 * \brief Updates the pressed states of all the managed modifier sets.
+	 */
+	void updateModifierStates();
+
+	/**
+	 * \brief Updates the pressed states of all managed bindings.
+	 */
+	void updateBindingStates();
 	
+	/**
+	 * \brief
+	 * Called at the start of a tick.
+	 * Resets any unwanted states from the last simulation tick.
+	 */
+	void startTick();
+
+public:
+	/**
+	 * \brief Set the rumble of the left and/or right motors of the controller.
+	 * \param leftMotor The power of the left motor.
+	 * \param rightMotor The power of the right motor.
+	 */
+	void setRumble(float leftMotor, float rightMotor) const;
+
+	/**
+	 * \brief Add a simulator to be tracked an updated each tick.
+	 * \param simulator The simulator to add.
+	 * \return \c true if the simulator is not already tracked.
+	 */
+	bool addSimulator(ISimulator* simulator);
+
+	/**
+	 * \brief Remove a simulator from tracking and updating.
+	 * \param simulator The simulator to remove.
+	 * \return \c true if the simulator was tracked and removed.
+	 */
+	bool removeSimulator(ISimulator* simulator);
+
+private:
+	/**
+	 * \brief Runs all tracked simulators for this tick.
+	 */
+	void runSimulators();
+
+public:
 	/**
 	 * \brief Runs all input maps managed by this instance.
 	 */
@@ -147,7 +210,8 @@ public:
 	 * \brief Runs all persistent input maps (e.g rapid fire) managed by this instance.
 	 */
 	void runPersistent();
-	
+
+private:
 	/**
 	 * \brief Runs all touch regions managed by this instance.
 	 * \sa updateTouchRegion
@@ -157,13 +221,12 @@ public:
 	/**
 	 * \brief Updates a provided touch region, handling allowed/disallowed overlap, etc.
 	 * \param region The touch region to update.
-	 * \param modifier The parent modifier set, if any.
 	 * \param sender The touch sender (touch A or touch B)
 	 * \param point The point on the touch pad that \a sender was fired from.
 	 * \param disallow Buttons to disallow if a region does not allow overlap.
 	 */
-	void updateTouchRegion(Ds4TouchRegion& region, InputModifier* modifier, Ds4Buttons_t sender,
-	                       Ds4Vector2& point, Ds4Buttons_t& disallow);
+	void updateTouchRegion(Ds4TouchRegion& region, Ds4Buttons_t sender,
+	                       const Ds4Vector2& point, Ds4Buttons_t& disallow) const;
 	
 	/**
 	 * \brief Internal implementation of \sa updatePressedState
@@ -171,39 +234,29 @@ public:
 	 * \param press Press callback.
 	 * \param release Release callback.
 	 */
-	void updatePressedStateImpl(InputMapBase& instance, const std::function<void()>& press, const std::function<void()>& release);
-	
+	void updatePressedState(InputMapBase& instance, const std::function<void()>& press, const std::function<void()>& release);
+
 	/**
 	 * \brief Updates the pressed state of a modifier set and its managed child bindings.
 	 * \param modifier The modifier to update.
+	 * \return \c true if the active state of the modifier has changed.
 	 */
-	void updatePressedState(InputModifier& modifier);
-	
+	bool updateModifierState(InputModifier& modifier);
+
 	/**
-	 * \brief Generic method for updating the pressed state of a binding.
-	 * If provided, the parent modifier set must be active for a press to activate.
+	 * \brief
+	 * Root level method for updating input mappings and simulating inputs.
+	 * Updates pressed state accounting for modifiers, runs special actions, etc.
+	 * If provided, the parent \p modifier must be active for \p map to be activated.
 	 * Otherwise, the map's pressed state is made inactive.
+	 * 
 	 * \param map The map to update.
 	 * \param modifier The parent modifier set, if any.
+	 *
+	 * \return \c true if the pressed state of the map has changed.
 	 */
-	void updatePressedState(InputMap& map, InputModifier* modifier);
-	
-	/**
-	 * \brief Root level method for updating input mappings and simulating inputs.
-	 * Updates pressed state accounting for modifiers, runs special actions, etc.
-	 * If provided, the parent modifier set must be active for a press to activate.
-	 * Otherwise, the map's pressed state is made inactive.
-	 * \param m The map to update.
-	 * \param modifier The parent modifier set, if any.
-	 */
-	void updateBindingState(InputMap& m, InputModifier* modifier);
-	
-	/**
-	 * \brief Polls information from emulation endpoints (e.g XInput) if necessary.
-	 */
-	void updateEmulators() const;
+	bool updateBindingState(InputMap& map, InputModifier* modifier);
 
-private:
 	/**
 	 * \brief Connects a virtual XInput device to the system.
 	 * \return \c true on success.

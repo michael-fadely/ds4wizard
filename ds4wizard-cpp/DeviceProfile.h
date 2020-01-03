@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include <unordered_map>
+#include <map>
 #include <deque>
 
 #include "DeviceSettingsCommon.h"
@@ -45,8 +45,9 @@ public:
 	 */
 	int xinputIndex = 0;
 
+	// TODO: make ordered with std::map
 	/**
-	 * \brief Collection of touchpad regions referenced by name.
+	 * \brief Map of touchpad regions referenced by name.
 	 */
 	std::unordered_map<std::string, Ds4TouchRegion> touchRegions;
 

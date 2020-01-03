@@ -43,6 +43,12 @@ public:
 	 */
 	Ds4Buttons_t releasedButtons = 0; // TODO: private set
 
+	/**
+	 * \brief Each axis that has changed since the last poll.
+	 * \sa Ds4Axes, Ds4Axes_t
+	 */
+	Ds4Axes_t axes = 0; // TODO: private set
+
 	Ds4InputData data {};
 
 	/**
@@ -62,7 +68,7 @@ public:
 	 * \param polarity The desired polarity of the axis.
 	 * \return The magnitude of the axis. If it does not align with the desired \a polarity, \c 0.0f is returned.
 	 */
-	float getAxis(Ds4Axis_t axis, const std::optional<AxisPolarity>& polarity) const;
+	float getAxis(Ds4Axes_t axis, const std::optional<AxisPolarity>& polarity) const;
 
 private:
 	Ds4Buttons_t lastHeldButtons = 0;
@@ -70,4 +76,5 @@ private:
 
 	void addButton(bool pressed, Ds4Buttons_t buttons);
 	void updateButtons();
+	void updateAxes(const Ds4InputData& last);
 };

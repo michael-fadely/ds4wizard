@@ -33,8 +33,8 @@ public:
 
 	bool operator==(const AxisOptions& other) const;
 	bool operator!=(const AxisOptions& other) const;
-	virtual void readJson(const nlohmann::json& json) override;
-	virtual void writeJson(nlohmann::json& json) const override;
+	void readJson(const nlohmann::json& json) override;
+	void writeJson(nlohmann::json& json) const override;
 };
 
 /**
@@ -47,6 +47,8 @@ public:
 	 * \brief Optionally invert the axis output.
 	 */
 	std::optional<bool> invert;
+
+	// TODO: /!\ /!\ /!\ provide method use length of input vector for dead zone application! (i.e. if length > dead zone, all axes in vector > dead zone)
 
 	/**
 	 * \brief The dead zone mode to use if configured.
@@ -112,7 +114,7 @@ public:
 	 * \param axis The axis to retrieve the configuration for.
 	 * \return The configuration for the requested axis, or empty configuration if not found.
 	 */
-	AxisOptions getAxisOptions(XInputAxis::T axis);
+	AxisOptions getAxisOptions(XInputAxis::T axis) const;
 
 	bool operator==(const XInputAxes& other) const;
 	bool operator!=(const XInputAxes& other) const;

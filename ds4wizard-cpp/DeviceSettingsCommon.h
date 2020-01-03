@@ -51,6 +51,6 @@ public:
 	bool operator==(const DeviceSettingsCommon& other) const;
 	bool operator!=(const DeviceSettingsCommon& other) const;
 
-	virtual void readJson(const nlohmann::json& json) override;
-	virtual void writeJson(nlohmann::json& json) const override;
+	void readJson(const nlohmann::json& json) override;
+	void writeJson(nlohmann::json& json) const override;
 };

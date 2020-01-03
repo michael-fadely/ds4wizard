@@ -1,5 +1,6 @@
 #pragma once
 
+#include <chrono>
 #include <unordered_map>
 
 #include <enum.h>
@@ -9,13 +10,63 @@
 #include "Pressable.h"
 #include "AxisOptions.h"
 #include "JsonData.h"
+#include "circular_buffer.h"
+#include "Trackball.h"
 
-// TODO: TrackPad
-// TODO: TrackBall (surface friction, constant friction, "haptic" feedback)
-// TODO: Slider
+// TODO: TrackPad - basically always auto-centering stick
+// TODO: Slider (maybe just "cursor", with toggle-able X and Y axes?)
 // TODO: Make auto-center an option instead of type?
 
-BETTER_ENUM(Ds4TouchRegionType, int, none, button, stick, stickAutoCenter)
+/*
+ * How do we detect a touch pad flick?
+ * - points[newest] - points[oldest], where points = circular buffer of last N touch points
+ */
+
+BETTER_ENUM(Ds4TouchRegionType, int,
+            /** \brief No type specified. Considered invalid. */
+            none,
+            /** \brief Simulates a digital button. */
+            button,
+            /** \brief Simulates an analog stick. */
+            stick,
+            /** \brief Simulates an analog stick which scales. */
+            stickAutoCenter,
+            /** \brief Simulates a trackball which can roll over time. */
+            trackball)
+
+class Ds4TouchRegion;
+
+/**
+ * \brief A collection of \c Ds4TouchRegion
+ * \sa Ds4TouchRegion
+ */
+using Ds4TouchRegionCollection = std::map<std::string, Ds4TouchRegion>;
+
+/**
+ * \brief A collection of \c Ds4TouchRegion* as a caching mechanism.
+ * \sa Ds4TouchRegion, Ds4TouchRegionCollection
+ */
+using Ds4TouchRegionCache = std::map<std::string, Ds4TouchRegion*>;
+
+struct Ds4TouchHistory
+{
+	using Clock     = std::chrono::high_resolution_clock;
+	using TimePoint = Clock::time_point;
+	using Duration  = Clock::duration;
+
+	TimePoint timestamp {};
+	Ds4Vector2 point {};
+
+	explicit Ds4TouchHistory(const Ds4Vector2& point)
+		: timestamp(Clock::now()),
+		  point(point)
+	{
+	}
+
+	Ds4TouchHistory() = default;
+};
+
+// TODO: /!\ just let the region pull the touch data on its own!
 
 /**
  * \brief A user-defined \c Ds4Device touch region.
@@ -26,12 +77,18 @@ class Ds4TouchRegion : public JsonData
 	Ds4Vector2 pointStart1 {};
 	Ds4Vector2 pointStart2 {};
 
-public:
 	/**
 	 * \brief "Buttons" (touches) active in this region.
 	 * \sa Ds4Buttons, Ds4Buttons_t
 	 */
-	Ds4Buttons_t activeButtons = 0; // TODO: private set
+	Ds4Buttons_t activeButtons = 0;
+
+	circular_buffer<Ds4TouchHistory, 30> points1 {}, points2 {};
+
+	std::shared_ptr<TrackballSimulator> trackball;
+
+public:
+	std::shared_ptr<TrackballSettings> trackballSettings;
 
 	/**
 	 * \brief Pressed state for multi-touch point 1.
@@ -44,6 +101,16 @@ public:
 	 * \sa Pressable
 	 */
 	Pressable state2;
+
+	ISimulator* getSimulator(InputSimulator* parent);
+
+	[[nodiscard]] std::optional<PressedState> getSimulatorState() const;
+
+	/**
+	 * \brief Clamp a point to the bounds of this touch region.
+	 * \param point The point to clamp.
+	 */
+	void clamp(Ds4Vector2& point) const;
 
 	// TODO: toggle for multi-touch press
 
@@ -84,7 +151,7 @@ public:
 	 */
 	std::unordered_map<Direction_t, InputAxisOptions> touchAxisOptions;
 
-	Ds4TouchRegion() = default;
+	Ds4TouchRegion();
 
 	/**
 	 * \brief Constructs a pre-configured touch region.
@@ -103,58 +170,55 @@ public:
 	 */
 	Ds4TouchRegion(const Ds4TouchRegion& other);
 
+	Ds4TouchRegion& operator=(const Ds4TouchRegion& other);
+
 	/**
 	 * \brief Check if a point is within the bounds of this touch region.
 	 * \param sender The multi-touch sender (touch 1, touch 2).
 	 * \param point The point to check.
 	 * \return \c true if \a point is within the bounds of this touch region.
 	 */
-	bool isInRegion(Ds4Buttons_t sender, const Ds4Vector2& point) const;
-
-	/**
-	 * \brief Check if a point is within the bounds of this touch region.
-	 * \param sender The multi-touch sender (touch 1, touch 2).
-	 * \param x The X coordinate of the point.
-	 * \param y The Y coordinate of the point.
-	 * \return \c true if \a point is within the bounds of this touch region.
-	 */
-	bool isInRegion(Ds4Buttons_t sender, short x, short y) const;
+	bool isInRegion(Ds4Buttons_t sender, const Ds4Vector2& point);
 
 	/**
 	 * \brief Get the starting coordinates that activated this touch region.
 	 * \param sender The multi-touch sender (touch 1, touch 2).
 	 * \return The initial activation coordinates.
 	 */
-	Ds4Vector2 getStartPoint(Ds4Buttons_t sender) const;
+	[[nodiscard]] Ds4Vector2 getStartPoint(Ds4Buttons_t sender) const;
 
 	/**
 	 * \brief Check if a multi-touch sender is active in this touch region.
 	 * \param sender The multi-touch sender (touch 1, touch 2).
 	 * \return \c true if the sender is active in this region.
 	 */
-	bool isActive(Ds4Buttons_t sender) const;
+	[[nodiscard]] bool isTouchActive(Ds4Buttons_t sender) const;
+
+	[[nodiscard]] bool isActive(Ds4Buttons_t sender, Direction_t direction) const;
 
 	/**
 	 * \brief Activate the specified multi-touch senders at the given point in this touch region.
 	 * \param sender The multi-touch sender (touch 1, touch 2).
 	 * \param point The starting point of the activation.
 	 */
-	void setActive(Ds4Buttons_t sender, const Ds4Vector2& point);
+	void activateTouch(Ds4Buttons_t sender, const Ds4Vector2& point);
 
 	/**
 	 * \brief De-activate the specified multi-touch senders in this region.
 	 * \param sender The multi-touch sender (touch 1, touch 2).
+	 * \param point The last point reported by the device.
 	 */
-	void setInactive(Ds4Buttons_t sender);
+	void deactivateTouch(Ds4Buttons_t sender, Ds4Vector2 point);
 
 	/**
 	 * \brief Get the delta of the activation point and current touch coordinates.
 	 * \param sender The multi-touch sender (touch 1, touch 2).
 	 * \param direction The direction of touch movement.
-	 * \param point The current coordinates of the sender.
 	 * \return The delta between the start point and \a point.
 	 */
-	float getTouchDelta(Ds4Buttons_t sender, Direction_t direction, const Ds4Vector2& point) const;
+	[[nodiscard]] float getSimulatedAxis(Ds4Buttons_t sender, Direction_t direction) const;
+
+	[[nodiscard]] const decltype(points1)& getPoints(Ds4Buttons_t sender) const;
 
 	/**
 	 * \brief Get the dead zone of the specified touch direction.
@@ -168,7 +232,7 @@ public:
 	 * \param direction The direction of touch movement.
 	 * \param analog The value to apply the dead zone formula to.
 	 */
-	void applyDeadZone(Direction_t direction, float& analog);
+	void applyDeadZone(Direction_t direction, float& analog) const;
 
 	bool operator==(const Ds4TouchRegion& other) const;
 	bool operator!=(const Ds4TouchRegion& other) const;

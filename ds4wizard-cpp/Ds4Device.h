@@ -28,8 +28,9 @@ class Ds4Device
 	bool running = false;
 	std::recursive_mutex sync_lock;
 
-	// Read-Only
 	Stopwatch idleTime {};
+	Stopwatch writeTime {};
+	const std::chrono::milliseconds writeFrequency = std::chrono::milliseconds(4);
 
 	inline static const Ds4Color fadeColor {};
 
@@ -53,20 +54,12 @@ class Ds4Device
 
 	InputSimulator simulator;
 
-	// Delta time (for things like mouse movement).
-	// Assumes 1000 Hz virtual polling rate.
-	Stopwatch deltaStopwatch {};
-
 public:
 	enum class BluetoothDisconnectReason
 	{
 		none,
 		idle
 	};
-
-	// Delta time (for things like mouse movement).
-	// Assumes 1000 Hz virtual polling rate.
-	float deltaTime = 1.0f;
 
 	Event<Ds4Device> onDeviceClosed;
 	Event<Ds4Device> onBatteryLevelChanged;

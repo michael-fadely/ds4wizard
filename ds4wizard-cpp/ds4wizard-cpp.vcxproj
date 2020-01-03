@@ -169,6 +169,7 @@
     <ClCompile Include="enums.cpp" />
     <ClCompile Include="InputMap.cpp" />
     <ClCompile Include="InputSimulator.cpp" />
+    <ClCompile Include="ISimulator.cpp" />
     <ClCompile Include="KeyboardSimulator.cpp" />
     <ClCompile Include="Latency.cpp" />
     <ClCompile Include="Logger.cpp" />
@@ -188,6 +189,7 @@
     <ClCompile Include="Pressable.cpp" />
     <ClCompile Include="ProfileEditorDialog.cpp" />
     <ClCompile Include="program.cpp" />
+    <ClCompile Include="RumbleSequence.cpp" />
     <ClCompile Include="Settings.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -195,18 +197,24 @@
     </ClCompile>
     <ClCompile Include="Stopwatch.cpp" />
     <ClCompile Include="stringutil.cpp" />
+    <ClCompile Include="Trackball.cpp" />
+    <ClCompile Include="Vector2.cpp" />
     <ClCompile Include="ViGEmDriver.cpp" />
     <ClCompile Include="ViGEmTarget.cpp" />
     <ClCompile Include="XInputGamepad.cpp" />
+    <ClCompile Include="XInputRumbleSimulator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="average.h" />
     <ClInclude Include="AxisOptions.h" />
     <ClInclude Include="Bluetooth.h" />
     <ClInclude Include="busenum.h" />
+    <ClInclude Include="circular_buffer.h" />
     <ClInclude Include="DeviceIdleOptions.h" />
     <ClInclude Include="DeviceProfile.h" />
     <ClInclude Include="DeviceProfileCache.h" />
+    <ClInclude Include="RumbleSequence.h" />
+    <ClInclude Include="XInputRumbleSimulator.h" />
     <QtMoc Include="DevicePropertiesDialog.h">
       
       
@@ -240,8 +248,10 @@
     <ClInclude Include="Ds4TouchRegion.h" />
     <ClInclude Include="enums.h" />
     <ClInclude Include="Event.h" />
+    <ClInclude Include="gmath.h" />
     <ClInclude Include="InputMap.h" />
     <ClInclude Include="InputSimulator.h" />
+    <ClInclude Include="ISimulator.h" />
     <ClInclude Include="JsonData.h" />
     <ClInclude Include="KeyboardSimulator.h" />
     <ClInclude Include="Latency.h" />
@@ -252,10 +262,13 @@
       
       
     </QtMoc>
+    <ClInclude Include="MapCache.h" />
     <ClInclude Include="MouseSimulator.h" />
     <ClInclude Include="pathutil.h" />
     <ClInclude Include="Stopwatch.h" />
     <ClInclude Include="stringutil.h" />
+    <ClInclude Include="Trackball.h" />
+    <ClInclude Include="Vector2.h" />
     <ClInclude Include="ViGEmDriver.h" />
     <ClInclude Include="ViGEmTarget.h" />
     <ClInclude Include="XInputGamepad.h" />
@@ -266,7 +279,6 @@
       
     </QtMoc>
     <ClInclude Include="ConnectionType.h" />
-    <ClInclude Include="lerp.h" />
     <ClInclude Include="lock.h" />
     <ClInclude Include="Pressable.h" />
     <ClInclude Include="program.h" />

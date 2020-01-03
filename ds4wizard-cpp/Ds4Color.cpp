@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "Ds4Color.h"
-#include "lerp.h"
+#include "gmath.h"
 
 Ds4Color::Ds4Color(uint8_t r, uint8_t g, uint8_t b)
 	: red(r),
@@ -23,9 +23,9 @@ Ds4Color Ds4Color::lerp(const Ds4Color& a, const Ds4Color& b, float f)
 {
 	Ds4Color dest;
 
-	dest.red   = ::lerp(a.red, b.red, f);
-	dest.green = ::lerp(a.green, b.green, f);
-	dest.blue  = ::lerp(a.blue, b.blue, f);
+	dest.red   = gmath::lerp(a.red, b.red, f);
+	dest.green = gmath::lerp(a.green, b.green, f);
+	dest.blue  = gmath::lerp(a.blue, b.blue, f);
 
 	return dest;
 }

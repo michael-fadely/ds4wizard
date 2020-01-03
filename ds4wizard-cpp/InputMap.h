@@ -20,28 +20,36 @@ private:
 	Stopwatch rapidStopwatch;
 
 public:
-	PressedState simulatedState() const;
+	/**
+	 * \brief
+	 * The pressed state of the underlying emulated mapping.
+	 * For example if \c toggle and \c isToggled are \c true,
+	 * this function will return \c PressedState::pressed or \c PressedState::on.
+	 * \sa PressedState
+	 */
+	[[nodiscard]] PressedState simulatedState() const;
 
-	[[nodiscard]] virtual bool isActive() const override;
+	[[nodiscard]] bool isActive() const override;
 
 	/**
 	 * \brief Indicates if this instance has a persistent state
 	 * which is actively simulated.
 	 */
-	bool isPersistent() const;
+	[[nodiscard]] bool isPersistent() const;
 
 	InputType_t inputType = 0;
 
 	std::optional<Ds4Buttons_t> inputButtons;
-	std::optional<Ds4Axis_t> inputAxis;
-	std::string inputRegion;
+	std::optional<Ds4Axes_t> inputAxes;
+	std::string inputTouchRegion;
+	std::optional<Direction_t> inputTouchDirection;
 
 	std::optional<bool> toggle;
 	std::optional<bool> rapidFire;
 
 	std::optional<std::chrono::microseconds> rapidFireInterval;
 
-	std::unordered_map<Ds4Axis_t, InputAxisOptions> inputAxisOptions;
+	std::unordered_map<Ds4Axes_t, InputAxisOptions> inputAxisOptions;
 
 	InputMapBase() = default;
 	InputMapBase(const InputMapBase& other);
@@ -49,26 +57,26 @@ public:
 
 	explicit InputMapBase(InputType_t inputType);
 	InputMapBase(InputType_t inputType, Ds4Buttons::T input);
-	InputMapBase(InputType_t inputType, Ds4Axis::T input);
+	InputMapBase(InputType_t inputType, Ds4Axes::T input);
 	InputMapBase(InputType_t inputType, std::string input);
 
 	InputMapBase& operator=(const InputMapBase&) = default;
 	InputMapBase& operator=(InputMapBase&& other) noexcept;
 
-	virtual void press() override;
+	void press() override;
 
 protected:
 	void updateRapidState();
 
 public:
-	virtual void release() override;
-	InputAxisOptions getAxisOptions(Ds4Axis_t axis);
+	void release() override;
+	InputAxisOptions getAxisOptions(Ds4Axes_t axis) const;
 
 	bool operator==(const InputMapBase& other) const;
 	bool operator!=(const InputMapBase& other) const;
 
-	virtual void readJson(const nlohmann::json& json) override;
-	virtual void writeJson(nlohmann::json& json) const override;
+	void readJson(const nlohmann::json& json) override;
+	void writeJson(nlohmann::json& json) const override;
 };
 
 class InputModifier;
@@ -833,7 +841,8 @@ enum VirtualKeyCode //: UInt16
 	//
 
 	/// <summary>
-	/// Used for miscellaneous characters; it can vary by keyboard. Windows 2000/XP: For the US standard keyboard, the ';:' key 
+	/// Used for miscellaneous characters; it can vary by keyboard.
+	/// Windows 2000/XP: For the US standard keyboard, the ';:' key 
 	/// </summary>
 	oem1 = 0xBA,
 
@@ -858,12 +867,14 @@ enum VirtualKeyCode //: UInt16
 	oemPeriod = 0xBE,
 
 	/// <summary>
-	/// Used for miscellaneous characters; it can vary by keyboard. Windows 2000/XP: For the US standard keyboard, the '/?' key 
+	/// Used for miscellaneous characters; it can vary by keyboard.
+	/// Windows 2000/XP: For the US standard keyboard, the '/?' key 
 	/// </summary>
 	oem2 = 0xBF,
 
 	/// <summary>
-	/// Used for miscellaneous characters; it can vary by keyboard. Windows 2000/XP: For the US standard keyboard, the '`~' key 
+	/// Used for miscellaneous characters; it can vary by keyboard.
+	/// Windows 2000/XP: For the US standard keyboard, the '`~' key 
 	/// </summary>
 	oem3 = 0xC0,
 
@@ -876,22 +887,26 @@ enum VirtualKeyCode //: UInt16
 	//
 
 	/// <summary>
-	/// Used for miscellaneous characters; it can vary by keyboard. Windows 2000/XP: For the US standard keyboard, the '[{' key
+	/// Used for miscellaneous characters; it can vary by keyboard.
+	/// Windows 2000/XP: For the US standard keyboard, the '[{' key
 	/// </summary>
 	oem4 = 0xDB,
 
 	/// <summary>
-	/// Used for miscellaneous characters; it can vary by keyboard. Windows 2000/XP: For the US standard keyboard, the '\|' key
+	/// Used for miscellaneous characters; it can vary by keyboard.
+	/// Windows 2000/XP: For the US standard keyboard, the '\|' key
 	/// </summary>
 	oem5 = 0xDC,
 
 	/// <summary>
-	/// Used for miscellaneous characters; it can vary by keyboard. Windows 2000/XP: For the US standard keyboard, the ']}' key
+	/// Used for miscellaneous characters; it can vary by keyboard.
+	/// Windows 2000/XP: For the US standard keyboard, the ']}' key
 	/// </summary>
 	oem6 = 0xDD,
 
 	/// <summary>
-	/// Used for miscellaneous characters; it can vary by keyboard. Windows 2000/XP: For the US standard keyboard, the 'single-quote/double-quote' key
+	/// Used for miscellaneous characters; it can vary by keyboard.
+	/// Windows 2000/XP: For the US standard keyboard, the 'single-quote/double-quote' key
 	/// </summary>
 	oem7 = 0xDE,
 
@@ -927,7 +942,9 @@ enum VirtualKeyCode //: UInt16
 	//
 
 	/// <summary>
-	/// Windows 2000/XP: Used to pass Unicode characters as if they were keystrokes. The PACKET key is the low word of a 32-bit Virtual Key value used for non-keyboard input methods. For more information, see Remark in KEYBDINPUT, SendInput, WM_KEYDOWN, and WM_KEYUP
+	/// Windows 2000/XP: Used to pass Unicode characters as if they were keystrokes.
+	/// The PACKET key is the low word of a 32-bit Virtual Key value used for non-keyboard input methods.
+	/// For more information, see Remark in KEYBDINPUT, SendInput, WM_KEYDOWN, and WM_KEYUP
 	/// </summary>
 	packet = 0xE7,
 
@@ -994,12 +1011,6 @@ public:
 
 	std::optional<ActionType> action;
 
-	#pragma region Touch
-
-	std::optional<Direction_t> touchDirection;
-
-	#pragma endregion
-
 	#pragma region Keyboard
 
 	std::optional<VirtualKeyCode> keyCode;
@@ -1045,6 +1056,9 @@ public:
 	void writeJson(nlohmann::json& json) const override;
 };
 
+/**
+ * \brief A modifier set that controls a collection of input bindings.
+ */
 class InputModifier : public InputMapBase
 {
 public:
@@ -1056,7 +1070,7 @@ public:
 	InputModifier() = default;
 
 	InputModifier(InputType_t type, Ds4Buttons::T buttons);
-	InputModifier(InputType_t type, Ds4Axis::T axis);
+	InputModifier(InputType_t type, Ds4Axes::T axis);
 	InputModifier(InputType_t type, const std::string& region);
 
 	// Copy constructor

@@ -12,6 +12,9 @@
 #include "Bluetooth.h"
 #include "Ds4AutoLightColor.h"
 
+// TODO: allow enabling, disabling, and remapping of individual output (and eventual virtual input) DS4 motors
+// TODO: allow enabling, disabling, and remapping of individual input XInput rumble motors
+
 using namespace std::chrono;
 
 bool Ds4Device::disconnectOnIdle() const
@@ -413,6 +416,11 @@ void Ds4Device::setupUsbOutputBuffer() const
 
 void Ds4Device::writeUsbAsync()
 {
+	if (writeTime.elapsed() < writeFrequency)
+	{
+		return;
+	}
+
 	if (usbDevice->checkPendingWrite())
 	{
 		return;
@@ -436,6 +444,11 @@ void Ds4Device::writeUsbAsync()
 
 void Ds4Device::writeBluetooth()
 {
+	if (writeTime.elapsed() < writeFrequency)
+	{
+		return;
+	}
+
 	constexpr auto bt_output_offset = 6;
 
 	const auto span = gsl::make_span(&bluetoothDevice->output_buffer[bt_output_offset],
@@ -458,9 +471,6 @@ void Ds4Device::writeBluetooth()
 
 void Ds4Device::run()
 {
-	deltaTime = static_cast<float>(duration_cast<milliseconds>(deltaStopwatch.elapsed()).count());
-	deltaStopwatch.start();
-
 	// HACK: make this class manage the light state
 	output.lightColor = activeLight.color;
 
@@ -487,8 +497,6 @@ void Ds4Device::run()
 	const bool useBluetooth = bluetooth && (preferredConnection == +ConnectionType::bluetooth || !usb);
 
 	dataReceived = false;
-
-	simulator.updateEmulators();
 
 	if (useUsb)
 	{
@@ -529,12 +537,12 @@ void Ds4Device::run()
 		}
 	}
 
-	const float lx = input.getAxis(Ds4Axis::leftStickX, std::nullopt);
-	const float ly = input.getAxis(Ds4Axis::leftStickY, std::nullopt);
+	const float lx = input.getAxis(Ds4Axes::leftStickX, std::nullopt);
+	const float ly = input.getAxis(Ds4Axes::leftStickY, std::nullopt);
 	const float ls = std::sqrt(lx * lx + ly * ly);
 
-	const float rx = input.getAxis(Ds4Axis::rightStickX, std::nullopt);
-	const float ry = input.getAxis(Ds4Axis::rightStickY, std::nullopt);
+	const float rx = input.getAxis(Ds4Axes::rightStickX, std::nullopt);
+	const float ry = input.getAxis(Ds4Axes::rightStickY, std::nullopt);
 	const float rs = std::sqrt(rx * rx + ry * ry);
 
 	// TODO: gyro/accel - definitely needs to be configurable
@@ -615,9 +623,10 @@ void Ds4Device::run()
 
 void Ds4Device::controllerThread()
 {
+	simulator.start();
 	readLatency.start();
 	idleTime.start();
-	deltaStopwatch.start();
+	writeTime.start();
 
 	while (connected() && running)
 	{

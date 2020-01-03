@@ -139,7 +139,7 @@ R"(
       "bottom": 941
     },
     "Right Half": {
-      "type": "stickAutoCenter",
+      "type": "trackball",
       "allowCrossOver": false,
       "left": 960,
       "top": 0,
@@ -158,6 +158,19 @@ R"(
         "right": {
           "deadZone": 0.25
         }
+      },
+      "trackballSettings": {
+        "touchFriction": 1.0,
+        "ballFriction": 0.1,
+        "ballSpeed": 100.0,
+        "touchVibration": {
+          "enabled": true,
+          "factor": 0.25
+        },
+        "ballVibration": {
+          "enabled": true,
+          "factor": 1
+        }
       }
     }
   },
@@ -165,34 +178,34 @@ R"(
     {
       "simulatorType": "input",
       "outputType": "xinput",
-      "touchDirection": "up",
+      "inputTouchDirection": "up",
       "xinputButtons": "dPadUp",
       "inputType": "touchRegion",
-      "inputRegion": "Right Half"
+      "inputTouchRegion": "Right Half"
     },
     {
       "simulatorType": "input",
       "outputType": "xinput",
-      "touchDirection": "down",
+      "inputTouchDirection": "down",
       "xinputButtons": "dPadDown",
       "inputType": "touchRegion",
-      "inputRegion": "Right Half"
+      "inputTouchRegion": "Right Half"
     },
     {
       "simulatorType": "input",
       "outputType": "xinput",
-      "touchDirection": "left",
+      "inputTouchDirection": "left",
       "xinputButtons": "dPadLeft",
       "inputType": "touchRegion",
-      "inputRegion": "Right Half"
+      "inputTouchRegion": "Right Half"
     },
     {
       "simulatorType": "input",
       "outputType": "xinput",
-      "touchDirection": "right",
+      "inputTouchDirection": "right",
       "xinputButtons": "dPadRight",
       "inputType": "touchRegion",
-      "inputRegion": "Right Half"
+      "inputTouchRegion": "Right Half"
     },
     {
       "simulatorType": "input",
@@ -311,7 +324,7 @@ R"(
         }
       },
       "inputType": "axis",
-      "inputAxis": "leftStickY",
+      "inputAxes": "leftStickY",
       "inputAxisOptions": {
         "leftStickY": {
           "polarity": "positive"
@@ -330,7 +343,7 @@ R"(
         }
       },
       "inputType": "axis",
-      "inputAxis": "leftStickY",
+      "inputAxes": "leftStickY",
       "inputAxisOptions": {
         "leftStickY": {
           "polarity": "negative"
@@ -349,7 +362,7 @@ R"(
         }
       },
       "inputType": "axis",
-      "inputAxis": "leftStickX",
+      "inputAxes": "leftStickX",
       "inputAxisOptions": {
         "leftStickX": {
           "polarity": "positive"
@@ -368,7 +381,7 @@ R"(
         }
       },
       "inputType": "axis",
-      "inputAxis": "leftStickX",
+      "inputAxes": "leftStickX",
       "inputAxisOptions": {
         "leftStickX": {
           "polarity": "negative"
@@ -387,7 +400,7 @@ R"(
         }
       },
       "inputType": "axis",
-      "inputAxis": "rightStickY",
+      "inputAxes": "rightStickY",
       "inputAxisOptions": {
         "rightStickY": {
           "polarity": "positive"
@@ -406,7 +419,7 @@ R"(
         }
       },
       "inputType": "axis",
-      "inputAxis": "rightStickY",
+      "inputAxes": "rightStickY",
       "inputAxisOptions": {
         "rightStickY": {
           "polarity": "negative"
@@ -425,7 +438,7 @@ R"(
         }
       },
       "inputType": "axis",
-      "inputAxis": "rightStickX",
+      "inputAxes": "rightStickX",
       "inputAxisOptions": {
         "rightStickX": {
           "polarity": "positive"
@@ -444,7 +457,7 @@ R"(
         }
       },
       "inputType": "axis",
-      "inputAxis": "rightStickX",
+      "inputAxes": "rightStickX",
       "inputAxisOptions": {
         "rightStickX": {
           "polarity": "negative"
@@ -458,7 +471,7 @@ R"(
         "axes": "leftTrigger"
       },
       "inputType": "axis",
-      "inputAxis": "leftTrigger"
+      "inputAxes": "leftTrigger"
     },
     {
       "simulatorType": "input",
@@ -467,7 +480,7 @@ R"(
         "axes": "rightTrigger"
       },
       "inputType": "axis",
-      "inputAxis": "rightTrigger"
+      "inputAxes": "rightTrigger"
     }
   ],
   "modifiers": [
@@ -529,7 +542,7 @@ R"(
         }
       ],
       "inputType": "touchRegion",
-      "inputRegion": "Left Half"
+      "inputTouchRegion": "Left Half"
     },
     {
       "bindings": [
@@ -542,7 +555,7 @@ R"(
         }
       ],
       "inputType": "touchRegion",
-      "inputRegion": "Right Half"
+      "inputTouchRegion": "Right Half"
     },
     {
       "bindings": [

@@ -58,6 +58,7 @@
 #include <ViGEm/Common.h>
 #include <ViGEm/km/BusShared.h>
 
+#include "MapCache.h"
 #include "average.h"
 #include "AxisOptions.h"
 #include "Bluetooth.h"
@@ -81,12 +82,12 @@
 #include "Ds4TouchRegion.h"
 #include "enums.h"
 #include "Event.h"
+#include "gmath.h"
 #include "InputMap.h"
 #include "InputSimulator.h"
 #include "JsonData.h"
 #include "KeyboardSimulator.h"
 #include "Latency.h"
-#include "lerp.h"
 #include "lock.h"
 #include "Logger.h"
 #include "MainWindow.h"
@@ -98,4 +99,6 @@
 #include "Settings.h"
 #include "Stopwatch.h"
 #include "stringutil.h"
+#include "Trackball.h"
+#include "Vector2.h"
 #include "XInputGamepad.h"
