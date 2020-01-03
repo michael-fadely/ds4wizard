@@ -6,8 +6,7 @@
 bool TrackballVibration::operator==(TrackballVibration& other) const
 {
 	return enabled == other.enabled &&
-	       gmath::near_equal(factor, other.factor) &&
-	       gmath::near_equal(deadZone, other.deadZone);
+	       gmath::near_equal(factor, other.factor);
 }
 
 bool TrackballVibration::operator!=(TrackballVibration& other) const
@@ -17,16 +16,16 @@ bool TrackballVibration::operator!=(TrackballVibration& other) const
 
 void TrackballVibration::readJson(const nlohmann::json& json)
 {
-	enabled  = json["enabled"];
-	factor   = json["factor"];
-	deadZone = json["deadZone"];
+	enabled = json["enabled"];
+	factor  = json["factor"];
+
+	factor = std::clamp(factor, 0.0f, 1.0f);
 }
 
 void TrackballVibration::writeJson(nlohmann::json& json) const
 {
-	json["enabled"]  = enabled;
-	json["factor"]   = factor;
-	json["deadZone"] = deadZone;
+	json["enabled"] = enabled;
+	json["factor"]  = factor;
 }
 
 bool TrackballSettings::operator==(TrackballSettings& other) const
@@ -72,7 +71,7 @@ void TrackballSettings::writeJson(nlohmann::json& json) const
 TrackballSimulator::TrackballSimulator(const TrackballSettings& settings, Ds4TouchRegion* region, InputSimulator* parent)
 	: ISimulator(parent),
 	  region(region),
-	  rumbleTimer(std::make_shared<RumbleTimer>(parent, std::chrono::milliseconds(125), 0, 0)),
+	  rumbleTimer(std::make_shared<RumbleTimer>(parent, std::chrono::milliseconds(125), 0.0f, 0.0f)),
 	  settings(settings)
 {
 }
@@ -93,7 +92,7 @@ bool TrackballSimulator::rolling() const
 
 TrackballSimulator::TrackballState TrackballSimulator::applyDirectionalForce(bool touching, Vector2 targetDirection, float force, float deltaTime)
 {
-	if (gmath::is_zero(force))
+	if (std::abs(force) < settings.ballFriction)
 	{
 		if (rolling())
 		{
@@ -112,11 +111,7 @@ TrackballSimulator::TrackballState TrackballSimulator::applyDirectionalForce(boo
 
 	const auto currentDirection = velocity.normalized();
 
-	if (targetDirection.near_equal(Vector2::zero))
-	{
-		targetDirection = currentDirection;
-	}
-	else if (!targetDirection.is_normalized())
+	if (!targetDirection.is_normalized())
 	{
 		targetDirection.normalize();
 	}
@@ -215,19 +210,23 @@ void TrackballSimulator::decelerate(float deltaTime)
 	velocity = Vector2::clamp(velocity, -settings.ballSpeed, settings.ballSpeed);
 }
 
-template <size_t N>
-void doStupidShit(const circular_buffer<Ds4TouchHistory, N>& points,
-                  std::optional<Ds4TouchHistory>& newest, std::optional<Ds4TouchHistory>& oldest)
+template <ptrdiff_t N>
+void selectPoints(const circular_buffer<Ds4TouchHistory, N>& points,
+                  std::optional<Ds4TouchHistory>& newest,
+                  std::optional<Ds4TouchHistory>& oldest)
 {
 	newest = points.newest();
 	oldest = points.oldest();
 
-	// UNDONE: use this to calculate a flick threshold
-	
 	static constexpr auto threshold = std::chrono::milliseconds(125);
 
-	for (size_t i = 0; i < points.count; i++)
+	for (ptrdiff_t i = 0; i < points.count - 1; i++)
 	{
+		if (newest->timestamp < points[i].timestamp)
+		{
+			continue;
+		}
+
 		if (newest->timestamp - points[i].timestamp < threshold)
 		{
 			oldest = points[i];
@@ -238,8 +237,8 @@ void doStupidShit(const circular_buffer<Ds4TouchHistory, N>& points,
 
 void TrackballSimulator::simulate(float deltaTime, Ds4Buttons_t touchId)
 {
-	const short width  = static_cast<short>(region->right - region->left);
-	const short height = static_cast<short>(region->bottom - region->top);
+	const auto width  = static_cast<short>(region->right - region->left);
+	const auto height = static_cast<short>(region->bottom - region->top);
 
 	std::optional<Ds4TouchHistory> newest;
 	std::optional<Ds4TouchHistory> oldest;
@@ -248,7 +247,7 @@ void TrackballSimulator::simulate(float deltaTime, Ds4Buttons_t touchId)
 	
 	if (touching)
 	{
-		doStupidShit(region->getPoints(touchId), newest, oldest);
+		selectPoints(region->getPoints(touchId), newest, oldest);
 	}
 
 	Vector2 direction {};
@@ -263,37 +262,31 @@ void TrackballSimulator::simulate(float deltaTime, Ds4Buttons_t touchId)
 		region->clamp(pb);
 
 		direction = {
-			static_cast<float>(pb.x - pa.x) / width,
-			static_cast<float>(pb.y - pa.y) / height
+			static_cast<float>(pb.x - pa.x) / static_cast<float>(width),
+			static_cast<float>(pb.y - pa.y) / static_cast<float>(height)
 		};
 
 		force = direction.length();
 		direction.normalize();
 	}
 
-	TrackballState state = applyDirectionalForce(touching, direction, force, deltaTime);
+	const TrackballState state = applyDirectionalForce(touching, direction, force, deltaTime);
 
 	const float f = velocity.length() / settings.ballSpeed;
 
-	uint8_t left  = static_cast<uint8_t>(std::clamp(f * settings.touchVibration.factor * 255.0f, 0.0f, 255.0f));
-	uint8_t right = static_cast<uint8_t>(std::clamp(f * settings.ballVibration.factor * 255.0f, 0.0f, 255.0f));
+	const auto left  = std::clamp(f * settings.touchVibration.factor * 255.0f, 0.0f, 1.0f);
+	const auto right = std::clamp(f * settings.ballVibration.factor * 255.0f, 0.0f, 1.0f);
 
 	switch (state)
 	{
 		case TrackballState::slowing:
-			//qDebug() << "slowing";
 			rumbleTimer->left = left;
 			rumbleTimer->reset();
 			parent->addSimulator(rumbleTimer.get());
 			break;
 
-		case TrackballState::decelerating:
-			//qDebug() << "decelerating";
-			parent->setRumble(0, right);
-			break;
-
 		case TrackballState::accelerating:
-			//qDebug() << "accelerating";
+		case TrackballState::decelerating:
 			parent->setRumble(0, right);
 			break;
 

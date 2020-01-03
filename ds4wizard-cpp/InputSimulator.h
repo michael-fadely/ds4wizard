@@ -69,8 +69,12 @@ public:
 	explicit InputSimulator(Ds4Device* parent);
 	~InputSimulator();
 
+	/**
+	 * \brief Performs any required initialization before simulations can occur.
+	 */
 	void start();
 
+private:
 	/**
 	 * \brief Simulates XInput buttons.
 	 * \param buttons Buttons to simulate.
@@ -99,12 +103,14 @@ public:
 	 */
 	void runMap(const InputMap& m, InputModifier const* modifier);
 
+public:
 	/**
 	 * \brief Applies a profile to the device.
 	 * \param profile The profile to apply.
 	 */
 	void applyProfile(DeviceProfile* profile);
 
+private:
 	/**
 	 * \brief Handles toggles which are managed by touch regions.
 	 * \param m The input map managed by a touch region.
@@ -144,17 +150,57 @@ public:
 	 */
 	void runAction(ActionType action) const;
 
+	/**
+	 * \brief Updates the delta time scale. Called by \sa startTick
+	 */
 	void updateDeltaTime();
-	void updateModifiers();
-	void updateBindings();
-	void reset();
 
-	void setRumble(uint8_t leftMotor, uint8_t rightMotor) const;
+	/**
+	 * \brief Updates the pressed states of all the managed modifier sets.
+	 */
+	void updateModifierStates();
 
+	/**
+	 * \brief Updates the pressed states of all managed bindings.
+	 */
+	void updateBindingStates();
+	
+	/**
+	 * \brief
+	 * Called at the start of a tick.
+	 * Resets any unwanted states from the last simulation tick.
+	 */
+	void startTick();
+
+public:
+	/**
+	 * \brief Set the rumble of the left and/or right motors of the controller.
+	 * \param leftMotor The power of the left motor.
+	 * \param rightMotor The power of the right motor.
+	 */
+	void setRumble(float leftMotor, float rightMotor) const;
+
+	/**
+	 * \brief Add a simulator to be tracked an updated each tick.
+	 * \param simulator The simulator to add.
+	 * \return \c true if the simulator is not already tracked.
+	 */
 	bool addSimulator(ISimulator* simulator);
+
+	/**
+	 * \brief Remove a simulator from tracking and updating.
+	 * \param simulator The simulator to remove.
+	 * \return \c true if the simulator was tracked and removed.
+	 */
 	bool removeSimulator(ISimulator* simulator);
+
+private:
+	/**
+	 * \brief Runs all tracked simulators for this tick.
+	 */
 	void runSimulators();
 
+public:
 	/**
 	 * \brief Runs all input maps managed by this instance.
 	 */
@@ -164,7 +210,8 @@ public:
 	 * \brief Runs all persistent input maps (e.g rapid fire) managed by this instance.
 	 */
 	void runPersistent();
-	
+
+private:
 	/**
 	 * \brief Runs all touch regions managed by this instance.
 	 * \sa updateTouchRegion
@@ -179,7 +226,7 @@ public:
 	 * \param disallow Buttons to disallow if a region does not allow overlap.
 	 */
 	void updateTouchRegion(Ds4TouchRegion& region, Ds4Buttons_t sender,
-	                       Ds4Vector2& point, Ds4Buttons_t& disallow) const;
+	                       const Ds4Vector2& point, Ds4Buttons_t& disallow) const;
 	
 	/**
 	 * \brief Internal implementation of \sa updatePressedState
@@ -194,7 +241,7 @@ public:
 	 * \param modifier The modifier to update.
 	 * \return \c true if the active state of the modifier has changed.
 	 */
-	bool updateModifier(InputModifier& modifier);
+	bool updateModifierState(InputModifier& modifier);
 
 	/**
 	 * \brief
@@ -209,8 +256,7 @@ public:
 	 * \return \c true if the pressed state of the map has changed.
 	 */
 	bool updateBindingState(InputMap& map, InputModifier* modifier);
-	
-private:
+
 	/**
 	 * \brief Connects a virtual XInput device to the system.
 	 * \return \c true on success.

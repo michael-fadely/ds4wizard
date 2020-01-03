@@ -16,8 +16,8 @@ struct RumbleSequenceElement
 {
 	RumbleSequenceBlending blending = RumbleSequenceBlending::none;
 	int64_t durationMilliseconds = 0;
-	uint8_t leftMotor = 0;
-	uint8_t rightMotor = 0;
+	float leftMotor = 0.0f;
+	float rightMotor = 0.0f;
 };
 
 class InputSimulator;
@@ -41,11 +41,11 @@ class RumbleTimer : public ISimulator
 
 public:
 	RumbleTimer(InputSimulator* parent, Stopwatch::Duration duration,
-	            uint8_t left, uint8_t right);
+	            float left, float right);
 
 	Stopwatch::Duration duration;
-	uint8_t left;
-	uint8_t right;
+	float left;
+	float right;
 
 	void reset();
 

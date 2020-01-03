@@ -165,13 +165,11 @@ R"(
         "ballSpeed": 100.0,
         "touchVibration": {
           "enabled": true,
-          "factor": 0.25,
-          "deadZone": 0.0
+          "factor": 0.25
         },
         "ballVibration": {
           "enabled": true,
-          "factor": 1,
-          "deadZone": 0.0
+          "factor": 1
         }
       }
     }

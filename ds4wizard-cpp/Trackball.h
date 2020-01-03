@@ -9,7 +9,6 @@ struct TrackballVibration : JsonData
 {
 	bool  enabled  = false;
 	float factor   = 1.0f;
-	float deadZone = 0.0f;
 
 	bool operator==(TrackballVibration& other) const;
 	bool operator!=(TrackballVibration& other) const;
@@ -18,6 +17,8 @@ struct TrackballVibration : JsonData
 	void writeJson(nlohmann::json& json) const override;
 };
 
+// TODO: /!\ configuration for simulated axis activation range (> lower bound, < upper bound; basically two dead zones)
+// TODO: /!\ configuration for flick threshold (milliseconds, microseconds, whatever)
 struct TrackballSettings : JsonData
 {
 	TrackballVibration touchVibration;

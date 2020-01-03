@@ -31,37 +31,22 @@ BETTER_ENUM(Ds4TouchRegionType, int,
             stick,
             /** \brief Simulates an analog stick which scales. */
             stickAutoCenter,
-            /** \brief  */
+            /** \brief Simulates a trackball which can roll over time. */
             trackball)
 
 class Ds4TouchRegion;
-
-// TODO: make these use sorted maps
 
 /**
  * \brief A collection of \c Ds4TouchRegion
  * \sa Ds4TouchRegion
  */
-using Ds4TouchRegionCollection = std::unordered_map<std::string, Ds4TouchRegion>;
+using Ds4TouchRegionCollection = std::map<std::string, Ds4TouchRegion>;
 
 /**
  * \brief A collection of \c Ds4TouchRegion* as a caching mechanism.
  * \sa Ds4TouchRegion, Ds4TouchRegionCollection
  */
-using Ds4TouchRegionCache = std::unordered_map<std::string, Ds4TouchRegion*>;
-
-/*
- * for when you inevitably come to this code and think:
- * "why doesn't this have InputModifier support?"
- *
- * - a Ds4TouchRegion is a virtual input, not a mapping;
- * - InputMapBase can use Ds4TouchRegion as an input;
- * - an InputMap which is part of an InputModifier that
- *   references a Ds4TouchRegion will not execute unless
- *   its InputModifier conditions are met.
- *
- * in conclusion: it does, indirectly.
- */
+using Ds4TouchRegionCache = std::map<std::string, Ds4TouchRegion*>;
 
 struct Ds4TouchHistory
 {
@@ -119,7 +104,7 @@ public:
 
 	ISimulator* getSimulator(InputSimulator* parent);
 
-	std::optional<PressedState> getSimulatorState() const;
+	[[nodiscard]] std::optional<PressedState> getSimulatorState() const;
 
 	/**
 	 * \brief Clamp a point to the bounds of this touch region.

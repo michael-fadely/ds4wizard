@@ -236,18 +236,7 @@ void InputSimulator::runMap(const InputMap& m, InputModifier const* modifier)
 		throw std::out_of_range("inputType must be non-zero.");
 	}
 
-	/*
-	 * UNDONE: this will not properly simulate activation for multiple input types; see below
-	 *
-	 * for touch regions, `release()` is called explicitly.
-	 * because of this poor implementation, an `InputMap` can
-	 * be "released" more than once per tick, effectively
-	 * skipping the released state and going straight to "off".
-	 *
-	 * solution:
-	 * - InputMap state should not be mutated in any way from
-	 *   this point onward. (const&)
-	 */
+	// UNDONE: this will not properly simulate activation for multiple input types; this is an OR, we probably want AND
 	for (InputType_t value : InputType_values)
 	{
 		if ((m.inputType & value) == 0)
@@ -304,34 +293,15 @@ void InputSimulator::runMap(const InputMap& m, InputModifier const* modifier)
 				}
 				else if (region->type == +Ds4TouchRegionType::trackball)
 				{
-					/*
-					 * UNDONE: trackball is ignored in favor of touch region's pressed state; see below
-					 * 
-					 * the touch region reports its own active state - that's all fine and dandy!
-					 * but the trackball has its own persistent state over time, regardless of
-					 * the active state of the touch region.
-					 *
-					 * solution:
-					 * - when the touch pad is a simulator (i.e. trackball), allow the simulator
-					 *   to report its active state, and use that instead.
-					 *   - note: `InputMapBase` provides a `simulatedState()` method that might
-					 *     be suited to this case in name alone, but not implementation.
-					 */
-
 					const Direction_t direction = m.inputTouchDirection.value();
 
 					float analog = region->getSimulatedAxis(Ds4Buttons::touch1, direction);
 
+					// TODO: update this to use the input vector-oriented dead zone application once implemented
 					region->applyDeadZone(direction, analog);
 					applyMap(m, modifier, m.simulatedState(), analog);
-
-					/*state  = handleTouchToggle(m, modifier, region->state2);
-					analog = region->getSimulatedAxis(Ds4Buttons::touch2, direction);
-
-					region->applyDeadZone(direction, analog);
-					applyMap(m, modifier, state, analog);*/
 				}
-				else
+				else // TODO: re-do this; Pressable::release should not be called
 				{
 					const Direction_t direction = m.inputTouchDirection.value();
 
@@ -340,6 +310,7 @@ void InputSimulator::runMap(const InputMap& m, InputModifier const* modifier)
 					PressedState state = handleTouchToggle(m, modifier, region->state1);
 					float analog = region->getSimulatedAxis(Ds4Buttons::touch1, direction);
 
+					// TODO: not this!!!
 					if (analog < deadZone)
 					{
 						Pressable::release(state);
@@ -348,9 +319,10 @@ void InputSimulator::runMap(const InputMap& m, InputModifier const* modifier)
 					region->applyDeadZone(direction, analog);
 					applyMap(m, modifier, state, analog);
 
-					state  = handleTouchToggle(m, modifier, region->state2);
+					state = handleTouchToggle(m, modifier, region->state2);
 					analog = region->getSimulatedAxis(Ds4Buttons::touch2, direction);
 
+					// TODO: not this!!!
 					if (analog < deadZone)
 					{
 						Pressable::release(state);
@@ -418,21 +390,26 @@ void InputSimulator::applyProfile(DeviceProfile* profile)
 		xinputDisconnect();
 	}
 
-	this->rumbleSequence = std::make_unique<RumbleSequence>(this);
+	if (rumbleSequence == nullptr)
+	{
+		rumbleSequence = std::make_unique<RumbleSequence>(this);
+	}
 
-	RumbleSequenceElement first = {
+	const RumbleSequenceElement first = {
 		RumbleSequenceBlending::none,
 		125,
 		0,
-		255
+		1.0f
 	};
 
-	RumbleSequenceElement second = {
+	const RumbleSequenceElement second = {
 		RumbleSequenceBlending::none,
 		125,
 		0,
 		0
 	};
+
+	// we want a nice "buzz buzz", so add these both twice
 
 	rumbleSequence->add(first);
 	rumbleSequence->add(second);
@@ -443,6 +420,7 @@ void InputSimulator::applyProfile(DeviceProfile* profile)
 	addSimulator(rumbleSequence.get());
 }
 
+// TODO: /!\ either document this thoroughly or remove it entirely
 PressedState InputSimulator::handleTouchToggle(const InputMap& m, InputModifier const* modifier, const Pressable& pressable) // static
 {
 	if (m.inputTouchDirection.has_value() && m.inputTouchDirection != Direction::none)
@@ -544,7 +522,7 @@ void InputSimulator::simulateMouse(const InputMap& m, PressedState state, float 
 
 	analog *= deltaTime;
 
-	// TODO: /!\ actually the thing (GetAxisOptions)
+	// TODO: /!\ getAxisOptions for mouse
 	Direction_t direction = m.mouseAxes.value().directions;
 
 	int x = 0;
@@ -653,11 +631,11 @@ void InputSimulator::updateDeltaTime()
 	deltaStopwatch.start();
 }
 
-void InputSimulator::updateModifiers()
+void InputSimulator::updateModifierStates()
 {
 	auto visitor = [&](InputModifier* m) -> bool
 	{
-		return updateModifier(*m);
+		return updateModifierState(*m);
 	};
 
 	for (const Ds4Buttons_t bit : Ds4Buttons_values)
@@ -676,7 +654,7 @@ void InputSimulator::updateModifiers()
 	}
 }
 
-void InputSimulator::updateBindings()
+void InputSimulator::updateBindingStates()
 {
 	auto visitor = [&](InputMap* m) -> bool
 	{
@@ -699,7 +677,7 @@ void InputSimulator::updateBindings()
 	}
 }
 
-void InputSimulator::reset()
+void InputSimulator::startTick()
 {
 	parent->output.leftMotor  = 0;
 	parent->output.rightMotor = 0;
@@ -712,10 +690,13 @@ void InputSimulator::reset()
 	simulatedXInputAxis = 0;
 }
 
-void InputSimulator::setRumble(uint8_t leftMotor, uint8_t rightMotor) const
+void InputSimulator::setRumble(float leftMotor, float rightMotor) const
 {
-	parent->output.leftMotor  = std::max(leftMotor, parent->output.leftMotor);
-	parent->output.rightMotor = std::max(rightMotor, parent->output.rightMotor);
+	leftMotor  = std::clamp(leftMotor, 0.0f, 1.0f);
+	rightMotor = std::clamp(rightMotor, 0.0f, 1.0f);
+
+	parent->output.leftMotor  = std::max(static_cast<uint8_t>(leftMotor * 255.0f),  parent->output.leftMotor);
+	parent->output.rightMotor = std::max(static_cast<uint8_t>(rightMotor * 255.0f), parent->output.rightMotor);
 }
 
 bool InputSimulator::addSimulator(ISimulator* simulator)
@@ -776,11 +757,11 @@ void InputSimulator::runSimulators()
 
 void InputSimulator::runMaps()
 {
-	reset();
+	startTick();
 
 	updateTouchRegions();
-	updateModifiers();
-	updateBindings();
+	updateModifierStates();
+	updateBindingStates();
 
 	runSimulators();
 
@@ -793,13 +774,13 @@ void InputSimulator::runMaps()
 
 void InputSimulator::runPersistent()
 {
-	reset();
+	startTick();
 
 	for (InputModifier* modifier : modifiers.allMaps())
 	{
 		if (modifier->isPersistent())
 		{
-			updateModifier(*modifier);
+			updateModifierState(*modifier);
 		}
 	}
 
@@ -834,7 +815,7 @@ void InputSimulator::updateTouchRegions()
 		}
 	};
 
-	// TODO: devise a cleaner way to get and manipulate touch data
+	// TODO: devise a cleaner way to get and manipulate touch data for each touch point
 
 	for (auto& region : sortableTouchRegions)
 	{
@@ -850,7 +831,7 @@ void InputSimulator::updateTouchRegions()
 	}
 }
 
-void InputSimulator::updateTouchRegion(Ds4TouchRegion& region, Ds4Buttons_t sender, Ds4Vector2& point, Ds4Buttons_t& disallow) const
+void InputSimulator::updateTouchRegion(Ds4TouchRegion& region, Ds4Buttons_t sender, const Ds4Vector2& point, Ds4Buttons_t& disallow) const
 {
 	if (!!(disallow & sender) || !(parent->input.heldButtons & sender) || !region.isInRegion(sender, point))
 	{
@@ -978,7 +959,7 @@ void InputSimulator::updatePressedState(InputMapBase& instance, const std::funct
 	}
 }
 
-bool InputSimulator::updateModifier(InputModifier& modifier)
+bool InputSimulator::updateModifierState(InputModifier& modifier)
 {
 	const PressedState oldPressedState = modifier.pressedState;
 

@@ -53,11 +53,17 @@ BETTER_ENUM(MouseButton, int,
             ex2)
 
 /**
+ * \brief Integral representation of \c InputType
+ * \sa InputType
+ */
+using InputType_t = uint32_t;
+
+/**
  * \brief The type of input to poll from the device.
  */
 struct InputType
 {
-	enum T : uint32_t
+	enum T : InputType_t
 	{
 		/** \brief None - invalid state. */
 		none,
@@ -70,21 +76,17 @@ struct InputType
 	};
 };
 
-/**
- * \brief Integral representation of \c InputType
- * \sa InputType
- */
-using InputType_t = uint32_t;
-
 ENUM_FLAGS(InputType);
 ENUM_VALUES(InputType, 3);
+
+using OutputType_t = uint32_t;
 
 /**
  * \brief Bitfield representing an output simulation type.
  */
 struct OutputType // TODO: vjoy output support
 {
-	enum T : uint32_t
+	enum T : OutputType_t
 	{
 		/** \brief None - invalid state. */
 		none,
@@ -97,17 +99,17 @@ struct OutputType // TODO: vjoy output support
 	};
 };
 
-using OutputType_t = uint32_t;
-
 ENUM_FLAGS(OutputType);
 ENUM_VALUES(OutputType, 3);
+
+using XInputButtons_t = uint16_t;
 
 /**
  * \brief Bitfield representing Xbox 360 digital buttons.
  */
 struct XInputButtons
 {
-	enum T : uint16_t
+	enum T : XInputButtons_t
 	{
 		dPadUp        = 0x0001,
 		dPadDown      = 0x0002,
@@ -128,16 +130,17 @@ struct XInputButtons
 	};
 };
 
-using XInputButtons_t = uint16_t;
 ENUM_FLAGS(XInputButtons);
 ENUM_VALUES(XInputButtons, 16);
+
+using XInputAxis_t = uint32_t;
 
 /**
  * \brief Bitfield representing Xbox 360 axes.
  */
 struct XInputAxis
 {
-	enum T : uint32_t
+	enum T : XInputAxis_t
 	{
 		none,
 		leftStickX   = 1 << 0,
@@ -149,16 +152,17 @@ struct XInputAxis
 	};
 };
 
-using XInputAxis_t = uint32_t;
 ENUM_FLAGS(XInputAxis);
 ENUM_VALUES(XInputAxis, 6);
+
+using Direction_t = uint32_t;
 
 /**
  * \brief Bitfield representing the direction of an action.
  */
 struct Direction
 {
-	enum T : uint32_t
+	enum T : Direction_t
 	{
 		none,
 		up    = 1 << 0,
@@ -168,7 +172,6 @@ struct Direction
 	};
 };
 
-using Direction_t = uint32_t;
 ENUM_FLAGS(Direction);
 ENUM_VALUES(Direction, 4);
 
@@ -289,12 +292,14 @@ struct Ds4Buttons
 ENUM_FLAGS(Ds4Buttons);
 ENUM_VALUES(Ds4Buttons, 20);
 
+using Ds4Axes_t = uint32_t;
+
 /**
  * \brief Bitfield representing the axes provided by the DualShock 4.
  */
 struct Ds4Axes
 {
-	enum T : uint32_t
+	enum T : Ds4Axes_t
 	{
 		leftStickX   = 1 << 0,
 		leftStickY   = 1 << 1,
@@ -309,18 +314,44 @@ struct Ds4Axes
 		gyroY        = 1 << 10,
 		gyroZ        = 1 << 11
 	};
+
+	static const Ds4Axes_t leftStick     = leftStickX | leftStickY;
+	static const Ds4Axes_t rightStick    = rightStickX | rightStickY;
+	static const Ds4Axes_t accelerometer = accelX | accelY | accelZ;
+	static const Ds4Axes_t gyroscope     = gyroX | gyroY | gyroZ;
 };
 
-using Ds4Axes_t = uint32_t;
 ENUM_FLAGS(Ds4Axes);
 ENUM_VALUES(Ds4Axes, 12);
+
+using Ds4VectorInput_t = size_t;
+
+struct Ds4VectorInput
+{
+	enum T : Ds4VectorInput_t
+	{
+		none,
+		/** \brief The left stick of the controller. */
+		leftStick,
+		/** \brief The right stick of the controller. */
+		rightStick,
+		/** \brief The accelerometer. */
+		accelerometer,
+		/** \brief The gyroscope. */
+		gyroscope
+	};
+
+	static T fromAxes(Ds4Axes_t axes);
+};
+
+using Ds4Extensions_t = uint8_t;
 
 /**
  * \brief Bitfield representing the (known) extensions reported by the DualShock 4.
  */
 struct Ds4Extensions
 {
-	enum T : uint8_t
+	enum T : Ds4Extensions_t
 	{
 		/** \brief A power/data cable is plugged into the controller. */
 		cable = 1 << 0,
@@ -333,6 +364,5 @@ struct Ds4Extensions
 	};
 };
 
-using Ds4Extensions_t = uint8_t;
 ENUM_FLAGS(Ds4Extensions);
 ENUM_VALUES(Ds4Extensions, 4);

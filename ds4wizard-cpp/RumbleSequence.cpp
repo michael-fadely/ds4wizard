@@ -36,8 +36,8 @@ void RumbleSequence::update(float deltaTime)
 
 		case RumbleSequenceBlending::linear:
 		{
-			uint8_t left  = 0;
-			uint8_t right = 0;
+			float left  = 0.0f;
+			float right = 0.0f;
 
 			if (!sequence.empty())
 			{
@@ -67,7 +67,7 @@ void RumbleSequence::add(const RumbleSequenceElement& element)
 	sequence.push(element);
 }
 
-RumbleTimer::RumbleTimer(InputSimulator* parent, Stopwatch::Duration duration, uint8_t left, uint8_t right)
+RumbleTimer::RumbleTimer(InputSimulator* parent, Stopwatch::Duration duration, float left, float right)
 	: ISimulator(parent),
 	  duration(duration),
 	  left(left),

@@ -298,6 +298,31 @@ static const char* Ds4Extensions_names[] = {
 	"unknown"
 };
 
+Ds4VectorInput::T Ds4VectorInput::fromAxes(Ds4Axes_t axes)
+{
+	if (axes & Ds4Axes::leftStick)
+	{
+		return Ds4VectorInput::leftStick;
+	}
+
+	if (axes & Ds4Axes::rightStick)
+	{
+		return Ds4VectorInput::rightStick;
+	}
+
+	if (axes & Ds4Axes::accelerometer)
+	{
+		return Ds4VectorInput::accelerometer;
+	}
+
+	if (axes & Ds4Axes::gyroscope)
+	{
+		return Ds4VectorInput::gyroscope;
+	}
+
+	return Ds4VectorInput::none;
+}
+
 SERIALIZE_DEF(Ds4Extensions)
 
 const std::array<Direction_t, 4> Direction_values = {

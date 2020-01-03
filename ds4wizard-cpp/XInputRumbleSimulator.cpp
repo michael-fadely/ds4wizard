@@ -10,8 +10,8 @@ XInputRumbleSimulator::XInputRumbleSimulator(InputSimulator* parent)
 
 void XInputRumbleSimulator::update(float deltaTime)
 {
-	parent->setRumble(static_cast<uint8_t>(xinputVibration.wLeftMotorSpeed >> 8),
-	                  static_cast<uint8_t>(xinputVibration.wRightMotorSpeed >> 8));
+	parent->setRumble(static_cast<float>(xinputVibration.wLeftMotorSpeed >> 8) / 255.0f,
+	                  static_cast<float>(xinputVibration.wRightMotorSpeed >> 8) / 255.0f);
 }
 
 void XInputRumbleSimulator::onActivate(float deltaTime)

@@ -287,27 +287,28 @@ float Ds4TouchRegion::getSimulatedAxis(Ds4Buttons_t sender, Direction_t directio
 		{
 			const Vector2 normalized = trackball->velocity.normalized();
 			const float length = trackball->velocity.length();
+			const auto factor = trackball->settings.ballSpeed;
 
 			switch (direction)
 			{
 				case Direction::up:
-					result = std::clamp((normalized.y * length) / trackball->settings.ballSpeed, 0.0f, 1.0f);
+					result = std::clamp((normalized.y * length) / factor, 0.0f, 1.0f);
 					break;
 
 				case Direction::down:
-					result = std::abs(std::clamp((normalized.y * length) / trackball->settings.ballSpeed, -1.0f, 0.0f));
+					result = std::abs(std::clamp((normalized.y * length) / factor, -1.0f, 0.0f));
 					break;
 
 				case Direction::left:
-					result = std::clamp((normalized.x * length) / trackball->settings.ballSpeed, 0.0f, 1.0f);
+					result = std::clamp((normalized.x * length) / factor, 0.0f, 1.0f);
 					break;
 
 				case Direction::right:
-					result = std::abs(std::clamp((normalized.x * length) / trackball->settings.ballSpeed, -1.0f, 0.0f));
+					result = std::abs(std::clamp((normalized.x * length) / factor, -1.0f, 0.0f));
 					break;
 
 				case Direction::none:
-					result = (normalized * length).length() / trackball->settings.ballSpeed;
+					result = (normalized * length).length() / factor;
 					break;
 
 				default:
