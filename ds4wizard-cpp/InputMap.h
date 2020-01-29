@@ -1027,7 +1027,7 @@ public:
 
 	#pragma region XInput
 
-	std::optional<XInputButtons_t> xinputButtons = 0;
+	std::optional<XInputButtons_t> xinputButtons;
 	std::optional<XInputAxes> xinputAxes;
 
 	#pragma endregion
