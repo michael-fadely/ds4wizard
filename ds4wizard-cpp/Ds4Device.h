@@ -43,8 +43,8 @@ class Ds4Device
 
 	std::unique_ptr<std::thread> deviceThread = nullptr;
 
-	std::unique_ptr<hid::HidInstance> usbDevice;
-	std::unique_ptr<hid::HidInstance> bluetoothDevice;
+	std::shared_ptr<hid::HidInstance> usbDevice;
+	std::shared_ptr<hid::HidInstance> bluetoothDevice;
 
 	Ds4LightOptions activeLight;
 
@@ -99,10 +99,10 @@ public:
 	const std::string& name() const;
 
 	Ds4Device();
-	explicit Ds4Device(hid::HidInstance& device);
+	explicit Ds4Device(std::shared_ptr<hid::HidInstance> device);
 	~Ds4Device();
 
-	void open(hid::HidInstance& device);
+	void open(std::shared_ptr<hid::HidInstance> device);
 
 	std::unique_lock<std::recursive_mutex> lock();
 
@@ -139,11 +139,11 @@ public:
 
 private:
 	void closeUsbDevice();
-	static bool openDevice(hid::HidInstance& device, bool exclusive);
+	static bool openDevice(std::shared_ptr<hid::HidInstance>& device, bool exclusive);
 
 public:
-	void openBluetoothDevice(hid::HidInstance& device);
-	void openUsbDevice(hid::HidInstance& device);
+	void openBluetoothDevice(std::shared_ptr<hid::HidInstance> device);
+	void openUsbDevice(std::shared_ptr<hid::HidInstance> device);
 
 private:
 	void setupBluetoothOutputBuffer() const;

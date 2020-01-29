@@ -79,23 +79,23 @@ Ds4Device::Ds4Device()
 {
 }
 
-Ds4Device::Ds4Device(hid::HidInstance& device)
+Ds4Device::Ds4Device(std::shared_ptr<hid::HidInstance> device)
 	: simulator(this)
 {
-	open(device);
+	open(std::move(device));
 }
 
-void Ds4Device::open(hid::HidInstance& device)
+void Ds4Device::open(std::shared_ptr<hid::HidInstance> device)
 {
 	std::stringstream macaddr;
 
 	macaddr << std::hex << std::uppercase << std::setw(2) << std::setfill('0')
-		<< static_cast<int>(device.serial[0]);
+		<< static_cast<int>(device->serial[0]);
 
-	for (size_t i = 1; i < device.serial.size(); ++i)
+	for (size_t i = 1; i < device->serial.size(); ++i)
 	{
 		macaddr << ':' << std::hex << std::uppercase << std::setw(2) << std::setfill('0')
-			<< static_cast<int>(device.serial[i]);
+			<< static_cast<int>(device->serial[i]);
 	}
 
 	macAddress_     = macaddr.str();
@@ -104,18 +104,19 @@ void Ds4Device::open(hid::HidInstance& device)
 	safeMacAddress_.erase(std::remove(safeMacAddress_.begin(), safeMacAddress_.end(), ':'), safeMacAddress_.end());
 	std::transform(safeMacAddress_.begin(), safeMacAddress_.end(), safeMacAddress_.begin(), tolower);
 
-	if (device.caps().inputReportSize != 64)
+	if (device->caps().inputReportSize != 64)
 	{
-		bluetoothDevice = std::make_unique<hid::HidInstance>(std::move(device));
+		bluetoothDevice = std::move(device);
 		setupBluetoothOutputBuffer();
 	}
 	else
 	{
-		usbDevice = std::make_unique<hid::HidInstance>(std::move(device));
+		usbDevice = std::move(device);
 		setupUsbOutputBuffer();
 	}
 
 	auto settings = Program::profileCache.getSettings(macAddress_);
+
 	if (!settings.has_value())
 	{
 		this->settings = {};
@@ -172,14 +173,14 @@ void Ds4Device::applyProfile()
 	if (usbDevice != nullptr && (!usbConnected() || usbDevice->isExclusive() != profile.exclusiveMode))
 	{
 		closeUsbDevice();
-		hid::HidInstance inst = std::move(*usbDevice);
+		std::shared_ptr<hid::HidInstance> inst = std::move(usbDevice);
 		openUsbDevice(inst);
 	}
 
 	if (bluetoothDevice != nullptr && (!bluetoothConnected() || bluetoothDevice->isExclusive() != profile.exclusiveMode))
 	{
 		closeBluetoothDevice();
-		hid::HidInstance inst = std::move(*bluetoothDevice);
+		std::shared_ptr<hid::HidInstance> inst = std::move(bluetoothDevice);
 		openBluetoothDevice(inst);
 	}
 
@@ -321,17 +322,17 @@ void Ds4Device::closeUsbDevice()
 	idleTime.start();
 }
 
-bool Ds4Device::openDevice(hid::HidInstance& device, bool exclusive)
+bool Ds4Device::openDevice(std::shared_ptr<hid::HidInstance>& device, bool exclusive)
 {
-	if (device.open((exclusive ? hid::HidOpenFlags::exclusive : 0) | hid::HidOpenFlags::async))
+	if (device->open((exclusive ? hid::HidOpenFlags::exclusive : 0) | hid::HidOpenFlags::async))
 	{
 		return true;
 	}
 
-	return exclusive && device.open(hid::HidOpenFlags::async);
+	return exclusive && device->open(hid::HidOpenFlags::async);
 }
 
-void Ds4Device::openBluetoothDevice(hid::HidInstance& device)
+void Ds4Device::openBluetoothDevice(std::shared_ptr<hid::HidInstance> device)
 {
 	LOCK(sync);
 	{
@@ -346,7 +347,7 @@ void Ds4Device::openBluetoothDevice(hid::HidInstance& device)
 			return;
 		}
 
-		if (profile.exclusiveMode && !device.isExclusive())
+		if (profile.exclusiveMode && !device->isExclusive())
 		{
 			onBluetoothExclusiveFailure.invoke(this);
 		}
@@ -355,7 +356,7 @@ void Ds4Device::openBluetoothDevice(hid::HidInstance& device)
 			onBluetoothConnected.invoke(this);
 		}
 
-		bluetoothDevice = std::make_unique<hid::HidInstance>(std::move(device));
+		bluetoothDevice = std::move(device);
 
 		// Enables bluetooth operational mode which makes
 		// the controller send report id 17 (0x11)
@@ -372,7 +373,7 @@ void Ds4Device::openBluetoothDevice(hid::HidInstance& device)
 	}
 }
 
-void Ds4Device::openUsbDevice(hid::HidInstance& device)
+void Ds4Device::openUsbDevice(std::shared_ptr<hid::HidInstance> device)
 {
 	LOCK(sync);
 	{
@@ -387,7 +388,7 @@ void Ds4Device::openUsbDevice(hid::HidInstance& device)
 			return;
 		}
 
-		if (profile.exclusiveMode && !device.isExclusive())
+		if (profile.exclusiveMode && !device->isExclusive())
 		{
 			onUsbExclusiveFailure.invoke(this);
 		}
@@ -396,7 +397,7 @@ void Ds4Device::openUsbDevice(hid::HidInstance& device)
 			onUsbConnected.invoke(this);
 		}
 
-		usbDevice = std::make_unique<hid::HidInstance>(std::move(device));
+		usbDevice = std::move(device);
 		setupUsbOutputBuffer();
 	}
 }

@@ -38,9 +38,9 @@ void Ds4DeviceManager::findControllers()
 {
 	LOCK(sync);
 
-	hid::enumerateHid([&](hid::HidInstance& hid) -> bool
+	hid::enumerateHid([&](std::shared_ptr<hid::HidInstance> hid) -> bool
 	{
-		return handleDevice(hid);
+		return handleDevice(std::move(hid));
 	});
 }
 
@@ -63,11 +63,11 @@ void Ds4DeviceManager::findController(const std::wstring& devicePath)
 			return false;
 		}
 
-		hid::HidInstance hid(path, instanceId);
+		auto hid = std::make_shared<hid::HidInstance>(path, instanceId);
 
-		if (hid.readMetadata())
+		if (hid->readMetadata())
 		{
-			return handleDevice(hid);
+			return handleDevice(std::move(hid));
 		}
 
 		return false;
@@ -85,9 +85,9 @@ std::unique_lock<std::recursive_mutex> Ds4DeviceManager::lockDevices()
 	return std::unique_lock<std::recursive_mutex>(devices_lock);
 }
 
-bool Ds4DeviceManager::handleDevice(hid::HidInstance& hid)
+bool Ds4DeviceManager::handleDevice(std::shared_ptr<hid::HidInstance> hid)
 {
-	if (!isDs4(hid))
+	if (!isDs4(*hid))
 	{
 		return false;
 	}
@@ -98,7 +98,7 @@ bool Ds4DeviceManager::handleDevice(hid::HidInstance& hid)
 
 	try
 	{
-		isBluetooth = hid.caps().inputReportSize != 64;
+		isBluetooth = hid->caps().inputReportSize != 64;
 
 		// USB connection type
 		if (!isBluetooth)
@@ -107,13 +107,13 @@ bool Ds4DeviceManager::handleDevice(hid::HidInstance& hid)
 			std::array<uint8_t, 16> buffer {};
 			buffer[0] = 18;
 
-			if (!hid.getFeature(buffer))
+			if (!hid->getFeature(buffer))
 			{
-				const std::string hidPath(hid.path.begin(), hid.path.end());
+				const std::string hidPath(hid->path.begin(), hid->path.end());
 				throw std::runtime_error(fmt::format("Failed to read MAC address from USB device {0}", hidPath));
 			}
 
-			hid.serial =
+			hid->serial =
 			{
 				buffer[6], buffer[5], buffer[4],
 				buffer[3], buffer[2], buffer[1]
@@ -124,12 +124,12 @@ bool Ds4DeviceManager::handleDevice(hid::HidInstance& hid)
 			serialString << std::setw(2) << std::setfill(L'0') << std::hex
 				<< buffer[6] << buffer[5] << buffer[4] << buffer[3] << buffer[2] << buffer[1];
 
-			hid.serialString = serialString.str();
+			hid->serialString = serialString.str();
 		}
 
-		if (hid.serialString.empty())
+		if (hid->serialString.empty())
 		{
-			const std::string hidPath(hid.path.begin(), hid.path.end());
+			const std::string hidPath(hid->path.begin(), hid->path.end());
 			throw std::runtime_error(fmt::format("Device {0} returned empty MAC address.", hidPath));
 		}
 	}
@@ -137,7 +137,7 @@ bool Ds4DeviceManager::handleDevice(hid::HidInstance& hid)
 	{
 		// TODO: proper HID exceptions
 		Logger::writeLine(LogLevel::warning, "Failed to read device metadata: " + std::string(ex.what()));
-		hid.close();
+		hid->close();
 		return false;
 	}
 
@@ -145,7 +145,7 @@ bool Ds4DeviceManager::handleDevice(hid::HidInstance& hid)
 	{
 		LOCK(devices);
 
-		const auto it = devices.find(hid.serialString);
+		const auto it = devices.find(hid->serialString);
 		std::shared_ptr<Ds4Device> device;
 
 		// device isn't already being managed, so set up all the event handling/etc
@@ -156,10 +156,40 @@ bool Ds4DeviceManager::handleDevice(hid::HidInstance& hid)
 
 			token_store.push_back(device->onDeviceClosed.add([this](auto sender) { onDs4DeviceClosed(sender); }));
 
-			// TODO: translatable
+			bool toggledUsb = false;
+			bool toggledBluetooth = false;
 
-			//device->onXInputHandleFailure    += [](auto sender) { Logger::writeLine(LogLevel::warning, "Failed to obtain ScpVBus XInput handle. XInput emulation will not be available."); };
-			token_store.push_back(device->onBluetoothExclusiveFailure.add([](auto sender) { Logger::writeLine(LogLevel::warning, sender->name(), "Failed to open Bluetooth device exclusively."); }));
+			auto onUsbExclusiveFailure = [&](Ds4Device* sender)
+			{
+				if (toggledUsb)
+				{
+					// TODO: translatable
+					Logger::writeLine(LogLevel::warning, sender->name(), "Failed to open USB device exclusively.");
+					return;
+				}
+
+				toggledUsb = true;
+				toggleDevice(hid->instanceId);
+				device->openUsbDevice(hid);
+			};
+
+			auto onBluetoothExclusiveFailure = [&](Ds4Device* sender)
+			{
+				if (toggledBluetooth)
+				{
+					// TODO: translatable
+					Logger::writeLine(LogLevel::warning, sender->name(), "Failed to open Bluetooth device exclusively.");
+					return;
+				}
+
+				toggledBluetooth = true;
+				toggleDevice(hid->instanceId);
+			};
+
+			token_store.push_back(device->onBluetoothExclusiveFailure.add(onBluetoothExclusiveFailure));
+			token_store.push_back(device->onUsbExclusiveFailure.add(onUsbExclusiveFailure));
+
+			// TODO: translatable
 			token_store.push_back(device->onBluetoothConnected       .add([](auto sender) { Logger::writeLine(LogLevel::info,    sender->name(), "Bluetooth connected."); }));
 			token_store.push_back(device->onBluetoothIdleDisconnect  .add([](auto sender) { Logger::writeLine(LogLevel::info,    sender->name(), "Bluetooth idle disconnect."); }));
 			token_store.push_back(device->onBluetoothDisconnected    .add([](auto sender) { Logger::writeLine(LogLevel::info,    sender->name(), "Bluetooth disconnected."); }));
@@ -173,8 +203,6 @@ bool Ds4DeviceManager::handleDevice(hid::HidInstance& hid)
 				Logger::writeLine(LogLevel::warning, sender->name(), str);
 			}));
 
-			// TODO: don't toggle the device unless opening exclusively fails!
-			toggleDevice(hid.instanceId);
 			device->open(hid);
 
 			const auto& safe = device->safeMacAddress();
@@ -194,8 +222,6 @@ bool Ds4DeviceManager::handleDevice(hid::HidInstance& hid)
 			{
 				if (!device->bluetoothConnected())
 				{
-					// TODO: don't toggle the device unless opening exclusively fails!
-					toggleDevice(hid.instanceId);
 					device->openBluetoothDevice(hid);
 				}
 			}
@@ -203,8 +229,6 @@ bool Ds4DeviceManager::handleDevice(hid::HidInstance& hid)
 			{
 				if (!device->usbConnected())
 				{
-					// TODO: don't toggle the device unless opening exclusively fails!
-					toggleDevice(hid.instanceId);
 					device->openUsbDevice(hid);
 				}
 			}

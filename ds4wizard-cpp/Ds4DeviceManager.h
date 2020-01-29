@@ -109,7 +109,7 @@ public:
 	std::unique_lock<std::recursive_mutex> lockDevices();
 
 private:
-	bool handleDevice(hid::HidInstance& hid);
+	bool handleDevice(std::shared_ptr<hid::HidInstance> hid);
 	void onDs4DeviceClosed(Ds4Device* sender);
 
 public:

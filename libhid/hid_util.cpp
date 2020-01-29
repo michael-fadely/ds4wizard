@@ -96,16 +96,16 @@ bool hid::enumerateGuid(const std::function<bool(const std::wstring& path, const
 	return false;
 }
 
-void hid::enumerateHid(const std::function<bool(HidInstance& instance)>& fn) noexcept
+void hid::enumerateHid(const std::function<bool(std::shared_ptr<HidInstance> instance)>& fn) noexcept
 {
 	GUID guid = {};
 	HidD_GetHidGuid(&guid);
 
 	const auto callback = [fn](const std::wstring& path, const std::wstring& instanceId) -> bool
 	{
-		HidInstance hid(path, instanceId);
+		auto hid = std::make_shared<HidInstance>(path, instanceId);
 
-		if (hid.readMetadata())
+		if (hid->readMetadata())
 		{
 			return fn(hid);
 		}
