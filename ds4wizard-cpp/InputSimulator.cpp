@@ -804,12 +804,11 @@ void InputSimulator::updateTouchRegions()
 		return (a->isTouchActive(touchMask) && !a->allowCrossOver) && !(b->isTouchActive(touchMask) && !b->allowCrossOver);
 	});
 
-	const Ds4Buttons_t held = parent->input.heldButtons;
-	const Ds4Buttons_t inactive = (held & touchMask) ^ touchMask;
+	const Ds4Buttons_t inactiveTouchPoints = (parent->input.heldButtons & touchMask) ^ touchMask;
 
 	auto makeInactive = [&](Ds4Buttons_t touchId, Ds4TouchRegion* region, const Ds4Vector2& point)
 	{
-		if ((inactive & touchId) && region->isTouchActive(touchId))
+		if ((inactiveTouchPoints & touchId) && region->isTouchActive(touchId))
 		{
 			region->deactivateTouch(touchId, point);
 		}
@@ -819,7 +818,7 @@ void InputSimulator::updateTouchRegions()
 
 	for (auto& region : sortableTouchRegions)
 	{
-		if (region->isTouchActive(inactive))
+		if (region->isTouchActive(inactiveTouchPoints))
 		{
 			makeInactive(Ds4Buttons::touch1, region, parent->input.data.touchPoint1);
 			makeInactive(Ds4Buttons::touch2, region, parent->input.data.touchPoint2);
