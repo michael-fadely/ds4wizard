@@ -131,19 +131,14 @@ void InputAxisOptions::writeJson(nlohmann::json& json) const
 
 AxisOptions XInputAxes::getAxisOptions(XInputAxis::T axis) const
 {
-	if (options.empty())
+	const auto it = options.find(axis);
+
+	if (it == options.end())
 	{
 		return AxisOptions();
 	}
 
-	const auto it = options.find(axis);
-
-	if (it != options.end())
-	{
-		return it->second;
-	}
-
-	return AxisOptions();
+	return it->second;
 }
 
 bool XInputAxes::operator==(const XInputAxes& other) const
@@ -192,22 +187,14 @@ void XInputAxes::writeJson(nlohmann::json& json) const
 
 AxisOptions MouseAxes::getAxisOptions(Direction_t axis)
 {
-	if (options.empty())
+	const auto it = options.find(axis);
+
+	if (it == options.end())
 	{
 		return AxisOptions();
 	}
 
-	const auto it = options.find(axis);
-
-	if (it != options.end())
-	{
-		return it->second;
-	}
-
-	// HACK: separate into its own cache
-	AxisOptions result {};
-	options[axis] = result;
-	return result;
+	return it->second;
 }
 
 bool MouseAxes::operator==(const MouseAxes& other) const
