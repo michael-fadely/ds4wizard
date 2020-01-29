@@ -89,10 +89,14 @@ MainWindow::MainWindow(QWidget* parent)
 		Program::profileCache.updateProfile({}, DeviceProfile::defaultProfile());
 	});
 
+#ifdef _DEBUG
+	show();
+#else
 	if (!supportsSystemTray || !Program::settings.startMinimized)
 	{
 		show();
 	}
+#endif
 
 	// TODO: only start this once the window is shown (or whatever else, since it can start minimized!)
 	startupTask = std::async(std::launch::async, [this]() -> void
