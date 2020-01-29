@@ -323,15 +323,18 @@ void InputMapBase::writeJson(nlohmann::json& json) const
 		json["rapidFireInterval"] = rapidFireInterval.value().count();
 	}
 
-	nlohmann::json inputAxisOptions_;
-
-	for (const auto& pair : inputAxisOptions)
+	if (!inputAxisOptions.empty())
 	{
-		auto key = ENUM_SERIALIZE_FLAGS(Ds4Axes)(pair.first);
-		inputAxisOptions_[key] = pair.second.toJson();
-	}
+		nlohmann::json inputAxisOptions_;
 
-	json["inputAxisOptions"] = inputAxisOptions_;
+		for (const auto& pair : inputAxisOptions)
+		{
+			auto key = ENUM_SERIALIZE_FLAGS(Ds4Axes)(pair.first);
+			inputAxisOptions_[key] = pair.second.toJson();
+		}
+
+		json["inputAxisOptions"] = inputAxisOptions_;
+	}
 }
 
 InputModifier::InputModifier(InputType_t type, Ds4Buttons::T buttons)
