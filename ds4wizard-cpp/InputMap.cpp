@@ -186,21 +186,14 @@ void InputMapBase::release()
 
 InputAxisOptions InputMapBase::getAxisOptions(Ds4Axes_t axis) const
 {
-	if (inputAxisOptions.empty())
+	const auto it = inputAxisOptions.find(axis);
+
+	if (it == inputAxisOptions.end())
 	{
-		// HACK: remove
 		return InputAxisOptions();
 	}
 
-	const auto it = inputAxisOptions.find(axis);
-
-	if (it != inputAxisOptions.end())
-	{
-		return it->second;
-	}
-
-	// HACK: remove
-	return InputAxisOptions();
+	return it->second;
 }
 
 bool InputMapBase::operator==(const InputMapBase& other) const
