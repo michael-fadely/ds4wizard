@@ -172,17 +172,23 @@ void XInputAxes::readJson(const nlohmann::json& json)
 
 void XInputAxes::writeJson(nlohmann::json& json) const
 {
-	json["axes"] = ENUM_SERIALIZE_FLAGS(XInputAxis)(axes).c_str();
-
-	nlohmann::json options_;
-
-	for (const auto& pair : options)
+	if (axes != XInputAxis::none)
 	{
-		auto key = ENUM_SERIALIZE_FLAGS(XInputAxis)(pair.first);
-		options_[key.c_str()] = pair.second.toJson();
+		json["axes"] = ENUM_SERIALIZE_FLAGS(XInputAxis)(axes).c_str();
 	}
 
-	json["options"] = options_;
+	if (!options.empty())
+	{
+		nlohmann::json options_;
+
+		for (const auto& pair : options)
+		{
+			auto key = ENUM_SERIALIZE_FLAGS(XInputAxis)(pair.first);
+			options_[key.c_str()] = pair.second.toJson();
+		}
+
+		json["options"] = options_;
+	}
 }
 
 AxisOptions MouseAxes::getAxisOptions(Direction_t axis)
