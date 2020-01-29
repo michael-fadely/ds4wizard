@@ -48,7 +48,7 @@ public:
 	 */
 	std::optional<bool> invert;
 
-	// TODO: /!\ /!\ /!\ provide method use length of input vector for dead zone application! (i.e. if length > dead zone, all axes in vector > dead zone)
+	// TODO: /!\ /!\ /!\ (issue #1) implement radial dead zone
 
 	/**
 	 * \brief The dead zone mode to use if configured.
