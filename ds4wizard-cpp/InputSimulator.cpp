@@ -1025,9 +1025,9 @@ bool InputSimulator::xinputConnect()
 		return true;
 	}
 
-	VIGEM_ERROR vigemError = xinputTarget->connect();
+	VIGEM_ERROR vigemResult = xinputTarget->connect();
 
-	if (VIGEM_SUCCESS(vigemError))
+	if (VIGEM_SUCCESS(vigemResult))
 	{
 		return true;
 	}
@@ -1035,20 +1035,20 @@ bool InputSimulator::xinputConnect()
 	// If connecting an emulated XInput controller failed,
 	// it's likely because it's already connected. Disconnect
 	// it before continuing.
-	vigemError = xinputTarget->disconnect();
+	vigemResult = xinputTarget->disconnect();
 
-	if (!VIGEM_SUCCESS(vigemError))
+	if (!VIGEM_SUCCESS(vigemResult))
 	{
-		// TODO: implement a callback for XInput target disconnect failure
-		Logger::writeLine(LogLevel::warning, parent->name(), "ViGEm target connect followed by disconnect failed: " + std::to_string(vigemError));
+		// TODO: implement a callback for ViGEm target disconnect failure
+		Logger::writeLine(LogLevel::warning, parent->name(), "ViGEm target connect followed by disconnect failed: " + std::to_string(vigemResult));
 	}
 
 	// Attempt to recover the virtual controller up to 4 times on a 250ms interval.
 	for (size_t i = 0; i < 4; i++)
 	{
-		vigemError = xinputTarget->connect();
+		vigemResult = xinputTarget->connect();
 
-		if (VIGEM_SUCCESS(vigemError))
+		if (VIGEM_SUCCESS(vigemResult))
 		{
 			break;
 		}
@@ -1057,10 +1057,10 @@ bool InputSimulator::xinputConnect()
 		std::this_thread::sleep_for(250ms);
 	}
 
-	if (!VIGEM_SUCCESS(vigemError))
+	if (!VIGEM_SUCCESS(vigemResult))
 	{
-		// TODO: implement a callback for XInput target connect failure
-		Logger::writeLine(LogLevel::warning, parent->name(), "ViGEm target connect failed: " + std::to_string(vigemError));
+		// TODO: implement a callback for ViGEm target connect failure
+		Logger::writeLine(LogLevel::warning, parent->name(), "ViGEm target connect failed: " + std::to_string(vigemResult));
 		return false;
 	}
 
@@ -1069,9 +1069,17 @@ bool InputSimulator::xinputConnect()
 
 void InputSimulator::xinputDisconnect()
 {
-	if (xinputTarget)
+	if (!xinputTarget)
 	{
-		xinputTarget->disconnect();
+		return;
+	}
+
+	const VIGEM_ERROR result = xinputTarget->disconnect();
+
+	if (!VIGEM_SUCCESS(result))
+	{
+		// TODO: implement a callback for ViGEm target disconnect failure
+		Logger::writeLine(LogLevel::warning, parent->name(), "ViGEm target disconnect failed: " + std::to_string(result));
 	}
 }
 
