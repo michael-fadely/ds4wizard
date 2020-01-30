@@ -26,12 +26,12 @@ DeviceProfile& DeviceProfile::operator=(DeviceProfile&& other) noexcept
 {
 	DeviceSettingsCommon::operator=(other);
 
-	name            = std::move(other.name);
-	exclusiveMode   = other.exclusiveMode;
-	useXInput       = other.useXInput;
-	touchRegions    = std::move(other.touchRegions);
-	bindings        = std::move(other.bindings);
-	modifiers       = std::move(other.modifiers);
+	name          = std::move(other.name);
+	exclusiveMode = other.exclusiveMode;
+	useXInput     = other.useXInput;
+	touchRegions  = std::move(other.touchRegions);
+	bindings      = std::move(other.bindings);
+	modifiers     = std::move(other.modifiers);
 
 	return *this;
 }
