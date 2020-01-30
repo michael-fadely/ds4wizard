@@ -17,6 +17,14 @@
 
 #include "Ds4DeviceManager.h"
 
+/*
+ * TODO: this needs to be re-done; see reasons below
+ * - when a device fails to open and is toggled, it closes and re-opens the xinput handle;
+ *   ideally it should not open the xinput handle until the device is opened, exclusive or not.
+ * - a cooldown time should be specified on toggles for a device.
+ * - a "device open failed" notification can be displayed immediately followed by successful device open.
+ */
+
 Ds4DeviceManager::~Ds4DeviceManager()
 {
 	close();
@@ -146,13 +154,12 @@ bool Ds4DeviceManager::handleDevice(std::shared_ptr<hid::HidInstance> hid)
 		LOCK(devices);
 
 		const auto it = devices.find(hid->serialString);
-		std::shared_ptr<Ds4Device> device;
 
 		// device isn't already being managed, so set up all the event handling/etc
 		if (it == devices.end())
 		{
-			device = std::make_shared<Ds4Device>();
-			auto& token_store = tokens.insert({ device, {} }).first->second;
+			std::shared_ptr<Ds4Device> device = std::make_shared<Ds4Device>();
+			auto& token_store = tokens.insert({ hid->serialString, {} }).first->second;
 
 			token_store.push_back(device->onDeviceClosed.add([this](auto sender) { onDs4DeviceClosed(sender); }));
 
@@ -216,7 +223,7 @@ bool Ds4DeviceManager::handleDevice(std::shared_ptr<hid::HidInstance> hid)
 		}
 		else
 		{
-			device = it->second;
+			std::shared_ptr<Ds4Device> device = it->second;
 
 			if (isBluetooth)
 			{
@@ -241,6 +248,10 @@ bool Ds4DeviceManager::handleDevice(std::shared_ptr<hid::HidInstance> hid)
 	{
 		// TODO: proper HID exceptions
 		Logger::writeLine(LogLevel::error, "Error while opening device: " + std::string(ex.what()));
+
+		LOCK(devices);
+		devices.erase(hid->serialString);
+		tokens.erase(hid->serialString);
 	}
 
 	return false;
@@ -262,7 +273,7 @@ void Ds4DeviceManager::onDs4DeviceClosed(Ds4Device* sender)
 
 	auto args = std::make_shared<DeviceClosedEventArgs>(ptr);
 	deviceClosed.invoke(this, args);
-	tokens.erase(ptr);
+	tokens.erase(mac);
 	devices.erase(it);
 }
 
@@ -283,7 +294,8 @@ void Ds4DeviceManager::close()
 		auto args = std::make_shared<DeviceClosedEventArgs>(ptr);
 		deviceClosed.invoke(this, args);
 
-		tokens.erase(ptr);
+		const auto mac = std::wstring(ptr->safeMacAddress().cbegin(), ptr->safeMacAddress().cend());
+		tokens.erase(mac);
 	}
 }
 
