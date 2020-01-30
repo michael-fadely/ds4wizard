@@ -1025,26 +1025,37 @@ bool InputSimulator::xinputConnect()
 
 	//int index = profile->autoXInputIndex ? ScpDevice::getFreePort() : profile->xinputIndex;
 
-	if (VIGEM_SUCCESS(xinputTarget->connect()))
+	VIGEM_ERROR vigemError = xinputTarget->connect();
+
+	if (VIGEM_SUCCESS(vigemError))
 	{
 		// TODO: get LED index from ViGEm
 		realXInputIndex = 0;
 		return true;
 	}
 
+#ifdef _DEBUG
+	// TODO: implement a callback for XInput target connect failure
+	Logger::writeLine(LogLevel::warning, parent->name(), "Failed to connect ViGEm target: " + std::to_string(vigemError));
+#endif
+
 	// If connecting an emulated XInput controller failed,
 	// it's likely because it's already connected. Disconnect
 	// it before continuing.
-	xinputTarget->disconnect();
+	vigemError = xinputTarget->disconnect();
 
-	bool ok = false;
+	if (!VIGEM_SUCCESS(vigemError))
+	{
+		// TODO: implement a callback for XInput target disconnect failure
+		Logger::writeLine(LogLevel::warning, parent->name(), "Failed to disconnect ViGEm target: " + std::to_string(vigemError));
+	}
 
-	// Try up to 4 times to recover the virtual controller.
+	// Attempt to recover the virtual controller up to 4 times on a 250ms interval.
 	for (size_t i = 0; i < 4; i++)
 	{
-		ok = xinputTarget->connect();
+		vigemError = xinputTarget->connect();
 
-		if (ok)
+		if (VIGEM_SUCCESS(vigemError))
 		{
 			break;
 		}
@@ -1053,7 +1064,7 @@ bool InputSimulator::xinputConnect()
 		std::this_thread::sleep_for(250ms);
 	}
 
-	if (!ok)
+	if (!VIGEM_SUCCESS(vigemError))
 	{
 		onXInputHandleFailure.invoke(parent);
 		return false;
