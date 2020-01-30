@@ -35,16 +35,6 @@ public:
 	 */
 	bool useXInput = true;
 
-	/**
-	 * \brief If \c true, automatically selects an XInput player index.
-	 */
-	bool autoXInputIndex = true;
-
-	/**
-	 * \brief User-defined XInput player index.
-	 */
-	int xinputIndex = 0;
-
 	// TODO: make ordered with std::map
 	/**
 	 * \brief Map of touchpad regions referenced by name.

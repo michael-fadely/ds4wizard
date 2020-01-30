@@ -13,7 +13,7 @@ using namespace std::chrono;
 InputSimulator::InputSimulator(Ds4Device* parent)
 	: parent(parent)
 {
-	xinputDeviceOpen();
+	xinputTargetOpen();
 }
 
 InputSimulator::~InputSimulator()
@@ -765,7 +765,9 @@ void InputSimulator::runMaps()
 
 	runSimulators();
 
-	if (parent->profile.useXInput && realXInputIndex >= 0 && xinputPad != xinputLast)
+	if (parent->profile.useXInput &&
+	    xinputTarget && xinputTarget->connected() &&
+	    xinputPad != xinputLast)
 	{
 		xinputLast = xinputPad;
 		xinputTarget->update(xinputPad);
@@ -1013,31 +1015,22 @@ bool InputSimulator::updateBindingState(InputMap& map, InputModifier* modifier)
 
 bool InputSimulator::xinputConnect()
 {
-	if (!xinputDeviceOpen())
+	if (!xinputTargetOpen())
 	{
 		return false;
 	}
 
-	if (realXInputIndex >= 0)
+	if (xinputTarget->connected())
 	{
 		return true;
 	}
-
-	//int index = profile->autoXInputIndex ? ScpDevice::getFreePort() : profile->xinputIndex;
 
 	VIGEM_ERROR vigemError = xinputTarget->connect();
 
 	if (VIGEM_SUCCESS(vigemError))
 	{
-		// TODO: get LED index from ViGEm
-		realXInputIndex = 0;
 		return true;
 	}
-
-#ifdef _DEBUG
-	// TODO: implement a callback for XInput target connect failure
-	Logger::writeLine(LogLevel::warning, parent->name(), "Failed to connect ViGEm target: " + std::to_string(vigemError));
-#endif
 
 	// If connecting an emulated XInput controller failed,
 	// it's likely because it's already connected. Disconnect
@@ -1047,7 +1040,7 @@ bool InputSimulator::xinputConnect()
 	if (!VIGEM_SUCCESS(vigemError))
 	{
 		// TODO: implement a callback for XInput target disconnect failure
-		Logger::writeLine(LogLevel::warning, parent->name(), "Failed to disconnect ViGEm target: " + std::to_string(vigemError));
+		Logger::writeLine(LogLevel::warning, parent->name(), "ViGEm target connect followed by disconnect failed: " + std::to_string(vigemError));
 	}
 
 	// Attempt to recover the virtual controller up to 4 times on a 250ms interval.
@@ -1066,26 +1059,23 @@ bool InputSimulator::xinputConnect()
 
 	if (!VIGEM_SUCCESS(vigemError))
 	{
-		onXInputHandleFailure.invoke(parent);
+		// TODO: implement a callback for XInput target connect failure
+		Logger::writeLine(LogLevel::warning, parent->name(), "ViGEm target connect failed: " + std::to_string(vigemError));
 		return false;
 	}
 
-	realXInputIndex = 0;
 	return true;
 }
 
 void InputSimulator::xinputDisconnect()
 {
-	if (realXInputIndex < 0 || !xinputTarget)
+	if (xinputTarget)
 	{
-		return;
+		xinputTarget->disconnect();
 	}
-
-	xinputTarget->disconnect();
-	realXInputIndex = -1;
 }
 
-bool InputSimulator::xinputDeviceOpen()
+bool InputSimulator::xinputTargetOpen()
 {
 	if (!Program::driver.isOpen())
 	{
@@ -1103,7 +1093,7 @@ bool InputSimulator::xinputDeviceOpen()
 	return true;
 }
 
-void InputSimulator::xinputDeviceClose()
+void InputSimulator::xinputTargetClose()
 {
 	if (xinputRumbleSimulator)
 	{
@@ -1111,10 +1101,6 @@ void InputSimulator::xinputDeviceClose()
 		xinputRumbleSimulator = nullptr;
 	}
 
-	if (xinputTarget)
-	{
-		xinputTarget->disconnect();
-	}
-
+	xinputDisconnect();
 	xinputTarget = nullptr;
 }

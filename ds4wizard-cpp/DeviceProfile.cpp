@@ -15,8 +15,6 @@ DeviceProfile::DeviceProfile(DeviceProfile&& other) noexcept
 	  name(std::move(other.name)),
 	  exclusiveMode(other.exclusiveMode),
 	  useXInput(other.useXInput),
-	  autoXInputIndex(other.autoXInputIndex),
-	  xinputIndex(other.xinputIndex),
 	  touchRegions(std::move(other.touchRegions)),
 	  bindings(std::move(other.bindings)),
 	  modifiers(std::move(other.modifiers))
@@ -31,8 +29,6 @@ DeviceProfile& DeviceProfile::operator=(DeviceProfile&& other) noexcept
 	name            = std::move(other.name);
 	exclusiveMode   = other.exclusiveMode;
 	useXInput       = other.useXInput;
-	autoXInputIndex = other.autoXInputIndex;
-	xinputIndex     = other.xinputIndex;
 	touchRegions    = std::move(other.touchRegions);
 	bindings        = std::move(other.bindings);
 	modifiers       = std::move(other.modifiers);
@@ -46,8 +42,6 @@ bool DeviceProfile::operator==(const DeviceProfile& other) const
 	       && name == other.name
 	       && exclusiveMode == other.exclusiveMode
 	       && useXInput == other.useXInput
-	       && autoXInputIndex == other.autoXInputIndex
-	       && xinputIndex == other.xinputIndex
 	       && touchRegions == other.touchRegions
 	       && bindings == other.bindings
 	       && modifiers == other.modifiers;
@@ -57,11 +51,9 @@ void DeviceProfile::readJson(const nlohmann::json& json)
 {
 	DeviceSettingsCommon::readJson(json);
 
-	name            = json["name"];
-	exclusiveMode   = json["exclusiveMode"];
-	useXInput       = json["useXInput"];
-	autoXInputIndex = json.value("autoXInputIndex", true);
-	xinputIndex     = json["xinputIndex"];
+	name          = json["name"];
+	exclusiveMode = json["exclusiveMode"];
+	useXInput     = json["useXInput"];
 
 	auto touchRegions_ = json["touchRegions"].items();
 
@@ -86,11 +78,9 @@ void DeviceProfile::writeJson(nlohmann::json& json) const
 {
 	DeviceSettingsCommon::writeJson(json);
 
-	json["name"]            = name.c_str();
-	json["exclusiveMode"]   = exclusiveMode;
-	json["useXInput"]       = useXInput;
-	json["autoXInputIndex"] = autoXInputIndex;
-	json["xinputIndex"]     = xinputIndex;
+	json["name"]          = name.c_str();
+	json["exclusiveMode"] = exclusiveMode;
+	json["useXInput"]     = useXInput;
 
 	nlohmann::json touchRegions_;
 
@@ -127,8 +117,6 @@ R"(
 {
   "exclusiveMode": true,
   "useXInput": true,
-  "autoXInputIndex": true,
-  "xinputIndex": 0,
   "touchRegions": {
     "Left Half": {
       "type": "button",

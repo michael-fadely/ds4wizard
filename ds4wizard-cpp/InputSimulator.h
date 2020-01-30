@@ -37,7 +37,6 @@ class InputSimulator
 	MapCacheCollection<InputModifier> modifiers;
 	MapCacheCollection<InputMap> bindings;
 
-	int realXInputIndex = -1;
 	XInputGamepad xinputPad {};
 	XInputGamepad xinputLast {};
 	std::shared_ptr<vigem::XInputTarget> xinputTarget;
@@ -52,9 +51,6 @@ class InputSimulator
 	std::unique_ptr<RumbleSequence> rumbleSequence;
 
 public:
-	/** \brief Event raised when a handle to a virtual XInput device cannot be acquired. */
-	Event<Ds4Device> onXInputHandleFailure;
-
 	/** \brief \c InputSimulator cannot be copied or moved. */
 	InputSimulator() = delete;
 	/** \brief \c InputSimulator cannot be copied or moved. */
@@ -272,10 +268,10 @@ private:
 	 * \brief Acquires a handle to the XInput emulation driver.
 	 * \return \c true on success.
 	 */
-	bool xinputDeviceOpen();
+	bool xinputTargetOpen();
 
 	/**
 	 * \brief Closes the handle to the XInput emulation driver.
 	 */
-	void xinputDeviceClose();
+	void xinputTargetClose();
 };
