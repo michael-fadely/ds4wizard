@@ -6,7 +6,6 @@
 #include <iomanip>
 
 #include "Ds4Device.h"
-#include "lock.h"
 #include "program.h"
 #include "DeviceProfileCache.h"
 #include "Bluetooth.h"
@@ -34,13 +33,13 @@ bool Ds4Device::isIdle() const
 
 bool Ds4Device::bluetoothConnected()
 {
-	LOCK(sync);
+	auto lock_guard = lock();
 	return bluetoothDevice != nullptr && bluetoothDevice->isOpen();
 }
 
 bool Ds4Device::usbConnected()
 {
-	LOCK(sync);
+	auto lock_guard = lock();
 	return usbDevice != nullptr && usbDevice->isOpen();
 }
 
@@ -131,13 +130,13 @@ void Ds4Device::open(std::shared_ptr<hid::HidInstance> device)
 
 void Ds4Device::saveSettings()
 {
-	LOCK(sync);
+	auto lock_guard = lock();
 	Program::profileCache.saveSettings(macAddress_, settings);
 }
 
 void Ds4Device::applySettings(const DeviceSettings& newSettings)
 {
-	LOCK(sync);
+	auto lock_guard = lock();
 	settings = newSettings;
 	saveSettings();
 	applyProfile();
@@ -145,7 +144,7 @@ void Ds4Device::applySettings(const DeviceSettings& newSettings)
 
 void Ds4Device::applyProfile()
 {
-	LOCK(sync);
+	auto lock_guard = lock();
 	releaseAutoColor();
 
 	auto cachedProfile = Program::profileCache.getProfile(settings.profile);
@@ -189,14 +188,14 @@ void Ds4Device::applyProfile()
 
 void Ds4Device::releaseAutoColor()
 {
-	LOCK(sync);
+	auto lock_guard = lock();
 	Ds4AutoLightColor::releaseColor(colorIndex);
 	colorIndex = -1;
 }
 
 void Ds4Device::onProfileChanged(const std::string& newName)
 {
-	LOCK(sync);
+	auto lock_guard = lock();
 	settings.profile = newName.empty() ? std::string() : newName;
 	saveSettings();
 	applyProfile();
@@ -221,31 +220,31 @@ std::unique_lock<std::recursive_mutex> Ds4Device::lock()
 
 Latency Ds4Device::getReadLatency()
 {
-	LOCK(sync);
+	auto lock_guard = lock();
 	return readLatency;
 }
 
 Latency Ds4Device::getWriteLatency()
 {
-	LOCK(sync);
+	auto lock_guard = lock();
 	return writeLatency;
 }
 
 void Ds4Device::resetReadLatencyPeak()
 {
-	LOCK(sync);
+	auto lock_guard = lock();
 	readLatency.resetPeak();
 }
 
 void Ds4Device::resetWriteLatencyPeak()
 {
-	LOCK(sync);
+	auto lock_guard = lock();
 	writeLatency.resetPeak();
 }
 
 void Ds4Device::closeImpl()
 {
-	LOCK(sync);
+	auto lock_guard = lock();
 	running = false;
 
 	closeUsbDevice();
@@ -276,7 +275,7 @@ void Ds4Device::close()
 
 void Ds4Device::closeBluetoothDevice()
 {
-	LOCK(sync);
+	auto lock_guard = lock();
 
 	if (bluetoothDevice != nullptr && bluetoothDevice->isOpen())
 	{
@@ -312,7 +311,7 @@ void Ds4Device::disconnectBluetooth(BluetoothDisconnectReason reason)
 
 void Ds4Device::closeUsbDevice()
 {
-	LOCK(sync);
+	auto lock_guard = lock();
 
 	if (usbDevice != nullptr && usbDevice->isOpen())
 	{
@@ -334,72 +333,70 @@ bool Ds4Device::openDevice(std::shared_ptr<hid::HidInstance>& device, bool exclu
 
 void Ds4Device::openBluetoothDevice(std::shared_ptr<hid::HidInstance> device)
 {
-	LOCK(sync);
+	auto lock_guard = lock();
+	
+	if (bluetoothConnected())
 	{
-		if (bluetoothConnected())
-		{
-			return;
-		}
-
-		if (!openDevice(device, profile.exclusiveMode))
-		{
-			// TODO: error handling
-			return;
-		}
-
-		if (profile.exclusiveMode && !device->isExclusive())
-		{
-			onBluetoothExclusiveFailure.invoke(this);
-		}
-		else
-		{
-			onBluetoothConnected.invoke(this);
-		}
-
-		bluetoothDevice = std::move(device);
-
-		// Enables bluetooth operational mode which makes
-		// the controller send report id 17 (0x11)
-		std::array<uint8_t, 37> temp {};
-		temp[0] = 0x02;
-
-		if (bluetoothDevice->getFeature(temp))
-		{
-			// success
-		}
-
-		setupBluetoothOutputBuffer();
-		idleTime.start();
+		return;
 	}
+
+	if (!openDevice(device, profile.exclusiveMode))
+	{
+		// TODO: error handling
+		return;
+	}
+
+	if (profile.exclusiveMode && !device->isExclusive())
+	{
+		onBluetoothExclusiveFailure.invoke(this);
+	}
+	else
+	{
+		onBluetoothConnected.invoke(this);
+	}
+
+	bluetoothDevice = std::move(device);
+
+	// Enables bluetooth operational mode which makes
+	// the controller send report id 17 (0x11)
+	std::array<uint8_t, 37> temp {};
+	temp[0] = 0x02;
+
+	if (bluetoothDevice->getFeature(temp))
+	{
+		// success
+	}
+
+	setupBluetoothOutputBuffer();
+	idleTime.start();
 }
 
 void Ds4Device::openUsbDevice(std::shared_ptr<hid::HidInstance> device)
 {
-	LOCK(sync);
+	auto lock_guard = lock();
+	
+	if (usbConnected())
 	{
-		if (usbConnected())
-		{
-			return;
-		}
-
-		if (!openDevice(device, profile.exclusiveMode))
-		{
-			// TODO: error handling
-			return;
-		}
-
-		if (profile.exclusiveMode && !device->isExclusive())
-		{
-			onUsbExclusiveFailure.invoke(this);
-		}
-		else
-		{
-			onUsbConnected.invoke(this);
-		}
-
-		usbDevice = std::move(device);
-		setupUsbOutputBuffer();
+		return;
 	}
+
+	if (!openDevice(device, profile.exclusiveMode))
+	{
+		// TODO: error handling
+		return;
+	}
+
+	if (profile.exclusiveMode && !device->isExclusive())
+	{
+		onUsbExclusiveFailure.invoke(this);
+	}
+	else
+	{
+		onUsbConnected.invoke(this);
+	}
+
+	usbDevice = std::move(device);
+	setupUsbOutputBuffer();
 }
 
 void Ds4Device::setupBluetoothOutputBuffer() const
@@ -632,7 +629,7 @@ void Ds4Device::controllerThread()
 	while (connected() && running)
 	{
 		{
-			LOCK(sync);
+			auto lock_guard = lock();
 			run();
 		}
 

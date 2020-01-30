@@ -19,7 +19,7 @@ class Ds4AutoLightColor
 		explicit Pair(const Ds4Color& color);
 	};
 
-	inline static std::recursive_mutex sync_lock;
+	inline static std::recursive_mutex lock;
 
 	static std::array<Pair, 17> colors;
 

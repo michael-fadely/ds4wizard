@@ -36,7 +36,7 @@ public:
 
 class Logger
 {
-	inline static std::recursive_mutex sync_lock;
+	inline static std::recursive_mutex lock;
 
 public:
 	static inline Event<void, std::shared_ptr<LineLoggedEventArgs>> lineLogged;

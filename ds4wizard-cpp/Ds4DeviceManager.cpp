@@ -44,7 +44,7 @@ bool Ds4DeviceManager::isDs4(const std::wstring& devicePath)
 
 void Ds4DeviceManager::findControllers()
 {
-	LOCK(sync);
+	MAKE_GUARD(sync_lock);
 
 	hid::enumerateHid([&](std::shared_ptr<hid::HidInstance> hid) -> bool
 	{
@@ -62,7 +62,7 @@ void Ds4DeviceManager::findController(const std::wstring& devicePath)
 	GUID guid = {};
 	HidD_GetHidGuid(&guid);
 
-	LOCK(sync);
+	MAKE_GUARD(sync_lock);
 
 	hid::enumerateGuid([&](const std::wstring& path, const std::wstring& instanceId) -> bool
 	{
@@ -100,7 +100,7 @@ bool Ds4DeviceManager::handleDevice(std::shared_ptr<hid::HidInstance> hid)
 		return false;
 	}
 
-	LOCK(sync);
+	MAKE_GUARD(sync_lock);
 
 	bool isBluetooth;
 
