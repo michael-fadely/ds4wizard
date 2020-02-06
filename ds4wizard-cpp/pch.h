@@ -1,7 +1,7 @@
 #pragma once
 
-#define QT_IS_FUCKING_BROKEN
-#define QAPPLICATION_CLASS QApplication
+#define QT_IS_BROKEN
+#define QAPPLICATION_CLASS QApplication // for SingleApplication
 
 // Windows
 #include <Windows.h>

@@ -4,13 +4,13 @@
 #include <singleapplication.h>
 #include "program.h"
 
-#ifdef QT_IS_FUCKING_BROKEN
+#ifdef QT_IS_BROKEN
 #include <Windows.h>
 #endif
 
 static MainWindow* window = nullptr;
 
-#ifdef QT_IS_FUCKING_BROKEN
+#ifdef QT_IS_BROKEN
 
 static WNDPROC lpPrevWndFunc = nullptr;
 
@@ -62,7 +62,7 @@ int main(int argc, char** argv)
 		window->setFocus();
 	});
 
-#ifdef QT_IS_FUCKING_BROKEN
+#ifdef QT_IS_BROKEN
 	auto hWnd = reinterpret_cast<HWND>(window->winId());
 
 	lpPrevWndFunc = reinterpret_cast<WNDPROC>(GetWindowLongPtr(hWnd, GWLP_WNDPROC));

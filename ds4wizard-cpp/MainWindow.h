@@ -37,7 +37,7 @@ private:
 
 protected:
 
-#if !defined(QT_IS_FUCKING_BROKEN)
+#if !defined(QT_IS_BROKEN)
 	bool nativeEvent(const QByteArray& eventType, void* message, long* result) override;
 #endif
 
