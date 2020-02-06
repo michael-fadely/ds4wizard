@@ -321,14 +321,14 @@ void Ds4Device::closeUsbDevice()
 	idleTime.start();
 }
 
-bool Ds4Device::openDevice(std::shared_ptr<hid::HidInstance>& device, bool exclusive)
+bool Ds4Device::openDevice(std::shared_ptr<hid::HidInstance>& hid, bool exclusive)
 {
-	if (device->open((exclusive ? hid::HidOpenFlags::exclusive : 0) | hid::HidOpenFlags::async))
+	if (hid->open((exclusive ? hid::HidOpenFlags::exclusive : 0) | hid::HidOpenFlags::async))
 	{
 		return true;
 	}
 
-	return exclusive && device->open(hid::HidOpenFlags::async);
+	return exclusive && hid->open(hid::HidOpenFlags::async);
 }
 
 void Ds4Device::openBluetoothDevice(std::shared_ptr<hid::HidInstance> device)
@@ -342,7 +342,7 @@ void Ds4Device::openBluetoothDevice(std::shared_ptr<hid::HidInstance> device)
 
 	if (!openDevice(device, profile.exclusiveMode))
 	{
-		// TODO: error handling
+		// TODO: /!\ error handling
 		return;
 	}
 
@@ -382,7 +382,7 @@ void Ds4Device::openUsbDevice(std::shared_ptr<hid::HidInstance> device)
 
 	if (!openDevice(device, profile.exclusiveMode))
 	{
-		// TODO: error handling
+		// TODO: /!\ error handling
 		return;
 	}
 

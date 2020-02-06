@@ -131,15 +131,12 @@ public:
 	void onProfileChanged(const std::string& newName);
 	void close();
 
-private:
 	void closeBluetoothDevice();
 
-public:
 	void disconnectBluetooth(BluetoothDisconnectReason reason);
 
-private:
 	void closeUsbDevice();
-	static bool openDevice(std::shared_ptr<hid::HidInstance>& device, bool exclusive);
+	static bool openDevice(std::shared_ptr<hid::HidInstance>& hid, bool exclusive);
 
 public:
 	void openBluetoothDevice(std::shared_ptr<hid::HidInstance> device);

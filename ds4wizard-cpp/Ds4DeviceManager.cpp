@@ -22,7 +22,6 @@
  * - when a device fails to open and is toggled, it closes and re-opens the xinput handle;
  *   ideally it should not open the xinput handle until the device is opened, exclusive or not.
  * - a cooldown time should be specified on toggles for a device.
- * - a "device open failed" notification can be displayed immediately followed by successful device open.
  */
 
 Ds4DeviceManager::~Ds4DeviceManager()
@@ -149,6 +148,47 @@ bool Ds4DeviceManager::handleDevice(std::shared_ptr<hid::HidInstance> hid)
 		return false;
 	}
 
+	static constexpr size_t toggleRetryMax = 3;
+
+	size_t toggledUsb = 0;
+	size_t toggledBluetooth = 0;
+
+	auto onUsbExclusiveFailure = [&](Ds4Device* sender)
+	{
+		if (toggledUsb >= toggleRetryMax)
+		{
+			// TODO: translatable
+			Logger::writeLine(LogLevel::warning, sender->name(), "Failed to open USB device exclusively.");
+			return;
+		}
+
+		toggledUsb = true;
+
+		hid->close();
+
+		sender->closeUsbDevice();
+		toggleDevice(hid->instanceId);
+		sender->openUsbDevice(hid);
+	};
+
+	auto onBluetoothExclusiveFailure = [&](Ds4Device* sender)
+	{
+		if (toggledBluetooth >= toggleRetryMax)
+		{
+			// TODO: translatable
+			Logger::writeLine(LogLevel::warning, sender->name(), "Failed to open Bluetooth device exclusively.");
+			return;
+		}
+
+		toggledBluetooth = true;
+
+		hid->close();
+
+		sender->closeBluetoothDevice();
+		toggleDevice(hid->instanceId);
+		sender->openBluetoothDevice(hid);
+	};
+
 	try
 	{
 		LOCK(devices);
@@ -163,35 +203,7 @@ bool Ds4DeviceManager::handleDevice(std::shared_ptr<hid::HidInstance> hid)
 
 			token_store.push_back(device->onDeviceClosed.add([this](auto sender) { onDs4DeviceClosed(sender); }));
 
-			bool toggledUsb = false;
-			bool toggledBluetooth = false;
 
-			auto onUsbExclusiveFailure = [&](Ds4Device* sender)
-			{
-				if (toggledUsb)
-				{
-					// TODO: translatable
-					Logger::writeLine(LogLevel::warning, sender->name(), "Failed to open USB device exclusively.");
-					return;
-				}
-
-				toggledUsb = true;
-				toggleDevice(hid->instanceId);
-				device->openUsbDevice(hid);
-			};
-
-			auto onBluetoothExclusiveFailure = [&](Ds4Device* sender)
-			{
-				if (toggledBluetooth)
-				{
-					// TODO: translatable
-					Logger::writeLine(LogLevel::warning, sender->name(), "Failed to open Bluetooth device exclusively.");
-					return;
-				}
-
-				toggledBluetooth = true;
-				toggleDevice(hid->instanceId);
-			};
 
 			token_store.push_back(device->onBluetoothExclusiveFailure.add(onBluetoothExclusiveFailure));
 			token_store.push_back(device->onUsbExclusiveFailure.add(onUsbExclusiveFailure));
@@ -200,7 +212,6 @@ bool Ds4DeviceManager::handleDevice(std::shared_ptr<hid::HidInstance> hid)
 			token_store.push_back(device->onBluetoothConnected       .add([](auto sender) { Logger::writeLine(LogLevel::info,    sender->name(), "Bluetooth connected."); }));
 			token_store.push_back(device->onBluetoothIdleDisconnect  .add([](auto sender) { Logger::writeLine(LogLevel::info,    sender->name(), "Bluetooth idle disconnect."); }));
 			token_store.push_back(device->onBluetoothDisconnected    .add([](auto sender) { Logger::writeLine(LogLevel::info,    sender->name(), "Bluetooth disconnected."); }));
-			token_store.push_back(device->onUsbExclusiveFailure      .add([](auto sender) { Logger::writeLine(LogLevel::warning, sender->name(), "Failed to open USB device exclusively."); }));
 			token_store.push_back(device->onUsbConnected             .add([](auto sender) { Logger::writeLine(LogLevel::info,    sender->name(), "USB connected."); }));
 
 			token_store.push_back(device->onLatencyThresholdExceeded.add(
