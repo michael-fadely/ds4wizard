@@ -147,7 +147,8 @@ void Ds4Device::applyProfile()
 	auto lock_guard = lock();
 	releaseAutoColor();
 
-	auto cachedProfile = Program::profileCache.getProfile(settings.profile);
+	std::optional<DeviceProfile> cachedProfile = Program::profileCache.getProfile(settings.profile);
+
 	if (!cachedProfile.has_value())
 	{
 		settings.profile = {};
@@ -158,16 +159,14 @@ void Ds4Device::applyProfile()
 		profile = *cachedProfile;
 	}
 
-	simulator.applyProfile(&profile);
+	Ds4LightOptions& lightOptions = settings.useProfileLight ? profile.light : settings.light;
 
-	Ds4LightOptions& l = settings.useProfileLight ? profile.light : settings.light;
-
-	if (l.automaticColor)
+	if (lightOptions.automaticColor)
 	{
-		l.color = Ds4AutoLightColor::getColor(colorIndex);
+		lightOptions.color = Ds4AutoLightColor::getColor(colorIndex);
 	}
 
-	activeLight = Ds4LightOptions(l);
+	activeLight = lightOptions;
 
 	if (usbDevice != nullptr && (!usbConnected() || usbDevice->isExclusive() != profile.exclusiveMode))
 	{
@@ -181,6 +180,11 @@ void Ds4Device::applyProfile()
 		closeBluetoothDevice();
 		std::shared_ptr<hid::HidInstance> inst = std::move(bluetoothDevice);
 		openBluetoothDevice(inst);
+	}
+
+	if (this->connected())
+	{
+		simulator.applyProfile(&profile);
 	}
 
 	idleTime.start();

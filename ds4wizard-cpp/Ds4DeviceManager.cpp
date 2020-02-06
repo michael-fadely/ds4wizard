@@ -19,8 +19,6 @@
 
 /*
  * TODO: this needs to be re-done; see reasons below
- * - when a device fails to open and is toggled, it closes and re-opens the xinput handle;
- *   ideally it should not open the xinput handle until the device is opened, exclusive or not.
  * - a cooldown time should be specified on toggles for a device.
  */
 
@@ -312,7 +310,6 @@ void Ds4DeviceManager::close()
 
 void Ds4DeviceManager::toggleDevice(const std::wstring& instanceId)
 {
-	// TODO: check if windows 8 or newer, otherwise don't bother
 	// TODO: use CreateProcess and get console output
 
 	if (Program::isElevated())
