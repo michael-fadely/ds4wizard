@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27703.2018
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29728.190
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ds4wizard-cpp", "ds4wizard-cpp\ds4wizard-cpp.vcxproj", "{B12702AD-ABFB-343A-A199-8E24837244A3}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -19,6 +19,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "fmt", "dependencies\fmt-build\fmt.vcxproj", "{A89BB5DB-DB58-36B0-8D5E-B020F3A513EB}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ViGEmClient", "dependencies\ViGEmClient\src\ViGEmClient.vcxproj", "{7DB06674-1F4F-464B-8E1C-172E9587F9DC}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SingleApplication", "SingleApplication\SingleApplication.vcxproj", "{7ECA4674-EE2E-434E-BA80-BD026783A13D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -170,6 +172,28 @@ Global
 		{7DB06674-1F4F-464B-8E1C-172E9587F9DC}.Release|x64.Build.0 = Release_DLL|x64
 		{7DB06674-1F4F-464B-8E1C-172E9587F9DC}.Release|x86.ActiveCfg = Release_DLL|Win32
 		{7DB06674-1F4F-464B-8E1C-172E9587F9DC}.Release|x86.Build.0 = Release_DLL|Win32
+		{7ECA4674-EE2E-434E-BA80-BD026783A13D}.Debug_DLL|x64.ActiveCfg = Debug|x64
+		{7ECA4674-EE2E-434E-BA80-BD026783A13D}.Debug_DLL|x64.Build.0 = Debug|x64
+		{7ECA4674-EE2E-434E-BA80-BD026783A13D}.Debug_DLL|x86.ActiveCfg = Release|x64
+		{7ECA4674-EE2E-434E-BA80-BD026783A13D}.Debug_DLL|x86.Build.0 = Release|x64
+		{7ECA4674-EE2E-434E-BA80-BD026783A13D}.Debug_LIB|x64.ActiveCfg = Debug|x64
+		{7ECA4674-EE2E-434E-BA80-BD026783A13D}.Debug_LIB|x64.Build.0 = Debug|x64
+		{7ECA4674-EE2E-434E-BA80-BD026783A13D}.Debug_LIB|x86.ActiveCfg = Release|x64
+		{7ECA4674-EE2E-434E-BA80-BD026783A13D}.Debug_LIB|x86.Build.0 = Release|x64
+		{7ECA4674-EE2E-434E-BA80-BD026783A13D}.Debug|x64.ActiveCfg = Debug|x64
+		{7ECA4674-EE2E-434E-BA80-BD026783A13D}.Debug|x64.Build.0 = Debug|x64
+		{7ECA4674-EE2E-434E-BA80-BD026783A13D}.Debug|x86.ActiveCfg = Debug|x64
+		{7ECA4674-EE2E-434E-BA80-BD026783A13D}.Release_DLL|x64.ActiveCfg = Release|x64
+		{7ECA4674-EE2E-434E-BA80-BD026783A13D}.Release_DLL|x64.Build.0 = Release|x64
+		{7ECA4674-EE2E-434E-BA80-BD026783A13D}.Release_DLL|x86.ActiveCfg = Release|x64
+		{7ECA4674-EE2E-434E-BA80-BD026783A13D}.Release_DLL|x86.Build.0 = Release|x64
+		{7ECA4674-EE2E-434E-BA80-BD026783A13D}.Release_LIB|x64.ActiveCfg = Release|x64
+		{7ECA4674-EE2E-434E-BA80-BD026783A13D}.Release_LIB|x64.Build.0 = Release|x64
+		{7ECA4674-EE2E-434E-BA80-BD026783A13D}.Release_LIB|x86.ActiveCfg = Release|x64
+		{7ECA4674-EE2E-434E-BA80-BD026783A13D}.Release_LIB|x86.Build.0 = Release|x64
+		{7ECA4674-EE2E-434E-BA80-BD026783A13D}.Release|x64.ActiveCfg = Release|x64
+		{7ECA4674-EE2E-434E-BA80-BD026783A13D}.Release|x64.Build.0 = Release|x64
+		{7ECA4674-EE2E-434E-BA80-BD026783A13D}.Release|x86.ActiveCfg = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -177,6 +201,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{A89BB5DB-DB58-36B0-8D5E-B020F3A513EB} = {EFC8667D-50C4-4A83-A819-B56998FFF2AA}
 		{7DB06674-1F4F-464B-8E1C-172E9587F9DC} = {EFC8667D-50C4-4A83-A819-B56998FFF2AA}
+		{7ECA4674-EE2E-434E-BA80-BD026783A13D} = {EFC8667D-50C4-4A83-A819-B56998FFF2AA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7F2C3D6C-DAE3-426B-861F-DC54077524D2}

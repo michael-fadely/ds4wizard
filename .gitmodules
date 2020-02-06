@@ -13,3 +13,6 @@
 [submodule "dependencies/better-enums"]
 	path = dependencies/better-enums
 	url = https://github.com/aantron/better-enums.git
+[submodule "dependencies/SingleApplication"]
+	path = dependencies/SingleApplication
+	url = https://github.com/itay-grudev/SingleApplication.git

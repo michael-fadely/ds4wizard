@@ -1,6 +1,7 @@
 #pragma once
 
 #define QT_IS_FUCKING_BROKEN
+#define QAPPLICATION_CLASS QApplication
 
 // Windows
 #include <Windows.h>
@@ -38,6 +39,8 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets>
+
+#include <singleapplication.h>
 
 // GSL
 #include <gsl/span>

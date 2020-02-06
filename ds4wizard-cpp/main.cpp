@@ -1,9 +1,8 @@
 #include "pch.h"
 #include "MainWindow.h"
-#include <QtWidgets/QApplication>
+#include <QApplication>
+#include <singleapplication.h>
 #include "program.h"
-
-// TODO: single instance https://stackoverflow.com/a/26904110
 
 #ifdef QT_IS_FUCKING_BROKEN
 #include <Windows.h>
@@ -47,12 +46,21 @@ int main(int argc, char** argv)
 	SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
 #endif
 
-	QApplication application(argc, argv);
+	SingleApplication application(argc, argv, false,
+	                              SingleApplication::Mode::ExcludeAppPath | SingleApplication::Mode::User | SingleApplication::Mode::ExcludeAppVersion);
 
 	Program::initialize();
 	Program::loadSettings();
 
 	window = new MainWindow();
+
+	QObject::connect(&application, &SingleApplication::instanceStarted, window, [&]()
+	{
+		window->setWindowState(Qt::WindowActive);
+		window->show();
+		window->raise();
+		window->setFocus();
+	});
 
 #ifdef QT_IS_FUCKING_BROKEN
 	auto hWnd = reinterpret_cast<HWND>(window->winId());
