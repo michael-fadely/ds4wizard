@@ -14,7 +14,24 @@
 // TODO: allow enabling, disabling, and remapping of individual output (and eventual virtual input) DS4 motors
 // TODO: allow enabling, disabling, and remapping of individual input XInput rumble motors
 
+// TODO: !!! retry count for exclusive lock acquisition
+// TODO: !!! external method for exclusive lock acquisition (i.e. to enable retry from gui)
+
 using namespace std::chrono;
+
+Ds4ConnectEvent::Ds4ConnectEvent(ConnectionType connectionType_, Status status_, std::optional<size_t> nativeError_)
+	: connectionType(connectionType_),
+	  status(status_),
+	  nativeError(nativeError_)
+{
+}
+
+Ds4DisconnectEvent::Ds4DisconnectEvent(ConnectionType connectionType_, Reason reason_, std::optional<size_t> nativeError_)
+	: connectionType(connectionType_),
+	  reason(reason_),
+	  nativeError(nativeError_)
+{
+}
 
 bool Ds4Device::disconnectOnIdle() const
 {
@@ -303,14 +320,8 @@ void Ds4Device::disconnectBluetooth(BluetoothDisconnectReason reason)
 
 	closeBluetoothDevice();
 
-	if (reason == BluetoothDisconnectReason::idle)
-	{
-		onBluetoothIdleDisconnect.invoke(this);
-	}
-	else
-	{
-		onBluetoothDisconnected.invoke(this);
-	}
+	const auto eventReason = reason == BluetoothDisconnectReason::idle ? Ds4DisconnectEvent::Reason::idle : Ds4DisconnectEvent::Reason::closed;
+	onDisconnect.invoke(this, Ds4DisconnectEvent(ConnectionType::bluetooth, eventReason));
 }
 
 void Ds4Device::closeUsbDevice()
@@ -335,72 +346,133 @@ bool Ds4Device::openDevice(std::shared_ptr<hid::HidInstance>& hid, bool exclusiv
 	return exclusive && hid->open(hid::HidOpenFlags::async);
 }
 
-void Ds4Device::openBluetoothDevice(std::shared_ptr<hid::HidInstance> device)
+bool Ds4Device::openBluetoothDevice(std::shared_ptr<hid::HidInstance> hid)
 {
 	auto lock_guard = lock();
 	
 	if (bluetoothConnected())
 	{
-		return;
+		return true;
 	}
 
-	if (!openDevice(device, profile.exclusiveMode))
+	if (!openDevice(hid, profile.exclusiveMode))
 	{
-		// TODO: /!\ error handling
-		return;
+		onConnectFailure.invoke(this, Ds4ConnectEvent(ConnectionType::bluetooth, Ds4ConnectEvent::Status::openFailed, hid->nativeError()));
+		return false;
 	}
 
-	if (profile.exclusiveMode && !device->isExclusive())
-	{
-		onBluetoothExclusiveFailure.invoke(this);
-	}
-	else
-	{
-		onBluetoothConnected.invoke(this);
-	}
+	auto isExclusiveFailure = [&]() -> bool { return profile.exclusiveMode && !hid->isExclusive(); };
+	const bool wasExclusiveFailure = isExclusiveFailure();
 
-	bluetoothDevice = std::move(device);
+	if (wasExclusiveFailure)
+	{
+		hid->close();
+
+		try
+		{
+			Ds4DeviceManager::toggleDevice(hid->instanceId);
+		}
+		catch (const std::exception&)
+		{
+			onConnectFailure.invoke(this, Ds4ConnectEvent(ConnectionType::bluetooth,
+			                                              Ds4ConnectEvent::Status::toggleFailed,
+			                                              GetLastError()));
+
+			return false;
+		}
+
+		if (!openDevice(hid, profile.exclusiveMode))
+		{
+			onConnectFailure.invoke(this, Ds4ConnectEvent(ConnectionType::bluetooth, Ds4ConnectEvent::Status::openFailed, hid->nativeError()));
+			return false;
+		}
+	}
 
 	// Enables bluetooth operational mode which makes
 	// the controller send report id 17 (0x11)
 	std::array<uint8_t, 37> temp {};
 	temp[0] = 0x02;
 
-	if (bluetoothDevice->getFeature(temp))
+	// TODO: on failure, pull the error code from GetLastError internally instead of doing it manually
+	if (!hid->getFeature(temp))
 	{
-		// success
+		hid->close();
+		onWirelessOperationalModeFailure.invoke(this, GetLastError());
+		return false;
 	}
+
+	if (wasExclusiveFailure && isExclusiveFailure())
+	{
+		// exclusive failure is non-critical
+		onConnect.invoke(this, Ds4ConnectEvent(ConnectionType::bluetooth, Ds4ConnectEvent::Status::exclusiveFailed));
+	}
+	else
+	{
+		onConnect.invoke(this, Ds4ConnectEvent(ConnectionType::bluetooth, Ds4ConnectEvent::Status::opened));
+	}
+
+	bluetoothDevice = std::move(hid);
 
 	setupBluetoothOutputBuffer();
 	idleTime.start();
+	return true;
 }
 
-void Ds4Device::openUsbDevice(std::shared_ptr<hid::HidInstance> device)
+bool Ds4Device::openUsbDevice(std::shared_ptr<hid::HidInstance> hid)
 {
 	auto lock_guard = lock();
 	
 	if (usbConnected())
 	{
-		return;
+		return true;
 	}
 
-	if (!openDevice(device, profile.exclusiveMode))
+	if (!openDevice(hid, profile.exclusiveMode))
 	{
-		// TODO: /!\ error handling
-		return;
+		onConnectFailure.invoke(this, Ds4ConnectEvent(ConnectionType::usb, Ds4ConnectEvent::Status::openFailed, hid->nativeError()));
+		return false;
 	}
 
-	if (profile.exclusiveMode && !device->isExclusive())
+	auto isExclusiveFailure = [&]() -> bool { return profile.exclusiveMode && !hid->isExclusive(); };
+	const bool wasExclusiveFailure = isExclusiveFailure();
+
+	if (wasExclusiveFailure)
 	{
-		onUsbExclusiveFailure.invoke(this);
+		hid->close();
+
+		try
+		{
+			Ds4DeviceManager::toggleDevice(hid->instanceId);
+		}
+		catch (const std::exception&)
+		{
+			onConnectFailure.invoke(this, Ds4ConnectEvent(ConnectionType::usb,
+			                                              Ds4ConnectEvent::Status::toggleFailed,
+			                                              GetLastError()));
+
+			return false;
+		}
+
+		if (!openDevice(hid, profile.exclusiveMode))
+		{
+			onConnectFailure.invoke(this, Ds4ConnectEvent(ConnectionType::usb, Ds4ConnectEvent::Status::openFailed, hid->nativeError()));
+			return false;
+		}
+	}
+
+	if (wasExclusiveFailure && isExclusiveFailure())
+	{
+		// exclusive failure is non-critical
+		onConnect.invoke(this, Ds4ConnectEvent(ConnectionType::usb, Ds4ConnectEvent::Status::exclusiveFailed));
 	}
 	else
 	{
-		onUsbConnected.invoke(this);
+		onConnect.invoke(this, Ds4ConnectEvent(ConnectionType::usb, Ds4ConnectEvent::Status::opened));
 	}
 
-	usbDevice = std::move(device);
+	usbDevice = std::move(hid);
 	setupUsbOutputBuffer();
+	return true;
 }
 
 void Ds4Device::setupBluetoothOutputBuffer() const
@@ -520,6 +592,13 @@ void Ds4Device::run()
 		// disconnected from bluetooth (if connected).
 		if (!usbConnected())
 		{
+			const auto reason = usbDevice->nativeError() != ERROR_DEVICE_NOT_CONNECTED
+			                    ? Ds4DisconnectEvent::Reason::error
+			                    : Ds4DisconnectEvent::Reason::closed;
+
+			onDisconnect.invoke(this, Ds4DisconnectEvent(ConnectionType::usb, reason, usbDevice->nativeError()));
+
+			closeUsbDevice();
 			idleTime.start();
 		}
 	}
@@ -646,7 +725,7 @@ void Ds4Device::controllerThread()
 	}
 
 	closeImpl();
-	onDeviceClosed.invoke(this);
+	onDeviceClose.invoke(this);
 }
 
 void Ds4Device::start()

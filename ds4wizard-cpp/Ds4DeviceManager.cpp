@@ -9,6 +9,8 @@
 #include <hid_util.h>
 #include <devicetoggle.h>
 
+#include <QTranslator>
+
 #include "Ds4Device.h"
 #include "lock.h"
 #include "Logger.h"
@@ -90,6 +92,161 @@ std::unique_lock<std::recursive_mutex> Ds4DeviceManager::lockDevices()
 	return std::unique_lock<std::recursive_mutex>(devices_lock);
 }
 
+void Ds4DeviceManager::registerDeviceCallbacks(const std::wstring& serialString, std::shared_ptr<Ds4Device> device)
+{
+	auto& token_store = tokens.insert({ serialString, {} }).first->second;
+
+	//token_store.push_back(device->onBluetoothExclusiveFailure.add(onBluetoothExclusiveFailure));
+	//token_store.push_back(device->onUsbExclusiveFailure.add(onUsbExclusiveFailure));
+
+	token_store.push_back(device->onDeviceClose.add([this](auto sender) { onDs4DeviceClose(sender); }));
+
+	auto onConnect = [](Ds4Device* sender, const Ds4ConnectEvent& args)
+	{
+		switch (args.connectionType)
+		{
+			case ConnectionType::usb:
+			{
+				switch (args.status)
+				{
+					case Ds4ConnectEvent::Status::opened:
+						Logger::writeLine(LogLevel::info, sender->name(), QObject::tr("USB connected.").toStdString());
+						break;
+
+					case Ds4ConnectEvent::Status::toggleFailed:
+						Logger::writeLine(LogLevel::error, sender->name(), QObject::tr("USB toggle failed. Please report!").toStdString());
+						break;
+
+					case Ds4ConnectEvent::Status::exclusiveFailed:
+						Logger::writeLine(LogLevel::warning, sender->name(), QObject::tr("USB connected, but exclusive acquisition failed.").toStdString());
+						break;
+
+					case Ds4ConnectEvent::Status::openFailed:
+						Logger::writeLine(LogLevel::error, sender->name(), QObject::tr("USB open failed!").toStdString());
+						break;
+					default:
+						break;
+				}
+				break;
+			}
+
+			case ConnectionType::bluetooth:
+			{
+				switch (args.status)
+				{
+					case Ds4ConnectEvent::Status::opened:
+						Logger::writeLine(LogLevel::info, sender->name(), QObject::tr("Bluetooth connected.").toStdString());
+						break;
+
+					case Ds4ConnectEvent::Status::toggleFailed:
+						Logger::writeLine(LogLevel::error, sender->name(), QObject::tr("Bluetooth toggle failed. Please report!").toStdString());
+						break;
+
+					case Ds4ConnectEvent::Status::exclusiveFailed:
+						Logger::writeLine(LogLevel::warning, sender->name(), QObject::tr("Bluetooth connected, but exclusive acquisition failed.").toStdString());
+						break;
+
+					case Ds4ConnectEvent::Status::openFailed:
+						Logger::writeLine(LogLevel::error, sender->name(), QObject::tr("Bluetooth open failed!").toStdString());
+						break;
+					default:
+						break;
+				}
+				break;
+			}
+
+			default:
+				break;
+		}
+
+	};
+
+	auto onDisconnect = [](Ds4Device* sender, const Ds4DisconnectEvent& args)
+	{
+		switch (args.connectionType)
+		{
+			case ConnectionType::usb:
+			{
+				switch (args.reason)
+				{
+					case Ds4DisconnectEvent::Reason::dropped:
+						Logger::writeLine(LogLevel::error, sender->name(), QObject::tr("USB connection lost!").toStdString());
+						break;
+
+					case Ds4DisconnectEvent::Reason::closed:
+						Logger::writeLine(LogLevel::info, sender->name(), QObject::tr("USB disconnected.").toStdString());
+						break;
+
+					case Ds4DisconnectEvent::Reason::idle:
+						Logger::writeLine(LogLevel::info, sender->name(), QObject::tr("Controller idle. USB disconnected.").toStdString());
+						break;
+
+					case Ds4DisconnectEvent::Reason::error:
+					{
+						const QString str = QObject::tr("USB disconnected unexpectedly with error code %1").arg(args.nativeError.value_or(0));
+						Logger::writeLine(LogLevel::error, sender->name(), str.toStdString());
+						break;
+					}
+
+					default:
+						break;
+				}
+				break;
+			}
+
+			case ConnectionType::bluetooth:
+			{
+				switch (args.reason)
+				{
+					case Ds4DisconnectEvent::Reason::dropped:
+						Logger::writeLine(LogLevel::error, sender->name(), QObject::tr("Bluetooth connection lost!").toStdString());
+						break;
+
+					case Ds4DisconnectEvent::Reason::closed:
+						Logger::writeLine(LogLevel::info, sender->name(), QObject::tr("Bluetooth disconnected.").toStdString());
+						break;
+
+					case Ds4DisconnectEvent::Reason::idle:
+						Logger::writeLine(LogLevel::info, sender->name(), QObject::tr("Controller idle. Bluetooth disconnected.").toStdString());
+						break;
+
+					case Ds4DisconnectEvent::Reason::error:
+					{
+						const QString str = QObject::tr("Bluetooth disconnected unexpectedly with error code %1").arg(args.nativeError.value_or(0));
+						Logger::writeLine(LogLevel::error, sender->name(), str.toStdString());
+						break;
+					}
+
+					default:
+						break;
+				}
+				break;
+			}
+
+			default:
+				break;
+		}
+	};
+	
+	token_store.push_back(device->onConnect.add(onConnect));
+	token_store.push_back(device->onConnectFailure.add(onConnect));
+	token_store.push_back(device->onDisconnect.add(onDisconnect));
+
+	token_store.push_back(device->onWirelessOperationalModeFailure.add(
+		[](Ds4Device* sender, size_t nativeError) -> void
+		{
+			const QString str = QObject::tr("Enabling wireless operational mode failed with error code %1").arg(nativeError);
+			Logger::writeLine(LogLevel::error, sender->name(), str.toStdString());
+		}));
+
+	token_store.push_back(device->onLatencyThresholdExceeded.add(
+		[](auto sender, std::chrono::milliseconds value, std::chrono::milliseconds threshold)
+		{
+			const std::string str = fmt::format("Input latency has exceeded the threshold. ({0} ms > {1} ms)", value.count(), threshold.count());
+			Logger::writeLine(LogLevel::warning, sender->name(), str);
+		}));
+}
+
 bool Ds4DeviceManager::handleDevice(std::shared_ptr<hid::HidInstance> hid)
 {
 	if (!isDs4(*hid))
@@ -146,47 +303,6 @@ bool Ds4DeviceManager::handleDevice(std::shared_ptr<hid::HidInstance> hid)
 		return false;
 	}
 
-	static constexpr size_t toggleRetryMax = 3;
-
-	size_t toggledUsb = 0;
-	size_t toggledBluetooth = 0;
-
-	auto onUsbExclusiveFailure = [&](Ds4Device* sender)
-	{
-		if (toggledUsb >= toggleRetryMax)
-		{
-			// TODO: translatable
-			Logger::writeLine(LogLevel::warning, sender->name(), "Failed to open USB device exclusively.");
-			return;
-		}
-
-		toggledUsb = true;
-
-		hid->close();
-
-		sender->closeUsbDevice();
-		toggleDevice(hid->instanceId);
-		sender->openUsbDevice(hid);
-	};
-
-	auto onBluetoothExclusiveFailure = [&](Ds4Device* sender)
-	{
-		if (toggledBluetooth >= toggleRetryMax)
-		{
-			// TODO: translatable
-			Logger::writeLine(LogLevel::warning, sender->name(), "Failed to open Bluetooth device exclusively.");
-			return;
-		}
-
-		toggledBluetooth = true;
-
-		hid->close();
-
-		sender->closeBluetoothDevice();
-		toggleDevice(hid->instanceId);
-		sender->openBluetoothDevice(hid);
-	};
-
 	try
 	{
 		LOCK(devices);
@@ -196,28 +312,11 @@ bool Ds4DeviceManager::handleDevice(std::shared_ptr<hid::HidInstance> hid)
 		// device isn't already being managed, so set up all the event handling/etc
 		if (it == devices.end())
 		{
+			const auto& serialString = hid->serialString;
+
 			std::shared_ptr<Ds4Device> device = std::make_shared<Ds4Device>();
-			auto& token_store = tokens.insert({ hid->serialString, {} }).first->second;
 
-			token_store.push_back(device->onDeviceClosed.add([this](auto sender) { onDs4DeviceClosed(sender); }));
-
-
-
-			token_store.push_back(device->onBluetoothExclusiveFailure.add(onBluetoothExclusiveFailure));
-			token_store.push_back(device->onUsbExclusiveFailure.add(onUsbExclusiveFailure));
-
-			// TODO: translatable
-			token_store.push_back(device->onBluetoothConnected       .add([](auto sender) { Logger::writeLine(LogLevel::info,    sender->name(), "Bluetooth connected."); }));
-			token_store.push_back(device->onBluetoothIdleDisconnect  .add([](auto sender) { Logger::writeLine(LogLevel::info,    sender->name(), "Bluetooth idle disconnect."); }));
-			token_store.push_back(device->onBluetoothDisconnected    .add([](auto sender) { Logger::writeLine(LogLevel::info,    sender->name(), "Bluetooth disconnected."); }));
-			token_store.push_back(device->onUsbConnected             .add([](auto sender) { Logger::writeLine(LogLevel::info,    sender->name(), "USB connected."); }));
-
-			token_store.push_back(device->onLatencyThresholdExceeded.add(
-			[](auto sender, std::chrono::milliseconds value, std::chrono::milliseconds threshold)
-			{
-				const std::string str = fmt::format("Input latency has exceeded the threshold. ({0} ms > {1} ms)", value.count(), threshold.count());
-				Logger::writeLine(LogLevel::warning, sender->name(), str);
-			}));
+			registerDeviceCallbacks(serialString, device);
 
 			device->open(hid);
 
@@ -266,7 +365,7 @@ bool Ds4DeviceManager::handleDevice(std::shared_ptr<hid::HidInstance> hid)
 	return false;
 }
 
-void Ds4DeviceManager::onDs4DeviceClosed(Ds4Device* sender)
+void Ds4DeviceManager::onDs4DeviceClose(Ds4Device* sender)
 {
 	LOCK(devices);
 

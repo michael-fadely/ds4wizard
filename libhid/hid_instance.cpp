@@ -110,6 +110,8 @@ bool HidInstance::readMetadata()
 		return (readCaps() | readAttributes() | readSerial());
 	}
 
+	nativeError_ = 0;
+
 #ifdef _MSC_VER
 	Handle h = Handle(CreateFile(path.c_str(), GENERIC_READ,
 	                             FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, 0, nullptr), true);
@@ -180,10 +182,13 @@ bool hid::HidInstance::setFeature(const gsl::span<uint8_t>& buffer) const
 bool HidInstance::open(HidOpenFlags_t flags)
 {
 	bool exclusive = !!(flags & HidOpenFlags::exclusive);
+
 	if (exclusive != isExclusive())
 	{
 		close();
 	}
+
+	nativeError_ = 0;
 
 	const uint32_t share_flags = exclusive ? 0 : FILE_SHARE_READ | FILE_SHARE_WRITE;
 	const uint32_t async_flags = !!(flags & HidOpenFlags::async) ? FILE_FLAG_OVERLAPPED : 0;
@@ -284,6 +289,7 @@ bool HidInstance::checkPendingRead()
 bool HidInstance::checkAsyncReadError()
 {
 	const DWORD error = GetLastError();
+	nativeError_ = 0;
 
 	switch (error)
 	{
@@ -296,6 +302,7 @@ bool HidInstance::checkAsyncReadError()
 			break;
 
 		default:
+			nativeError_ = error;
 			close();
 			return false;
 	}
@@ -451,6 +458,8 @@ bool HidInstance::readCaps(HANDLE h)
 {
 	bool result = false;
 
+	nativeError_ = 0;
+
 #ifdef _MSC_VER
 	HIDP_CAPS c = {};
 	PHIDP_PREPARSED_DATA ptr = nullptr;
@@ -501,6 +510,8 @@ bool HidInstance::readCaps(HANDLE h)
 
 bool HidInstance::readSerial(HANDLE h)
 {
+	nativeError_ = 0;
+
 	serial.clear();
 
 #ifdef _MSC_VER
@@ -524,6 +535,10 @@ bool HidInstance::readSerial(HANDLE h)
 			serial.push_back(static_cast<uint8_t>(std::stoul(sub, nullptr, 16)));
 		}
 	}
+	else
+	{
+		nativeError_ = GetLastError();
+	}
 
 	return result;
 #else
@@ -534,12 +549,19 @@ bool HidInstance::readSerial(HANDLE h)
 bool HidInstance::readAttributes(HANDLE h)
 {
 #ifdef _MSC_VER
+	nativeError_ = 0;
+
 	HIDD_ATTRIBUTES attributes {};
 	bool result = HidD_GetAttributes(h, &attributes);
 
 	attributes_.vendorId      = attributes.VendorID;
 	attributes_.productId     = attributes.ProductID;
 	attributes_.versionNumber = attributes.VersionNumber;
+
+	if (!result)
+	{
+		nativeError_ = GetLastError();
+	}
 
 	return result;
 #else

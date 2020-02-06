@@ -16,6 +16,46 @@
 #include "Latency.h"
 #include "InputSimulator.h"
 
+class Ds4ConnectEvent
+{
+public:
+	enum class Status
+	{
+		opened,
+		toggleFailed,
+		exclusiveFailed,
+		openFailed
+	};
+
+	ConnectionType connectionType;
+	Status status;
+	std::optional<size_t> nativeError;
+
+	Ds4ConnectEvent() = delete;
+
+	Ds4ConnectEvent(ConnectionType connectionType_, Status status_, std::optional<size_t> nativeError_ = std::nullopt);
+};
+
+class Ds4DisconnectEvent
+{
+public:
+	enum class Reason
+	{
+		dropped,
+		closed,
+		idle,
+		error
+	};
+
+	ConnectionType connectionType;
+	Reason reason;
+	std::optional<size_t> nativeError;
+
+	Ds4DisconnectEvent() = delete;
+
+	Ds4DisconnectEvent(ConnectionType connectionType_, Reason reason_, std::optional<size_t> nativeError_ = std::nullopt);
+};
+
 class Ds4Device
 {
 	bool peakedLatencyThreshold = false;
@@ -61,14 +101,12 @@ public:
 		idle
 	};
 
-	Event<Ds4Device> onDeviceClosed;
+	Event<Ds4Device> onDeviceClose;
 	Event<Ds4Device> onBatteryLevelChanged;
-	Event<Ds4Device> onBluetoothExclusiveFailure;
-	Event<Ds4Device> onBluetoothConnected;
-	Event<Ds4Device> onBluetoothIdleDisconnect;
-	Event<Ds4Device> onBluetoothDisconnected;
-	Event<Ds4Device> onUsbExclusiveFailure;
-	Event<Ds4Device> onUsbConnected;
+	Event<Ds4Device, Ds4ConnectEvent> onConnect;
+	Event<Ds4Device, size_t> onWirelessOperationalModeFailure;
+	Event<Ds4Device, Ds4ConnectEvent> onConnectFailure;
+	Event<Ds4Device, Ds4DisconnectEvent> onDisconnect;
 
 	// value, threshold
 	Event<Ds4Device, std::chrono::milliseconds, std::chrono::milliseconds> onLatencyThresholdExceeded;
@@ -139,8 +177,8 @@ public:
 	static bool openDevice(std::shared_ptr<hid::HidInstance>& hid, bool exclusive);
 
 public:
-	void openBluetoothDevice(std::shared_ptr<hid::HidInstance> device);
-	void openUsbDevice(std::shared_ptr<hid::HidInstance> device);
+	bool openBluetoothDevice(std::shared_ptr<hid::HidInstance> hid);
+	bool openUsbDevice(std::shared_ptr<hid::HidInstance> hid);
 
 private:
 	void setupBluetoothOutputBuffer() const;
