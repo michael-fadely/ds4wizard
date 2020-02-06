@@ -104,7 +104,8 @@
       <QtRccFileName>qrc_%(Filename).cpp</QtRccFileName>
     </QtRcc>
     <PostBuildEvent>
-      <Command>copy "$(SolutionDir)bin\$(Configuration)\$(PlatformShortName)\*" "$(SolutionDir)bin\$(Configuration)\"</Command>
+      <Command>copy "$(SolutionDir)bin\$(Configuration)\$(PlatformShortName)\*" "$(SolutionDir)bin\$(Configuration)\"
+"$(QTDIR)\bin\windeployqt.exe" "$(OutDir.TrimEnd('\'))" --no-system-d3d-compiler --no-opengl-sw --no-angle</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -155,7 +156,8 @@
       <QtRccFileName>qrc_%(Filename).cpp</QtRccFileName>
     </QtRcc>
     <PostBuildEvent>
-      <Command>copy "$(SolutionDir)bin\$(Configuration)\$(PlatformShortName)\*" "$(SolutionDir)bin\$(Configuration)\"</Command>
+      <Command>copy "$(SolutionDir)bin\$(Configuration)\$(PlatformShortName)\*" "$(SolutionDir)bin\$(Configuration)\"
+"$(QTDIR)\bin\windeployqt.exe" "$(OutDir.TrimEnd('\'))" --no-system-d3d-compiler --no-opengl-sw --no-angle</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
