@@ -94,6 +94,11 @@ class Ds4Device
 
 	InputSimulator simulator;
 
+	// TODO: rather than storing a boolean, implement a run-once, resettable callback
+	bool notifiedLow = false;
+	// TODO: rather than storing a boolean, implement a run-once, resettable callback
+	bool notifiedCharged = true;
+
 public:
 	enum class BluetoothDisconnectReason
 	{
@@ -102,11 +107,15 @@ public:
 	};
 
 	Event<Ds4Device> onDeviceClose;
-	Event<Ds4Device> onBatteryLevelChanged;
 	Event<Ds4Device, Ds4ConnectEvent> onConnect;
 	Event<Ds4Device, size_t> onWirelessOperationalModeFailure;
 	Event<Ds4Device, Ds4ConnectEvent> onConnectFailure;
 	Event<Ds4Device, Ds4DisconnectEvent> onDisconnect;
+
+	Event<Ds4Device> onBatteryLevelChanged;
+	// current battery level
+	Event<Ds4Device, uint8_t> onBatteryLevelLow;
+	Event<Ds4Device> onBatteryFullyCharged;
 
 	// value, threshold
 	Event<Ds4Device, std::chrono::milliseconds, std::chrono::milliseconds> onLatencyThresholdExceeded;
@@ -164,6 +173,7 @@ public:
 
 private:
 	void releaseAutoColor();
+	void displayPowerNotifications();
 
 public:
 	void onProfileChanged(const std::string& newName);
@@ -176,7 +186,6 @@ public:
 	void closeUsbDevice();
 	static bool openDevice(std::shared_ptr<hid::HidInstance>& hid, bool exclusive);
 
-public:
 	bool openBluetoothDevice(std::shared_ptr<hid::HidInstance> hid);
 	bool openUsbDevice(std::shared_ptr<hid::HidInstance> hid);
 

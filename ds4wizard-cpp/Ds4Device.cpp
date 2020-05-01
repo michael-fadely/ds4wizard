@@ -142,6 +142,9 @@ void Ds4Device::open(std::shared_ptr<hid::HidInstance> device)
 		this->settings = *settings;
 	}
 
+	notifiedLow = false;
+	notifiedCharged = true;
+
 	applyProfile();
 }
 
@@ -212,6 +215,35 @@ void Ds4Device::releaseAutoColor()
 	auto lock_guard = lock();
 	Ds4AutoLightColor::releaseColor(colorIndex);
 	colorIndex = -1;
+}
+
+void Ds4Device::displayPowerNotifications()
+{
+	if (settings.notifyBatteryLow > 0)
+	{
+		if (usbConnected() || charging() || battery() > settings.notifyBatteryLow)
+		{
+			notifiedLow = false;
+		}
+		else if (!notifiedLow)
+		{
+			notifiedLow = true;
+			onBatteryLevelLow.invoke(this, battery());
+		}
+	}
+
+	if (settings.notifyFullyCharged)
+	{
+		if (!usbConnected() || battery() < 10)
+		{
+			notifiedCharged = false;
+		}
+		else if (!notifiedCharged)
+		{
+			notifiedCharged = true;
+			onBatteryFullyCharged.invoke(this);
+		}
+	}
 }
 
 void Ds4Device::onProfileChanged(const std::string& newName)
@@ -662,7 +694,7 @@ void Ds4Device::run()
 
 		if (charging_ != charging() || battery_ != battery())
 		{
-			settings.displayNotifications(this);
+			displayPowerNotifications();
 			onBatteryLevelChanged.invoke(this);
 		}
 

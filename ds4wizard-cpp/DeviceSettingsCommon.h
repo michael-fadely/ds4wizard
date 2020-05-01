@@ -13,9 +13,6 @@ class Ds4Device;
  */
 class DeviceSettingsCommon : public JsonData
 {
-	bool notifiedLow;
-	bool notifiedCharged;
-
 public:
 	/** \brief Options for the light bar. */
 	Ds4LightOptions light;
@@ -41,12 +38,6 @@ public:
 	DeviceSettingsCommon();
 	DeviceSettingsCommon(const DeviceSettingsCommon&) = default;
 	DeviceSettingsCommon& operator=(const DeviceSettingsCommon&) = default;
-
-	/**
-	 * \brief Displays a notification, if configured.
-	 * \param device The device that raised the notification.
-	 */
-	void displayNotifications(Ds4Device* device);
 
 	bool operator==(const DeviceSettingsCommon& other) const;
 	bool operator!=(const DeviceSettingsCommon& other) const;

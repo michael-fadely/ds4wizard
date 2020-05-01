@@ -1,58 +1,19 @@
 #include "pch.h"
 #include "DeviceSettingsCommon.h"
-#include "Logger.h"
-#include <sstream>
 
 DeviceSettingsCommon::DeviceSettingsCommon()
-	: notifiedLow(false),
-	  notifiedCharged(true),
-	  idle({}),
+	: idle({}),
 	  notifyFullyCharged(true),
 	  notifyBatteryLow(2)
 {
 }
 
-// TODO: move this shit out of here wtf
-void DeviceSettingsCommon::displayNotifications(Ds4Device* device)
-{
-	if (notifyBatteryLow > 0)
-	{
-		if (device->usbConnected() || device->charging() || device->battery() > notifyBatteryLow)
-		{
-			notifiedLow = false;
-		}
-		else if (!notifiedLow)
-		{
-			notifiedLow = true;
-
-			// TODO: translatable
-			std::stringstream message;
-			message << "Battery running low! (" << device->battery() * 10 << ")";
-
-			Logger::writeLine(LogLevel::warning, device->name(), message.str());
-		}
-	}
-
-	if (notifyFullyCharged)
-	{
-		if (!device->usbConnected() || device->battery() < 10)
-		{
-			notifiedCharged = false;
-		}
-		else if (!notifiedCharged)
-		{
-			notifiedCharged = true;
-			// TODO: translatable
-			Logger::writeLine(LogLevel::info, device->name(), "Fully charged.");
-		}
-	}
-}
-
 bool DeviceSettingsCommon::operator==(const DeviceSettingsCommon& other) const
 {
-	return light == other.light && idle == other.idle
-	       && notifyFullyCharged == other.notifyFullyCharged
-	       && notifyBatteryLow == other.notifyBatteryLow;
+	return light == other.light &&
+	       idle == other.idle &&
+	       notifyFullyCharged == other.notifyFullyCharged &&
+	       notifyBatteryLow == other.notifyBatteryLow;
 }
 
 bool DeviceSettingsCommon::operator!=(const DeviceSettingsCommon& other) const

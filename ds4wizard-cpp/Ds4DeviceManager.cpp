@@ -242,8 +242,20 @@ void Ds4DeviceManager::registerDeviceCallbacks(const std::wstring& serialString,
 	token_store.push_back(device->onLatencyThresholdExceeded.add(
 		[](auto sender, std::chrono::milliseconds value, std::chrono::milliseconds threshold)
 		{
+			// TODO: translatable
 			const std::string str = fmt::format("Input latency has exceeded the threshold. ({0} ms > {1} ms)", value.count(), threshold.count());
 			Logger::writeLine(LogLevel::warning, sender->name(), str);
+		}));
+
+	token_store.push_back(device->onBatteryFullyCharged.add([](Ds4Device* sender)
+		{
+			Logger::writeLine(LogLevel::info, sender->name(), QObject::tr("Fully charged.").toStdString());
+		}));
+
+	token_store.push_back(device->onBatteryLevelLow.add([](Ds4Device* sender, uint8_t value)
+		{
+			const QString str = QObject::tr("Battery running low! (%1%%)").arg(value * 10);
+			Logger::writeLine(LogLevel::warning, sender->name(), str.toStdString());
 		}));
 }
 
