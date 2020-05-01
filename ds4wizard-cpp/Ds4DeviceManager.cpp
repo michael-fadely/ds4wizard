@@ -431,9 +431,7 @@ void Ds4DeviceManager::toggleDevice(const std::wstring& instanceId)
 		return;
 	}
 
-	std::wstring params = L"--toggle-device \"";
-	params.append(instanceId);
-	params.append(L"\"");
+	const std::wstring params = fmt::format(L"--toggle-device \"{0}\"", instanceId);
 
 	SHELLEXECUTEINFO info {};
 	info.cbSize       = sizeof(info);
