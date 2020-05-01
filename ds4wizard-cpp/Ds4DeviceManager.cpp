@@ -1,6 +1,5 @@
 #include "pch.h"
 #include <iomanip>
-#include <sstream>
 
 #include <shellapi.h>
 
@@ -295,12 +294,9 @@ bool Ds4DeviceManager::handleDevice(std::shared_ptr<hid::HidInstance> hid)
 				buffer[3], buffer[2], buffer[1]
 			};
 
-			std::wstringstream serialString;
-
-			serialString << std::setw(2) << std::setfill(L'0') << std::hex
-				<< buffer[6] << buffer[5] << buffer[4] << buffer[3] << buffer[2] << buffer[1];
-
-			hid->serialString = serialString.str();
+			// HACK: this member shouldn't be exposed, but getting the "serial" (MAC) over USB is non-standard for the DS4.
+			hid->serialString = fmt::format(L"{:2x}{:2x}{:2x}{:2x}{:2x}{:2x}",
+			                                buffer[6], buffer[5], buffer[4], buffer[3], buffer[2], buffer[1]);
 		}
 
 		if (hid->serialString.empty())
