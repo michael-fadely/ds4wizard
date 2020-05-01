@@ -99,7 +99,7 @@ void Ds4DeviceManager::registerDeviceCallbacks(const std::wstring& serialString,
 	//token_store.push_back(device->onBluetoothExclusiveFailure.add(onBluetoothExclusiveFailure));
 	//token_store.push_back(device->onUsbExclusiveFailure.add(onUsbExclusiveFailure));
 
-	token_store.push_back(device->onDeviceClose.add([this](auto sender) { onDs4DeviceClose(sender); }));
+	token_store.push_back(device->onDeviceClose.add([this](Ds4Device* sender) { onDs4DeviceClose(sender); }));
 
 	auto onConnect = [](Ds4Device* sender, const Ds4ConnectEvent& args)
 	{
@@ -240,11 +240,13 @@ void Ds4DeviceManager::registerDeviceCallbacks(const std::wstring& serialString,
 		}));
 
 	token_store.push_back(device->onLatencyThresholdExceeded.add(
-		[](auto sender, std::chrono::milliseconds value, std::chrono::milliseconds threshold)
+		[](Ds4Device* sender, std::chrono::milliseconds value, std::chrono::milliseconds threshold)
 		{
-			// TODO: translatable
-			const std::string str = fmt::format("Input latency has exceeded the threshold. ({0} ms > {1} ms)", value.count(), threshold.count());
-			Logger::writeLine(LogLevel::warning, sender->name(), str);
+			const QString str = QObject::tr("Input latency has exceeded the threshold. (%1 ms > %2 ms)")
+			                    .arg(value.count())
+			                    .arg(threshold.count());
+			
+			Logger::writeLine(LogLevel::warning, sender->name(), str.toStdString());
 		}));
 
 	token_store.push_back(device->onBatteryFullyCharged.add([](Ds4Device* sender)
