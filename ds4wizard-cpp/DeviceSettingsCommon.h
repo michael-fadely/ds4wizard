@@ -5,8 +5,6 @@
 #include "Ds4LightOptions.h"
 #include "DeviceIdleOptions.h"
 
-class Ds4Device;
-
 /**
  * \brief Represents common device configuration for a \c Ds4Device.
  * \sa Ds4Device
