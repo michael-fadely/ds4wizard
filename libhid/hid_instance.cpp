@@ -2,7 +2,6 @@
 #include <hidsdi.h>
 #include <hidpi.h>
 
-#include <thread>
 #include <utility>
 
 #include "hid_handle.h"
