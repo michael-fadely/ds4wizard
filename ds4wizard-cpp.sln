@@ -24,6 +24,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SingleApplication", "Single
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hid-tester", "hid-tester\hid-tester.vcxproj", "{A1449C88-190B-4F6B-9B13-BA8EDB7E2807}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "internal libraries", "internal libraries", "{66D229C9-532C-4984-A907-945CED26F85A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug_DLL|x64 = Debug_DLL|x64
@@ -135,12 +137,14 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{03F69A1B-6D18-43F5-B71F-B3A3018F12F0} = {66D229C9-532C-4984-A907-945CED26F85A}
+		{3292BD3C-C649-46B0-9C60-545B31F2B169} = {66D229C9-532C-4984-A907-945CED26F85A}
 		{A89BB5DB-DB58-36B0-8D5E-B020F3A513EB} = {EFC8667D-50C4-4A83-A819-B56998FFF2AA}
 		{7DB06674-1F4F-464B-8E1C-172E9587F9DC} = {EFC8667D-50C4-4A83-A819-B56998FFF2AA}
 		{7ECA4674-EE2E-434E-BA80-BD026783A13D} = {EFC8667D-50C4-4A83-A819-B56998FFF2AA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		Qt5Version = $(DefaultQtVersion)
 		SolutionGuid = {7F2C3D6C-DAE3-426B-861F-DC54077524D2}
+		Qt5Version = $(DefaultQtVersion)
 	EndGlobalSection
 EndGlobal
