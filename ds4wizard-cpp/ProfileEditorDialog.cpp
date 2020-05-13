@@ -15,6 +15,4 @@ ProfileEditorDialog::ProfileEditorDialog(DeviceProfileModel* profileModel_, QWid
 	ui.comboBox_ModifierList->setModel(model);
 }
 
-ProfileEditorDialog::~ProfileEditorDialog()
-{
-}
+ProfileEditorDialog::~ProfileEditorDialog() = default;

@@ -13,7 +13,7 @@ class MainWindow : public QMainWindow
 
 public:
 	explicit MainWindow(QWidget* parent = nullptr);
-	~MainWindow();
+	~MainWindow() override;
 
 	void changeEvent(QEvent* e) override;
 	bool wndProc(tagMSG* msg) const;

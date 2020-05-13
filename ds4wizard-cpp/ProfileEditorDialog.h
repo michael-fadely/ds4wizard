@@ -13,7 +13,7 @@ class ProfileEditorDialog : public QDialog
 
 public:
 	ProfileEditorDialog(DeviceProfileModel* profileModel_, QWidget* parent = Q_NULLPTR);
-	~ProfileEditorDialog();
+	~ProfileEditorDialog() override;
 
 private:
 	Ui::ProfileEditorDialog ui;

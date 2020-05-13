@@ -20,6 +20,8 @@ private:
 	Stopwatch rapidStopwatch;
 
 public:
+	~InputMapBase() override = default;
+
 	/**
 	 * \brief
 	 * The pressed state of the underlying emulated mapping.
@@ -1033,6 +1035,7 @@ public:
 	#pragma endregion
 
 	InputMap() = default;
+	~InputMap() override = default;
 
 	InputMap(const InputMap& other) = default;
 	InputMap(InputMap&& other) noexcept;
@@ -1068,6 +1071,7 @@ public:
 	std::deque<InputMap> bindings;
 
 	InputModifier() = default;
+	~InputModifier() override = default;
 
 	InputModifier(InputType_t type, Ds4Buttons::T buttons);
 	InputModifier(InputType_t type, Ds4Axes::T axis);

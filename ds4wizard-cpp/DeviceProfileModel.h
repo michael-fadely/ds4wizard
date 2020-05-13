@@ -29,7 +29,7 @@ class DeviceProfileModel final : public QObject
 public:
 	DeviceProfileModel(QObject* parent, DeviceProfile&& profile_);
 	DeviceProfileModel(QObject* parent, const DeviceProfile& profile_);
-	~DeviceProfileModel() = default;
+	~DeviceProfileModel() override = default;
 
 	[[nodiscard]] ModifierListModel* makeModifierModel(QObject* parent);
 };

@@ -9,6 +9,8 @@
 class Pressable
 {
 public:
+	virtual ~Pressable() = default;
+
 	/**
 	 * \brief Indicates the pressed state of this pressable instance.
 	 * \sa PressedState
