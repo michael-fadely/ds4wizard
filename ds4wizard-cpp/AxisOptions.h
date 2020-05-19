@@ -51,8 +51,6 @@ public:
 	 */
 	std::optional<bool> invert;
 
-	// TODO: /!\ /!\ /!\ (issue #1) implement radial dead zone
-
 	/**
 	 * \brief The dead zone mode to use if configured.
 	 * If \c DeadZoneSource::none or \c std::nullopt, no
