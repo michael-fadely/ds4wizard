@@ -225,14 +225,14 @@ public:
 	 * \param direction The direction of touch movement.
 	 * \return The dead zone of the specified direction.
 	 */
-	float getDeadZone(Direction_t direction);
+	[[nodiscard]] float getDeadZone(Direction_t direction);
 
 	/**
 	 * \brief Apply the configured dead zone formula of a direction to an analog value.
 	 * \param direction The direction of touch movement.
-	 * \param analog The value to apply the dead zone formula to.
+	 * \param value The value to apply the dead zone formula to.
 	 */
-	void applyDeadZone(Direction_t direction, float& analog) const;
+	[[nodiscard]] float applyDeadZone(Direction_t direction, float value) const;
 
 	bool operator==(const Ds4TouchRegion& other) const;
 	bool operator!=(const Ds4TouchRegion& other) const;

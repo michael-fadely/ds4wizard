@@ -214,6 +214,7 @@ copy "$(SolutionDir)bin\$(Configuration)\$(PlatformShortName)\*" "$(SolutionDir)
     <ClCompile Include="stringutil.cpp" />
     <ClCompile Include="Trackball.cpp" />
     <ClCompile Include="Vector2.cpp" />
+    <ClCompile Include="Vector3.cpp" />
     <ClCompile Include="ViGEmDriver.cpp" />
     <ClCompile Include="ViGEmTarget.cpp" />
     <ClCompile Include="XInputGamepad.cpp" />
@@ -229,6 +230,7 @@ copy "$(SolutionDir)bin\$(Configuration)\$(PlatformShortName)\*" "$(SolutionDir)
     <ClInclude Include="DeviceProfile.h" />
     <ClInclude Include="DeviceProfileCache.h" />
     <ClInclude Include="RumbleSequence.h" />
+    <ClInclude Include="Vector3.h" />
     <ClInclude Include="XInputRumbleSimulator.h" />
     <QtMoc Include="DevicePropertiesDialog.h">
     </QtMoc>

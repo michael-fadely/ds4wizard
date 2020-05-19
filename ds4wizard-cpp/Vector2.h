@@ -51,16 +51,16 @@ public:
 	explicit operator float*();
 	explicit operator const float*() const;
 
-	float length_squared() const;
-	float length() const;
+	[[nodiscard]] float lengthSquared() const;
+	[[nodiscard]] float length() const;
 	void normalize();
-	Vector2 normalized() const;
+	[[nodiscard]] Vector2 normalized() const;
 	bool operator==(const Vector2& rhs) const;
 	bool operator!=(const Vector2& rhs) const;
-	bool is_normalized() const;
+	[[nodiscard]] bool isNormalized() const;
 
-	float dot(const Vector2& rhs) const;
-	bool near_equal(const Vector2& rhs) const;
+	[[nodiscard]] float dot(const Vector2& rhs) const;
+	[[nodiscard]] bool nearEqual(const Vector2& rhs) const;
 
 	static Vector2 lerp(const Vector2& start, const Vector2& end, float amount);
 	static Vector2 clamp(const Vector2& v, float lower, float upper);

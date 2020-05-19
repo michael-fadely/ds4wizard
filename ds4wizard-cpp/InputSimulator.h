@@ -42,6 +42,7 @@ class InputSimulator
 	std::shared_ptr<vigem::XInputTarget> xinputTarget;
 	XInputAxis_t simulatedXInputAxis = 0;
 
+	// TODO: refactor delta time to be the elapsed time of the last tick in seconds
 	Stopwatch deltaStopwatch {};
 	const float deltaTimeTarget = 1000.0f / 60.0f;
 	float deltaTime = 1.0f;
@@ -91,6 +92,8 @@ private:
 	 * \return \c true if overridden by a modifier.
 	 */
 	bool isOverriddenByModifierSet(const InputMapBase& map);
+
+	[[nodiscard]] float getAxisWithDeadZone(Ds4Axes_t axes, const InputAxisOptions& options) const;
 
 	/**
 	 * \brief Runs an input map with an optional parent modifier.

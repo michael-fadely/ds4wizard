@@ -111,7 +111,7 @@ TrackballSimulator::TrackballState TrackballSimulator::applyDirectionalForce(boo
 
 	const auto currentDirection = velocity.normalized();
 
-	if (!targetDirection.is_normalized())
+	if (!targetDirection.isNormalized())
 	{
 		targetDirection.normalize();
 	}
@@ -180,7 +180,7 @@ void TrackballSimulator::slow(float deltaTime)
 	const Vector2 direction = velocity.normalized();
 	const Vector2 changed = velocity - (direction * m);
 
-	if (velocity.length_squared() - changed.length_squared() < 0.0f)
+	if (velocity.lengthSquared() - changed.lengthSquared() < 0.0f)
 	{
 		velocity = Vector2::zero;
 	}
@@ -198,7 +198,7 @@ void TrackballSimulator::decelerate(float deltaTime)
 	const Vector2 direction = velocity.normalized();
 	const Vector2 changed = velocity - (direction * m);
 
-	if (velocity.length_squared() - changed.length_squared() < 0.0f)
+	if (velocity.lengthSquared() - changed.lengthSquared() < 0.0f)
 	{
 		velocity = Vector2::zero;
 	}

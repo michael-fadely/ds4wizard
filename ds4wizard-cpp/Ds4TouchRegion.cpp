@@ -172,7 +172,7 @@ bool Ds4TouchRegion::isActive(Ds4Buttons_t sender, Direction_t direction) const
 			}
 
 			float axis = getSimulatedAxis(sender, direction);
-			applyDeadZone(direction, axis);
+			axis = applyDeadZone(direction, axis);
 			return !gmath::is_zero(axis);
 		}
 
@@ -385,17 +385,18 @@ float Ds4TouchRegion::getDeadZone(Direction_t direction)
 	return touchAxisOptions[direction].deadZone.value_or(0.0f);
 }
 
-void Ds4TouchRegion::applyDeadZone(Direction_t direction, float& analog) const
+// UNDONE: update to be more like InputaxisOptions::applyToValue
+float Ds4TouchRegion::applyDeadZone(Direction_t direction, float value) const
 {
 	const auto it = touchAxisOptions.find(direction);
 
 	if (it == touchAxisOptions.end())
 	{
-		return;
+		return value;
 	}
 	
 	const InputAxisOptions& options = it->second;
-	options.applyDeadZone(analog);
+	return options.applyToValue(value);
 }
 
 bool Ds4TouchRegion::operator==(const Ds4TouchRegion& other) const

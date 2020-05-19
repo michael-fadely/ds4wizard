@@ -20,19 +20,21 @@ BETTER_ENUM(AxisPolarity, int,
             negative)
 
 /**
- * \brief Configuration for axis dead zone scaling.
+ * \brief Configuration for the source of the value used in dead zone calculations.
  */
-BETTER_ENUM(DeadZoneMode, int,
+BETTER_ENUM(DeadZoneSource, int,
             /** \brief No dead zone is applied. */
             none,
-            /** \brief When an axis reaches the dead zone threshold, the raw value is let through. */
-            hardLimit,
-            /**
-             * \brief
-             * When the dead zone threshold is reached, the axis output is scaled relative to that threshold (normalized).
-             * Example: if the dead zone is 0.2 and an axis reaches or exceeds that value, it will be normalized to [0.0 .. 1.0].
+
+            /** \brief Use the magnitude of the vector that the input belongs to.
+             *
+             * e.g. If the left stick is the input, the magnitude of the left stick's
+             * X and Y values must exceed the dead zone value to activate.
              */
-            scale)
+            axisVectorMagnitude,
+
+            /** \brief Use the value of the axis as-is, accounting for polarity/direction. */
+            axisValue)
 
 // TODO: /!\ better name
 BETTER_ENUM(SimulatorType, int, none, input, action)
@@ -319,6 +321,21 @@ struct Ds4Axes
 	static const Ds4Axes_t rightStick    = rightStickX | rightStickY;
 	static const Ds4Axes_t accelerometer = accelX | accelY | accelZ;
 	static const Ds4Axes_t gyroscope     = gyroX | gyroY | gyroZ;
+
+	/**
+	 * \brief Given any combination of \c Ds4Axes bits, returns a
+	 * bitmask expanded to cover all vector components of the axes.
+	 * \param axes The axes to expand.
+	 * \return The bitmask for expanded axes.
+	 */
+	static Ds4Axes_t expand(Ds4Axes_t axes);
+
+	/**
+	 * \brief Given an axis, returns the number of components in the vector it belongs to.
+	 * \param vector_axis The axis to retrieve the vector component count of.
+	 * \return The number of components in the axis vector.
+	 */
+	static size_t componentCount(Ds4Axes_t vector_axis);
 };
 
 ENUM_FLAGS(Ds4Axes);

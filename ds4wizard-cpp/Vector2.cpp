@@ -177,14 +177,14 @@ Vector2::operator const float*() const
 	return array;
 }
 
-float Vector2::length_squared() const
+float Vector2::lengthSquared() const
 {
 	return x * x + y * y;
 }
 
 float Vector2::length() const
 {
-	return sqrt(length_squared());
+	return sqrt(lengthSquared());
 }
 
 void Vector2::normalize()
@@ -211,7 +211,7 @@ Vector2 Vector2::normalized() const
 
 bool Vector2::operator==(const Vector2& rhs) const
 {
-	return x == rhs.x && y == rhs.y;
+	return nearEqual(rhs);
 }
 
 bool Vector2::operator!=(const Vector2& rhs) const
@@ -219,9 +219,9 @@ bool Vector2::operator!=(const Vector2& rhs) const
 	return !(*this == rhs);
 }
 
-bool Vector2::is_normalized() const
+bool Vector2::isNormalized() const
 {
-	return gmath::is_one(length_squared());
+	return gmath::is_one(lengthSquared());
 }
 
 float Vector2::dot(const Vector2& rhs) const
@@ -229,14 +229,19 @@ float Vector2::dot(const Vector2& rhs) const
 	return (x * rhs.x) + (y * rhs.y);
 }
 
-bool Vector2::near_equal(const Vector2& rhs) const
+bool Vector2::nearEqual(const Vector2& rhs) const
 {
-	return gmath::near_equal(x, rhs.x) && gmath::near_equal(y, rhs.y);
+	return gmath::near_equal(x, rhs.x) &&
+	       gmath::near_equal(y, rhs.y);
 }
 
 Vector2 Vector2::lerp(const Vector2& start, const Vector2& end, float amount)
 {
-	return { gmath::lerp(start.x, end.x, amount), gmath::lerp(start.y, end.y, amount) };
+	return
+	{
+		gmath::lerp(start.x, end.x, amount),
+		gmath::lerp(start.y, end.y, amount)
+	};
 }
 
 Vector2 Vector2::clamp(const Vector2& v, float lower, float upper)

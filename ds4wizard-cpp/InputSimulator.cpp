@@ -229,6 +229,37 @@ bool InputSimulator::isOverriddenByModifierSet(const InputMapBase& map)
 	return false;
 }
 
+float InputSimulator::getAxisWithDeadZone(Ds4Axes_t axes, const InputAxisOptions& options) const
+{
+	const Ds4Axes_t expanded = Ds4Axes::expand(axes);
+
+	if (expanded & (Ds4Axes::leftStick | Ds4Axes::rightStick))
+	{
+		Ds4Buttons_t x_axis;
+		Ds4Buttons_t y_axis;
+
+		if (expanded & Ds4Axes::leftStick)
+		{
+			x_axis = Ds4Axes::leftStickX;
+			y_axis = Ds4Axes::leftStickY;
+		}
+		else
+		{
+			x_axis = Ds4Axes::rightStickX;
+			y_axis = Ds4Axes::rightStickY;
+		}
+
+		const Vector2 stick(parent->input.getAxis(x_axis, std::nullopt),
+		                    parent->input.getAxis(y_axis, std::nullopt));
+
+		const float value = parent->input.getAxis(axes, options.polarity);
+
+		return options.applyToValue(value, stick);
+	}
+
+	return options.applyToValue(parent->input.getAxis(axes, options.polarity));
+}
+
 void InputSimulator::runMap(const InputMap& m, InputModifier const* modifier)
 {
 	if (m.inputType == 0)
@@ -269,9 +300,7 @@ void InputSimulator::runMap(const InputMap& m, InputModifier const* modifier)
 
 					InputAxisOptions options = m.getAxisOptions(bit);
 
-					float analog = parent->input.getAxis(m.inputAxes.value(), options.polarity);
-					options.applyDeadZone(analog);
-
+					const float analog = getAxisWithDeadZone(m.inputAxes.value(), options);
 					const PressedState state = m.simulatedState();
 					applyMap(m, modifier, state, analog);
 				}
@@ -297,8 +326,8 @@ void InputSimulator::runMap(const InputMap& m, InputModifier const* modifier)
 
 					float analog = region->getSimulatedAxis(Ds4Buttons::touch1, direction);
 
-					// TODO: update this to use the input vector-oriented dead zone application once implemented
-					region->applyDeadZone(direction, analog);
+					// UNDONE: update this to use new DeadZoneSource implementation
+					analog = region->applyDeadZone(direction, analog);
 					applyMap(m, modifier, m.simulatedState(), analog);
 				}
 				else // TODO: re-do this; Pressable::release should not be called
@@ -316,7 +345,7 @@ void InputSimulator::runMap(const InputMap& m, InputModifier const* modifier)
 						Pressable::release(state);
 					}
 
-					region->applyDeadZone(direction, analog);
+					analog = region->applyDeadZone(direction, analog);
 					applyMap(m, modifier, state, analog);
 
 					state = handleTouchToggle(m, modifier, region->state2);
@@ -328,7 +357,7 @@ void InputSimulator::runMap(const InputMap& m, InputModifier const* modifier)
 						Pressable::release(state);
 					}
 
-					region->applyDeadZone(direction, analog);
+					analog = region->applyDeadZone(direction, analog);
 					applyMap(m, modifier, state, analog);
 				}
 
