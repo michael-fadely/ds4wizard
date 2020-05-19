@@ -385,7 +385,7 @@ float Ds4TouchRegion::getDeadZone(Direction_t direction)
 	return touchAxisOptions[direction].deadZone.value_or(0.0f);
 }
 
-// UNDONE: update to be more like InputaxisOptions::applyToValue
+// UNDONE: update to be more like InputAxisOptions::applyToValue
 float Ds4TouchRegion::applyDeadZone(Direction_t direction, float value) const
 {
 	const auto it = touchAxisOptions.find(direction);
