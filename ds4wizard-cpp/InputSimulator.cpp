@@ -312,7 +312,7 @@ void InputSimulator::runMap(const InputMap& m, InputModifier const* modifier)
 			{
 				Ds4TouchRegion* region = touchRegions[m.inputTouchRegion];
 
-				if (region->type == +Ds4TouchRegionType::button || !m.inputTouchDirection.has_value() || m.inputTouchDirection == Direction::none)
+				if (region->type == +Ds4TouchRegionType::button || m.inputTouchDirection.value_or(Direction::none) == Direction::none)
 				{
 					const PressedState state1 = handleTouchToggle(m, modifier, region->state1);
 					applyMap(m, modifier, state1, Pressable::isActiveState(state1) ? 1.0f : 0.0f);
