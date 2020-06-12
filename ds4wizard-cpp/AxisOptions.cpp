@@ -89,7 +89,7 @@ float InputAxisOptions::applyToValueWithMagnitude(float axisValue, float axisVec
 float InputAxisOptions::applyToValue(float value) const
 {
 	const auto dzValue = deadZone.value_or(0.0f);
-	value = std::max(0.0f, (value - dzValue) / (1.0f - dzValue));
+	value = std::clamp((value - dzValue) / (1.0f - dzValue), 0.0f, 1.0f);
 
 	if (invert.value_or(false))
 	{
