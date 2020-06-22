@@ -4,7 +4,7 @@
 using namespace std::chrono;
 
 DeviceSettings::DeviceSettings()
-	: latencyThreshold(5)
+	: latencyThreshold(17)
 {
 }
 
