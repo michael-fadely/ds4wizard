@@ -229,7 +229,7 @@ bool InputSimulator::isOverriddenByModifierSet(const InputMapBase& map)
 	return false;
 }
 
-float InputSimulator::getAxisWithDeadZone(Ds4Axes_t axes, const InputAxisOptions& options) const
+float InputSimulator::getAxisWithOptionsApplied(Ds4Axes_t axes, const InputAxisOptions& options) const
 {
 	const Ds4Axes_t expanded = Ds4Axes::expand(axes);
 
@@ -254,6 +254,8 @@ float InputSimulator::getAxisWithDeadZone(Ds4Axes_t axes, const InputAxisOptions
 
 		const float value = parent->input.getAxis(axes, options.polarity);
 
+		// applyToValue will automatically check the mode to see if we actually need to use
+		// the magnitude of the stick.
 		return options.applyToValue(value, stick);
 	}
 
@@ -300,7 +302,7 @@ void InputSimulator::runMap(const InputMap& m, InputModifier const* modifier)
 
 					InputAxisOptions options = m.getAxisOptions(bit);
 
-					const float analog = getAxisWithDeadZone(m.inputAxes.value(), options);
+					const float analog = getAxisWithOptionsApplied(m.inputAxes.value(), options);
 					const PressedState state = m.simulatedState();
 					applyMap(m, modifier, state, analog);
 				}
@@ -312,53 +314,52 @@ void InputSimulator::runMap(const InputMap& m, InputModifier const* modifier)
 			{
 				Ds4TouchRegion* region = touchRegions[m.inputTouchRegion];
 
-				if (region->type == +Ds4TouchRegionType::button || m.inputTouchDirection.value_or(Direction::none) == Direction::none)
+				// UNDONE: we can't assume that a direction of none indicates button mode... can we?
+				if (region->type == +Ds4TouchRegionType::button /* UNDONE: || m.inputTouchDirection.value_or(Direction::none) == Direction::none*/)
 				{
-					const PressedState state1 = handleTouchToggle(m, modifier, region->state1);
+					const PressedState state1 = getTouchRegionPressedState(m, modifier, region->state1);
 					applyMap(m, modifier, state1, Pressable::isActiveState(state1) ? 1.0f : 0.0f);
 
-					const PressedState state2 = handleTouchToggle(m, modifier, region->state2);
+					const PressedState state2 = getTouchRegionPressedState(m, modifier, region->state2);
 					applyMap(m, modifier, state2, Pressable::isActiveState(state2) ? 1.0f : 0.0f);
 				}
 				else if (region->type == +Ds4TouchRegionType::trackball)
 				{
 					const Direction_t direction = m.inputTouchDirection.value();
 
-					float analog = region->getSimulatedAxis(Ds4Buttons::touch1, direction);
-
-					// UNDONE: update this to use new DeadZoneSource implementation
-					analog = region->applyDeadZone(direction, analog);
+					const float analog = region->getSimulatedAxisWithOptionsApplied(Ds4Buttons::touch1, direction);
 					applyMap(m, modifier, m.simulatedState(), analog);
 				}
-				else // TODO: re-do this; Pressable::release should not be called
+				else if (region->type == +Ds4TouchRegionType::stick || region->type == +Ds4TouchRegionType::stickAutoCenter)
 				{
+					// TODO: re-do this; Pressable::release should not be called
 					const Direction_t direction = m.inputTouchDirection.value();
 
-					const float deadZone = region->getDeadZone(direction);
+					PressedState state = getTouchRegionPressedState(m, modifier, region->state1);
+					float analog = region->getSimulatedAxisWithOptionsApplied(Ds4Buttons::touch1, direction);
 
-					PressedState state = handleTouchToggle(m, modifier, region->state1);
-					float analog = region->getSimulatedAxis(Ds4Buttons::touch1, direction);
-
-					// TODO: not this!!!
-					if (analog < deadZone)
+					// FIXME: Pressable::release should not be called! This should be managed automatically!
+					if (gmath::is_zero(analog))
 					{
 						Pressable::release(state);
 					}
 
-					analog = region->applyDeadZone(direction, analog);
 					applyMap(m, modifier, state, analog);
 
-					state = handleTouchToggle(m, modifier, region->state2);
-					analog = region->getSimulatedAxis(Ds4Buttons::touch2, direction);
+					state = getTouchRegionPressedState(m, modifier, region->state2);
+					analog = region->getSimulatedAxisWithOptionsApplied(Ds4Buttons::touch2, direction);
 
-					// TODO: not this!!!
-					if (analog < deadZone)
+					// FIXME: Pressable::release should not be called! This should be managed automatically!
+					if (gmath::is_zero(analog))
 					{
 						Pressable::release(state);
 					}
 
-					analog = region->applyDeadZone(direction, analog);
 					applyMap(m, modifier, state, analog);
+				}
+				else
+				{
+					throw std::out_of_range("unhandled Ds4TouchRegionType");
 				}
 
 				return;
@@ -372,7 +373,7 @@ void InputSimulator::runMap(const InputMap& m, InputModifier const* modifier)
 
 void InputSimulator::applyProfile(DeviceProfile* profile)
 {
-	for (auto& simulator : simulators)
+	for (ISimulator* simulator : simulators)
 	{
 		simulator->deactivate(1.0f);
 	}
@@ -450,7 +451,7 @@ void InputSimulator::applyProfile(DeviceProfile* profile)
 }
 
 // TODO: /!\ either document this thoroughly or remove it entirely
-PressedState InputSimulator::handleTouchToggle(const InputMap& m, InputModifier const* modifier, const Pressable& pressable) // static
+PressedState InputSimulator::getTouchRegionPressedState(const InputMap& m, InputModifier const* modifier, const Pressable& pressable) // static
 {
 	if (m.inputTouchDirection.has_value() && m.inputTouchDirection != Direction::none)
 	{

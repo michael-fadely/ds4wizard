@@ -66,6 +66,9 @@ struct Ds4TouchHistory
 	Ds4TouchHistory() = default;
 };
 
+class InputSimulator;
+class ISimulator;
+
 // TODO: /!\ just let the region pull the touch data on its own!
 
 /**
@@ -86,10 +89,9 @@ class Ds4TouchRegion : public JsonData
 	circular_buffer<Ds4TouchHistory, 30> points1 {}, points2 {};
 
 	std::shared_ptr<TrackballSimulator> trackball;
-
-public:
 	std::shared_ptr<TrackballSettings> trackballSettings;
 
+public:
 	/**
 	 * \brief Pressed state for multi-touch point 1.
 	 * \sa Pressable
@@ -210,6 +212,8 @@ public:
 	 */
 	void deactivateTouch(Ds4Buttons_t sender, Ds4Vector2 point);
 
+	// TODO: fix documentation for getSimulatedAxis/etc, as it is not always a touch delta that is returned.
+
 	/**
 	 * \brief Get the delta of the activation point and current touch coordinates.
 	 * \param sender The multi-touch sender (touch 1, touch 2).
@@ -218,21 +222,16 @@ public:
 	 */
 	[[nodiscard]] float getSimulatedAxis(Ds4Buttons_t sender, Direction_t direction) const;
 
+	/**
+	 * \brief Get the simulated axis for the given touch activator and requested direction.
+	 * \param sender The multi-touch sender (touch 1, touch 2).
+	 * \param direction The direction of touch movement.
+	 * \return The delta between the start point and \a point.
+	 */
+	[[nodiscard]] float getSimulatedAxisWithOptionsApplied(Ds4Buttons_t sender, Direction_t direction) const;
+
+	// UNDONE: nice documentation, nerd!
 	[[nodiscard]] const decltype(points1)& getPoints(Ds4Buttons_t sender) const;
-
-	/**
-	 * \brief Get the dead zone of the specified touch direction.
-	 * \param direction The direction of touch movement.
-	 * \return The dead zone of the specified direction.
-	 */
-	[[nodiscard]] float getDeadZone(Direction_t direction);
-
-	/**
-	 * \brief Apply the configured dead zone formula of a direction to an analog value.
-	 * \param direction The direction of touch movement.
-	 * \param value The value to apply the dead zone formula to.
-	 */
-	[[nodiscard]] float applyDeadZone(Direction_t direction, float value) const;
 
 	bool operator==(const Ds4TouchRegion& other) const;
 	bool operator!=(const Ds4TouchRegion& other) const;

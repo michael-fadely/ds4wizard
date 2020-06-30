@@ -81,6 +81,8 @@ private:
 	 */
 	[[nodiscard]] bool exceedsDeadZone(float value) const;
 
+public:
+	// TODO: better documentation - i.e. axisValue is returned as-is sometimes
 	/**
 	 * \brief Returns the provided analog input with the stored multiplier, inverse, and dead zone applied.
 	 * 
@@ -91,7 +93,6 @@ private:
 	 */
 	[[nodiscard]] float applyToValueWithMagnitude(float axisValue, float axisVectorMagnitude) const;
 
-public:
 	/**
 	 * \brief Returns the value with multiplier, inverse, and dead zone applied.
 	 */
