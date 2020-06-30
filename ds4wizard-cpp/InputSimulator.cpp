@@ -171,7 +171,7 @@ bool InputSimulator::isOverriddenByModifierSet(const InputMapBase& map)
 					continue;
 				}
 
-				auto collection = cache.getButtonMaps(bit);
+				auto* collection = cache.getButtonMaps(bit);
 
 				if (collection == nullptr)
 				{
@@ -196,7 +196,7 @@ bool InputSimulator::isOverriddenByModifierSet(const InputMapBase& map)
 					continue;
 				}
 
-				auto collection = cache.getAxisMaps(bit);
+				auto* collection = cache.getAxisMaps(bit);
 
 				if (collection == nullptr)
 				{
@@ -212,7 +212,7 @@ bool InputSimulator::isOverriddenByModifierSet(const InputMapBase& map)
 
 		if (map.inputType & InputType::touchRegion && !map.inputTouchRegion.empty())
 		{
-			auto collection = cache.getTouchMaps(map.inputTouchRegion);
+			auto* collection = cache.getTouchMaps(map.inputTouchRegion);
 
 			if (collection == nullptr)
 			{
@@ -553,7 +553,7 @@ void InputSimulator::simulateMouse(const InputMap& m, PressedState state, float 
 	analog *= deltaTime;
 
 	// TODO: /!\ getAxisOptions for mouse
-	Direction_t direction = m.mouseAxes.value().directions;
+	const Direction_t direction = m.mouseAxes.value().directions;
 
 	int x = 0;
 	int y = 0;
@@ -603,7 +603,7 @@ void InputSimulator::simulateKeyboard(const InputMap& m, PressedState state)
 		return;
 	}
 
-	VirtualKeyCode keyCode = m.keyCode.value();
+	const VirtualKeyCode keyCode = m.keyCode.value();
 
 	switch (state)
 	{
@@ -736,7 +736,7 @@ bool InputSimulator::addSimulator(ISimulator* simulator)
 		return false;
 	}
 
-	auto it = simulators.find(simulator);
+	const auto it = simulators.find(simulator);
 
 	if (it != simulators.end())
 	{
@@ -932,7 +932,7 @@ void InputSimulator::updatePressedState(InputMapBase& instance, const std::funct
 
 					InputAxisOptions options = instance.getAxisOptions(bit);
 
-					float axis = parent->input.getAxis(instance.inputAxes.value(), options.polarity);
+					const float axis = parent->input.getAxis(instance.inputAxes.value(), options.polarity);
 
 					if (axis >= options.deadZone.value_or(0.0f))
 					{

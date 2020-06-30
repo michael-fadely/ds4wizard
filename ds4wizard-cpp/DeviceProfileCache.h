@@ -8,7 +8,6 @@
 
 #include "DeviceSettings.h"
 #include "DeviceProfile.h"
-#include "program.h"
 #include "Ds4DeviceManager.h"
 
 /**
