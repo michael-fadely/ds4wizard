@@ -127,7 +127,7 @@ R"(
       "bottom": 941
     },
     "Right Half": {
-      "type": "trackball",
+      "type": "stickAutoCenter",
       "allowCrossOver": false,
       "left": 960,
       "top": 0,
@@ -135,29 +135,20 @@ R"(
       "bottom": 941,
       "touchAxisOptions": {
         "up": {
+          "deadZoneSource": "axisValue",
           "deadZone": 0.25
         },
         "down": {
+          "deadZoneSource": "axisValue",
           "deadZone": 0.25
         },
         "left": {
+          "deadZoneSource": "axisValue",
           "deadZone": 0.25
         },
         "right": {
+          "deadZoneSource": "axisValue",
           "deadZone": 0.25
-        }
-      },
-      "trackballSettings": {
-        "touchFriction": 1.0,
-        "ballFriction": 0.1,
-        "ballSpeed": 100.0,
-        "touchVibration": {
-          "enabled": true,
-          "factor": 0.25
-        },
-        "ballVibration": {
-          "enabled": true,
-          "factor": 1
         }
       }
     }
