@@ -42,6 +42,7 @@ class InputSimulator
 	std::shared_ptr<vigem::XInputTarget> xinputTarget;
 	XInputAxis_t simulatedXInputAxis = 0;
 
+	// TODO: refactor delta time to be the elapsed time of the last tick in seconds
 	Stopwatch deltaStopwatch {};
 	const float deltaTimeTarget = 1000.0f / 60.0f;
 	float deltaTime = 1.0f;
@@ -93,6 +94,14 @@ private:
 	bool isOverriddenByModifierSet(const InputMapBase& map);
 
 	/**
+	 * \brief Given an axis, get the associated stick vector if applicable, and apply axis options.
+	 * \param axes The axes for the stick whose vector will be used.
+	 * \param options The options for the axis.
+	 * \return The value of the axis specified by \p axes with dead zone applied according to \p options.
+	 */
+	[[nodiscard]] float getAxisWithOptionsApplied(Ds4Axes_t axes, const InputAxisOptions& options) const;
+
+	/**
 	 * \brief Runs an input map with an optional parent modifier.
 	 * \param m The map to run.
 	 * \param modifier The parent modifier, if any.
@@ -114,7 +123,7 @@ private:
 	 * \param pressable The pressable state of the touch region.
 	 * \return The simulated pressed state.
 	 */
-	static PressedState handleTouchToggle(const InputMap& m, InputModifier const* modifier, const Pressable& pressable);
+	static PressedState getTouchRegionPressedState(const InputMap& m, InputModifier const* modifier, const Pressable& pressable);
 
 	/**
 	 * \brief Applies a map's state as determined by \sa runMap

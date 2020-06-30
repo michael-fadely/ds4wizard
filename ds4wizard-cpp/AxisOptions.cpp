@@ -1,5 +1,7 @@
 #include "pch.h"
 #include "AxisOptions.h"
+#include "Vector2.h"
+#include "Vector3.h"
 
 AxisOptions::AxisOptions(AxisPolarity polarity)
 	: polarity(polarity)
@@ -47,40 +49,78 @@ InputAxisOptions::InputAxisOptions(AxisPolarity polarity)
 {
 }
 
-void InputAxisOptions::applyDeadZone(float& analog) const
+bool InputAxisOptions::exceedsDeadZone(float value) const
 {
-	const auto dzValue = deadZone.value_or(0.0f);
+	return value >= deadZone.value_or(0.0f);
+}
 
-	switch (deadZoneMode.value_or(DeadZoneMode::scale))
+float InputAxisOptions::applyToValueWithMagnitude(float axisValue, float axisVectorMagnitude) const
+{
+	switch (deadZoneSource.value_or(DeadZoneSource::axisVectorMagnitude))
 	{
-		case DeadZoneMode::hardLimit:
-			analog = analog >= dzValue ? analog : 0.0f;
-			break;
+		case +DeadZoneSource::none:
+			return applyToValue(axisValue);
 
-		case DeadZoneMode::scale:
-			analog = std::max(0.0f, (analog - dzValue) / (1.0f - dzValue));
-			break;
+		case +DeadZoneSource::axisVectorMagnitude:
+			if (exceedsDeadZone(axisVectorMagnitude))
+			{
+				// if our target axis is the one in the vector that pushed the magnitude
+				// over the threshold, the dead-zone'd magnitude will *always* be less
+				// than the raw value. for other axes in the vector, it will *always* be
+				// greater, thus allowing axisValue through instead.
+				return std::min(applyToValue(axisVectorMagnitude), axisValue);
+			}
+
+			return 0.0f;
+
+		case +DeadZoneSource::axisValue:
+			if (exceedsDeadZone(axisValue))
+			{
+				return applyToValue(axisValue);
+			}
+
+			return 0.0f;
 
 		default:
-			throw std::out_of_range("invalid DeadZoneMode");
+			throw std::out_of_range("invalid DeadZoneSource");
 	}
+}
+
+float InputAxisOptions::applyToValue(float value) const
+{
+	const auto dzValue = deadZone.value_or(0.0f);
+	value = std::clamp((value - dzValue) / (1.0f - dzValue), 0.0f, 1.0f);
 
 	if (invert.value_or(false))
 	{
-		analog = 1.0f - analog;
+		value = 1.0f - value;
 	}
 
 	if (multiplier.has_value())
 	{
-		analog *= multiplier.value();
+		value *= multiplier.value();
 	}
+
+	return value;
+}
+
+float InputAxisOptions::applyToValue(float axisValue, const Vector2& axisVector) const
+{
+	const float vectorMagnitude = (axisVector.normalized() * std::min(1.0f, axisVector.length())).length();
+	return applyToValueWithMagnitude(axisValue, vectorMagnitude);
+}
+
+float InputAxisOptions::applyToValue(float axisValue, const Vector3& axisVector) const
+{
+	const float vectorMagnitude = (axisVector.normalized() * std::min(1.0f, axisVector.length())).length();
+	return applyToValueWithMagnitude(axisValue, vectorMagnitude);
 }
 
 bool InputAxisOptions::operator==(const InputAxisOptions& other) const
 {
 	return AxisOptions::operator==(other)
 	       && invert == other.invert
-	       && deadZoneMode == other.deadZoneMode
+	       && deadZoneSource == other.deadZoneSource
 	       && deadZone == other.deadZone;
 }
 
@@ -98,9 +138,9 @@ void InputAxisOptions::readJson(const nlohmann::json& json)
 		invert = json["invert"].get<bool>();
 	}
 
-	if (json.find("deadZoneMode") != json.end())
+	if (json.find("deadZoneSource") != json.end())
 	{
-		deadZoneMode = DeadZoneMode::_from_string(json.value("deadZoneMode", "scale").c_str());
+		deadZoneSource = DeadZoneSource::_from_string(json.value("deadZoneSource", "axisVectorMagnitude").c_str());
 	}
 
 	if (json.find("deadZone") != json.end())
@@ -118,9 +158,9 @@ void InputAxisOptions::writeJson(nlohmann::json& json) const
 		json["invert"] = invert.value();
 	}
 
-	if (deadZoneMode.has_value())
+	if (deadZoneSource.has_value())
 	{
-		json["deadZoneMode"] = deadZoneMode.value()._to_string();
+		json["deadZoneSource"] = deadZoneSource.value()._to_string();
 	}
 
 	if (deadZone.has_value())

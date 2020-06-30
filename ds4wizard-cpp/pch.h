@@ -104,4 +104,5 @@
 #include "stringutil.h"
 #include "Trackball.h"
 #include "Vector2.h"
+#include "Vector3.h"
 #include "XInputGamepad.h"

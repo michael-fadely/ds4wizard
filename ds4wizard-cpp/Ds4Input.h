@@ -65,10 +65,10 @@ public:
 	/**
 	 * \brief Get the magnitude of an axis.
 	 * \param axis The axis to retrieve.
-	 * \param polarity The desired polarity of the axis.
+	 * \param polarity The desired polarity of the axis, or \c std::nullopt for both positive and negative.
 	 * \return The magnitude of the axis. If it does not align with the desired \a polarity, \c 0.0f is returned.
 	 */
-	float getAxis(Ds4Axes_t axis, const std::optional<AxisPolarity>& polarity) const;
+	[[nodiscard]] float getAxis(Ds4Axes_t axis, const std::optional<AxisPolarity>& polarity) const;
 
 private:
 	Ds4Buttons_t lastHeldButtons = 0;

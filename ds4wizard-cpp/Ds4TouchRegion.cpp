@@ -1,5 +1,7 @@
 #include "pch.h"
 #include "Ds4TouchRegion.h"
+#include "InputSimulator.h"
+#include "ISimulator.h"
 
 ISimulator* Ds4TouchRegion::getSimulator(InputSimulator* parent)
 {
@@ -159,20 +161,20 @@ bool Ds4TouchRegion::isActive(Ds4Buttons_t sender, Direction_t direction) const
 		case Ds4TouchRegionType::stickAutoCenter:
 		case Ds4TouchRegionType::trackball:
 		{
-			if (direction == Direction::none)
+			// FIXME: do we really want this for an axis?
+			/*if (direction == Direction::none)
 			{
 				return isTouchActive(sender);
-			}
+			}*/
 
-			const auto simulatorState = getSimulatorState();
+			const std::optional<PressedState> simulatorState = getSimulatorState();
 
 			if (simulatorState.has_value() && !Pressable::isActiveState(*simulatorState))
 			{
 				return false;
 			}
 
-			float axis = getSimulatedAxis(sender, direction);
-			applyDeadZone(direction, axis);
+			const float axis = getSimulatedAxisWithOptionsApplied(sender, direction);
 			return !gmath::is_zero(axis);
 		}
 
@@ -242,21 +244,32 @@ float Ds4TouchRegion::getSimulatedAxis(Ds4Buttons_t sender, Direction_t directio
 		point = points2.newest().point;
 	}
 
+	auto getVectorLength = [this, sender]() -> float
+	{
+		Vector2 axis(-getSimulatedAxis(sender, Direction::up)   + getSimulatedAxis(sender, Direction::down),
+		             -getSimulatedAxis(sender, Direction::left) + getSimulatedAxis(sender, Direction::right));
+
+		const float length = std::min(axis.length(), 1.0f);
+		axis.normalize();
+		return (axis * length).length();
+	};
+
 	short x = std::clamp(point.x, left, right);
 	short y = std::clamp(point.y, top, bottom);
+
 	float result;
 
 	switch (type)
 	{
 		case +Ds4TouchRegionType::stickAutoCenter:
 		{
-			Ds4Vector2 start = getStartPoint(sender);
+			const Ds4Vector2 start = getStartPoint(sender);
 
-			int width  = std::max(start.x - left, right - start.x);
-			int height = std::max(start.y - top, bottom - start.y);
+			const int width  = std::max(start.x - left, right - start.x);
+			const int height = std::max(start.y - top, bottom - start.y);
 
-			short sx = start.x;
-			short sy = start.y;
+			const short sx = start.x;
+			const short sy = start.y;
 
 			switch (direction)
 			{
@@ -276,6 +289,10 @@ float Ds4TouchRegion::getSimulatedAxis(Ds4Buttons_t sender, Direction_t directio
 					result = std::clamp(std::clamp(x - sx, -width, width) / static_cast<float>(width), 0.0f, 1.0f);
 					break;
 
+				case Direction::none:
+					result = getVectorLength();
+					break;
+
 				default:
 					throw std::runtime_error("invalid Direction");
 			}
@@ -287,7 +304,7 @@ float Ds4TouchRegion::getSimulatedAxis(Ds4Buttons_t sender, Direction_t directio
 		{
 			const Vector2 normalized = trackball->velocity.normalized();
 			const float length = trackball->velocity.length();
-			const auto factor = trackball->settings.ballSpeed;
+			const float factor = trackball->settings.ballSpeed;
 
 			switch (direction)
 			{
@@ -323,11 +340,11 @@ float Ds4TouchRegion::getSimulatedAxis(Ds4Buttons_t sender, Direction_t directio
 			x = static_cast<short>(x - left);
 			y = static_cast<short>(y - top);
 
-			int width  = right - left;
-			int height = bottom - top;
+			const int width  = right - left;
+			const int height = bottom - top;
 
-			int cx = width / 2;
-			int cy = height / 2;
+			const int cx = width / 2;
+			const int cy = height / 2;
 
 			switch (direction)
 			{
@@ -347,6 +364,10 @@ float Ds4TouchRegion::getSimulatedAxis(Ds4Buttons_t sender, Direction_t directio
 					result = std::clamp(std::clamp(x - cx, -width, width) / static_cast<float>(cx), 0.0f, 1.0f);
 					break;
 
+				case Direction::none:
+					result = getVectorLength();
+					break;
+
 				default:
 					throw std::runtime_error("invalid Direction");
 			}
@@ -355,6 +376,21 @@ float Ds4TouchRegion::getSimulatedAxis(Ds4Buttons_t sender, Direction_t directio
 	}
 
 	return result;
+}
+
+float Ds4TouchRegion::getSimulatedAxisWithOptionsApplied(Ds4Buttons_t sender, Direction_t direction) const
+{
+	const float value = getSimulatedAxis(sender, direction);
+	const auto it = touchAxisOptions.find(direction);
+
+	if (it == touchAxisOptions.end())
+	{
+		return value;
+	}
+
+	const float magnitude = getSimulatedAxis(sender, Direction::none);
+	const InputAxisOptions& options = it->second;
+	return options.applyToValueWithMagnitude(value, magnitude);
 }
 
 const decltype(Ds4TouchRegion::points1)& Ds4TouchRegion::getPoints(Ds4Buttons_t sender) const
@@ -370,32 +406,6 @@ const decltype(Ds4TouchRegion::points1)& Ds4TouchRegion::getPoints(Ds4Buttons_t 
 	}
 
 	throw;
-}
-
-// HACK: why does this just provide the dead zone? Why doesn't it do its own simulation?
-float Ds4TouchRegion::getDeadZone(Direction_t direction)
-{
-	const auto it = touchAxisOptions.find(direction);
-
-	if (it == touchAxisOptions.end())
-	{
-		return 0.0f;
-	}
-
-	return touchAxisOptions[direction].deadZone.value_or(0.0f);
-}
-
-void Ds4TouchRegion::applyDeadZone(Direction_t direction, float& analog) const
-{
-	const auto it = touchAxisOptions.find(direction);
-
-	if (it == touchAxisOptions.end())
-	{
-		return;
-	}
-	
-	const InputAxisOptions& options = it->second;
-	options.applyDeadZone(analog);
 }
 
 bool Ds4TouchRegion::operator==(const Ds4TouchRegion& other) const

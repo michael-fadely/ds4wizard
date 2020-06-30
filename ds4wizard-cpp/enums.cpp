@@ -282,6 +282,51 @@ static const char* Ds4Axes_names[] = {
 	"gyroZ"
 };
 
+Ds4Axes_t Ds4Axes::expand(Ds4Axes_t axes)
+{
+	Ds4Axes_t result = axes;
+	
+	if (axes & leftStick)
+	{
+		result |= leftStick;
+	}
+
+	if (axes & rightStick)
+	{
+		result |= rightStick;
+	}
+
+	if (axes & gyroscope)
+	{
+		result |= gyroscope;
+	}
+
+	if (axes & accelerometer)
+	{
+		result |= accelerometer;
+	}
+
+	return result;
+}
+
+size_t Ds4Axes::componentCount(Ds4Axes_t vector_axis)
+{
+	if (vector_axis & (leftStick | rightStick))
+	{
+		// left/right stick have components x, y
+		return 2;
+	}
+
+	if (vector_axis & (gyroscope | accelerometer))
+	{
+		// gyroscope/accelerometer have components x, y, z
+		return 3;
+	}
+
+	// everything else is 1
+	return 1;
+}
+
 SERIALIZE_DEF(Ds4Axes)
 
 const std::array<Ds4Extensions_t, 4> Ds4Extensions_values = {

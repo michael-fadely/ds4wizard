@@ -226,7 +226,7 @@ void Ds4DeviceManager::registerDeviceCallbacks(const std::wstring& serialString,
 				break;
 		}
 	};
-	
+
 	token_store.push_back(device->onConnect.add(onConnect));
 	token_store.push_back(device->onConnectFailure.add(onConnect));
 	token_store.push_back(device->onDisconnect.add(onDisconnect));

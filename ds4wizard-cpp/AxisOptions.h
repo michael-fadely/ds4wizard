@@ -4,6 +4,9 @@
 #include "JsonData.h"
 #include <optional>
 
+class Vector3;
+class Vector2;
+
 /**
  * \brief Common configuration for an axis.
  */
@@ -48,19 +51,17 @@ public:
 	 */
 	std::optional<bool> invert;
 
-	// TODO: /!\ /!\ /!\ (issue #1) implement radial dead zone
-
 	/**
 	 * \brief The dead zone mode to use if configured.
-	 * If \c DeadZoneMode::none or \c std::nullopt, no
+	 * If \c DeadZoneSource::none or \c std::nullopt, no
 	 * dead zone will be applied to the axis.
-	 * \sa DeadZoneMode, deadZone
+	 * \sa DeadZoneSource, deadZone
 	 */
-	std::optional<DeadZoneMode> deadZoneMode;
+	std::optional<DeadZoneSource> deadZoneSource;
 
 	/**
 	 * \brief Dead zone threshold.
-	 * \sa deadZoneMode
+	 * \sa deadZoneSource
 	 */
 	std::optional<float> deadZone;
 
@@ -74,12 +75,58 @@ public:
 	 */
 	explicit InputAxisOptions(AxisPolarity polarity);
 
+private:
 	/**
-	 * \brief Applies the dead zone formula configured by \c deadZoneMode to a given value.
-	 * \param analog The value to apply the formula to.
-	 * \sa deadZoneMode
+	 * \brief Check if \a value exceeds configured dead zone, if any.
 	 */
-	void applyDeadZone(float& analog) const;
+	[[nodiscard]] bool exceedsDeadZone(float value) const;
+
+public:
+	// TODO: better documentation - i.e. axisValue is returned as-is sometimes
+	/**
+	 * \brief Returns the provided analog input with the stored multiplier, inverse, and dead zone applied.
+	 * 
+	 * If \c deadZoneSource is \c DeadZoneSource::axisVectorMagnitude, \a axisVectorMagnitude is used for activation,
+	 * and \a axisValue is returned only with options applied (i.e. without dead zone scaling applied).
+	 *
+	 * Otherwise, \a axisVector is returned with options and dead zone scaling applied.
+	 */
+	[[nodiscard]] float applyToValueWithMagnitude(float axisValue, float axisVectorMagnitude) const;
+
+	/**
+	 * \brief Returns the value with multiplier, inverse, and dead zone applied.
+	 */
+	[[nodiscard]] float applyToValue(float value) const;
+
+	/**
+	 * \brief Returns the provided analog input with the stored multiplier, inverse, and dead zone applied.
+	 * 
+	 * If \c deadZoneSource is \c DeadZoneSource::axisVectorMagnitude, the magnitude
+	 * of \a axisVector is used for activation, and \a axisValue is returned only with options
+	 * applied (i.e. without dead zone scaling applied).
+	 *
+	 * Otherwise, \a axisVector is returned with options and dead zone scaling applied.
+	 * 
+	 * \param axisValue The raw axis value provided by the device, clamped according to polarity.
+	 * \param axisVector The vector that the axis value belongs to.
+	 * \return The analog value with options applied.
+	 */
+	[[nodiscard]] float applyToValue(float axisValue, const Vector2& axisVector) const;
+
+	/**
+	 * \brief Returns the provided analog input with the stored multiplier, inverse, and dead zone applied.
+	 *
+	 * If \c deadZoneSource is \c DeadZoneSource::axisVectorMagnitude, the magnitude
+	 * of \a axisVector is used for activation, and \a axisValue is returned only with options
+	 * applied (i.e. without dead zone scaling applied).
+	 *
+	 * Otherwise, \a axisVector is returned with options and dead zone scaling applied.
+	 *
+	 * \param axisValue The raw axis value provided by the device, clamped according to polarity.
+	 * \param axisVector The vector that the axis value belongs to.
+	 * \return The analog value with options applied.
+	 */
+	[[nodiscard]] float applyToValue(float axisValue, const Vector3& axisVector) const;
 
 	bool operator==(const InputAxisOptions& other) const;
 	bool operator!=(const InputAxisOptions& other) const;
@@ -114,7 +161,7 @@ public:
 	 * \param axis The axis to retrieve the configuration for.
 	 * \return The configuration for the requested axis, or empty configuration if not found.
 	 */
-	AxisOptions getAxisOptions(XInputAxis::T axis) const;
+	[[nodiscard]] AxisOptions getAxisOptions(XInputAxis::T axis) const;
 
 	bool operator==(const XInputAxes& other) const;
 	bool operator!=(const XInputAxes& other) const;
