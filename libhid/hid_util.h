@@ -11,15 +11,6 @@
 // libhid
 #include "hid_instance.h"
 
-// TODO: move to cpp
-template <typename T>
-T cbsize_t()
-{
-	T result = {};
-	result.cbSize = sizeof(T);
-	return result;
-}
-
 namespace hid
 {
 	std::wstring getDevicePath(HDEVINFO devInfoSet, SP_DEVICE_INTERFACE_DATA* interface, SP_DEVINFO_DATA* data = nullptr) noexcept;

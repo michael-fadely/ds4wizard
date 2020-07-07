@@ -8,22 +8,47 @@
 #include "hid_instance.h"
 #include "hid_util.h"
 
+// TODO: handle *A and *W variants of these methods and structures!
+
+template <typename T>
+void set_cbsize(T* pod)
+{
+	if (pod)
+	{
+		pod->cbSize = sizeof(T);
+	}
+}
+
+template <typename T>
+void set_cbsize(T& pod)
+{
+	pod.cbSize = sizeof(T);
+}
+
+template <typename T>
+T cbsize_t()
+{
+	T result {};
+	set_cbsize(result);
+	return result;
+}
+
 std::wstring hid::getDevicePath(const HDEVINFO devInfoSet, SP_DEVICE_INTERFACE_DATA* interface, SP_DEVINFO_DATA* data) noexcept
 {
 	DWORD size = 0;
 
 	SetupDiGetDeviceInterfaceDetail(devInfoSet, interface, nullptr, 0, &size, data);
 
-	auto detail = static_cast<PSP_DEVICE_INTERFACE_DETAIL_DATA>(malloc(offsetof(SP_DEVICE_INTERFACE_DETAIL_DATA, DevicePath) + size + sizeof(TCHAR)));
+	auto* detail = static_cast<PSP_DEVICE_INTERFACE_DETAIL_DATA>(malloc(offsetof(SP_DEVICE_INTERFACE_DETAIL_DATA, DevicePath) + size + sizeof(TCHAR)));
 
 	if (detail == nullptr)
 	{
 		return std::wstring();
 	}
 
-	detail->cbSize = sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA);
+	set_cbsize(detail);
 
-	bool success = SetupDiGetDeviceInterfaceDetail(devInfoSet, interface, detail, size, &size, data);
+	const bool success = SetupDiGetDeviceInterfaceDetail(devInfoSet, interface, detail, size, &size, data);
 
 	std::wstring result;
 
@@ -47,7 +72,7 @@ std::wstring hid::getInstanceId(const HDEVINFO devInfoSet, SP_DEVINFO_DATA* devI
 		return result;
 	}
 
-	auto buffer = new wchar_t[required];
+	auto* buffer = new wchar_t[required];
 
 	if (SetupDiGetDeviceInstanceId(devInfoSet, devInfoData, buffer, required, &required))
 	{
