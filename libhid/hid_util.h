@@ -1,10 +1,17 @@
 #pragma once
 
+// Windows
 #include <Windows.h>
 #include <SetupAPI.h>
+
+// STL
 #include <functional>
+#include <memory>
+
+// libhid
 #include "hid_instance.h"
 
+// TODO: move to cpp
 template <typename T>
 T cbsize_t()
 {

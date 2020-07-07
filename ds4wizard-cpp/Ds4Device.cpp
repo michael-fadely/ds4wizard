@@ -536,8 +536,8 @@ void Ds4Device::writeUsbAsync()
 
 	constexpr auto usb_output_offset = 4;
 
-	const auto span = gsl::make_span(&usbDevice->output_buffer[usb_output_offset],
-	                                 usbDevice->output_buffer.size() - usb_output_offset);
+	const auto span = gsl::span(&usbDevice->output_buffer[usb_output_offset],
+	                            usbDevice->output_buffer.size() - usb_output_offset);
 
 	if (!output.update(span))
 	{
@@ -557,8 +557,8 @@ void Ds4Device::writeBluetooth()
 
 	constexpr auto bt_output_offset = 6;
 
-	const auto span = gsl::make_span(&bluetoothDevice->output_buffer[bt_output_offset],
-	                                 bluetoothDevice->output_buffer.size() - bt_output_offset);
+	const auto span = gsl::span(&bluetoothDevice->output_buffer[bt_output_offset],
+	                            bluetoothDevice->output_buffer.size() - bt_output_offset);
 
 	if (!output.update(span))
 	{
@@ -613,8 +613,8 @@ void Ds4Device::run()
 			dataReceived = true;
 
 			constexpr auto usb_input_offset = 1;
-			const auto span = gsl::make_span(&usbDevice->input_buffer[usb_input_offset],
-			                                 usbDevice->input_buffer.size() - usb_input_offset);
+			const auto span = gsl::span(&usbDevice->input_buffer[usb_input_offset],
+			                            usbDevice->input_buffer.size() - usb_input_offset);
 
 			input.update(span);
 		}
@@ -643,8 +643,8 @@ void Ds4Device::run()
 			dataReceived = true;
 
 			constexpr auto bt_input_offset = 3;
-			const auto span = gsl::make_span(&bluetoothDevice->input_buffer[bt_input_offset],
-			                                 bluetoothDevice->input_buffer.size() - bt_input_offset);
+			const auto span = gsl::span(&bluetoothDevice->input_buffer[bt_input_offset],
+			                            bluetoothDevice->input_buffer.size() - bt_input_offset);
 
 			input.update(span);
 		}
