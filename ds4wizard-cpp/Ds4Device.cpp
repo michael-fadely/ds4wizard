@@ -103,18 +103,19 @@ Ds4Device::Ds4Device(std::shared_ptr<hid::HidInstance> device)
 
 void Ds4Device::open(std::shared_ptr<hid::HidInstance> device)
 {
-	std::stringstream macaddr;
+	// TODO: use fmt
+	std::stringstream macAddressStream;
 
-	macaddr << std::hex << std::uppercase << std::setw(2) << std::setfill('0')
+	macAddressStream << std::hex << std::uppercase << std::setw(2) << std::setfill('0')
 		<< static_cast<int>(device->serial[0]);
 
 	for (size_t i = 1; i < device->serial.size(); ++i)
 	{
-		macaddr << ':' << std::hex << std::uppercase << std::setw(2) << std::setfill('0')
+		macAddressStream << ':' << std::hex << std::uppercase << std::setw(2) << std::setfill('0')
 			<< static_cast<int>(device->serial[i]);
 	}
 
-	macAddress_     = macaddr.str();
+	macAddress_     = macAddressStream.str();
 	safeMacAddress_ = macAddress_;
 
 	safeMacAddress_.erase(std::remove(safeMacAddress_.begin(), safeMacAddress_.end(), ':'), safeMacAddress_.end());
