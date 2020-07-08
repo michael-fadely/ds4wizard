@@ -2,8 +2,9 @@
 
 #include <chrono>
 #include <thread>
-#include <sstream>
 #include <iomanip>
+
+#include <fmt/format.h>
 
 #include "Ds4Device.h"
 #include "program.h"
@@ -103,23 +104,13 @@ Ds4Device::Ds4Device(std::shared_ptr<hid::HidInstance> device)
 
 void Ds4Device::open(std::shared_ptr<hid::HidInstance> device)
 {
-	// TODO: use fmt
-	std::stringstream macAddressStream;
+	macAddress_ = fmt::format("{:2X}:{:2X}:{:2X}:{:2X}:{:2X}:{:2X}",
+	                          device->serial[0], device->serial[1], device->serial[2],
+	                          device->serial[3], device->serial[4], device->serial[5]);
 
-	macAddressStream << std::hex << std::uppercase << std::setw(2) << std::setfill('0')
-		<< static_cast<int>(device->serial[0]);
-
-	for (size_t i = 1; i < device->serial.size(); ++i)
-	{
-		macAddressStream << ':' << std::hex << std::uppercase << std::setw(2) << std::setfill('0')
-			<< static_cast<int>(device->serial[i]);
-	}
-
-	macAddress_     = macAddressStream.str();
-	safeMacAddress_ = macAddress_;
-
-	safeMacAddress_.erase(std::remove(safeMacAddress_.begin(), safeMacAddress_.end(), ':'), safeMacAddress_.end());
-	std::transform(safeMacAddress_.begin(), safeMacAddress_.end(), safeMacAddress_.begin(), tolower);
+	safeMacAddress_ = fmt::format("{:2x}{:2x}{:2x}{:2x}{:2x}{:2x}",
+	                              device->serial[0], device->serial[1], device->serial[2],
+	                              device->serial[3], device->serial[4], device->serial[5]);
 
 	if (device->caps().inputReportSize != usbInputReportSize)
 	{
