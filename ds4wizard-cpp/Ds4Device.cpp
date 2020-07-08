@@ -120,7 +120,7 @@ void Ds4Device::open(std::shared_ptr<hid::HidInstance> device)
 	safeMacAddress_.erase(std::remove(safeMacAddress_.begin(), safeMacAddress_.end(), ':'), safeMacAddress_.end());
 	std::transform(safeMacAddress_.begin(), safeMacAddress_.end(), safeMacAddress_.begin(), tolower);
 
-	if (device->caps().inputReportSize != 64)
+	if (device->caps().inputReportSize != usbInputReportSize)
 	{
 		bluetoothDevice = std::move(device);
 		setupBluetoothOutputBuffer();

@@ -273,7 +273,7 @@ bool Ds4DeviceManager::handleDevice(std::shared_ptr<hid::HidInstance> hid)
 
 	try
 	{
-		isBluetooth = hid->caps().inputReportSize != 64;
+		isBluetooth = hid->caps().inputReportSize != Ds4Device::usbInputReportSize;
 
 		// USB connection type
 		if (!isBluetooth)

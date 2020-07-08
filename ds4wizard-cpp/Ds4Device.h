@@ -103,6 +103,8 @@ public:
 		idle
 	};
 
+	static constexpr size_t usbInputReportSize = 64;
+
 	Event<Ds4Device> onDeviceClose;
 	Event<Ds4Device, Ds4ConnectEvent> onConnect;
 	Event<Ds4Device, size_t> onWirelessOperationalModeFailure;
