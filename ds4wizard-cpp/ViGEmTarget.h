@@ -1,8 +1,5 @@
 #pragma once
 
-#include <unordered_map>
-#include <mutex>
-
 #include <ViGEm/Client.h>
 
 #include "Event.h"
@@ -17,10 +14,7 @@ namespace vigem
 
 		Driver* parent;
 		PVIGEM_TARGET target = nullptr;
-		bool connected_ = false;
-
-		static std::recursive_mutex target_mutex;
-		static std::unordered_map<PVIGEM_TARGET, XInputTarget*> targets;
+		bool connected_      = false;
 
 	public:
 		// large motor, small motor, led number
@@ -75,6 +69,8 @@ namespace vigem
 
 	private:
 		void close();
-		static void raiseEvent(PVIGEM_CLIENT client, PVIGEM_TARGET target, uint8_t largeMotor, uint8_t smallMotor, uint8_t ledNumber);
+		static void raiseEvent(PVIGEM_CLIENT client, PVIGEM_TARGET target,
+		                       uint8_t largeMotor, uint8_t smallMotor, uint8_t ledNumber,
+		                       LPVOID userData);
 	};
 }

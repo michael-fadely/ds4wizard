@@ -7,9 +7,6 @@
 
 namespace vigem
 {
-	std::recursive_mutex XInputTarget::target_mutex;
-	std::unordered_map<PVIGEM_TARGET, XInputTarget*> XInputTarget::targets;
-
 	XInputTarget::XInputTarget(Driver* parent)
 		: parent(parent)
 	{
@@ -51,17 +48,11 @@ namespace vigem
 
 		connected_ = true;
 
-		result = vigem_target_x360_register_notification(parent->client, target, &XInputTarget::raiseEvent);
+		result = vigem_target_x360_register_notification(parent->client, target, &XInputTarget::raiseEvent, this);
 
 		if (!VIGEM_SUCCESS(result))
 		{
 			disconnect();
-		}
-		else
-		{
-			target_mutex.lock();
-			targets[target] = this;
-			target_mutex.unlock();
 		}
 
 		return result;
@@ -87,10 +78,6 @@ namespace vigem
 			connected_ = false;
 
 			vigem_target_x360_unregister_notification(target);
-
-			target_mutex.lock();
-			targets.erase(target);
-			target_mutex.unlock();
 		}
 
 		return result;
@@ -114,21 +101,15 @@ namespace vigem
 		}
 	}
 
-	void XInputTarget::raiseEvent(PVIGEM_CLIENT client, PVIGEM_TARGET target, uint8_t largeMotor, uint8_t smallMotor, uint8_t ledNumber)
+	void XInputTarget::raiseEvent(PVIGEM_CLIENT client, PVIGEM_TARGET target,
+	                              uint8_t largeMotor, uint8_t smallMotor, uint8_t ledNumber,
+	                              LPVOID userData)
 	{
-		target_mutex.lock();
-		XInputTarget* xtarget = targets[target];
-		target_mutex.unlock();
+		auto* xinput_target = static_cast<XInputTarget*>(userData);
 
-		// HACK: this is occasionally nullptr when connecting the controller via bluetooth; this is not a good fix
-		if (!xtarget)
+		if (xinput_target->parent->client == client)
 		{
-			return;
-		}
-
-		if (xtarget->parent->client == client)
-		{
-			xtarget->notification.invoke(xtarget, largeMotor, smallMotor, ledNumber);
+			xinput_target->notification.invoke(xinput_target, largeMotor, smallMotor, ledNumber);
 		}
 	}
 }
