@@ -25,6 +25,7 @@ namespace vigem
 	{
 		rhs.unregisterNotification();
 		rhs.target = nullptr;
+		rhs.connected_ = false;
 		registerNotification();
 	}
 
