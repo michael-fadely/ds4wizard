@@ -23,7 +23,9 @@ namespace vigem
 		  target(rhs.target),
 		  connected_(rhs.connected_)
 	{
+		rhs.unregisterNotification();
 		rhs.target = nullptr;
+		registerNotification();
 	}
 
 	XInputTarget::~XInputTarget()
@@ -39,7 +41,8 @@ namespace vigem
 		}
 
 		auto guard = parent->lock();
-		VIGEM_ERROR result = vigem_target_add(parent->client, target);
+
+		const VIGEM_ERROR result = vigem_target_add(parent->client, target);
 
 		if (!VIGEM_SUCCESS(result))
 		{
@@ -48,14 +51,7 @@ namespace vigem
 
 		connected_ = true;
 
-		result = vigem_target_x360_register_notification(parent->client, target, &XInputTarget::raiseEvent, this);
-
-		if (!VIGEM_SUCCESS(result))
-		{
-			disconnect();
-		}
-
-		return result;
+		return registerNotification();
 	}
 
 	bool XInputTarget::connected() const
@@ -76,8 +72,7 @@ namespace vigem
 		if (VIGEM_SUCCESS(result))
 		{
 			connected_ = false;
-
-			vigem_target_x360_unregister_notification(target);
+			unregisterNotification();
 		}
 
 		return result;
@@ -86,7 +81,8 @@ namespace vigem
 	void XInputTarget::update(const XInputGamepad& data) const
 	{
 		auto guard = parent->lock();
-		vigem_target_x360_update(parent->client, this->target, *reinterpret_cast<const XUSB_REPORT*>(&data));
+		vigem_target_x360_update(parent->client, this->target,
+		                         *reinterpret_cast<const XUSB_REPORT*>(&data));
 	}
 
 	void XInputTarget::close()
@@ -99,6 +95,25 @@ namespace vigem
 			vigem_target_free(target);
 			target = nullptr;
 		}
+	}
+
+	VIGEM_ERROR XInputTarget::registerNotification()
+	{
+		const VIGEM_ERROR result = vigem_target_x360_register_notification(parent->client, target,
+		                                                                   &XInputTarget::raiseEvent,
+		                                                                   this);
+
+		if (!VIGEM_SUCCESS(result))
+		{
+			disconnect();
+		}
+
+		return result;
+	}
+
+	void XInputTarget::unregisterNotification()
+	{
+		vigem_target_x360_unregister_notification(target);
 	}
 
 	void XInputTarget::raiseEvent(PVIGEM_CLIENT client, PVIGEM_TARGET target,

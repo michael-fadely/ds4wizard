@@ -69,6 +69,9 @@ namespace vigem
 
 	private:
 		void close();
+		VIGEM_ERROR registerNotification();
+		void unregisterNotification();
+
 		static void raiseEvent(PVIGEM_CLIENT client, PVIGEM_TARGET target,
 		                       uint8_t largeMotor, uint8_t smallMotor, uint8_t ledNumber,
 		                       LPVOID userData);
