@@ -150,7 +150,7 @@ bool InputSimulator::isOverriddenByModifierSet(const InputMapBase& map)
 		       !!(m->inputAxes.value_or(0) & map.inputAxes.value());
 	};
 
-	auto checkTouchMap = [&](InputMap const* m)
+	auto checkTouchMap = [&](InputMap const* m) -> bool
 	{
 		return m->isActive() && m != &map;
 	};
