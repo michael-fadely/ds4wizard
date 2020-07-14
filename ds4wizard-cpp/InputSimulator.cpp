@@ -314,8 +314,7 @@ void InputSimulator::runMap(const InputMap& m, InputModifier const* modifier)
 			{
 				Ds4TouchRegion* region = touchRegions[m.inputTouchRegion];
 
-				// UNDONE: we can't assume that a direction of none indicates button mode... can we?
-				if (region->type == +Ds4TouchRegionType::button /* UNDONE: || m.inputTouchDirection.value_or(Direction::none) == Direction::none*/)
+				if (region->type == +Ds4TouchRegionType::button)
 				{
 					const PressedState state1 = getTouchRegionPressedState(m, modifier, region->state1);
 					applyMap(m, modifier, state1, Pressable::isActiveState(state1) ? 1.0f : 0.0f);
