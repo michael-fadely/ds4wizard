@@ -656,7 +656,7 @@ void Ds4Device::run()
 	{
 		idleTime.start();
 	}
-	else if (disconnectOnIdle() && useBluetooth && isIdle())
+	else if (disconnectOnIdle() && useBluetooth && !charging() && isIdle())
 	{
 		disconnectBluetooth(BluetoothDisconnectReason::idle);
 	}
