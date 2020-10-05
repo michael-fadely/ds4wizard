@@ -255,7 +255,7 @@ void Ds4DeviceManager::registerDeviceCallbacks(const std::wstring& serialString,
 
 	token_store.push_back(device->onBatteryLevelLow.add([](Ds4Device* sender, uint8_t value)
 		{
-			const QString str = QObject::tr("Battery running low! (%1%%)").arg(value * 10);
+			const QString str = QObject::tr("Battery running low! (%1%)").arg(value * 10);
 			Logger::writeLine(LogLevel::warning, sender->name(), str.toStdString());
 		}));
 }
