@@ -13,15 +13,18 @@ MainWindow::MainWindow(QWidget* parent)
 	: QMainWindow(parent), ui()
 {
 	const auto now = []() -> auto { return high_resolution_clock::now(); };
-	const auto start = now();
 
-	ui.setupUi(this);
+	{
+		const auto start = now();
 
-	const auto elapsed = now() - start;
+		ui.setupUi(this);
 
-	qInfo() << __FUNCTION__ " setupUi: "
-		<< duration_cast<milliseconds>(elapsed).count()
-		<< " ms";
+		const auto elapsed = now() - start;
+
+		qInfo() << __FUNCTION__ " setupUi: "
+			<< duration_cast<milliseconds>(elapsed).count()
+			<< " ms";
+	}
 
 	ui.checkMinimizeToTray->setChecked(Program::settings.minimizeToTray);
 	ui.checkStartMinimized->setChecked(Program::settings.startMinimized);
