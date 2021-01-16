@@ -58,11 +58,11 @@ namespace hid
 		HidCaps caps_ {};
 		HidAttributes attributes_ {};
 
-		OVERLAPPED overlap_in = {};
-		OVERLAPPED overlap_out = {};
+		OVERLAPPED overlappedIn = {};
+		OVERLAPPED overlappedOut = {};
 
-		bool pending_read_ = false;
-		bool pending_write_ = false;
+		bool pendingRead_ = false;
+		bool pendingWrite_ = false;
 
 		size_t nativeError_ = 0;
 
@@ -72,8 +72,8 @@ namespace hid
 		std::wstring serialString;
 		std::vector<uint8_t> serial;
 
-		std::vector<uint8_t> input_buffer;
-		std::vector<uint8_t> output_buffer;
+		std::vector<uint8_t> inputBuffer;
+		std::vector<uint8_t> outputBuffer;
 
 		HidInstance(const HidInstance&) = delete;
 		HidInstance& operator=(const HidInstance&) = delete;
@@ -91,8 +91,6 @@ namespace hid
 		bool isOpen() const;
 		bool isExclusive() const;
 		bool isAsync() const;
-		bool readPending() const;
-		bool writePending() const;
 		const HidCaps& caps() const;
 		const HidAttributes& attributes() const;
 
@@ -103,7 +101,7 @@ namespace hid
 		bool getFeature(const gsl::span<uint8_t>& buffer) const;
 		bool setFeature(const gsl::span<uint8_t>& buffer) const;
 
-		bool open(HidOpenFlags_t flags);
+		bool open(HidOpenFlags_t openFlags);
 		void close();
 
 		inline auto nativeError() const
@@ -114,29 +112,30 @@ namespace hid
 		bool read(void* buffer, size_t size) const;
 		bool read(const gsl::span<uint8_t>& buffer) const;
 		bool read();
-		bool checkPendingRead();
-		bool checkAsyncReadError();
 
-		bool readAsync(void* buffer, size_t size);
-		bool readAsync(const gsl::span<uint8_t>& buffer);
 		bool readAsync();
 
 		bool write(const void* buffer, size_t size) const;
 		bool write(const gsl::span<const uint8_t>& buffer) const;
 		bool write() const;
-		bool checkPendingWrite();
-		bool checkAsyncWriteError();
 
-		bool writeAsync(const void* buffer, size_t size);
-		bool writeAsync(const gsl::span<const uint8_t>& buffer);
 		bool writeAsync();
 
-		void cancelAsync() const;
+		bool asyncReadPending() const;
+		bool asyncReadInProgress();
+		bool asyncWritePending() const;
+		bool asyncWriteInProgress();
+
+		void cancelAsyncReadAndWait();
+		void cancelAsyncWriteAndWait();
 
 		bool setOutputReport(const gsl::span<uint8_t>& buffer) const;
 		bool setOutputReport();
 
 	private:
+		void cancelAsyncAndWait(OVERLAPPED* overlapped);
+		bool asyncInProgress(OVERLAPPED* overlapped);
+
 		bool readCaps(HANDLE h);
 		bool readSerial(HANDLE h);
 		bool readAttributes(HANDLE h);
