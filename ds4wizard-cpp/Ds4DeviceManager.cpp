@@ -123,6 +123,7 @@ void Ds4DeviceManager::registerDeviceCallbacks(const std::wstring& serialString,
 					case Ds4ConnectEvent::Status::openFailed:
 						Logger::writeLine(LogLevel::error, sender->name(), QObject::tr("USB open failed!").toStdString());
 						break;
+
 					default:
 						break;
 				}
@@ -148,6 +149,7 @@ void Ds4DeviceManager::registerDeviceCallbacks(const std::wstring& serialString,
 					case Ds4ConnectEvent::Status::openFailed:
 						Logger::writeLine(LogLevel::error, sender->name(), QObject::tr("Bluetooth open failed!").toStdString());
 						break;
+
 					default:
 						break;
 				}
@@ -157,7 +159,6 @@ void Ds4DeviceManager::registerDeviceCallbacks(const std::wstring& serialString,
 			default:
 				break;
 		}
-
 	};
 
 	auto onDisconnect = [](Ds4Device* sender, const Ds4DisconnectEvent& args)
@@ -278,25 +279,12 @@ bool Ds4DeviceManager::handleDevice(std::shared_ptr<hid::HidInstance> hid)
 		// USB connection type
 		if (!isBluetooth)
 		{
-			// From DS4Windows
-			std::array<uint8_t, 16> buffer {};
-			buffer[0] = 18;
-
-			if (!hid->getFeature(buffer))
-			{
-				const std::string hidPath(hid->path.begin(), hid->path.end());
-				throw std::runtime_error(fmt::format("Failed to read MAC address from USB device {0}", hidPath));
-			}
-
-			hid->serial =
-			{
-				buffer[6], buffer[5], buffer[4],
-				buffer[3], buffer[2], buffer[1]
-			};
+			Ds4Device::MacAddress macAddress = Ds4Device::getMacAddress(hid);
 
 			// HACK: this member shouldn't be exposed, but getting the "serial" (MAC) over USB is non-standard for the DS4.
 			hid->serialString = fmt::format(L"{:2x}{:2x}{:2x}{:2x}{:2x}{:2x}",
-			                                buffer[6], buffer[5], buffer[4], buffer[3], buffer[2], buffer[1]);
+			                                macAddress[0], macAddress[1], macAddress[2],
+			                                macAddress[3], macAddress[4], macAddress[5]);
 		}
 
 		if (hid->serialString.empty())

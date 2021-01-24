@@ -58,6 +58,10 @@ public:
 
 class Ds4Device
 {
+public:
+	using MacAddress = std::array<uint8_t, 6>;
+
+private:
 	bool peakedLatencyThreshold = false;
 	std::string macAddress_;
 	std::string safeMacAddress_;
@@ -67,7 +71,7 @@ class Ds4Device
 
 	Stopwatch idleTime {};
 	Stopwatch writeTime {};
-	const std::chrono::milliseconds writeFrequency = std::chrono::milliseconds(4);
+	const std::chrono::milliseconds writeFrequency = std::chrono::milliseconds(0);
 
 	inline static const Ds4Color fadeColor {};
 
@@ -82,6 +86,7 @@ class Ds4Device
 
 	std::shared_ptr<hid::HidInstance> usbDevice;
 	std::shared_ptr<hid::HidInstance> bluetoothDevice;
+	MacAddress macAddressBytes {};
 
 	Ds4LightOptions activeLight;
 
@@ -147,6 +152,8 @@ public:
 	Ds4Device();
 	explicit Ds4Device(std::shared_ptr<hid::HidInstance> device);
 	~Ds4Device();
+
+	static MacAddress getMacAddress(std::shared_ptr<hid::HidInstance> device);
 
 	void open(std::shared_ptr<hid::HidInstance> device);
 

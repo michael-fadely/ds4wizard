@@ -102,15 +102,58 @@ Ds4Device::Ds4Device(std::shared_ptr<hid::HidInstance> device)
 	open(std::move(device));
 }
 
+// static
+Ds4Device::MacAddress Ds4Device::getMacAddress(std::shared_ptr<hid::HidInstance> device)
+{
+	MacAddress mac {};
+
+	// USB connection type
+	if (device->caps().inputReportSize == usbInputReportSize)
+	{
+		// From DS4Windows
+		std::array<uint8_t, 16> buffer {};
+		buffer[0] = 18;
+
+		if (!device->getFeature(buffer))
+		{
+			const std::string hidPath(device->path.begin(), device->path.end());
+			throw std::runtime_error(fmt::format("Failed to read MAC address from USB device {0}", hidPath));
+		}
+
+		mac =
+		{
+			buffer[6], buffer[5], buffer[4],
+			buffer[3], buffer[2], buffer[1]
+		};
+	}
+	else
+	{
+		for (size_t i = 0; i < mac.size(); i++)
+		{
+			const auto sub = device->serialString.substr(i * 2, 2);
+			mac[i] = static_cast<uint8_t>(std::stoul(sub, nullptr, 16));
+		}
+	}
+
+	return mac;
+}
+
 void Ds4Device::open(std::shared_ptr<hid::HidInstance> device)
 {
+	const MacAddress macAddress = getMacAddress(device);
+
 	macAddress_ = fmt::format("{:2X}:{:2X}:{:2X}:{:2X}:{:2X}:{:2X}",
-	                          device->serial[0], device->serial[1], device->serial[2],
-	                          device->serial[3], device->serial[4], device->serial[5]);
+	                          macAddress[0], macAddress[1], macAddress[2],
+	                          macAddress[3], macAddress[4], macAddress[5]);
 
 	safeMacAddress_ = fmt::format("{:2x}{:2x}{:2x}{:2x}{:2x}{:2x}",
-	                              device->serial[0], device->serial[1], device->serial[2],
-	                              device->serial[3], device->serial[4], device->serial[5]);
+	                              macAddress[0], macAddress[1], macAddress[2],
+	                              macAddress[3], macAddress[4], macAddress[5]);
+
+	if (!!memcmp(macAddressBytes.data(), macAddress.data(), macAddress.size()))
+	{
+		macAddressBytes = macAddress;
+	}
 
 	if (device->caps().inputReportSize != usbInputReportSize)
 	{
@@ -119,19 +162,24 @@ void Ds4Device::open(std::shared_ptr<hid::HidInstance> device)
 	}
 	else
 	{
+		// HACK: this member shouldn't be exposed, but getting the "serial" (MAC) over USB is non-standard for the DS4.
+		device->serialString = fmt::format(L"{:2x}{:2x}{:2x}{:2x}{:2x}{:2x}",
+		                                   macAddress[0], macAddress[1], macAddress[2],
+		                                   macAddress[3], macAddress[4], macAddress[5]);
+
 		usbDevice = std::move(device);
 		setupUsbOutputBuffer();
 	}
 
-	auto settings = Program::profileCache.getSettings(macAddress_);
+	std::optional<DeviceSettings> cachedSettings = Program::profileCache.getSettings(macAddress_);
 
-	if (!settings.has_value())
+	if (!cachedSettings.has_value())
 	{
 		this->settings = {};
 	}
 	else
 	{
-		this->settings = *settings;
+		this->settings = *cachedSettings;
 	}
 
 	notifiedLow = false;
@@ -183,15 +231,15 @@ void Ds4Device::applyProfile()
 	if (usbDevice != nullptr && (!usbConnected() || usbDevice->isExclusive() != profile.exclusiveMode))
 	{
 		closeUsbDevice();
-		std::shared_ptr<hid::HidInstance> inst = std::move(usbDevice);
-		openUsbDevice(inst);
+		std::shared_ptr<hid::HidInstance> instance = std::move(usbDevice);
+		openUsbDevice(instance);
 	}
 
 	if (bluetoothDevice != nullptr && (!bluetoothConnected() || bluetoothDevice->isExclusive() != profile.exclusiveMode))
 	{
 		closeBluetoothDevice();
-		std::shared_ptr<hid::HidInstance> inst = std::move(bluetoothDevice);
-		openBluetoothDevice(inst);
+		std::shared_ptr<hid::HidInstance> instance = std::move(bluetoothDevice);
+		openBluetoothDevice(instance);
 	}
 
 	if (this->connected())
@@ -337,7 +385,7 @@ void Ds4Device::disconnectBluetooth(BluetoothDisconnectReason reason)
 		return;
 	}
 
-	for (size_t i = 0; !Bluetooth::disconnectDevice(bluetoothDevice->serial) && i < 5; i++)
+	for (size_t i = 0; !Bluetooth::disconnectDevice(macAddressBytes) && i < 5; i++)
 	{
 		std::this_thread::sleep_for(125ms);
 	}
@@ -373,7 +421,7 @@ bool Ds4Device::openDevice(std::shared_ptr<hid::HidInstance>& hid, bool exclusiv
 bool Ds4Device::openBluetoothDevice(std::shared_ptr<hid::HidInstance> hid)
 {
 	auto lock_guard = lock();
-	
+
 	if (bluetoothConnected())
 	{
 		return true;
@@ -445,7 +493,7 @@ bool Ds4Device::openBluetoothDevice(std::shared_ptr<hid::HidInstance> hid)
 bool Ds4Device::openUsbDevice(std::shared_ptr<hid::HidInstance> hid)
 {
 	auto lock_guard = lock();
-	
+
 	if (usbConnected())
 	{
 		return true;

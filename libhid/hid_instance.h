@@ -70,7 +70,6 @@ namespace hid
 		std::wstring path;
 		std::wstring instanceId;
 		std::wstring serialString;
-		std::vector<uint8_t> serial;
 
 		std::vector<uint8_t> inputBuffer;
 		std::vector<uint8_t> outputBuffer;

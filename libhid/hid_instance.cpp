@@ -32,7 +32,6 @@ HidInstance::HidInstance(HidInstance&& other) noexcept
 	  path(std::move(other.path)),
 	  instanceId(std::move(other.instanceId)),
 	  serialString(std::move(other.serialString)),
-	  serial(std::move(other.serial)),
 	  inputBuffer(std::move(other.inputBuffer)),
 	  outputBuffer(std::move(other.outputBuffer))
 {
@@ -51,7 +50,6 @@ HidInstance& HidInstance::operator=(HidInstance&& other) noexcept
 	caps_ = other.caps_;
 	attributes_ = other.attributes_;
 	serialString = std::move(other.serialString);
-	serial = std::move(other.serial);
 	path = std::move(other.path);
 	instanceId = std::move(other.instanceId);
 
@@ -478,34 +476,18 @@ bool HidInstance::readSerial(HANDLE h)
 {
 	nativeError_ = 0;
 
-	// FIXME: This field should be removed.
-	serial.clear();
+	// 4093 is the maximum allowed size according to Microsoft's documentation for HidD_GetSerialNumberString.
+	std::vector<uint8_t> buffer(4093);
 
-	// FIXME: This is hard-coded garbage.
-	std::array<uint8_t, 26> buffer {};
+	const bool result = HidD_GetSerialNumberString(h, buffer.data(), static_cast<ULONG>(buffer.size())) != 0;
 
-	const bool result = !!HidD_GetSerialNumberString(h, buffer.data(), static_cast<ULONG>(buffer.size()));
-
-	if (result)
-	{
-		serialString = std::wstring(reinterpret_cast<wchar_t*>(buffer.data()));
-
-		// HACK: this is bad and wrong; there is a device on my system returning "2.1.8"
-		if (serialString.length() < 12)
-		{
-			return false;
-		}
-
-		for (size_t i = 0; i < 6; i++)
-		{
-			const auto sub = serialString.substr(i * 2, 2);
-			serial.push_back(static_cast<uint8_t>(std::stoul(sub, nullptr, 16)));
-		}
-	}
-	else
+	if (!result)
 	{
 		nativeError_ = GetLastError();
+		return result;
 	}
+
+	serialString = std::wstring(reinterpret_cast<wchar_t*>(buffer.data()), buffer.size());
 
 	return result;
 }
