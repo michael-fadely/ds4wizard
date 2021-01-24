@@ -52,8 +52,8 @@ void DeviceProfileCache::saveSettings(const std::string& id, const DeviceSetting
 
 	const auto devicesFilePath = QString::fromStdString(Program::devicesFilePath());
 
-	QDir devicesDir(devicesFilePath);
-	devicesDir.cdUp();
+	const QFileInfo fileInfo(devicesFilePath);
+	const QDir devicesDir(fileInfo.absoluteDir());
 
 	if (!devicesDir.exists())
 	{
@@ -75,7 +75,7 @@ void DeviceProfileCache::saveSettings(const std::string& id, const DeviceSetting
 	{
 		json[pair.first] = pair.second.toJson();
 	}
-	
+
 	f.write(QByteArray::fromStdString(json.dump(4)));
 	f.close();
 }
@@ -251,7 +251,7 @@ void DeviceProfileCache::loadImpl()
 				QString str = devicesFile.readAll();
 
 				auto doc = nlohmann::json::parse(str.toStdString());
-				
+
 				for (auto& pair : doc.items())
 				{
 					deviceSettings[pair.key()] = JsonData::fromJson<DeviceSettings>(pair.value());
