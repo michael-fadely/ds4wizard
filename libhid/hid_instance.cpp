@@ -487,7 +487,9 @@ bool HidInstance::readSerial(HANDLE h)
 		return result;
 	}
 
-	serialString = std::wstring(reinterpret_cast<wchar_t*>(buffer.data()), buffer.size());
+	auto* wstr_ptr = reinterpret_cast<wchar_t*>(buffer.data());
+	const size_t length = wcsnlen(wstr_ptr, buffer.size());
+	serialString = std::wstring(wstr_ptr, length);
 
 	return result;
 }
