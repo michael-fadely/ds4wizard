@@ -274,7 +274,7 @@ void Ds4Device::displayPowerNotifications()
 
 	if (settings.notifyFullyCharged)
 	{
-		if (!usbConnected() || !charging() || battery() < 10)
+		if (!usbConnected() && !charging() && battery() < 10)
 		{
 			notifiedCharged = false;
 		}
