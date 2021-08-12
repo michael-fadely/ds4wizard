@@ -534,14 +534,10 @@ void Ds4Device::setupUsbOutputBuffer() const
 
 void Ds4Device::writeUsbAsync()
 {
-	if (writeTime.elapsed() < writeFrequency)
-	{
-		return;
-	}
-
 	// FIXME: This + async io rewrite prevents detection of device removal.
 	// If the controller is unplugged during an async write, Windows I/O
-	// polling doesn't detect a failure.
+	// polling doesn't detect a failure. Although it appears to be caught
+	// in the read phase now. Worth investigating.
 	if (usbDevice->asyncWriteInProgress())
 	{
 		return;
@@ -560,18 +556,17 @@ void Ds4Device::writeUsbAsync()
 		return;
 	}
 
-	usbDevice->writeAsync();
+	if (!usbDevice->writeAsync())
+	{
+		usbDevice->close();
+	}
+
 	writeLatency.start();
 	writeTime.start();
 }
 
 void Ds4Device::writeBluetooth()
 {
-	if (writeTime.elapsed() < writeFrequency)
-	{
-		return;
-	}
-
 	constexpr auto bt_output_offset = 6;
 
 	const auto span = gsl::span(&bluetoothDevice->outputBuffer[bt_output_offset],
@@ -623,22 +618,32 @@ void Ds4Device::run()
 
 	dataReceived = false;
 
+	auto asyncRead = [](hid::HidInstance* i) -> bool
+	{
+		if (!i->isOpen())
+		{
+			return false;
+		}
+
+		if (i->asyncReadPending())
+		{
+			return !i->asyncReadInProgress();
+		}
+
+		if (!i->readAsync())
+		{
+			i->close();
+			return false;
+		}
+
+		return !i->asyncReadInProgress();
+	};
+
 	if (useUsb)
 	{
 		writeUsbAsync();
 
-		bool dataAvailable;
-
-		if (usbDevice->asyncReadPending())
-		{
-			dataAvailable = !usbDevice->asyncReadInProgress();
-		}
-		else
-		{
-			dataAvailable = usbDevice->readAsync();
-		}
-
-		if (dataAvailable)
+		if (asyncRead(usbDevice.get()))
 		{
 			dataReceived = true;
 
@@ -654,6 +659,7 @@ void Ds4Device::run()
 		// disconnected from bluetooth (if connected).
 		if (!usbConnected())
 		{
+			// FIXME: Use of nativeError() is unlikely to be reliable in simultaneous async read/write because both update it.
 			const auto reason = usbDevice->nativeError() != ERROR_DEVICE_NOT_CONNECTED
 			                    ? Ds4DisconnectEvent::Reason::error
 			                    : Ds4DisconnectEvent::Reason::closed;
@@ -668,18 +674,7 @@ void Ds4Device::run()
 	{
 		writeBluetooth();
 
-		bool dataAvailable;
-
-		if (bluetoothDevice->asyncReadPending())
-		{
-			dataAvailable = !bluetoothDevice->asyncReadInProgress();
-		}
-		else
-		{
-			dataAvailable = bluetoothDevice->readAsync();
-		}
-
-		if (dataAvailable && bluetoothDevice->inputBuffer[0] == 0x11)
+		if (asyncRead(bluetoothDevice.get()) && bluetoothDevice->inputBuffer[0] == 0x11)
 		{
 			dataReceived = true;
 

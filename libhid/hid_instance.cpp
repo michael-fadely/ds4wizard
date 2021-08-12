@@ -266,8 +266,26 @@ bool HidInstance::readAsync()
 		return !asyncReadInProgress();
 	}
 
-	pendingRead_ = !ReadFile(handle.nativeHandle, inputBuffer.data(), static_cast<DWORD>(inputBuffer.size()), nullptr, &overlappedIn);
-	return !pendingRead_;
+	const bool result = ReadFile(handle.nativeHandle,
+	                             inputBuffer.data(),
+	                             static_cast<DWORD>(inputBuffer.size()),
+	                             nullptr,
+	                             &overlappedIn);
+
+	if (!result)
+	{
+		const DWORD error = GetLastError();
+
+		if (error == ERROR_IO_PENDING)
+		{
+			pendingRead_ = true;
+			return true;
+		}
+
+		nativeError_ = error;
+	}
+
+	return result;
 }
 
 bool HidInstance::write(const void* buffer, size_t size) const
@@ -292,8 +310,26 @@ bool HidInstance::writeAsync()
 		return asyncWriteInProgress();
 	}
 
-	pendingWrite_ = !WriteFile(handle.nativeHandle, outputBuffer.data(), static_cast<DWORD>(outputBuffer.size()), nullptr, &overlappedOut);
-	return !pendingWrite_;
+	const bool result = WriteFile(handle.nativeHandle,
+	                              outputBuffer.data(),
+	                              static_cast<DWORD>(outputBuffer.size()),
+	                              nullptr,
+	                              &overlappedOut);
+
+	if (!result)
+	{
+		const DWORD error = GetLastError();
+
+		if (error == ERROR_IO_PENDING)
+		{
+			pendingWrite_ = true;
+			return true;
+		}
+
+		nativeError_ = error;
+	}
+
+	return result;
 }
 
 bool HidInstance::asyncReadPending() const
@@ -357,7 +393,7 @@ bool HidInstance::setOutputReport(const gsl::span<uint8_t>& buffer) const
 		return false;
 	}
 
-	return HidD_SetOutputReport(handle.nativeHandle, reinterpret_cast<PVOID>(buffer.data()), static_cast<ULONG>(buffer.size_bytes()));
+	return HidD_SetOutputReport(handle.nativeHandle, buffer.data(), static_cast<ULONG>(buffer.size_bytes()));
 }
 
 bool HidInstance::setOutputReport()
@@ -395,6 +431,8 @@ bool HidInstance::asyncInProgress(OVERLAPPED* overlapped)
 	{
 		return false;
 	}
+
+	// TODO: Make use of HasOverlappedIoCompleted
 
 	DWORD bytesWritten = 0;
 	const bool result = GetOverlappedResult(handle.nativeHandle, overlapped, &bytesWritten, FALSE) != 0;

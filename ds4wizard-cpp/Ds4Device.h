@@ -71,7 +71,6 @@ private:
 
 	Stopwatch idleTime {};
 	Stopwatch writeTime {};
-	const std::chrono::milliseconds writeFrequency = std::chrono::milliseconds(0);
 
 	inline static const Ds4Color fadeColor {};
 
