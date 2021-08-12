@@ -179,7 +179,6 @@ public:
 
 private:
 	void releaseAutoColor();
-	void displayPowerNotifications();
 
 public:
 	void onProfileChanged(const std::string& newName);

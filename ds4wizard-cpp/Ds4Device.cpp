@@ -81,6 +81,7 @@ uint8_t Ds4Device::battery() const
 	return input.data.battery;
 }
 
+// FIXME: This name is super misleading!
 bool Ds4Device::charging() const
 {
 	return (input.data.extensions & Ds4Extensions::cable) != 0;
@@ -255,35 +256,6 @@ void Ds4Device::releaseAutoColor()
 	auto lock_guard = lock();
 	Ds4AutoLightColor::releaseColor(colorIndex);
 	colorIndex = -1;
-}
-
-void Ds4Device::displayPowerNotifications()
-{
-	if (settings.notifyBatteryLow > 0)
-	{
-		if (usbConnected() || charging() || battery() > settings.notifyBatteryLow)
-		{
-			notifiedLow = false;
-		}
-		else if (!notifiedLow)
-		{
-			notifiedLow = true;
-			onBatteryLevelLow.invoke(this, battery());
-		}
-	}
-
-	if (settings.notifyFullyCharged)
-	{
-		if (!usbConnected() && !charging() && battery() < 10)
-		{
-			notifiedCharged = false;
-		}
-		else if (!notifiedCharged)
-		{
-			notifiedCharged = true;
-			onBatteryFullyCharged.invoke(this);
-		}
-	}
 }
 
 void Ds4Device::onProfileChanged(const std::string& newName)
@@ -567,6 +539,9 @@ void Ds4Device::writeUsbAsync()
 		return;
 	}
 
+	// FIXME: This + async io rewrite prevents detection of device removal.
+	// If the controller is unplugged during an async write, Windows I/O
+	// polling doesn't detect a failure.
 	if (usbDevice->asyncWriteInProgress())
 	{
 		return;
@@ -581,11 +556,13 @@ void Ds4Device::writeUsbAsync()
 
 	if (!output.update(span))
 	{
+		writeTime.start();
 		return;
 	}
 
 	usbDevice->writeAsync();
 	writeLatency.start();
+	writeTime.start();
 }
 
 void Ds4Device::writeBluetooth()
@@ -602,6 +579,7 @@ void Ds4Device::writeBluetooth()
 
 	if (!output.update(span))
 	{
+		writeTime.start();
 		return;
 	}
 
@@ -613,6 +591,7 @@ void Ds4Device::writeBluetooth()
 	}
 
 	writeLatency.stop();
+	writeTime.start();
 }
 
 void Ds4Device::run()
@@ -631,8 +610,8 @@ void Ds4Device::run()
 		output.lightColor = Ds4Color::lerp(l.color, fadeColor, static_cast<float>(m));
 	}
 
-	const bool charging_   = charging();
-	const uint8_t battery_ = battery();
+	const bool lastChargingState = charging();
+	const uint8_t lastBatteryLevel = battery();
 
 	// cache
 	const bool usb = usbConnected();
@@ -754,9 +733,34 @@ void Ds4Device::run()
 
 		readLatency.start();
 
-		if (charging_ != charging() || battery_ != battery())
+		if (lastChargingState != charging() || lastBatteryLevel != battery())
 		{
-			displayPowerNotifications();
+			if (settings.notifyBatteryLow > 0)
+			{
+				if (usbConnected() || charging() || battery() > settings.notifyBatteryLow)
+				{
+					notifiedLow = false;
+				}
+				else if (!notifiedLow)
+				{
+					notifiedLow = true;
+					onBatteryLevelLow.invoke(this, battery());
+				}
+			}
+
+			if (settings.notifyFullyCharged)
+			{
+				if ((!usbConnected() && !charging()) || battery() < 10)
+				{
+					notifiedCharged = false;
+				}
+				else if (!notifiedCharged && battery() >= 10)
+				{
+					notifiedCharged = true;
+					onBatteryFullyCharged.invoke(this);
+				}
+			}
+
 			onBatteryLevelChanged.invoke(this);
 		}
 
