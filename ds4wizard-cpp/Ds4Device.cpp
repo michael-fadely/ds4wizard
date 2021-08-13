@@ -589,7 +589,7 @@ void Ds4Device::writeBluetooth()
 	writeTime.start();
 }
 
-void Ds4Device::run()
+bool Ds4Device::run()
 {
 	// HACK: make this class manage the light state
 	output.lightColor = activeLight.color;
@@ -616,7 +616,7 @@ void Ds4Device::run()
 	const bool useUsb = usb && (preferredConnection == +ConnectionType::usb || !bluetooth);
 	const bool useBluetooth = bluetooth && (preferredConnection == +ConnectionType::bluetooth || !usb);
 
-	dataReceived = false;
+	bool dataReceived = false;
 
 	auto asyncRead = [](hid::HidInstance* i) -> bool
 	{
@@ -749,7 +749,7 @@ void Ds4Device::run()
 				{
 					notifiedCharged = false;
 				}
-				else if (!notifiedCharged && battery() >= 10)
+				else if (!notifiedCharged && lastChargingState == charging() && battery() >= 10)
 				{
 					notifiedCharged = true;
 					onBatteryFullyCharged.invoke(this);
@@ -793,6 +793,8 @@ void Ds4Device::run()
 		input.updateChangedState();
 		simulator.runPersistent();
 	}
+
+	return dataReceived;
 }
 
 void Ds4Device::controllerThread()
@@ -804,9 +806,11 @@ void Ds4Device::controllerThread()
 
 	while (connected() && running)
 	{
+		bool dataReceived;
+
 		{
 			auto lock_guard = lock();
-			run();
+			dataReceived = run();
 		}
 
 		if (!dataReceived)

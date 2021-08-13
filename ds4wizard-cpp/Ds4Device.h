@@ -79,8 +79,6 @@ private:
 	Latency readLatency;
 	Latency writeLatency;
 
-	bool dataReceived = false;
-
 	std::unique_ptr<std::thread> deviceThread = nullptr;
 
 	std::shared_ptr<hid::HidInstance> usbDevice;
@@ -198,7 +196,7 @@ private:
 	void setupUsbOutputBuffer() const;
 	void writeUsbAsync();
 	void writeBluetooth();
-	void run();
+	bool run();
 	void controllerThread();
 
 public:
