@@ -230,7 +230,7 @@ public:
 	 */
 	[[nodiscard]] float getSimulatedAxisWithOptionsApplied(Ds4Buttons_t sender, Direction_t direction) const;
 
-	// UNDONE: nice documentation, nerd!
+	// FIXME: nice documentation, nerd!
 	[[nodiscard]] const decltype(points1)& getPoints(Ds4Buttons_t sender) const;
 
 	bool operator==(const Ds4TouchRegion& other) const;

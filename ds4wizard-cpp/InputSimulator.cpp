@@ -269,7 +269,7 @@ void InputSimulator::runMap(const InputMap& m, InputModifier const* modifier)
 		throw std::out_of_range("inputType must be non-zero.");
 	}
 
-	// UNDONE: this will not properly simulate activation for multiple input types; this is an OR, we probably want AND
+	// FIXME: this will not properly simulate activation for multiple input types; this is an OR, we probably want AND
 	for (InputType_t value : InputType_values)
 	{
 		if ((m.inputType & value) == 0)
