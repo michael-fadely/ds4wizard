@@ -81,9 +81,14 @@ MainWindow::MainWindow(QWidget* parent)
 	// HACK: for testing later
 	connect(ui.profileEdit, &QPushButton::clicked, this, [this](...)
 	{
-		const auto model = std::make_unique<DeviceProfileModel>(this, profileItems->getProfile(ui.profileList->currentIndex().row()));
-		auto dg = std::make_unique<ProfileEditorDialog>(model.get(), this);
-		dg->exec();
+		const int index = ui.profileList->currentIndex().row();
+
+		if (index >= 0)
+		{
+			const auto model = std::make_unique<DeviceProfileModel>(this, profileItems->getProfile(index));
+			auto dg = std::make_unique<ProfileEditorDialog>(model.get(), this);
+			dg->exec();
+		}
 	});
 
 	// HACK: for testing later
