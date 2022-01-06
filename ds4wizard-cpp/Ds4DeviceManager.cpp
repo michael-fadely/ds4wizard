@@ -4,6 +4,7 @@
 #include <shellapi.h>
 
 #include <fmt/format.h>
+#include <fmt/xchar.h>
 
 #include <hid_util.h>
 #include <devicetoggle.h>

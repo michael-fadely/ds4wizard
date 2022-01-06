@@ -5,6 +5,7 @@
 #include <iomanip>
 
 #include <fmt/format.h>
+#include <fmt/xchar.h>
 
 #include "Ds4Device.h"
 #include "program.h"
