@@ -281,7 +281,7 @@ Ds4Device::~Ds4Device()
 
 std::unique_lock<std::recursive_mutex> Ds4Device::lock()
 {
-	return std::unique_lock<std::recursive_mutex>(sync_lock);
+	return std::unique_lock(sync_lock);
 }
 
 Latency Ds4Device::getReadLatency()

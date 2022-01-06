@@ -89,7 +89,7 @@ size_t Ds4DeviceManager::deviceCount()
 
 std::unique_lock<std::recursive_mutex> Ds4DeviceManager::lockDevices()
 {
-	return std::unique_lock<std::recursive_mutex>(devices_lock);
+	return std::unique_lock(devices_lock);
 }
 
 void Ds4DeviceManager::registerDeviceCallbacks(const std::wstring& serialString, std::shared_ptr<Ds4Device> device)

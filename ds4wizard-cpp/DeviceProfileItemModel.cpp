@@ -87,7 +87,7 @@ QVariant DeviceProfileItemModel::headerData(int section, Qt::Orientation orienta
 
 DeviceProfile DeviceProfileItemModel::getProfile(int index) const
 {
-	std::lock_guard<std::recursive_mutex> guard(this->profileCache.profiles_lock);
+	std::lock_guard guard(this->profileCache.profiles_lock);
 	return this->profileCache.profiles[index];
 }
 
