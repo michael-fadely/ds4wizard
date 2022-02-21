@@ -3,6 +3,7 @@
 #include <deque>
 #include <functional>
 #include <memory>
+#include <mutex>
 
 /**
  * \brief An event token to be used with \c Event.
@@ -23,9 +24,9 @@ public:
 
 private:
 	using weak_callback = std::weak_ptr<callback_t>;
-	using shared_callback = std::shared_ptr<callback_t>;
 
 	std::deque<weak_callback> callbacks;
+	std::recursive_mutex mutex;
 
 public:
 	/**
@@ -35,6 +36,8 @@ public:
 	 */
 	[[nodiscard]] EventToken add(callback_t callback)
 	{
+		std::lock_guard lock(mutex);
+
 		auto token = std::make_shared<callback_t>(std::move(callback));
 		callbacks.push_back(token);
 		return token;
@@ -46,6 +49,8 @@ public:
 	 */
 	void remove(EventToken token)
 	{
+		std::lock_guard lock(mutex);
+
 		callbacks.erase(std::remove_if(callbacks.begin(), callbacks.end(), [token](auto ptr) -> bool
 		{
 			return ptr.lock() == token;
@@ -59,6 +64,8 @@ public:
 	 */
 	void invoke(sender_t* sender, args_t... args)
 	{
+		std::lock_guard lock(mutex);
+
 		auto predicate = [](weak_callback t) -> bool
 		{
 			return t.expired();
@@ -66,9 +73,10 @@ public:
 
 		callbacks.erase(std::remove_if(callbacks.begin(), callbacks.end(), predicate), callbacks.end());
 
-		auto callbacks_ = callbacks;
+		// Copied so that callbacks can register new callbacks or unregister callbacks.
+		auto callbacksCopy = callbacks;
 
-		for (auto weak : callbacks_)
+		for (auto weak : callbacksCopy)
 		{
 			if (auto shared = weak.lock())
 			{
