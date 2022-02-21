@@ -1,6 +1,5 @@
 #include <iomanip>
 #include <sstream>
-#include <codecvt>
 
 #include <Windows.h>
 #include <SetupAPI.h>
@@ -18,12 +17,12 @@ std::string getLastErrorString(const DWORD error)
 	LPSTR messageBuffer = nullptr;
 
 	const DWORD size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-	                                  NULL,
+	                                  nullptr,
 	                                  error,
 	                                  MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
 	                                  reinterpret_cast<LPSTR>(&messageBuffer),
 	                                  0,
-	                                  NULL);
+	                                  nullptr);
 
 	if (size < 1 && GetLastError() != ERROR_SUCCESS)
 	{
@@ -73,8 +72,8 @@ std::string wideToString(const std::wstring& wideString)
 	                                                   static_cast<int>(wideString.length()),
 	                                                   nullptr,
 	                                                   0,
-	                                                   NULL,
-	                                                   NULL);
+	                                                   nullptr,
+	                                                   nullptr);
 
 	wideToStringError(requiredBufferSize);
 
@@ -86,8 +85,8 @@ std::string wideToString(const std::wstring& wideString)
 	                                          static_cast<int>(wideString.length()),
 	                                          result.data(),
 	                                          requiredBufferSize,
-	                                          NULL,
-	                                          NULL);
+	                                          nullptr,
+	                                          nullptr);
 
 	wideToStringError(converted);
 
@@ -120,7 +119,7 @@ void toggleDevice(const std::wstring& instanceId)
 
 	try
 	{
-		SP_DEVINFO_DATA devInfoData;
+		SP_DEVINFO_DATA devInfoData {};
 		devInfoData.cbSize = sizeof(SP_DEVINFO_DATA);
 
 		if (!SetupDiEnumDeviceInfo(devInfoSet, 0, &devInfoData))
@@ -135,7 +134,7 @@ void toggleDevice(const std::wstring& instanceId)
 			throw std::runtime_error(message.str());
 		}
 
-		SP_PROPCHANGE_PARAMS propChangeParams;
+		SP_PROPCHANGE_PARAMS propChangeParams {};
 
 		propChangeParams.ClassInstallHeader.cbSize          = sizeof(SP_CLASSINSTALL_HEADER);
 		propChangeParams.ClassInstallHeader.InstallFunction = DIF_PROPERTYCHANGE;
