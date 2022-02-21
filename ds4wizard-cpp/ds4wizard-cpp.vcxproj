@@ -19,13 +19,13 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <OutDir>$(SolutionDir)bin\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <OutDir>$(SolutionDir)bin\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
@@ -103,8 +103,7 @@
     </QtRcc>
     <PostBuildEvent>
       <Command>set "VCINSTALLDIR=$(VcInstallDir)"
-copy "$(SolutionDir)bin\$(Configuration)\$(PlatformShortName)\*" "$(SolutionDir)bin\$(Configuration)\"
-"$(QTDIR)\bin\windeployqt.exe" "$(OutDir.TrimEnd('\'))" --no-system-d3d-compiler --no-opengl-sw --no-angle</Command>
+"$(QTDIR)\bin\windeployqt.exe" "$(OutDir.TrimEnd('\'))" --no-system-d3d-compiler --no-opengl-sw --no-angle --no-compiler-runtime</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -154,8 +153,7 @@ copy "$(SolutionDir)bin\$(Configuration)\$(PlatformShortName)\*" "$(SolutionDir)
     </QtRcc>
     <PostBuildEvent>
       <Command>set "VCINSTALLDIR=$(VcInstallDir)"
-copy "$(SolutionDir)bin\$(Configuration)\$(PlatformShortName)\*" "$(SolutionDir)bin\$(Configuration)\"
-"$(QTDIR)\bin\windeployqt.exe" "$(OutDir.TrimEnd('\'))" --no-system-d3d-compiler --no-opengl-sw --no-angle</Command>
+"$(QTDIR)\bin\windeployqt.exe" "$(OutDir.TrimEnd('\'))" --no-system-d3d-compiler --no-opengl-sw --no-angle --no-compiler-runtime</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -294,8 +292,8 @@ copy "$(SolutionDir)bin\$(Configuration)\$(PlatformShortName)\*" "$(SolutionDir)
     <ProjectReference Include="..\dependencies\fmt-build\fmt.vcxproj">
       <Project>{a89bb5db-db58-36b0-8d5e-b020f3a513eb}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\dependencies\ViGEmClient\src\ViGEmClient.vcxproj">
-      <Project>{7db06674-1f4f-464b-8e1c-172e9587f9dc}</Project>
+    <ProjectReference Include="..\dependencies\ViGEmClient-build\ViGEmClient.vcxproj">
+      <Project>{3d9fc874-7a4d-3908-9b5a-9fa7e93240be}</Project>
     </ProjectReference>
     <ProjectReference Include="..\libdevicetoggle\libdevicetoggle.vcxproj">
       <Project>{3292bd3c-c649-46b0-9c60-545b31f2b169}</Project>
