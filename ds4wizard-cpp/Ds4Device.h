@@ -194,6 +194,8 @@ private:
 	void setupUsbOutputBuffer() const;
 	void writeUsbAsync();
 	void writeBluetooth();
+	void onDisconnectErrorUsb();
+	void onDisconnectErrorBluetooth();
 	bool run();
 	void controllerThread();
 

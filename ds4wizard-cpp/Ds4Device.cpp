@@ -547,10 +547,10 @@ void Ds4Device::writeUsbAsync()
 
 	writeLatency.stop();
 
-	constexpr auto usb_output_offset = 4;
+	constexpr auto usbOutputOffset = 4;
 
-	const auto span = gsl::span(&usbDevice->outputBuffer[usb_output_offset],
-	                            usbDevice->outputBuffer.size() - usb_output_offset);
+	const auto span = gsl::span(&usbDevice->outputBuffer[usbOutputOffset],
+	                            usbDevice->outputBuffer.size() - usbOutputOffset);
 
 	if (!output.update(span))
 	{
@@ -569,10 +569,10 @@ void Ds4Device::writeUsbAsync()
 
 void Ds4Device::writeBluetooth()
 {
-	constexpr auto bt_output_offset = 6;
+	constexpr auto btOutputOffset = 6;
 
-	const auto span = gsl::span(&bluetoothDevice->outputBuffer[bt_output_offset],
-	                            bluetoothDevice->outputBuffer.size() - bt_output_offset);
+	const auto span = gsl::span(&bluetoothDevice->outputBuffer[btOutputOffset],
+	                            bluetoothDevice->outputBuffer.size() - btOutputOffset);
 
 	if (!output.update(span))
 	{
@@ -589,6 +589,37 @@ void Ds4Device::writeBluetooth()
 
 	writeLatency.stop();
 	writeTime.start();
+}
+
+void Ds4Device::onDisconnectErrorUsb()
+{
+	const size_t nativeError = usbDevice->nativeError();
+
+	const auto reason = nativeError != ERROR_DEVICE_NOT_CONNECTED
+	                    ? Ds4DisconnectEvent::Reason::error
+	                    : Ds4DisconnectEvent::Reason::closed;
+
+	onDisconnect.invoke(this, Ds4DisconnectEvent(ConnectionType::usb, reason, nativeError));
+
+	closeUsbDevice();
+
+	// Reset idle time so if bluetooth is available, it does not idle disconnect,
+	// and communication can fall back to bluetooth.
+	idleTime.start();
+}
+
+void Ds4Device::onDisconnectErrorBluetooth()
+{
+	const size_t nativeError = bluetoothDevice->nativeError();
+
+	const auto reason = nativeError != ERROR_DEVICE_NOT_CONNECTED
+	                    ? Ds4DisconnectEvent::Reason::error
+	                    : Ds4DisconnectEvent::Reason::closed;
+
+	onDisconnect.invoke(this, Ds4DisconnectEvent(ConnectionType::bluetooth, reason, nativeError));
+
+	closeBluetoothDevice();
+	idleTime.start();
 }
 
 bool Ds4Device::run()
@@ -645,46 +676,49 @@ bool Ds4Device::run()
 	{
 		writeUsbAsync();
 
-		if (asyncRead(usbDevice.get()))
+		if (!usbDevice->isOpen())
+		{
+			onDisconnectErrorUsb();
+		}
+		else if (asyncRead(usbDevice.get()))
 		{
 			dataReceived = true;
 
-			constexpr auto usb_input_offset = 1;
-			const auto span = gsl::span(&usbDevice->inputBuffer[usb_input_offset],
-			                            usbDevice->inputBuffer.size() - usb_input_offset);
+			constexpr auto usbInputOffset = 1;
+			const auto span = gsl::span(&usbDevice->inputBuffer[usbInputOffset],
+			                            usbDevice->inputBuffer.size() - usbInputOffset);
 
 			input.update(span);
 		}
-
-		// If the controller gets disconnected from USB while idle,
-		// reset the idle timer so that it doesn't get immediately
-		// disconnected from bluetooth (if connected).
-		if (!usbConnected())
+		else if (!usbDevice->isOpen())
 		{
-			// FIXME: Use of nativeError() is unlikely to be reliable in simultaneous async read/write because both update it.
-			const auto reason = usbDevice->nativeError() != ERROR_DEVICE_NOT_CONNECTED
-			                    ? Ds4DisconnectEvent::Reason::error
-			                    : Ds4DisconnectEvent::Reason::closed;
-
-			onDisconnect.invoke(this, Ds4DisconnectEvent(ConnectionType::usb, reason, usbDevice->nativeError()));
-
-			closeUsbDevice();
-			idleTime.start();
+			onDisconnectErrorUsb();
 		}
 	}
 	else if (useBluetooth)
 	{
 		writeBluetooth();
 
-		if (asyncRead(bluetoothDevice.get()) && bluetoothDevice->inputBuffer[0] == 0x11)
+		if (!bluetoothDevice->isOpen())
 		{
-			dataReceived = true;
+			onDisconnectErrorBluetooth();
+		}
+		else if (asyncRead(bluetoothDevice.get()))
+		{
+			if (bluetoothDevice->inputBuffer[0] == 0x11)
+			{
+				dataReceived = true;
 
-			constexpr auto bt_input_offset = 3;
-			const auto span = gsl::span(&bluetoothDevice->inputBuffer[bt_input_offset],
-			                            bluetoothDevice->inputBuffer.size() - bt_input_offset);
+				constexpr auto btInputOffset = 3;
+				const auto span = gsl::span(&bluetoothDevice->inputBuffer[btInputOffset],
+				                            bluetoothDevice->inputBuffer.size() - btInputOffset);
 
-			input.update(span);
+				input.update(span);
+			}
+		}
+		else if (!bluetoothDevice->isOpen())
+		{
+			onDisconnectErrorBluetooth();
 		}
 	}
 
