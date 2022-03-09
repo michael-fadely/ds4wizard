@@ -15,6 +15,7 @@
 
 #include "Latency.h"
 #include "InputSimulator.h"
+#include "MacAddress.h"
 
 class Ds4ConnectEvent
 {
@@ -58,9 +59,6 @@ public:
 
 class Ds4Device
 {
-public:
-	using MacAddress = std::array<uint8_t, 6>;
-
 private:
 	bool peakedLatencyThreshold = false;
 	std::string macAddress_;
@@ -150,7 +148,7 @@ public:
 	explicit Ds4Device(std::shared_ptr<hid::HidInstance> device);
 	~Ds4Device();
 
-	static MacAddress getMacAddress(std::shared_ptr<hid::HidInstance> device);
+	static MacAddress getMacAddress(const std::shared_ptr<hid::HidInstance>& device);
 
 	void open(std::shared_ptr<hid::HidInstance> device);
 

@@ -225,6 +225,7 @@
     <ClInclude Include="DeviceIdleOptions.h" />
     <ClInclude Include="DeviceProfile.h" />
     <ClInclude Include="DeviceProfileCache.h" />
+    <ClInclude Include="MacAddress.h" />
     <ClInclude Include="RumbleSequence.h" />
     <ClInclude Include="Vector3.h" />
     <ClInclude Include="XInputRumbleSimulator.h" />

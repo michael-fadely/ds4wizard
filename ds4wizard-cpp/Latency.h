@@ -15,11 +15,11 @@ public:
 
 	void start();
 	Stopwatch::Duration stop();
-	Stopwatch::Duration elapsed() const;
-	bool running() const;
+	[[nodiscard]] Stopwatch::Duration elapsed() const;
+	[[nodiscard]] bool running() const;
 
-	Stopwatch::Duration lastValue() const;
-	Stopwatch::Duration peak();
-	Stopwatch::Duration average();
+	[[nodiscard]] Stopwatch::Duration lastValue() const;
+	[[nodiscard]] Stopwatch::Duration peak();
+	[[nodiscard]] Stopwatch::Duration average();
 	void resetPeak();
 };

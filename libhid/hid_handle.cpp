@@ -1,20 +1,17 @@
 #include "hid_handle.h"
 #include <utility>
 
-Handle::Handle(const Handle& other)
+Handle::Handle(Handle&& other) noexcept
+	: owner(std::exchange(other.owner, false)),
+	  nativeHandle(std::exchange(other.nativeHandle, INVALID_HANDLE_VALUE))
 {
-	*this = other;
-}
-
-Handle::Handle(Handle&& rhs) noexcept
-{
-	*this = std::move(rhs);
+	*this = std::move(other);
 }
 
 Handle::Handle(HANDLE h, bool owner)
+	: owner(owner),
+	  nativeHandle(h)
 {
-	nativeHandle = h;
-	this->owner  = owner;
 }
 
 Handle::~Handle()
@@ -22,12 +19,17 @@ Handle::~Handle()
 	close();
 }
 
+bool Handle::isValid() const
+{
+	return nativeHandle && nativeHandle != INVALID_HANDLE_VALUE;
+}
+
 void Handle::close()
 {
 	if (owner && isValid())
 	{
 		CloseHandle(nativeHandle);
-		nativeHandle = nullptr;
+		nativeHandle = INVALID_HANDLE_VALUE;
 	}
 }
 
@@ -41,30 +43,15 @@ bool Handle::operator!=(const Handle& rhs) const
 	return !(*this == rhs);
 }
 
-Handle& Handle::operator=(const Handle& rhs)
-{
-	close();
-
-	nativeHandle = rhs.nativeHandle;
-	owner        = rhs.owner;
-
-	return *this;
-}
-
 Handle& Handle::operator=(Handle&& rhs) noexcept
 {
-	close();
+	if (this != &rhs && *this != rhs)
+	{
+		close();
 
-	nativeHandle = rhs.nativeHandle;
-	owner        = rhs.owner;
-
-	rhs.nativeHandle = nullptr;
-	rhs.owner        = false;
+		owner        = std::exchange(rhs.owner, false);
+		nativeHandle = std::exchange(rhs.nativeHandle, INVALID_HANDLE_VALUE);
+	}
 
 	return *this;
-}
-
-bool Handle::isValid() const
-{
-	return nativeHandle && nativeHandle != INVALID_HANDLE_VALUE;
 }

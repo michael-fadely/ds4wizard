@@ -263,19 +263,15 @@ void DeviceProfileCache::loadImpl()
 
 void DeviceProfileCache::onProfileChanged(const std::string& oldName, const std::string& newName)
 {
+	LOCK(deviceManager);
+
+	auto devices_lock = deviceManager->lockDevices();
+
+	for (auto& pair : deviceManager->devices)
 	{
-		LOCK(deviceManager);
-
-		auto devices_lock = deviceManager->lockDevices();
-
-		for (auto& pair : deviceManager->devices)
+		if (pair.second->settings.profile == oldName)
 		{
-			if (pair.second->settings.profile == oldName)
-			{
-				pair.second->onProfileChanged(newName);
-			}
+			pair.second->onProfileChanged(newName);
 		}
 	}
-
-	//ProfileChanged?.Invoke(this, EventArgs.Empty);
 }

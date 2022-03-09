@@ -6,22 +6,22 @@ class Handle
 {
 public:
 	bool owner = false;
-	HANDLE nativeHandle = nullptr;
+	HANDLE nativeHandle = INVALID_HANDLE_VALUE;
 
 	Handle() = default;
-	Handle(const Handle& other);
+	Handle(const Handle& other) = delete;
 
-	Handle(Handle&& rhs) noexcept;
+	Handle(Handle&& other) noexcept;
 	explicit Handle(HANDLE h, bool owner = false);
 	~Handle();
 
+	[[nodiscard]] bool isValid() const;
+
 	void close();
 
-	bool operator==(const Handle& rhs) const;
-	bool operator!=(const Handle& rhs) const;
+	[[nodiscard]] bool operator==(const Handle& rhs) const;
+	[[nodiscard]] bool operator!=(const Handle& rhs) const;
 
-	Handle& operator=(const Handle& rhs);
+	Handle& operator=(const Handle& rhs) = delete;
 	Handle& operator=(Handle&& rhs) noexcept;
-
-	bool isValid() const;
 };

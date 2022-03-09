@@ -87,7 +87,7 @@ bool hid::enumerateGuid(const std::function<bool(const std::wstring& path, const
 {
 	const HDEVINFO dev_info = SetupDiGetClassDevs(&guid, nullptr, nullptr, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
 
-	if (dev_info == reinterpret_cast<HDEVINFO>(-1))
+	if (dev_info == INVALID_HANDLE_VALUE)
 	{
 		return true;
 	}

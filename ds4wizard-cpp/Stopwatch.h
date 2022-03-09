@@ -21,7 +21,7 @@ public:
 	void start();
 	Duration stop();
 	[[nodiscard]] Duration elapsed() const;
-	bool running() const;
+	[[nodiscard]] bool running() const;
 	[[nodiscard]] TimePoint start_time() const;
 	[[nodiscard]] TimePoint end_time() const;
 };

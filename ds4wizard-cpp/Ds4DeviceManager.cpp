@@ -32,7 +32,7 @@ Ds4DeviceManager::~Ds4DeviceManager()
 bool Ds4DeviceManager::isDs4(const hid::HidInstance& hid)
 {
 	return hid.attributes().vendorId == vendorId &&
-	       std::find(productIds.begin(), productIds.end(), hid.attributes().productId) != productIds.end();
+	       std::ranges::find(productIds, hid.attributes().productId) != productIds.end();
 }
 
 bool Ds4DeviceManager::isDs4(const std::wstring& devicePath)
@@ -47,7 +47,7 @@ void Ds4DeviceManager::findControllers()
 
 	hid::enumerateHid([&](std::shared_ptr<hid::HidInstance> hid) -> bool
 	{
-		return handleDevice(std::move(hid));
+		return handleDevice(hid);
 	});
 }
 
@@ -74,7 +74,7 @@ void Ds4DeviceManager::findController(const std::wstring& devicePath)
 
 		if (hid->readMetadata())
 		{
-			return handleDevice(std::move(hid));
+			return handleDevice(hid);
 		}
 
 		return false;
@@ -92,12 +92,9 @@ std::unique_lock<std::recursive_mutex> Ds4DeviceManager::lockDevices()
 	return std::unique_lock(devices_lock);
 }
 
-void Ds4DeviceManager::registerDeviceCallbacks(const std::wstring& serialString, std::shared_ptr<Ds4Device> device)
+void Ds4DeviceManager::registerDeviceCallbacks(const std::wstring& serialString, const std::shared_ptr<Ds4Device>& device)
 {
 	auto& token_store = tokens.insert({ serialString, {} }).first->second;
-
-	//token_store.push_back(device->onBluetoothExclusiveFailure.add(onBluetoothExclusiveFailure));
-	//token_store.push_back(device->onUsbExclusiveFailure.add(onUsbExclusiveFailure));
 
 	token_store.push_back(device->onDeviceClose.add([this](Ds4Device* sender) { onDs4DeviceClose(sender); }));
 
@@ -262,7 +259,7 @@ void Ds4DeviceManager::registerDeviceCallbacks(const std::wstring& serialString,
 		}));
 }
 
-bool Ds4DeviceManager::handleDevice(std::shared_ptr<hid::HidInstance> hid)
+bool Ds4DeviceManager::handleDevice(const std::shared_ptr<hid::HidInstance>& hid)
 {
 	if (!isDs4(*hid))
 	{
@@ -280,7 +277,7 @@ bool Ds4DeviceManager::handleDevice(std::shared_ptr<hid::HidInstance> hid)
 		// USB connection type
 		if (!isBluetooth)
 		{
-			Ds4Device::MacAddress macAddress = Ds4Device::getMacAddress(hid);
+			MacAddress macAddress = Ds4Device::getMacAddress(hid);
 
 			// HACK: this member shouldn't be exposed, but getting the "serial" (MAC) over USB is non-standard for the DS4.
 			hid->serialString = fmt::format(L"{:2x}{:2x}{:2x}{:2x}{:2x}{:2x}",
@@ -330,7 +327,7 @@ bool Ds4DeviceManager::handleDevice(std::shared_ptr<hid::HidInstance> hid)
 		}
 		else
 		{
-			std::shared_ptr<Ds4Device> device = it->second;
+			std::shared_ptr<Ds4Device>& device = it->second;
 
 			if (isBluetooth)
 			{

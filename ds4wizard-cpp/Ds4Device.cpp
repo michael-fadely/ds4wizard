@@ -105,7 +105,7 @@ Ds4Device::Ds4Device(std::shared_ptr<hid::HidInstance> device)
 }
 
 // static
-Ds4Device::MacAddress Ds4Device::getMacAddress(std::shared_ptr<hid::HidInstance> device)
+MacAddress Ds4Device::getMacAddress(const std::shared_ptr<hid::HidInstance>& device)
 {
 	MacAddress mac {};
 
@@ -173,7 +173,7 @@ void Ds4Device::open(std::shared_ptr<hid::HidInstance> device)
 		setupUsbOutputBuffer();
 	}
 
-	std::optional<DeviceSettings> cachedSettings = Program::profileCache.getSettings(macAddress_);
+	const std::optional<DeviceSettings> cachedSettings = Program::profileCache.getSettings(macAddress_);
 
 	if (!cachedSettings.has_value())
 	{
@@ -209,7 +209,7 @@ void Ds4Device::applyProfile()
 	auto lock_guard = lock();
 	releaseAutoColor();
 
-	std::optional<DeviceProfile> cachedProfile = Program::profileCache.getProfile(settings.profile);
+	const std::optional<DeviceProfile> cachedProfile = Program::profileCache.getProfile(settings.profile);
 
 	if (!cachedProfile.has_value())
 	{
@@ -441,8 +441,9 @@ bool Ds4Device::openBluetoothDevice(std::shared_ptr<hid::HidInstance> hid)
 	// TODO: on failure, pull the error code from GetLastError internally instead of doing it manually
 	if (!hid->getFeature(temp))
 	{
+		const DWORD error = GetLastError();
 		hid->close();
-		onWirelessOperationalModeFailure.invoke(this, GetLastError());
+		onWirelessOperationalModeFailure.invoke(this, error);
 		return false;
 	}
 
@@ -717,7 +718,6 @@ bool Ds4Device::run()
 		{
 			if (!peakedLatencyThreshold)
 			{
-				// do the thing
 				peakedLatencyThreshold = true;
 				onLatencyThresholdExceeded.invoke(this, average, settings.latencyThreshold);
 			}

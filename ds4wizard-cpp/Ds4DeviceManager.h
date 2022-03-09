@@ -107,10 +107,10 @@ public:
 	size_t deviceCount();
 
 	std::unique_lock<std::recursive_mutex> lockDevices();
-	void registerDeviceCallbacks(const std::wstring& serialString, std::shared_ptr<Ds4Device> device);
+	void registerDeviceCallbacks(const std::wstring& serialString, const std::shared_ptr<Ds4Device>& device);
 
 private:
-	bool handleDevice(std::shared_ptr<hid::HidInstance> hid);
+	bool handleDevice(const std::shared_ptr<hid::HidInstance>& hid);
 	void onDs4DeviceClose(Ds4Device* sender);
 
 public:

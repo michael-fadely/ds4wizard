@@ -51,20 +51,20 @@ namespace hid
 
 	class HidInstance
 	{
-		HidOpenFlags_t flags = 0;
+		HidOpenFlags_t flags_ = HidOpenFlags::none;
 
-		Handle handle = Handle(nullptr, true);
+		Handle handle_ = Handle(nullptr, true);
 
 		HidCaps caps_ {};
 		HidAttributes attributes_ {};
 
-		OVERLAPPED overlappedIn = {};
-		OVERLAPPED overlappedOut = {};
+		OVERLAPPED overlappedIn_ = {};
+		OVERLAPPED overlappedOut_ = {};
 
 		bool pendingRead_ = false;
 		bool pendingWrite_ = false;
 
-		size_t nativeError_ = 0;
+		size_t nativeError_ = ERROR_SUCCESS;
 
 	public:
 		std::wstring path;
@@ -87,11 +87,11 @@ namespace hid
 
 		HidInstance& operator=(HidInstance&& other) noexcept;
 
-		bool isOpen() const;
-		bool isExclusive() const;
-		bool isAsync() const;
-		const HidCaps& caps() const;
-		const HidAttributes& attributes() const;
+		[[nodiscard]] bool isOpen() const;
+		[[nodiscard]] bool isExclusive() const;
+		[[nodiscard]] bool isAsync() const;
+		[[nodiscard]] const HidCaps& caps() const;
+		[[nodiscard]] const HidAttributes& attributes() const;
 
 		bool readMetadata();
 		bool readCaps();
@@ -103,7 +103,7 @@ namespace hid
 		bool open(HidOpenFlags_t openFlags);
 		void close();
 
-		inline auto nativeError() const
+		[[nodiscard]] inline auto nativeError() const
 		{
 			return nativeError_;
 		}

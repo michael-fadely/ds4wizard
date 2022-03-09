@@ -1,19 +1,27 @@
 #include "pch.h"
 #include "Bluetooth.h"
 #include <winioctl.h>
-#include <BluetoothAPIs.h>
-#include <Bthioctl.h>
+#include <bluetoothapis.h>
+#include <bthioctl.h>
 #include <hid_handle.h>
 
 bool Bluetooth::disconnectDevice(const gsl::span<uint8_t>& macAddress)
 {
-	bool result = false;
+	const size_t macAddressSize = macAddress.size();
 
+	if (macAddressSize != macAddressLength)
+	{
+		return false;
+	}
+
+	// The buffer which will hold the reversed MAC address.
+	// A length of 8 is required; otherwise DeviceIoControl fails.
 	std::array<uint8_t, 8> buffer {};
 
-	for (size_t i = 0; i < macAddress.size(); i++)
+	// Store reversed MAC address.
+	for (size_t i = 0; i < macAddressSize; i++)
 	{
-		buffer[5 - i] = macAddress[i];
+		buffer[macAddressSize - 1 - i] = macAddress[i];
 	}
 
 	BLUETOOTH_FIND_RADIO_PARAMS findParams {};
@@ -21,19 +29,25 @@ bool Bluetooth::disconnectDevice(const gsl::span<uint8_t>& macAddress)
 
 	Handle phRadio(nullptr, true);
 
-	auto hFind = BluetoothFindFirstRadio(&findParams, &phRadio.nativeHandle);
+	const HBLUETOOTH_RADIO_FIND hFind = BluetoothFindFirstRadio(&findParams, &phRadio.nativeHandle);
 
 	if (hFind == nullptr)
 	{
 		return false;
 	}
 
-	DWORD _;
+	bool result = false;
 
 	while (phRadio.nativeHandle != nullptr)
 	{
-		bool success = DeviceIoControl(phRadio.nativeHandle, IOCTL_BTH_DISCONNECT_DEVICE,
-		                               buffer.data(), static_cast<DWORD>(buffer.size()), nullptr, 0, &_, nullptr);
+		const bool success = DeviceIoControl(phRadio.nativeHandle, IOCTL_BTH_DISCONNECT_DEVICE,
+		                                     // Input buffer.
+		                                     buffer.data(), static_cast<DWORD>(buffer.size()),
+		                                     // Output buffer (ignored in our case).
+		                                     nullptr, 0,
+		                                     // Bytes returned in output buffer (ignored in our case).
+		                                     nullptr,
+		                                     nullptr);
 
 		phRadio.close();
 
