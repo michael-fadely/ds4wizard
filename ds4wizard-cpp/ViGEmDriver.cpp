@@ -1,5 +1,6 @@
 #include "pch.h"
 
+#include <utility>
 #include <ViGEm/Client.h>
 
 #include "ViGEmDriver.h"
@@ -7,9 +8,8 @@
 namespace vigem
 {
 	Driver::Driver(Driver&& rhs) noexcept
-		: client(rhs.client)
+		: client(std::exchange(rhs.client, nullptr))
 	{
-		rhs.client = nullptr;
 	}
 
 	Driver::~Driver()
@@ -55,9 +55,12 @@ namespace vigem
 
 	Driver& Driver::operator=(Driver&& rhs) noexcept
 	{
-		close();
-		client = rhs.client;
-		rhs.client = nullptr;
+		if (this != &rhs)
+		{
+			close();
+			client = std::exchange(rhs.client, nullptr);
+		}
+
 		return *this;
 	}
 }
