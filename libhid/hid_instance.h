@@ -97,8 +97,8 @@ namespace hid
 		bool readCaps();
 		bool readSerial();
 		bool readAttributes();
-		bool getFeature(const gsl::span<uint8_t>& buffer) const;
-		bool setFeature(const gsl::span<uint8_t>& buffer) const;
+		bool getFeature(const gsl::span<uint8_t>& buffer);
+		bool setFeature(const gsl::span<uint8_t>& buffer);
 
 		bool open(HidOpenFlags_t openFlags);
 		void close();
@@ -108,15 +108,15 @@ namespace hid
 			return nativeError_;
 		}
 
-		bool read(void* buffer, size_t size) const;
-		bool read(const gsl::span<uint8_t>& buffer) const;
+		bool read(void* buffer, size_t size);
+		bool read(const gsl::span<uint8_t>& buffer);
 		bool read();
 
 		bool readAsync();
 
-		bool write(const void* buffer, size_t size) const;
-		bool write(const gsl::span<const uint8_t>& buffer) const;
-		bool write() const;
+		bool write(const void* buffer, size_t size);
+		bool write(const gsl::span<const uint8_t>& buffer);
+		bool write();
 
 		bool writeAsync();
 
@@ -128,7 +128,7 @@ namespace hid
 		void cancelAsyncReadAndWait();
 		void cancelAsyncWriteAndWait();
 
-		bool setOutputReport(const gsl::span<uint8_t>& buffer) const;
+		bool setOutputReport(const gsl::span<uint8_t>& buffer);
 		bool setOutputReport();
 
 	private:

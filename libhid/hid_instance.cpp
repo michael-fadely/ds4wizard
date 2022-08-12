@@ -129,30 +129,37 @@ bool HidInstance::readAttributes()
 	return readAttributes(handle_.nativeHandle);
 }
 
-bool HidInstance::getFeature(const gsl::span<uint8_t>& buffer) const
+bool HidInstance::getFeature(const gsl::span<uint8_t>& buffer)
 {
 	try
 	{
+		nativeError_ = ERROR_SUCCESS;
+		bool result;
+
 		if (isOpen())
 		{
-			return HidD_GetFeature(handle_.nativeHandle, buffer.data(), static_cast<ULONG>(buffer.size_bytes()));
+			result = !!HidD_GetFeature(handle_.nativeHandle, buffer.data(), static_cast<ULONG>(buffer.size_bytes()));
 		}
-
-		const Handle h = Handle(CreateFile(path.c_str(),
-		                                   GENERIC_READ | GENERIC_WRITE,
-		                                   FILE_SHARE_READ | FILE_SHARE_WRITE,
-		                                   nullptr,
-		                                   OPEN_EXISTING,
-		                                   0,
-		                                   nullptr),
-		                        true);
-
-		if (!h.isValid())
+		else
 		{
-			return false;
+			const Handle h = Handle(CreateFile(path.c_str(),
+			                                   GENERIC_READ | GENERIC_WRITE,
+			                                   FILE_SHARE_READ | FILE_SHARE_WRITE,
+			                                   nullptr,
+			                                   OPEN_EXISTING,
+			                                   0,
+			                                   nullptr),
+			                        true);
+
+			result = h.isValid() && !!HidD_GetFeature(h.nativeHandle, buffer.data(), static_cast<ULONG>(buffer.size_bytes()));
 		}
 
-		return HidD_GetFeature(h.nativeHandle, buffer.data(), static_cast<ULONG>(buffer.size_bytes()));
+		if (!result)
+		{
+			nativeError_ = GetLastError();
+		}
+
+		return result;
 	}
 	catch (const std::exception&)
 	{
@@ -161,14 +168,23 @@ bool HidInstance::getFeature(const gsl::span<uint8_t>& buffer) const
 	}
 }
 
-bool HidInstance::setFeature(const gsl::span<uint8_t>& buffer) const
+bool HidInstance::setFeature(const gsl::span<uint8_t>& buffer)
 {
 	if (!isOpen())
 	{
 		return false;
 	}
 
-	return HidD_SetFeature(handle_.nativeHandle, buffer.data(), static_cast<ULONG>(buffer.size_bytes()));
+	nativeError_ = ERROR_SUCCESS;
+
+	const bool result = !!HidD_SetFeature(handle_.nativeHandle, buffer.data(), static_cast<ULONG>(buffer.size_bytes()));
+
+	if (!result)
+	{
+		nativeError_ = GetLastError();
+	}
+
+	return result;
 }
 
 bool HidInstance::open(HidOpenFlags_t openFlags)
@@ -186,13 +202,13 @@ bool HidInstance::open(HidOpenFlags_t openFlags)
 	const uint32_t asyncFlags = !!(openFlags & HidOpenFlags::async) ? FILE_FLAG_OVERLAPPED : 0;
 
 	handle_ = Handle(CreateFile(path.c_str(),
-	                           GENERIC_READ | GENERIC_WRITE,
-	                           shareFlags,
-	                           nullptr,
-	                           OPEN_EXISTING,
-	                           asyncFlags,
-	                           nullptr),
-	                true);
+	                            GENERIC_READ | GENERIC_WRITE,
+	                            shareFlags,
+	                            nullptr,
+	                            OPEN_EXISTING,
+	                            asyncFlags,
+	                            nullptr),
+	                 true);
 
 	if (!handle_.isValid())
 	{
@@ -236,17 +252,25 @@ void HidInstance::close()
 	flags_ = HidOpenFlags::none;
 }
 
-bool HidInstance::read(void* buffer, size_t size) const
+bool HidInstance::read(void* buffer, size_t size)
 {
 	if (!isOpen())
 	{
 		return false;
 	}
 
-	return ReadFile(handle_.nativeHandle, buffer, static_cast<DWORD>(size), nullptr, nullptr) != 0;
+	nativeError_ = ERROR_SUCCESS;
+	const bool result = !!ReadFile(handle_.nativeHandle, buffer, static_cast<DWORD>(size), nullptr, nullptr);
+
+	if (!result)
+	{
+		nativeError_ = GetLastError();
+	}
+
+	return result;
 }
 
-bool HidInstance::read(const gsl::span<uint8_t>& buffer) const
+bool HidInstance::read(const gsl::span<uint8_t>& buffer)
 {
 	return read(buffer.data(), buffer.size());
 }
@@ -263,11 +287,11 @@ bool HidInstance::readAsync()
 		return !asyncReadInProgress();
 	}
 
-	const bool result = ReadFile(handle_.nativeHandle,
-	                             inputBuffer.data(),
-	                             static_cast<DWORD>(inputBuffer.size()),
-	                             nullptr,
-	                             &overlappedIn_);
+	const bool result = !!ReadFile(handle_.nativeHandle,
+	                               inputBuffer.data(),
+	                               static_cast<DWORD>(inputBuffer.size()),
+	                               nullptr,
+	                               &overlappedIn_);
 
 	if (!result)
 	{
@@ -285,17 +309,30 @@ bool HidInstance::readAsync()
 	return result;
 }
 
-bool HidInstance::write(const void* buffer, size_t size) const
+bool HidInstance::write(const void* buffer, size_t size)
 {
-	return WriteFile(handle_.nativeHandle, buffer, static_cast<DWORD>(size), nullptr, nullptr);
+	if (!isOpen())
+	{
+		return false;
+	}
+
+	nativeError_ = ERROR_SUCCESS;
+	const bool result = !!WriteFile(handle_.nativeHandle, buffer, static_cast<DWORD>(size), nullptr, nullptr);
+
+	if (!result)
+	{
+		nativeError_ = GetLastError();
+	}
+
+	return result;
 }
 
-bool HidInstance::write(const gsl::span<const uint8_t>& buffer) const
+bool HidInstance::write(const gsl::span<const uint8_t>& buffer)
 {
 	return write(buffer.data(), buffer.size_bytes());
 }
 
-bool HidInstance::write() const
+bool HidInstance::write()
 {
 	return write(outputBuffer);
 }
@@ -307,11 +344,11 @@ bool HidInstance::writeAsync()
 		return asyncWriteInProgress();
 	}
 
-	const bool result = WriteFile(handle_.nativeHandle,
-	                              outputBuffer.data(),
-	                              static_cast<DWORD>(outputBuffer.size()),
-	                              nullptr,
-	                              &overlappedOut_);
+	const bool result = !!WriteFile(handle_.nativeHandle,
+	                                outputBuffer.data(),
+	                                static_cast<DWORD>(outputBuffer.size()),
+	                                nullptr,
+	                                &overlappedOut_);
 
 	if (!result)
 	{
@@ -383,14 +420,23 @@ void HidInstance::cancelAsyncWriteAndWait()
 	pendingWrite_ = false;
 }
 
-bool HidInstance::setOutputReport(const gsl::span<uint8_t>& buffer) const
+bool HidInstance::setOutputReport(const gsl::span<uint8_t>& buffer)
 {
 	if (!isOpen())
 	{
 		return false;
 	}
 
-	return HidD_SetOutputReport(handle_.nativeHandle, buffer.data(), static_cast<ULONG>(buffer.size_bytes()));
+	nativeError_ = ERROR_SUCCESS;
+
+	const bool result = !!HidD_SetOutputReport(handle_.nativeHandle, buffer.data(), static_cast<ULONG>(buffer.size_bytes()));
+
+	if (!result)
+	{
+		nativeError_ = GetLastError();
+	}
+
+	return result;
 }
 
 bool HidInstance::setOutputReport()
