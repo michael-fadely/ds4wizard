@@ -5,7 +5,6 @@ Handle::Handle(Handle&& other) noexcept
 	: owner(std::exchange(other.owner, false)),
 	  nativeHandle(std::exchange(other.nativeHandle, INVALID_HANDLE_VALUE))
 {
-	*this = std::move(other);
 }
 
 Handle::Handle(HANDLE h, bool owner)
