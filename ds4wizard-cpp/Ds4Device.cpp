@@ -582,9 +582,21 @@ void Ds4Device::writeBluetooth()
 
 	writeLatency.start();
 
-	if (!bluetoothDevice->setOutputReport())
+	// FIXME: this has the potential to loop forever
+	while (true)
 	{
-		closeBluetoothDevice();
+		if (bluetoothDevice->setOutputReport())
+		{
+			break;
+		}
+
+		if (bluetoothDevice->nativeError() != ERROR_BUSY)
+		{
+			closeBluetoothDevice();
+			break;
+		}
+
+		std::this_thread::sleep_for(1ms);
 	}
 
 	writeLatency.stop();
