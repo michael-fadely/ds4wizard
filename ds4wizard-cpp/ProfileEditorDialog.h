@@ -12,7 +12,7 @@ class ProfileEditorDialog : public QDialog
 	DeviceProfileModel* profileModel = nullptr;
 
 public:
-	ProfileEditorDialog(DeviceProfileModel* profileModel_, QWidget* parent = Q_NULLPTR);
+	explicit ProfileEditorDialog(DeviceProfileModel* profileModel_, QWidget* parent = Q_NULLPTR);
 	~ProfileEditorDialog() override;
 
 private:

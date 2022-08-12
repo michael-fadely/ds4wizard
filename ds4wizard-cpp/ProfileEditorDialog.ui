@@ -133,7 +133,7 @@ image: url(:/ds4wizardcpp/Resources/Dualshock_4_Layout manually colored.svg);</s
     </layout>
    </item>
    <item row="1" column="0">
-    <widget class="QLineEdit" name="lineEdit"/>
+    <widget class="QLineEdit" name="lineEdit_ProfileName"/>
    </item>
    <item row="0" column="0">
     <widget class="QLabel" name="label">
@@ -152,46 +152,10 @@ image: url(:/ds4wizardcpp/Resources/Dualshock_4_Layout manually colored.svg);</s
       </widget>
      </item>
      <item>
-      <widget class="QGroupBox" name="groupBox">
-       <property name="title">
-        <string>XInput</string>
+      <widget class="QCheckBox" name="checkBox_2">
+       <property name="text">
+        <string>Use XInput</string>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout_2">
-        <item>
-         <widget class="QCheckBox" name="checkBox_2">
-          <property name="text">
-           <string>Use XInput</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QCheckBox" name="checkBox_3">
-          <property name="text">
-           <string>Automatic index</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="label_3">
-          <property name="text">
-           <string>XInput Index:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QSpinBox" name="spinXInputIndex">
-          <property name="minimum">
-           <number>1</number>
-          </property>
-          <property name="maximum">
-           <number>4</number>
-          </property>
-          <property name="value">
-           <number>1</number>
-          </property>
-         </widget>
-        </item>
-       </layout>
       </widget>
      </item>
      <item>

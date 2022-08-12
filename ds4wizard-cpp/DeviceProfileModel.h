@@ -24,9 +24,9 @@ class DeviceProfileModel final : public QObject
 {
 	Q_OBJECT
 
-	DeviceProfile profile;
-
 public:
+	DeviceProfile profile; // WIP: shouldn't be public
+
 	DeviceProfileModel(QObject* parent, DeviceProfile&& profile_);
 	DeviceProfileModel(QObject* parent, const DeviceProfile& profile_);
 	~DeviceProfileModel() override = default;

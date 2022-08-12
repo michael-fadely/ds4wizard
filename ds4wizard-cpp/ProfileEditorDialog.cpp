@@ -10,9 +10,8 @@ ProfileEditorDialog::ProfileEditorDialog(DeviceProfileModel* profileModel_, QWid
 {
 	ui.setupUi(this);
 
-	auto model = profileModel->makeModifierModel(ui.comboBox_ModifierList);
-
-	ui.comboBox_ModifierList->setModel(model);
+	ui.lineEdit_ProfileName->setText(QString::fromStdString(profileModel_->profile.name));
+	ui.comboBox_ModifierList->setModel(profileModel->makeModifierModel(ui.comboBox_ModifierList));
 }
 
 ProfileEditorDialog::~ProfileEditorDialog() = default;
