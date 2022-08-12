@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "DevicePropertiesDialog.h"
 #include "ProfileEditorDialog.h"
+#include "DeviceProfileModel.h"
 
 #include <chrono>
 
@@ -16,7 +17,7 @@ QColor toQt(const Ds4Color& ds4Color)
 
 Ds4Color toDs4(const QColor& color)
 {
-	return Ds4Color(color.red(), color.green(), color.blue());
+	return Ds4Color(static_cast<uint8_t>(color.red()), static_cast<uint8_t>(color.green()), static_cast<uint8_t>(color.blue()));
 }
 
 DevicePropertiesDialog::DevicePropertiesDialog(QWidget* parent, std::shared_ptr<Ds4Device> device_)
@@ -93,7 +94,7 @@ void DevicePropertiesDialog::populateForm()
 	ui.checkBox_IdleDisconnect->setChecked(oldSettings.idle.disconnect);
 	ui.checkBox_IdleFade->setChecked(oldSettings.light.idleFade);
 
-	ui.spinBox_IdleTime->setValue(oldSettings.idle.timeout.count());
+	ui.spinBox_IdleTime->setValue(static_cast<double>(oldSettings.idle.timeout.count()));
 
 	if (oldSettings.idle.timeout >= 1h)
 	{
@@ -263,9 +264,16 @@ void DevicePropertiesDialog::resetPeakLatency() const
 void DevicePropertiesDialog::profileEditClicked(bool /*checked*/)
 {
 	// TODO: implement actual functionality
-	//auto dialog = new ProfileEditorDialog(this);
-	//dialog->exec();
-	//delete dialog;
+	const int index = ui.comboBox_Profile->currentIndex();
+
+	if (index >= 0)
+	{
+		const auto profileItems = dynamic_cast<DeviceProfileItemModel*>(ui.comboBox_Profile->model());
+		const auto model = std::make_unique<DeviceProfileModel>(this, profileItems->getProfile(index));
+		auto dialog = new ProfileEditorDialog(model.get(), this);
+		dialog->exec();
+		delete dialog;
+	}
 }
 
 void DevicePropertiesDialog::colorEditClicked(bool /*checked*/)
