@@ -2,7 +2,6 @@
 
 #include <chrono>
 #include <thread>
-#include <iomanip>
 
 #include <fmt/format.h>
 #include <fmt/xchar.h>
@@ -232,16 +231,14 @@ void Ds4Device::applyProfile()
 
 	if (usbDevice != nullptr && (!usbConnected() || usbDevice->isExclusive() != profile.exclusiveMode))
 	{
-		closeUsbDevice();
-		std::shared_ptr<hid::HidInstance> instance = std::move(usbDevice);
-		openUsbDevice(instance);
+		closeDeviceAndResetIdle(usbDevice);
+		openUsbDevice(std::move(usbDevice));
 	}
 
 	if (bluetoothDevice != nullptr && (!bluetoothConnected() || bluetoothDevice->isExclusive() != profile.exclusiveMode))
 	{
-		closeBluetoothDevice();
-		std::shared_ptr<hid::HidInstance> instance = std::move(bluetoothDevice);
-		openBluetoothDevice(instance);
+		closeDeviceAndResetIdle(bluetoothDevice);
+		openBluetoothDevice(std::move(bluetoothDevice));
 	}
 
 	if (this->connected())
@@ -257,6 +254,18 @@ void Ds4Device::releaseAutoColor()
 	auto lock_guard = lock();
 	Ds4AutoLightColor::releaseColor(colorIndex);
 	colorIndex = -1;
+}
+
+void Ds4Device::closeDeviceAndResetIdle(const std::shared_ptr<hid::HidInstance>& device)
+{
+	auto lock_guard = lock();
+
+	if (device != nullptr && device->isOpen())
+	{
+		device->close();
+	}
+
+	idleTime.start();
 }
 
 void Ds4Device::onProfileChanged(const std::string& newName)
@@ -313,8 +322,8 @@ void Ds4Device::closeImpl()
 	auto lock_guard = lock();
 	running = false;
 
-	closeUsbDevice();
-	closeBluetoothDevice();
+	closeDeviceAndResetIdle(usbDevice);
+	closeDeviceAndResetIdle(bluetoothDevice);
 
 	releaseAutoColor();
 }
@@ -339,18 +348,6 @@ void Ds4Device::close()
 	deviceThread = nullptr;
 }
 
-void Ds4Device::closeBluetoothDevice()
-{
-	auto lock_guard = lock();
-
-	if (bluetoothDevice != nullptr && bluetoothDevice->isOpen())
-	{
-		bluetoothDevice->close();
-	}
-
-	idleTime.start();
-}
-
 void Ds4Device::disconnectBluetooth(BluetoothDisconnectReason reason)
 {
 	if (!bluetoothConnected())
@@ -363,25 +360,13 @@ void Ds4Device::disconnectBluetooth(BluetoothDisconnectReason reason)
 		std::this_thread::sleep_for(125ms);
 	}
 
-	closeBluetoothDevice();
+	closeDeviceAndResetIdle(bluetoothDevice);
 
 	const auto eventReason = reason == BluetoothDisconnectReason::idle ? Ds4DisconnectEvent::Reason::idle : Ds4DisconnectEvent::Reason::closed;
 	onDisconnect.invoke(this, Ds4DisconnectEvent(ConnectionType::bluetooth, eventReason));
 }
 
-void Ds4Device::closeUsbDevice()
-{
-	auto lock_guard = lock();
-
-	if (usbDevice != nullptr && usbDevice->isOpen())
-	{
-		usbDevice->close();
-	}
-
-	idleTime.start();
-}
-
-bool Ds4Device::openDevice(std::shared_ptr<hid::HidInstance>& hid, bool exclusive)
+bool Ds4Device::openDevice(const std::shared_ptr<hid::HidInstance>& hid, bool exclusive)
 {
 	if (hid->open((exclusive ? hid::HidOpenFlags::exclusive : 0) | hid::HidOpenFlags::async))
 	{
@@ -438,12 +423,10 @@ bool Ds4Device::openBluetoothDevice(std::shared_ptr<hid::HidInstance> hid)
 	std::array<uint8_t, 37> temp {};
 	temp[0] = 0x02;
 
-	// TODO: on failure, pull the error code from GetLastError internally instead of doing it manually
 	if (!hid->getFeature(temp))
 	{
-		const DWORD error = GetLastError();
 		hid->close();
-		onWirelessOperationalModeFailure.invoke(this, error);
+		onWirelessOperationalModeFailure.invoke(this, hid->nativeError());
 		return false;
 	}
 
@@ -592,7 +575,7 @@ void Ds4Device::writeBluetooth()
 
 		if (bluetoothDevice->nativeError() != ERROR_BUSY)
 		{
-			closeBluetoothDevice();
+			closeDeviceAndResetIdle(bluetoothDevice);
 			break;
 		}
 
@@ -603,35 +586,15 @@ void Ds4Device::writeBluetooth()
 	writeTime.start();
 }
 
-void Ds4Device::onDisconnectErrorUsb()
+void Ds4Device::onDisconnectError(const std::shared_ptr<hid::HidInstance>& device, ConnectionType connectionType)
 {
-	const size_t nativeError = usbDevice->nativeError();
+	const size_t nativeError = device->nativeError();
 
 	const auto reason = nativeError != ERROR_DEVICE_NOT_CONNECTED
 	                    ? Ds4DisconnectEvent::Reason::error
 	                    : Ds4DisconnectEvent::Reason::closed;
 
-	onDisconnect.invoke(this, Ds4DisconnectEvent(ConnectionType::usb, reason, nativeError));
-
-	closeUsbDevice();
-
-	// Reset idle time so if bluetooth is available, it does not idle disconnect,
-	// and communication can fall back to bluetooth.
-	idleTime.start();
-}
-
-void Ds4Device::onDisconnectErrorBluetooth()
-{
-	const size_t nativeError = bluetoothDevice->nativeError();
-
-	const auto reason = nativeError != ERROR_DEVICE_NOT_CONNECTED
-	                    ? Ds4DisconnectEvent::Reason::error
-	                    : Ds4DisconnectEvent::Reason::closed;
-
-	onDisconnect.invoke(this, Ds4DisconnectEvent(ConnectionType::bluetooth, reason, nativeError));
-
-	closeBluetoothDevice();
-	idleTime.start();
+	onDisconnect.invoke(this, Ds4DisconnectEvent(connectionType, reason, nativeError));
 }
 
 bool Ds4Device::run()
@@ -643,11 +606,11 @@ bool Ds4Device::run()
 	if (activeLight.idleFade)
 	{
 		const Ds4LightOptions& l = settings.useProfileLight ? profile.light : settings.light;
-		const double m = isIdle() ? 1.0 : std::clamp(duration_cast<milliseconds>(idleTime.elapsed()).count()
-		                                             / static_cast<double>(duration_cast<milliseconds>(idleTimeout()).count()),
-		                                             0.0, 1.0);
+		const float m = isIdle() ? 1.0f : std::clamp(static_cast<float>(duration_cast<milliseconds>(idleTime.elapsed()).count())
+		                                             / static_cast<float>(duration_cast<milliseconds>(idleTimeout()).count()),
+		                                             0.0f, 1.0f);
 
-		output.lightColor = Ds4Color::lerp(l.color, fadeColor, static_cast<float>(m));
+		output.lightColor = Ds4Color::lerp(l.color, fadeColor, m);
 	}
 
 	const bool lastChargingState = charging();
@@ -690,7 +653,7 @@ bool Ds4Device::run()
 
 		if (!usbDevice->isOpen())
 		{
-			onDisconnectErrorUsb();
+			onDisconnectError(usbDevice, ConnectionType::usb);
 		}
 		else if (asyncRead(usbDevice.get()))
 		{
@@ -704,7 +667,7 @@ bool Ds4Device::run()
 		}
 		else if (!usbDevice->isOpen())
 		{
-			onDisconnectErrorUsb();
+			onDisconnectError(usbDevice, ConnectionType::usb);
 		}
 	}
 	else if (useBluetooth)
@@ -713,7 +676,7 @@ bool Ds4Device::run()
 
 		if (!bluetoothDevice->isOpen())
 		{
-			onDisconnectErrorBluetooth();
+			onDisconnectError(bluetoothDevice, ConnectionType::bluetooth);
 		}
 		else if (asyncRead(bluetoothDevice.get()))
 		{
@@ -730,7 +693,7 @@ bool Ds4Device::run()
 		}
 		else if (!bluetoothDevice->isOpen())
 		{
-			onDisconnectErrorBluetooth();
+			onDisconnectError(bluetoothDevice, ConnectionType::bluetooth);
 		}
 	}
 

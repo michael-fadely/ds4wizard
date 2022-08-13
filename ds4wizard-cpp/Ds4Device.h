@@ -174,17 +174,15 @@ public:
 
 private:
 	void releaseAutoColor();
+	void closeDeviceAndResetIdle(const std::shared_ptr<hid::HidInstance>& device);
 
 public:
 	void onProfileChanged(const std::string& newName);
 	void close();
 
-	void closeBluetoothDevice();
-
 	void disconnectBluetooth(BluetoothDisconnectReason reason);
 
-	void closeUsbDevice();
-	static bool openDevice(std::shared_ptr<hid::HidInstance>& hid, bool exclusive);
+	static bool openDevice(const std::shared_ptr<hid::HidInstance>& hid, bool exclusive);
 
 	bool openBluetoothDevice(std::shared_ptr<hid::HidInstance> hid);
 	bool openUsbDevice(std::shared_ptr<hid::HidInstance> hid);
@@ -194,8 +192,7 @@ private:
 	void setupUsbOutputBuffer() const;
 	void writeUsbAsync();
 	void writeBluetooth();
-	void onDisconnectErrorUsb();
-	void onDisconnectErrorBluetooth();
+	void onDisconnectError(const std::shared_ptr<hid::HidInstance>& device, ConnectionType connectionType);
 	bool run();
 	void controllerThread();
 
