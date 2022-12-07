@@ -29,6 +29,7 @@
 #include <memory>
 #include <mutex>
 #include <optional>
+#include <span>
 #include <sstream>
 #include <string>
 #include <thread>
@@ -41,9 +42,6 @@
 #include <QtWidgets>
 
 #include <singleapplication.h>
-
-// GSL
-#include <gsl/span>
 
 // better-enums
 #include <enum.h>

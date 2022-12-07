@@ -3,10 +3,10 @@
 #include <Windows.h>
 
 #include <cstdint>
+#include <span>
 #include <string>
 #include <vector>
 
-#include <gsl/span>
 #include "hid_handle.h"
 
 namespace hid
@@ -97,8 +97,8 @@ namespace hid
 		bool readCaps();
 		bool readSerial();
 		bool readAttributes();
-		bool getFeature(const gsl::span<uint8_t>& buffer);
-		bool setFeature(const gsl::span<uint8_t>& buffer);
+		bool getFeature(const std::span<uint8_t>& buffer);
+		bool setFeature(const std::span<uint8_t>& buffer);
 
 		bool open(HidOpenFlags_t openFlags);
 		void close();
@@ -109,13 +109,13 @@ namespace hid
 		}
 
 		bool read(void* buffer, size_t size);
-		bool read(const gsl::span<uint8_t>& buffer);
+		bool read(const std::span<uint8_t>& buffer);
 		bool read();
 
 		bool readAsync();
 
 		bool write(const void* buffer, size_t size);
-		bool write(const gsl::span<const uint8_t>& buffer);
+		bool write(const std::span<const uint8_t>& buffer);
 		bool write();
 
 		bool writeAsync();
@@ -128,7 +128,7 @@ namespace hid
 		void cancelAsyncReadAndWait();
 		void cancelAsyncWriteAndWait();
 
-		bool setOutputReport(const gsl::span<uint8_t>& buffer);
+		bool setOutputReport(const std::span<uint8_t>& buffer);
 		bool setOutputReport();
 
 	private:

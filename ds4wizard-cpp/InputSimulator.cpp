@@ -913,7 +913,7 @@ void InputSimulator::updatePressedState(InputMapBase& instance, const std::funct
 					throw std::invalid_argument("inputAxes has invalid or no value");
 				}
 
-				const gsl::span<const Ds4Axes_t> axes(Ds4Axes_values);
+				const std::span<const Ds4Axes_t> axes(Ds4Axes_values);
 
 				const size_t target = std::count_if(axes.begin(), axes.end(), [&](Ds4Axes_t x) -> bool
 				{

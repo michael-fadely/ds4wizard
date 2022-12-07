@@ -102,7 +102,7 @@ void Ds4Input::updateAxes(const Ds4InputData& last)
 	}
 }
 
-void Ds4Input::update(const gsl::span<uint8_t>& buffer)
+void Ds4Input::update(const std::span<uint8_t>& buffer)
 {
 	Ds4InputData last = data;
 

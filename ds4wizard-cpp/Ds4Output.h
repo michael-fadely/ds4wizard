@@ -1,6 +1,6 @@
 #pragma once
 #include "Ds4Color.h"
-#include <gsl/span>
+#include <span>
 
 /**
  * \brief PoD for setting \c Ds4Device parameters like motor speed, light color, etc.
@@ -22,5 +22,5 @@ struct Ds4Output
 	 * \param buffer Buffer to update.
 	 * \return \c true if changes have been made to \a buffer.
 	 */
-	bool update(const gsl::span<uint8_t>& buffer) const;
+	bool update(const std::span<uint8_t>& buffer) const;
 };

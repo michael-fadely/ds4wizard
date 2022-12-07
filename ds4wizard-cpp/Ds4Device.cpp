@@ -532,7 +532,7 @@ void Ds4Device::writeUsbAsync()
 
 	constexpr auto usbOutputOffset = 4;
 
-	const auto span = gsl::span(&usbDevice->outputBuffer[usbOutputOffset],
+	const auto span = std::span(&usbDevice->outputBuffer[usbOutputOffset],
 	                            usbDevice->outputBuffer.size() - usbOutputOffset);
 
 	if (!output.update(span))
@@ -554,7 +554,7 @@ void Ds4Device::writeBluetooth()
 {
 	constexpr auto btOutputOffset = 6;
 
-	const auto span = gsl::span(&bluetoothDevice->outputBuffer[btOutputOffset],
+	const auto span = std::span(&bluetoothDevice->outputBuffer[btOutputOffset],
 	                            bluetoothDevice->outputBuffer.size() - btOutputOffset);
 
 	if (!output.update(span))
@@ -660,7 +660,7 @@ bool Ds4Device::run()
 			dataReceived = true;
 
 			constexpr auto usbInputOffset = 1;
-			const auto span = gsl::span(&usbDevice->inputBuffer[usbInputOffset],
+			const auto span = std::span(&usbDevice->inputBuffer[usbInputOffset],
 			                            usbDevice->inputBuffer.size() - usbInputOffset);
 
 			input.update(span);
@@ -685,7 +685,7 @@ bool Ds4Device::run()
 				dataReceived = true;
 
 				constexpr auto btInputOffset = 3;
-				const auto span = gsl::span(&bluetoothDevice->inputBuffer[btInputOffset],
+				const auto span = std::span(&bluetoothDevice->inputBuffer[btInputOffset],
 				                            bluetoothDevice->inputBuffer.size() - btInputOffset);
 
 				input.update(span);

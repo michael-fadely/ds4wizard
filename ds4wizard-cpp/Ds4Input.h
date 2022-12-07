@@ -1,8 +1,7 @@
 #pragma once
 
 #include <optional>
-
-#include <gsl/span>
+#include <span>
 
 #include "Ds4InputData.h"
 
@@ -55,7 +54,7 @@ public:
 	 * \brief Updates serialized data using the given buffer.
 	 * \param buffer Buffer containing raw input report data.
 	 */
-	void update(const gsl::span<uint8_t>& buffer);
+	void update(const std::span<uint8_t>& buffer);
 
 	/**
 	 * \brief Updates button change states since last poll.

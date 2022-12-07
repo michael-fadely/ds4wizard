@@ -129,7 +129,7 @@ bool HidInstance::readAttributes()
 	return readAttributes(handle_.nativeHandle);
 }
 
-bool HidInstance::getFeature(const gsl::span<uint8_t>& buffer)
+bool HidInstance::getFeature(const std::span<uint8_t>& buffer)
 {
 	try
 	{
@@ -168,7 +168,7 @@ bool HidInstance::getFeature(const gsl::span<uint8_t>& buffer)
 	}
 }
 
-bool HidInstance::setFeature(const gsl::span<uint8_t>& buffer)
+bool HidInstance::setFeature(const std::span<uint8_t>& buffer)
 {
 	if (!isOpen())
 	{
@@ -270,7 +270,7 @@ bool HidInstance::read(void* buffer, size_t size)
 	return result;
 }
 
-bool HidInstance::read(const gsl::span<uint8_t>& buffer)
+bool HidInstance::read(const std::span<uint8_t>& buffer)
 {
 	return read(buffer.data(), buffer.size());
 }
@@ -327,7 +327,7 @@ bool HidInstance::write(const void* buffer, size_t size)
 	return result;
 }
 
-bool HidInstance::write(const gsl::span<const uint8_t>& buffer)
+bool HidInstance::write(const std::span<const uint8_t>& buffer)
 {
 	return write(buffer.data(), buffer.size_bytes());
 }
@@ -420,7 +420,7 @@ void HidInstance::cancelAsyncWriteAndWait()
 	pendingWrite_ = false;
 }
 
-bool HidInstance::setOutputReport(const gsl::span<uint8_t>& buffer)
+bool HidInstance::setOutputReport(const std::span<uint8_t>& buffer)
 {
 	if (!isOpen())
 	{

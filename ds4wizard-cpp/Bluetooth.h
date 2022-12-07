@@ -1,5 +1,5 @@
 #pragma once
-#include <gsl/span>
+#include <span>
 
 /**
  * \brief Class for managing Bluetooth state.
@@ -13,5 +13,5 @@ public:
 	 * \param macAddress The MAC address to search for.
 	 * \return \c true on success.
 	 */
-	static bool disconnectDevice(const gsl::span<uint8_t>& macAddress);
+	static bool disconnectDevice(const std::span<uint8_t>& macAddress);
 };
