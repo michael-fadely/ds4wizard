@@ -47,7 +47,7 @@ DevicePropertiesDialog::DevicePropertiesDialog(QWidget* parent, std::shared_ptr<
 
 		connect(ui.tabWidget, &QTabWidget::currentChanged, this, &DevicePropertiesDialog::tabChanged);
 
-		qRegisterMetaType<Ds4InputData>("Ds4InputData");
+		qRegisterMetaType<Ds4Input>("Ds4Input");
 		qRegisterMetaType<Ds4Buttons_t>("Ds4Buttons_t");
 		connect(this, &DevicePropertiesDialog::readoutChanged, this, &DevicePropertiesDialog::updateReadout);
 		connect(ui.buttonResetPeak, &QToolButton::clicked, this, &DevicePropertiesDialog::resetPeakLatency);
@@ -108,17 +108,17 @@ void DevicePropertiesDialog::populateForm()
 
 void DevicePropertiesDialog::readoutMethod()
 {
-	Ds4InputData last {};
+	Ds4Input last {};
 
 	while (doReadout)
 	{
-		Ds4InputData data = device->input.data;
+		Ds4Input current = device->input;
 		Ds4Buttons_t heldButtons = device->input.heldButtons;
 
-		if (data != last)
+		if (current.data != last.data)
 		{
-			last = data;
-			emit readoutChanged(heldButtons, data);
+			last = current;
+			emit readoutChanged(heldButtons, current);
 		}
 
 		auto averageRead = device->getReadLatency();
@@ -205,8 +205,10 @@ void DevicePropertiesDialog::tabChanged(int index)
 	}
 }
 
-void DevicePropertiesDialog::updateReadout(Ds4Buttons_t heldButtons, Ds4InputData data) const
+void DevicePropertiesDialog::updateReadout(Ds4Buttons_t heldButtons, Ds4Input input) const
 {
+	const Ds4InputData& data = input.data;
+
 	// Left stick
 	ui.labelLX->setNum(data.leftStick.x);
 	ui.labelLY->setNum(data.leftStick.y);
@@ -224,14 +226,14 @@ void DevicePropertiesDialog::updateReadout(Ds4Buttons_t heldButtons, Ds4InputDat
 	ui.labelTouchBY->setNum(data.touchPoint2.y);
 
 	// Gyroscope
-	ui.labelGyroX->setNum(data.gyro.x);
-	ui.labelGyroY->setNum(data.gyro.y);
-	ui.labelGyroZ->setNum(data.gyro.z);
+	ui.labelGyroX->setNum(input.getAxis(Ds4Axes::gyroX, std::nullopt));
+	ui.labelGyroY->setNum(input.getAxis(Ds4Axes::gyroY, std::nullopt));
+	ui.labelGyroZ->setNum(input.getAxis(Ds4Axes::gyroZ, std::nullopt));
 
 	// Accelerometer
-	ui.labelAccelX->setNum(data.accel.x);
-	ui.labelAccelY->setNum(data.accel.y);
-	ui.labelAccelZ->setNum(data.accel.z);
+	ui.labelAccelX->setNum(input.getAxis(Ds4Axes::accelX, std::nullopt));
+	ui.labelAccelY->setNum(input.getAxis(Ds4Axes::accelY, std::nullopt));
+	ui.labelAccelZ->setNum(input.getAxis(Ds4Axes::accelZ, std::nullopt));
 
 	// Triggers
 	ui.labelTriggerL->setNum(data.leftTrigger);
@@ -243,7 +245,7 @@ void DevicePropertiesDialog::updateReadout(Ds4Buttons_t heldButtons, Ds4InputDat
 	ui.labelRawButtons->setText(QString::fromStdString(std::format("{0:08X}", data.activeButtons & Ds4ButtonsRaw::mask)));
 	ui.labelButtons->setText(QString::fromStdString(std::format("{0:08X}", heldButtons)));
 
-	// TODO: write latency
+	// TODO: display write latency
 	auto latency = device->getReadLatency();
 
 	auto latencyNow = duration_cast<duration<double, std::milli>>(latency.lastValue());
@@ -257,7 +259,7 @@ void DevicePropertiesDialog::updateReadout(Ds4Buttons_t heldButtons, Ds4InputDat
 
 void DevicePropertiesDialog::resetPeakLatency() const
 {
-	// TODO: write latency
+	// TODO: display write latency
 	device->resetReadLatencyPeak();
 }
 

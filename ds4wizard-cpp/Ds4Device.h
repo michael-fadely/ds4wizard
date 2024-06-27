@@ -160,6 +160,8 @@ public:
 	void resetReadLatencyPeak();
 	void resetWriteLatencyPeak();
 
+	void readSensorCalibration();
+
 private:
 	void closeImpl();
 

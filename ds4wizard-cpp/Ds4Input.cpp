@@ -11,7 +11,7 @@ inline void Ds4Input::addButton(bool pressed, Ds4Buttons_t buttons)
 
 void Ds4Input::updateButtons()
 {
-	const Ds4Buttons_t lastDpad = heldButtons & Ds4Buttons::dpad;
+	const Ds4Buttons_t lastDpad = heldButtons & Ds4Buttons::dpad;  // NOLINT(clang-analyzer-deadcode.DeadStores)
 	heldButtons = Ds4Buttons::fromRaw(data.activeButtons);
 
 	addButton(data.touch1, Ds4Buttons::touch1);
@@ -37,74 +37,84 @@ void Ds4Input::updateButtons()
 	}
 }
 
-void Ds4Input::updateAxes(const Ds4InputData& last)
+void Ds4Input::updateAxes(const Ds4InputData& old)
 {
 	axes = 0;
 
-	if (data.leftStick.x != last.leftStick.x)
+	if (data.leftStick.x != old.leftStick.x)
 	{
 		axes |= Ds4Axes::leftStickX;
 	}
 
-	if (data.leftStick.y != last.leftStick.y)
+	if (data.leftStick.y != old.leftStick.y)
 	{
 		axes |= Ds4Axes::leftStickY;
 	}
 
-	if (data.rightStick.x != last.rightStick.x)
+	if (data.rightStick.x != old.rightStick.x)
 	{
 		axes |= Ds4Axes::rightStickX;
 	}
 
-	if (data.rightStick.y != last.rightStick.y)
+	if (data.rightStick.y != old.rightStick.y)
 	{
 		axes |= Ds4Axes::rightStickY;
 	}
 
-	if (data.leftTrigger != last.leftTrigger)
+	if (data.leftTrigger != old.leftTrigger)
 	{
 		axes |= Ds4Axes::leftTrigger;
 	}
 
-	if (data.rightTrigger != last.rightTrigger)
+	if (data.rightTrigger != old.rightTrigger)
 	{
 		axes |= Ds4Axes::rightTrigger;
 	}
 
-	if (data.accel.x != last.accel.x)
+	if (data.accel.x != old.accel.x)
 	{
 		axes |= Ds4Axes::accelX;
 	}
 	
-	if (data.accel.y != last.accel.y)
+	if (data.accel.y != old.accel.y)
 	{
 		axes |= Ds4Axes::accelY;
 	}
 	
-	if (data.accel.z != last.accel.z)
+	if (data.accel.z != old.accel.z)
 	{
 		axes |= Ds4Axes::accelZ;
 	}
 	
-	if (data.gyro.x != last.gyro.x)
+	if (data.gyro.x != old.gyro.x)
 	{
 		axes |= Ds4Axes::gyroX;
 	}
 	
-	if (data.gyro.y != last.gyro.y)
+	if (data.gyro.y != old.gyro.y)
 	{
 		axes |= Ds4Axes::gyroY;
 	}
 	
-	if (data.gyro.z != last.gyro.z)
+	if (data.gyro.z != old.gyro.z)
 	{
 		axes |= Ds4Axes::gyroZ;
 	}
 }
 
+void Ds4Input::applySensorCalibration(Ds4Vector3* gyro, Ds4Vector3* accel) const
+{
+	gyro->x  = static_cast<short>((static_cast<float>(gyro->x) - calibration.gyroPitch.bias) * (calibration.gyroPitch.numerator / calibration.gyroPitch.denominator));
+	gyro->y  = static_cast<short>((static_cast<float>(gyro->y) - calibration.gyroYaw.bias) * (calibration.gyroYaw.numerator / calibration.gyroYaw.denominator));
+	gyro->z  = static_cast<short>((static_cast<float>(gyro->z) - calibration.gyroRoll.bias) * (calibration.gyroRoll.numerator / calibration.gyroRoll.denominator));
+	accel->x = static_cast<short>((static_cast<float>(accel->x) - calibration.accelX.bias) * (calibration.accelX.numerator / calibration.accelX.denominator));
+	accel->y = static_cast<short>((static_cast<float>(accel->y) - calibration.accelY.bias) * (calibration.accelY.numerator / calibration.accelY.denominator));
+	accel->z = static_cast<short>((static_cast<float>(accel->z) - calibration.accelZ.bias) * (calibration.accelZ.numerator / calibration.accelZ.denominator));
+}
+
 void Ds4Input::update(std::span<const uint8_t> buffer)
 {
-	Ds4InputData last = data;
+	const Ds4InputData old = data;
 
 	data.leftStick.x       = buffer[0];
 	data.leftStick.y       = buffer[1];
@@ -113,12 +123,12 @@ void Ds4Input::update(std::span<const uint8_t> buffer)
 	data.frameCount        = static_cast<uint8_t>((buffer[6] >> 2) & 0x3F);
 	data.leftTrigger       = buffer[7];
 	data.rightTrigger      = buffer[8];
-	data.accel.x           = *reinterpret_cast<const int16_t*>(&buffer[12]);
-	data.accel.y           = *reinterpret_cast<const int16_t*>(&buffer[14]);
-	data.accel.z           = *reinterpret_cast<const int16_t*>(&buffer[16]);
-	data.gyro.x            = *reinterpret_cast<const int16_t*>(&buffer[18]);
-	data.gyro.y            = *reinterpret_cast<const int16_t*>(&buffer[20]);
-	data.gyro.z            = *reinterpret_cast<const int16_t*>(&buffer[22]);
+	data.gyro.x            = *reinterpret_cast<const int16_t*>(&buffer[12]);
+	data.gyro.y            = *reinterpret_cast<const int16_t*>(&buffer[14]);
+	data.gyro.z            = *reinterpret_cast<const int16_t*>(&buffer[16]);
+	data.accel.x           = *reinterpret_cast<const int16_t*>(&buffer[18]);
+	data.accel.y           = *reinterpret_cast<const int16_t*>(&buffer[20]);
+	data.accel.z           = *reinterpret_cast<const int16_t*>(&buffer[22]);
 	data.extensions        = static_cast<uint8_t>(buffer[29] >> 4);
 	data.battery           = static_cast<uint8_t>(buffer[29] & 0x0F);
 	data.touchEvent        = static_cast<uint8_t>(buffer[32] & 0x3F);
@@ -136,7 +146,8 @@ void Ds4Input::update(std::span<const uint8_t> buffer)
 	data.lastTouchPoint2.x = static_cast<short>(*reinterpret_cast<const int16_t*>(&buffer[47]) & 0xFFF);
 	data.lastTouchPoint2.y = static_cast<short>((*reinterpret_cast<const int16_t*>(&buffer[48]) >> 4) & 0xFFF);
 
-	updateAxes(last);
+	applySensorCalibration(&data.gyro, &data.accel);
+	updateAxes(old);
 
 	if (!(data.extensions & Ds4Extensions::cable))
 	{
@@ -151,8 +162,88 @@ void Ds4Input::update(std::span<const uint8_t> buffer)
 	data.activeButtons = *reinterpret_cast<const Ds4ButtonsRaw_t*>(&buffer[4]);
 
 	updateButtons();
-
 	updateChangedState();
+}
+
+void Ds4Input::updateSensorCalibration(std::span<const uint8_t> buffer, bool isUsb)
+{
+	calibration.gyroPitch.bias = *reinterpret_cast<const int16_t*>(&buffer[1]);
+	calibration.gyroYaw.bias   = *reinterpret_cast<const int16_t*>(&buffer[3]);
+	calibration.gyroRoll.bias  = *reinterpret_cast<const int16_t*>(&buffer[5]);
+
+	int16_t gyroPitchAdd;
+	int16_t gyroPitchSubtract;
+	int16_t gyroYawAdd;
+	int16_t gyroYawSubtract;
+	int16_t gyroRollAdd;
+	int16_t gyroRollSubtract;
+
+	if (!isUsb)
+	{
+		gyroPitchAdd      = *reinterpret_cast<const int16_t*>(&buffer[7]);
+		gyroYawAdd        = *reinterpret_cast<const int16_t*>(&buffer[9]);
+		gyroRollAdd       = *reinterpret_cast<const int16_t*>(&buffer[11]);
+		gyroPitchSubtract = *reinterpret_cast<const int16_t*>(&buffer[13]);
+		gyroYawSubtract   = *reinterpret_cast<const int16_t*>(&buffer[15]);
+		gyroRollSubtract  = *reinterpret_cast<const int16_t*>(&buffer[17]);
+	}
+	else
+	{
+		gyroPitchAdd      = *reinterpret_cast<const int16_t*>(&buffer[7]);
+		gyroPitchSubtract = *reinterpret_cast<const int16_t*>(&buffer[9]);
+		gyroYawAdd        = *reinterpret_cast<const int16_t*>(&buffer[11]);
+		gyroYawSubtract   = *reinterpret_cast<const int16_t*>(&buffer[13]);
+		gyroRollAdd       = *reinterpret_cast<const int16_t*>(&buffer[15]);
+		gyroRollSubtract  = *reinterpret_cast<const int16_t*>(&buffer[17]);
+	}
+
+	const int16_t gyroSpeedAdd      = *reinterpret_cast<const int16_t*>(&buffer[19]);
+	const int16_t gyroSpeedSubtract = *reinterpret_cast<const int16_t*>(&buffer[21]);
+
+	const int16_t accelXAdd      = *reinterpret_cast<const int16_t*>(&buffer[23]);
+	const int16_t accelXSubtract = *reinterpret_cast<const int16_t*>(&buffer[25]);
+	const int16_t accelYAdd      = *reinterpret_cast<const int16_t*>(&buffer[27]);
+	const int16_t accelYSubtract = *reinterpret_cast<const int16_t*>(&buffer[29]);
+	const int16_t accelZAdd      = *reinterpret_cast<const int16_t*>(&buffer[31]);
+	const int16_t accelZSubtract = *reinterpret_cast<const int16_t*>(&buffer[33]);
+
+	const auto gyroSpeed = static_cast<int16_t>(gyroSpeedAdd + gyroSpeedSubtract);
+	const auto gyroSpeedNumerator = static_cast<float>(gyroSpeed) * gyroDegreesPerSecond;
+
+	calibration.gyroPitch.numerator   = gyroSpeedNumerator;
+	calibration.gyroPitch.denominator = static_cast<float>(gyroPitchAdd - gyroPitchSubtract);
+
+	calibration.gyroYaw.numerator   = gyroSpeedNumerator;
+	calibration.gyroYaw.denominator = static_cast<float>(gyroYawAdd - gyroYawSubtract);
+
+	calibration.gyroRoll.numerator   = gyroSpeedNumerator;
+	calibration.gyroRoll.denominator = static_cast<float>(gyroRollAdd - gyroRollSubtract);
+
+	// from DS4Windows:
+	// Some revision 1 DualShock 4s have an inverted yaw gyroscope axis calibration (where numerator is positive, but the denominator is negative
+	if (calibration.gyroYaw.numerator > 0 && calibration.gyroYaw.denominator < 0 &&
+	    calibration.gyroPitch.denominator > 0 && calibration.gyroRoll.denominator > 0)
+	{
+		calibration.gyroYaw.denominator = -calibration.gyroYaw.denominator;
+	}
+
+	const auto accelRangeX = static_cast<short>(accelXAdd - accelXSubtract);
+
+	calibration.accelX.bias        = static_cast<float>(accelXAdd) - (static_cast<float>(accelRangeX) / 2.0f);
+	calibration.accelX.numerator   = accelResolutionPerG * 2.0f;
+	calibration.accelX.denominator = accelRangeX;
+
+	const auto accelRangeY = static_cast<short>(accelYAdd - accelYSubtract);
+	
+	calibration.accelY.bias        = static_cast<float>(accelYAdd) - (static_cast<float>(accelRangeY) / 2.0f);
+	calibration.accelY.numerator   = accelResolutionPerG * 2.0f;
+	calibration.accelY.denominator = accelRangeY;
+
+	const auto accelRangeZ = static_cast<short>(accelZAdd - accelZSubtract);
+	
+	calibration.accelZ.bias        = static_cast<float>(accelZAdd) - (static_cast<float>(accelRangeZ) / 2.0f);
+	calibration.accelZ.numerator   = accelResolutionPerG * 2.0f;
+	calibration.accelZ.denominator = accelRangeZ;
 }
 
 void Ds4Input::updateChangedState()
@@ -178,48 +269,44 @@ float Ds4Input::getAxis(Ds4Axes_t axis, const std::optional<AxisPolarity>& polar
 	switch (axis)
 	{
 		case Ds4Axes::leftStickX:
-			result = std::min(1.0f, std::clamp(data.leftStick.x - 128, -127, 127) / 127.0f);
-			result = std::clamp(result, -1.0f, 1.0f);
+			result = std::clamp(data.leftStick.x - stickAdjust, -stickMax, stickMax) / static_cast<float>(stickMax);
 			break;
 		case Ds4Axes::leftStickY:
-			result = -std::min(1.0f, std::clamp(data.leftStick.y - 128, -127, 127) / 127.0f);
-			result = std::clamp(result, -1.0f, 1.0f);
+			result = -std::clamp(data.leftStick.y - stickAdjust, -stickMax, stickMax) / static_cast<float>(stickMax);
 			break;
 
 		case Ds4Axes::rightStickX:
-			result = std::min(1.0f, std::clamp(data.rightStick.x - 128, -127, 127) / 127.0f);
-			result = std::clamp(result, -1.0f, 1.0f);
+			result = std::clamp(data.rightStick.x - stickAdjust, -stickMax, stickMax) / static_cast<float>(stickMax);
 			break;
 		case Ds4Axes::rightStickY:
-			result = -std::min(1.0f, std::clamp(data.rightStick.y - 128, -127, 127) / 127.0f);
-			result = std::clamp(result, -1.0f, 1.0f);
+			result = -std::clamp(data.rightStick.y - stickAdjust, -stickMax, stickMax) / static_cast<float>(stickMax);
 			break;
 
 		case Ds4Axes::leftTrigger:
-			result = static_cast<float>(data.leftTrigger) / 255.0f;
+			result = static_cast<float>(data.leftTrigger) / triggerMax;
 			break;
 		case Ds4Axes::rightTrigger:
-			result = static_cast<float>(data.rightTrigger) / 255.0f;
+			result = static_cast<float>(data.rightTrigger) / triggerMax;
 			break;
 
 		case Ds4Axes::accelX:
-			result = std::clamp(static_cast<float>(data.accel.x) / (std::numeric_limits<short>::max() + 1.0f), 0.0f, 1.0f);
+			result = std::clamp<int>(data.accel.x, accelMin, accelMax) / accelResolutionPerG;
 			break;
 		case Ds4Axes::accelY:
-			result = std::clamp(static_cast<float>(data.accel.y) / (std::numeric_limits<short>::max() + 1.0f), 0.0f, 1.0f);
+			result = -std::clamp<int>(data.accel.y, accelMin, accelMax) / accelResolutionPerG;
 			break;
 		case Ds4Axes::accelZ:
-			result = std::clamp(static_cast<float>(data.accel.z) / (std::numeric_limits<short>::max() + 1.0f), 0.0f, 1.0f);
+			result = std::clamp<int>(data.accel.z, accelMin, accelMax) / accelResolutionPerG;
 			break;
 
 		case Ds4Axes::gyroX:
-			result = std::clamp(static_cast<float>(data.gyro.x) / (std::numeric_limits<short>::max() + 1.0f), 0.0f, 1.0f);
+			result = -std::clamp<int>(data.gyro.x, gyroMin, gyroMax) / gyroDegreesPerSecond;
 			break;
 		case Ds4Axes::gyroY:
-			result = std::clamp(static_cast<float>(data.gyro.y) / (std::numeric_limits<short>::max() + 1.0f), 0.0f, 1.0f);
+			result = std::clamp<int>(data.gyro.y, gyroMin, gyroMax) / gyroDegreesPerSecond;
 			break;
 		case Ds4Axes::gyroZ:
-			result = std::clamp(static_cast<float>(data.gyro.z) / (std::numeric_limits<short>::max() + 1.0f), 0.0f, 1.0f);
+			result = std::clamp<int>(data.gyro.z, gyroMin, gyroMax) / gyroDegreesPerSecond;
 			break;
 
 		default:

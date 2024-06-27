@@ -185,6 +185,7 @@ void Ds4Device::open(std::shared_ptr<hid::HidInstance> device)
 	notifiedCharged = true;
 
 	applyProfile();
+	readSensorCalibration();
 }
 
 void Ds4Device::saveSettings()
@@ -313,6 +314,50 @@ void Ds4Device::resetWriteLatencyPeak()
 {
 	auto lock_guard = lock();
 	writeLatency.resetPeak();
+}
+
+void Ds4Device::readSensorCalibration()
+{
+	std::array<uint8_t, 41> buffer {};
+	std::shared_ptr<hid::HidInstance> device;
+	bool isUsb;
+
+	if (usbConnected())
+	{
+		buffer[0] = 0x02;
+		device = usbDevice;
+		isUsb = true;
+	}
+	else if (bluetoothConnected())
+	{
+		buffer[0] = 0x05;
+		device = bluetoothDevice;
+		isUsb = false;
+	}
+	else
+	{
+		return;
+	}
+
+	bool gotFeature;
+
+	// FIXME: this has the potential to loop forever
+	while (true)
+	{
+		gotFeature = device->getFeature(buffer);
+
+		if (gotFeature || device->nativeError() != ERROR_BUSY)
+		{
+			break;
+		}
+
+		std::this_thread::sleep_for(1ms);
+	}
+
+	if (gotFeature)
+	{
+		input.updateSensorCalibration(buffer, isUsb);
+	}
 }
 
 void Ds4Device::closeImpl()
