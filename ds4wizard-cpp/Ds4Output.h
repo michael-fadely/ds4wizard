@@ -22,5 +22,5 @@ struct Ds4Output
 	 * \param buffer Buffer to update.
 	 * \return \c true if changes have been made to \a buffer.
 	 */
-	bool update(const std::span<uint8_t>& buffer) const;
+	bool update(std::span<uint8_t> buffer) const;
 };

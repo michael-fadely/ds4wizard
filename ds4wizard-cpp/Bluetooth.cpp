@@ -6,7 +6,7 @@
 #include <hid_handle.h>
 #include <span>
 
-bool Bluetooth::disconnectDevice(const std::span<uint8_t>& macAddress)
+bool Bluetooth::disconnectDevice(std::span<const uint8_t> macAddress)
 {
 	const size_t macAddressSize = macAddress.size();
 

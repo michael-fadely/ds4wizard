@@ -54,7 +54,7 @@ public:
 	 * \brief Updates serialized data using the given buffer.
 	 * \param buffer Buffer containing raw input report data.
 	 */
-	void update(const std::span<uint8_t>& buffer);
+	void update(std::span<const uint8_t> buffer);
 
 	/**
 	 * \brief Updates button change states since last poll.

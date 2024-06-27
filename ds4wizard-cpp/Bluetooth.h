@@ -13,5 +13,5 @@ public:
 	 * \param macAddress The MAC address to search for.
 	 * \return \c true on success.
 	 */
-	static bool disconnectDevice(const std::span<uint8_t>& macAddress);
+	static bool disconnectDevice(std::span<const uint8_t> macAddress);
 };

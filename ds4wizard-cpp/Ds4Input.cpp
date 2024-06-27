@@ -102,7 +102,7 @@ void Ds4Input::updateAxes(const Ds4InputData& last)
 	}
 }
 
-void Ds4Input::update(const std::span<uint8_t>& buffer)
+void Ds4Input::update(std::span<const uint8_t> buffer)
 {
 	Ds4InputData last = data;
 
@@ -113,28 +113,28 @@ void Ds4Input::update(const std::span<uint8_t>& buffer)
 	data.frameCount        = static_cast<uint8_t>((buffer[6] >> 2) & 0x3F);
 	data.leftTrigger       = buffer[7];
 	data.rightTrigger      = buffer[8];
-	data.accel.x           = *reinterpret_cast<int16_t*>(&buffer[12]);
-	data.accel.y           = *reinterpret_cast<int16_t*>(&buffer[14]);
-	data.accel.z           = *reinterpret_cast<int16_t*>(&buffer[16]);
-	data.gyro.x            = *reinterpret_cast<int16_t*>(&buffer[18]);
-	data.gyro.y            = *reinterpret_cast<int16_t*>(&buffer[20]);
-	data.gyro.z            = *reinterpret_cast<int16_t*>(&buffer[22]);
+	data.accel.x           = *reinterpret_cast<const int16_t*>(&buffer[12]);
+	data.accel.y           = *reinterpret_cast<const int16_t*>(&buffer[14]);
+	data.accel.z           = *reinterpret_cast<const int16_t*>(&buffer[16]);
+	data.gyro.x            = *reinterpret_cast<const int16_t*>(&buffer[18]);
+	data.gyro.y            = *reinterpret_cast<const int16_t*>(&buffer[20]);
+	data.gyro.z            = *reinterpret_cast<const int16_t*>(&buffer[22]);
 	data.extensions        = static_cast<uint8_t>(buffer[29] >> 4);
 	data.battery           = static_cast<uint8_t>(buffer[29] & 0x0F);
 	data.touchEvent        = static_cast<uint8_t>(buffer[32] & 0x3F);
 	data.touchFrame        = static_cast<uint8_t>(buffer[33] & 0x3F);
 	data.touch1            = !(buffer[34] & 0x80);
 	data.touch1Id          = static_cast<uint8_t>(buffer[34] & 0x7F);
-	data.touchPoint1.x     = static_cast<short>(*reinterpret_cast<int16_t*>(&buffer[35]) & 0xFFF);
-	data.touchPoint1.y     = static_cast<short>((*reinterpret_cast<int16_t*>(&buffer[36]) >> 4) & 0xFFF);
+	data.touchPoint1.x     = static_cast<short>(*reinterpret_cast<const int16_t*>(&buffer[35]) & 0xFFF);
+	data.touchPoint1.y     = static_cast<short>((*reinterpret_cast<const int16_t*>(&buffer[36]) >> 4) & 0xFFF);
 	data.touch2            = !(buffer[38] & 0x80);
 	data.touch2Id          = static_cast<uint8_t>(buffer[38] & 0x7F);
-	data.touchPoint2.x     = static_cast<short>(*reinterpret_cast<int16_t*>(&buffer[39]) & 0xFFF);
-	data.touchPoint2.y     = static_cast<short>((*reinterpret_cast<int16_t*>(&buffer[40]) >> 4) & 0xFFF);
-	data.lastTouchPoint1.x = static_cast<short>(*reinterpret_cast<int16_t*>(&buffer[43]) & 0xFFF);
-	data.lastTouchPoint1.y = static_cast<short>((*reinterpret_cast<int16_t*>(&buffer[44]) >> 4) & 0xFFF);
-	data.lastTouchPoint2.x = static_cast<short>(*reinterpret_cast<int16_t*>(&buffer[47]) & 0xFFF);
-	data.lastTouchPoint2.y = static_cast<short>((*reinterpret_cast<int16_t*>(&buffer[48]) >> 4) & 0xFFF);
+	data.touchPoint2.x     = static_cast<short>(*reinterpret_cast<const int16_t*>(&buffer[39]) & 0xFFF);
+	data.touchPoint2.y     = static_cast<short>((*reinterpret_cast<const int16_t*>(&buffer[40]) >> 4) & 0xFFF);
+	data.lastTouchPoint1.x = static_cast<short>(*reinterpret_cast<const int16_t*>(&buffer[43]) & 0xFFF);
+	data.lastTouchPoint1.y = static_cast<short>((*reinterpret_cast<const int16_t*>(&buffer[44]) >> 4) & 0xFFF);
+	data.lastTouchPoint2.x = static_cast<short>(*reinterpret_cast<const int16_t*>(&buffer[47]) & 0xFFF);
+	data.lastTouchPoint2.y = static_cast<short>((*reinterpret_cast<const int16_t*>(&buffer[48]) >> 4) & 0xFFF);
 
 	updateAxes(last);
 
@@ -148,7 +148,7 @@ void Ds4Input::update(const std::span<uint8_t>& buffer)
 		data.battery = 10;
 	}
 
-	data.activeButtons = *reinterpret_cast<Ds4ButtonsRaw_t*>(&buffer[4]);
+	data.activeButtons = *reinterpret_cast<const Ds4ButtonsRaw_t*>(&buffer[4]);
 
 	updateButtons();
 
