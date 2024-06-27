@@ -500,6 +500,10 @@ bool HidInstance::asyncInProgress(OVERLAPPED* overlapped)
 			close();
 			nativeError_ = error;
 			return false;
+
+		case ERROR_SEM_TIMEOUT: // WIP
+			nativeError_ = error;
+			return false;
 	}
 }
 

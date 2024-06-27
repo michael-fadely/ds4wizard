@@ -626,7 +626,7 @@ bool Ds4Device::run()
 
 	bool dataReceived = false;
 
-	auto asyncRead = [](hid::HidInstance* i) -> bool
+	auto asyncRead = [this](hid::HidInstance* i) -> bool
 	{
 		if (!i->isOpen())
 		{
@@ -635,16 +635,40 @@ bool Ds4Device::run()
 
 		if (i->asyncReadPending())
 		{
-			return !i->asyncReadInProgress();
+			// WIP
+			const bool asyncReadInProgress = i->asyncReadInProgress();
+			if (!asyncReadInProgress && i->nativeError() == ERROR_SEM_TIMEOUT)
+			{
+				Logger::writeLine(LogLevel::warning, this->name(), "Got error 21 on pending read [1]");
+			}
+
+			return !asyncReadInProgress;
 		}
 
 		if (!i->readAsync())
 		{
-			i->close();
+			// WIP
+			if (i->nativeError() == ERROR_SEM_TIMEOUT)
+			{
+				Logger::writeLine(LogLevel::warning, this->name(), "Got error 21 on active read; ignoring");
+			}
+			else
+			{
+				i->close();
+			}
+
 			return false;
 		}
 
-		return !i->asyncReadInProgress();
+		const bool asyncReadInProgress = i->asyncReadInProgress(); // WIP
+
+		// WIP
+		if (!asyncReadInProgress && i->nativeError() == ERROR_SEM_TIMEOUT)
+		{
+			Logger::writeLine(LogLevel::warning, this->name(), "Got error 21 on pending read [2]");
+		}
+
+		return !asyncReadInProgress;
 	};
 
 	if (useUsb)
