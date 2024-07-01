@@ -178,7 +178,7 @@ bool InputSimulator::isOverriddenByModifierSet(const InputMapBase& map)
 					continue;
 				}
 
-				if (std::any_of(collection->cbegin(), collection->cend(), checkButtonMap))
+				if (std::ranges::any_of(std::as_const(*collection), checkButtonMap))
 				{
 					return true;
 				}
@@ -203,7 +203,7 @@ bool InputSimulator::isOverriddenByModifierSet(const InputMapBase& map)
 					continue;
 				}
 
-				if (std::any_of(collection->cbegin(), collection->cend(), checkAxisMap))
+				if (std::ranges::any_of(std::as_const(*collection), checkAxisMap))
 				{
 					return true;
 				}
@@ -219,7 +219,7 @@ bool InputSimulator::isOverriddenByModifierSet(const InputMapBase& map)
 				continue;
 			}
 
-			if (std::any_of(collection->cbegin(), collection->cend(), checkTouchMap))
+			if (std::ranges::any_of(std::as_const(*collection), checkTouchMap))
 			{
 				return true;
 			}
@@ -830,7 +830,7 @@ void InputSimulator::updateTouchRegions()
 {
 	Ds4Buttons_t disallow = 0;
 
-	std::sort(sortableTouchRegions.begin(), sortableTouchRegions.end(), [](const Ds4TouchRegion* a, const Ds4TouchRegion* b)
+	std::ranges::sort(sortableTouchRegions, [](const Ds4TouchRegion* a, const Ds4TouchRegion* b)
 	{
 		return (a->isTouchActive(touchMask) && !a->allowCrossOver) && !(b->isTouchActive(touchMask) && !b->allowCrossOver);
 	});
@@ -915,7 +915,7 @@ void InputSimulator::updatePressedState(InputMapBase& instance, const std::funct
 
 				const std::span<const Ds4Axes_t> axes(Ds4Axes_values);
 
-				const size_t target = std::count_if(axes.begin(), axes.end(), [&](Ds4Axes_t x) -> bool
+				const size_t target = std::ranges::count_if(axes, [&](Ds4Axes_t x) -> bool
 				{
 					return (x & instance.inputAxes.value()) != 0;
 				});

@@ -10,7 +10,7 @@ static const std::string INVALID_CHARS(R"(\/:*?"<>|)");
 
 static char replace_invalid(char c)
 {
-	if (std::find(INVALID_CHARS.cbegin(), INVALID_CHARS.cend(), c) != INVALID_CHARS.cend())
+	if (std::ranges::find(INVALID_CHARS, c) != INVALID_CHARS.cend())
 	{
 		return '_';
 	}
@@ -20,7 +20,7 @@ static char replace_invalid(char c)
 
 void makeValidFileName(std::string& str)
 {
-	std::transform(str.begin(), str.end(), str.begin(), replace_invalid);
+	std::ranges::transform(str, str.begin(), replace_invalid);
 }
 
 std::string validatedFileName(std::string str)

@@ -3,6 +3,7 @@
 #include <cwctype>
 #include <cctype>
 #include <locale>
+#include <ranges>
 
 #include "stringutil.h"
 
@@ -13,7 +14,7 @@ bool iequalsw(const wchar_t& a, const wchar_t& b)
 
 bool iequals(const std::wstring& a, const std::wstring& b)
 {
-	return a.size() == b.size() && std::equal(a.begin(), a.end(), b.begin(), &iequalsw);
+	return a.size() == b.size() && std::ranges::equal(a, b, &iequalsw);
 }
 
 bool iequalsc(const char& a, const char& b)
@@ -23,12 +24,12 @@ bool iequalsc(const char& a, const char& b)
 
 bool iequals(const std::string& a, const std::string& b)
 {
-	return a.size() == b.size() && std::equal(a.begin(), a.end(), b.begin(), &iequalsc);
+	return a.size() == b.size() && std::ranges::equal(a, b, &iequalsc);
 }
 
 void triml(std::string& s)
 {
-	s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](int ch)
+	s.erase(s.begin(), std::ranges::find_if(s, [](int ch)
 	{
 		return !std::isspace(ch);
 	}));
@@ -36,7 +37,8 @@ void triml(std::string& s)
 
 void trimr(std::string& s)
 {
-	s.erase(std::find_if(s.rbegin(), s.rend(), [](int ch)
+	std::ranges::reverse_view rs(s);
+	s.erase(std::ranges::find_if(rs, [](int ch)
 	{
 		return !std::isspace(ch);
 	}).base(), s.end());

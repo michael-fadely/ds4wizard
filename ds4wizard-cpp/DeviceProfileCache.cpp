@@ -105,7 +105,7 @@ void DeviceProfileCache::removeProfile(const DeviceProfile& profile)
 	{
 		LOCK(profiles);
 
-		const auto it = std::find(profiles.begin(), profiles.end(), profile);
+		const auto it = std::ranges::find(profiles, profile);
 
 		if (it != profiles.end())
 		{
@@ -145,7 +145,7 @@ void DeviceProfileCache::updateProfile(const DeviceProfile& last, const DevicePr
 	{
 		LOCK(profiles);
 
-		const auto it = std::find(profiles.begin(), profiles.end(), last);
+		const auto it = std::ranges::find(profiles, last);
 
 		if (it != profiles.end())
 		{
