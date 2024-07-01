@@ -290,7 +290,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\dependencies\ViGEmClient-build\ViGEmClient.vcxproj">
-      <Project>{3d9fc874-7a4d-3908-9b5a-9fa7e93240be}</Project>
+      <Project>{ca4a140f-336b-3d68-8097-383da83b9d01}</Project>
     </ProjectReference>
     <ProjectReference Include="..\libdevicetoggle\libdevicetoggle.vcxproj">
       <Project>{3292bd3c-c649-46b0-9c60-545b31f2b169}</Project>
