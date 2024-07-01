@@ -240,8 +240,8 @@ void DevicePropertiesDialog::updateReadout(Ds4Buttons_t heldButtons, Ds4InputDat
 	ui.labelTriggerR->setNum(data.rightTrigger);
 	ui.sliderTriggerR->setValue(data.rightTrigger);
 
-	ui.labelRawButtons->setText(QString::fromStdString(fmt::format("{0:08X}", data.activeButtons & Ds4ButtonsRaw::mask)));
-	ui.labelButtons->setText(QString::fromStdString(fmt::format("{0:08X}", heldButtons)));
+	ui.labelRawButtons->setText(QString::fromStdString(std::format("{0:08X}", data.activeButtons & Ds4ButtonsRaw::mask)));
+	ui.labelButtons->setText(QString::fromStdString(std::format("{0:08X}", heldButtons)));
 
 	// TODO: write latency
 	auto latency = device->getReadLatency();

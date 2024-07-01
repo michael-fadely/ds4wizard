@@ -262,5 +262,4 @@ __pycache__/
 
 ds4wizard-cpp/GeneratedFiles/*
 /cppcheck-build-dir
-dependencies/fmt-build/*
 dependencies/ViGEmClient-build/*

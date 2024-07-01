@@ -1,10 +1,8 @@
 #include "pch.h"
 
 #include <chrono>
+#include <format>
 #include <thread>
-
-#include <fmt/format.h>
-#include <fmt/xchar.h>
 
 #include "Ds4Device.h"
 #include "program.h"
@@ -118,7 +116,7 @@ MacAddress Ds4Device::getMacAddress(const std::shared_ptr<hid::HidInstance>& dev
 		if (!device->getFeature(buffer))
 		{
 			const std::string hidPath(device->path.begin(), device->path.end());
-			throw std::runtime_error(fmt::format("Failed to read MAC address from USB device {0}", hidPath));
+			throw std::runtime_error(std::format("Failed to read MAC address from USB device {0}", hidPath));
 		}
 
 		mac =
@@ -143,11 +141,11 @@ void Ds4Device::open(std::shared_ptr<hid::HidInstance> device)
 {
 	const MacAddress macAddress = getMacAddress(device);
 
-	macAddress_ = fmt::format("{:2X}:{:2X}:{:2X}:{:2X}:{:2X}:{:2X}",
+	macAddress_ = std::format("{:2X}:{:2X}:{:2X}:{:2X}:{:2X}:{:2X}",
 	                          macAddress[0], macAddress[1], macAddress[2],
 	                          macAddress[3], macAddress[4], macAddress[5]);
 
-	safeMacAddress_ = fmt::format("{:2x}{:2x}{:2x}{:2x}{:2x}{:2x}",
+	safeMacAddress_ = std::format("{:2x}{:2x}{:2x}{:2x}{:2x}{:2x}",
 	                              macAddress[0], macAddress[1], macAddress[2],
 	                              macAddress[3], macAddress[4], macAddress[5]);
 
@@ -164,7 +162,7 @@ void Ds4Device::open(std::shared_ptr<hid::HidInstance> device)
 	else
 	{
 		// HACK: this member shouldn't be exposed, but getting the "serial" (MAC) over USB is non-standard for the DS4.
-		device->serialString = fmt::format(L"{:2x}{:2x}{:2x}{:2x}{:2x}{:2x}",
+		device->serialString = std::format(L"{:2x}{:2x}{:2x}{:2x}{:2x}{:2x}",
 		                                   macAddress[0], macAddress[1], macAddress[2],
 		                                   macAddress[3], macAddress[4], macAddress[5]);
 

@@ -4,7 +4,6 @@ setlocal EnableDelayedExpansion
 :MAIN
 	pushd "%~dp0\dependencies"
 
-	call :MAKE_CMAKE_PROJECT "fmt"
 	call :MAKE_CMAKE_PROJECT "ViGEmClient"
 
 	popd

@@ -63,7 +63,7 @@
     <ClCompile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NOMINMAX;WIN32_LEAN_AND_MEAN;UNICODE;_UNICODE;WIN32;WIN64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;..\libhid;..\libdevicetoggle;..\dependencies\better-enums;..\dependencies\json\include;..\dependencies\fmt\include;..\dependencies\ViGEmClient\include;..\dependencies\SingleApplication;.;$(Qt_INCLUDEPATH_);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;..\libhid;..\libdevicetoggle;..\dependencies\better-enums;..\dependencies\json\include;..\dependencies\ViGEmClient\include;..\dependencies\SingleApplication;.;$(Qt_INCLUDEPATH_);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -110,7 +110,7 @@
     <ClCompile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NOMINMAX;WIN32_LEAN_AND_MEAN;UNICODE;_UNICODE;WIN32;WIN64;QT_NO_DEBUG;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;..\libhid;..\libdevicetoggle;..\dependencies\better-enums;..\dependencies\json\include;..\dependencies\fmt\include;..\dependencies\ViGEmClient\include;..\dependencies\SingleApplication;.;$(Qt_INCLUDEPATH_);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;..\libhid;..\libdevicetoggle;..\dependencies\better-enums;..\dependencies\json\include;..\dependencies\ViGEmClient\include;..\dependencies\SingleApplication;.;$(Qt_INCLUDEPATH_);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
@@ -290,9 +290,6 @@
     <ResourceCompile Include="ds4wizard-cpp.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\dependencies\fmt-build\fmt.vcxproj">
-      <Project>{a89bb5db-db58-36b0-8d5e-b020f3a513eb}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\dependencies\ViGEmClient-build\ViGEmClient.vcxproj">
       <Project>{3d9fc874-7a4d-3908-9b5a-9fa7e93240be}</Project>
     </ProjectReference>

@@ -22,6 +22,7 @@
 #include <cmath>
 #include <cstdint>
 #include <deque>
+#include <format>
 #include <functional>
 #include <iomanip>
 #include <list>
@@ -45,9 +46,6 @@
 
 // better-enums
 #include <enum.h>
-
-// fmt
-#include <fmt/format.h>
 
 // libhid
 #include <hid_handle.h>

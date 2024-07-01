@@ -1,10 +1,8 @@
 #include "pch.h"
+#include <format>
 #include <iomanip>
 
 #include <shellapi.h>
-
-#include <fmt/format.h>
-#include <fmt/xchar.h>
 
 #include <hid_util.h>
 #include <devicetoggle.h>
@@ -280,7 +278,7 @@ bool Ds4DeviceManager::handleDevice(const std::shared_ptr<hid::HidInstance>& hid
 			MacAddress macAddress = Ds4Device::getMacAddress(hid);
 
 			// HACK: this member shouldn't be exposed, but getting the "serial" (MAC) over USB is non-standard for the DS4.
-			hid->serialString = fmt::format(L"{:2x}{:2x}{:2x}{:2x}{:2x}{:2x}",
+			hid->serialString = std::format(L"{:2x}{:2x}{:2x}{:2x}{:2x}{:2x}",
 			                                macAddress[0], macAddress[1], macAddress[2],
 			                                macAddress[3], macAddress[4], macAddress[5]);
 		}
@@ -288,7 +286,7 @@ bool Ds4DeviceManager::handleDevice(const std::shared_ptr<hid::HidInstance>& hid
 		if (hid->serialString.empty())
 		{
 			const std::string hidPath(hid->path.begin(), hid->path.end());
-			throw std::runtime_error(fmt::format("Device {0} returned empty MAC address.", hidPath));
+			throw std::runtime_error(std::format("Device {0} returned empty MAC address.", hidPath));
 		}
 	}
 	catch (const std::exception& ex)
@@ -413,7 +411,7 @@ void Ds4DeviceManager::toggleDevice(const std::wstring& instanceId)
 		return;
 	}
 
-	const std::wstring params = fmt::format(L"--toggle-device \"{0}\"", instanceId);
+	const std::wstring params = std::format(L"--toggle-device \"{0}\"", instanceId);
 
 	SHELLEXECUTEINFO info {};
 	info.cbSize       = sizeof(info);
