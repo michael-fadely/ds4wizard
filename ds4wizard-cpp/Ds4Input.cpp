@@ -293,14 +293,14 @@ float Ds4Input::getAxis(Ds4Axes_t axis, const std::optional<AxisPolarity>& polar
 			result = std::clamp<int>(data.accel.x, accelMin, accelMax) / accelResolutionPerG;
 			break;
 		case Ds4Axes::accelY:
-			result = -std::clamp<int>(data.accel.y, accelMin, accelMax) / accelResolutionPerG;
+			result = std::clamp<int>(data.accel.y, accelMin, accelMax) / accelResolutionPerG;
 			break;
 		case Ds4Axes::accelZ:
 			result = std::clamp<int>(data.accel.z, accelMin, accelMax) / accelResolutionPerG;
 			break;
 
 		case Ds4Axes::gyroX:
-			result = -std::clamp<int>(data.gyro.x, gyroMin, gyroMax) / gyroDegreesPerSecond;
+			result = std::clamp<int>(data.gyro.x, gyroMin, gyroMax) / gyroDegreesPerSecond;
 			break;
 		case Ds4Axes::gyroY:
 			result = std::clamp<int>(data.gyro.y, gyroMin, gyroMax) / gyroDegreesPerSecond;
