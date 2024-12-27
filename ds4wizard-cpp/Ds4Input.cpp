@@ -178,22 +178,22 @@ void Ds4Input::updateSensorCalibration(std::span<const uint8_t> buffer, bool isU
 	int16_t gyroRollAdd;
 	int16_t gyroRollSubtract;
 
-	if (!isUsb)
-	{
-		gyroPitchAdd      = *reinterpret_cast<const int16_t*>(&buffer[7]);
-		gyroYawAdd        = *reinterpret_cast<const int16_t*>(&buffer[9]);
-		gyroRollAdd       = *reinterpret_cast<const int16_t*>(&buffer[11]);
-		gyroPitchSubtract = *reinterpret_cast<const int16_t*>(&buffer[13]);
-		gyroYawSubtract   = *reinterpret_cast<const int16_t*>(&buffer[15]);
-		gyroRollSubtract  = *reinterpret_cast<const int16_t*>(&buffer[17]);
-	}
-	else
+	if (isUsb)
 	{
 		gyroPitchAdd      = *reinterpret_cast<const int16_t*>(&buffer[7]);
 		gyroPitchSubtract = *reinterpret_cast<const int16_t*>(&buffer[9]);
 		gyroYawAdd        = *reinterpret_cast<const int16_t*>(&buffer[11]);
 		gyroYawSubtract   = *reinterpret_cast<const int16_t*>(&buffer[13]);
 		gyroRollAdd       = *reinterpret_cast<const int16_t*>(&buffer[15]);
+		gyroRollSubtract  = *reinterpret_cast<const int16_t*>(&buffer[17]);
+	}
+	else
+	{
+		gyroPitchAdd      = *reinterpret_cast<const int16_t*>(&buffer[7]);
+		gyroYawAdd        = *reinterpret_cast<const int16_t*>(&buffer[9]);
+		gyroRollAdd       = *reinterpret_cast<const int16_t*>(&buffer[11]);
+		gyroPitchSubtract = *reinterpret_cast<const int16_t*>(&buffer[13]);
+		gyroYawSubtract   = *reinterpret_cast<const int16_t*>(&buffer[15]);
 		gyroRollSubtract  = *reinterpret_cast<const int16_t*>(&buffer[17]);
 	}
 
